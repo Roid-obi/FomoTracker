@@ -5,6 +5,7 @@ FomoTracker adalah aplikasi web berbasis Next.js untuk membantu pelacakan kebias
 ## Tech Stack
 
 ### Architecture & Toolchain
+
 - Server-Side Rendering (SSR)
 - TypeScript
 - Node.js runtime
@@ -12,6 +13,7 @@ FomoTracker adalah aplikasi web berbasis Next.js untuk membantu pelacakan kebias
 - Biome untuk linting dan formatting
 
 ### Frontend
+
 - Next.js
 - Tailwind CSS
 - TanStack Query
@@ -20,12 +22,14 @@ FomoTracker adalah aplikasi web berbasis Next.js untuk membantu pelacakan kebias
 - Recharts
 
 ### Backend & Database
+
 - PostgreSQL
 - Supabase
 - Drizzle ORM
 - OpenRouter API / LLM API
 
 ### Tracking System
+
 - Android Usage Stats API untuk tracking aktivitas mobile
 
 ## Project Goals

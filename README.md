@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FomoTracker
 
-## Getting Started
+FomoTracker — AI-Powered Digital Wellbeing Platform for behavioral analytics and smart notifications.
 
-First, run the development server:
+"Understand Your Digital Habits Before They Control You."
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Ringkasan Proyek
+FomoTracker adalah platform digital wellbeing berbasis AI untuk memantau penggunaan media sosial, menganalisis pola perilaku digital, mendeteksi risiko penggunaan berlebihan, dan memberikan notifikasi cerdas serta rekomendasi berbasis perilaku.
+
+## Fitur Utama
+- Mobile activity tracking (durasi, frekuensi, midnight usage)
+- Behavioral analytics engine (behavioral score, usage patterns)
+- AI insight & recommendation system
+- Risk level analysis (Low / Moderate / High)
+- Smart notification system (behavioral triggers)
+- Digital wellbeing dashboard (visualisasi, trend, timeline)
+
+## Teknologi
+- Framework: Next.js (app router)
+- Bahasa: TypeScript
+- Paket & runtime: Bun (direkomendasikan) atau npm/yarn/pnpm
+- Linter & formatter: Biome
+- Styling: Tailwind CSS
+- State & data: TanStack Query, React Hook Form, Zod
+- Visualisasi: Recharts
+- Backend: Supabase (Postgres)
+- ORM: Drizzle
+- AI: OpenRouter API / LLM API
+
+## Persiapan Lokal (Windows)
+1. Instalasi runtime & tool (pilih salah satu paket manager):
+
+	 - Bun (direkomendasikan)
+		 - Install dari https://bun.sh
+
+	 - Alternatif: Node.js + npm/yarn/pnpm
+
+2. Clone repository dan masuk ke folder proyek:
+
+```powershell
+git clone <repo-url> .
+cd "e:/Lomba OLIVIA 2026/fomotracker"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Salin file env contoh dan isi variabel lingkungan:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```powershell
+copy .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Atau edit `.env.local` dan isi nilai-nilai berikut (contoh):
 
-## Learn More
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (jika diperlukan di server)
+- `DATABASE_URL` (untuk Drizzle / migrations)
+- `OPENROUTER_API_KEY` atau `OPENAI_API_KEY`
 
-To learn more about Next.js, take a look at the following resources:
+4. Install dependensi
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Dengan Bun:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+bun install
+```
 
-## Deploy on Vercel
+Dengan npm:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```powershell
+npm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Jalankan server development
+
+```powershell
+bun dev
+# atau
+npm run dev
+```
+
+6. Lint & format
+
+```powershell
+npm run lint
+npm run format
+```
+
+## Supabase & Database
+1. Buat project Supabase dan catat `URL` dan `ANON KEY`.
+2. Buat schema Postgres jika perlu dan isi `DATABASE_URL` pada `.env.local`.
+3. Jalankan migration (jika menggunakan Drizzle):
+
+```powershell
+# contoh dengan bun
+bun run drizzle-kit generate --schema src/db/schema
+bun run drizzle-kit push
+```
+
+Sesuaikan perintah di atas tergantung pada konfigurasi `drizzle-kit` dalam `package.json`.
+
+## Integrasi AI
+1. Daftarkan API key pada penyedia LLM (OpenRouter / OpenAI) dan simpan di `OPENROUTER_API_KEY` atau `OPENAI_API_KEY`.
+2. Pastikan panggilan AI dilakukan dari server-side untuk menjaga kunci tetap privat.
+
+## Struktur Proyek (ringkas)
+- `src/app` — entry Next.js dan halaman
+- `src/components` — komponen UI
+- `src/lib` — helpers, integrasi Supabase / AI
+- `src/server` — API routes, worker, notifications
+- `src/db` — schema/drizzle
+
+## Deployment
+- Recommended: deploy ke Vercel / Supabase Edge Functions + Supabase Postgres untuk backend.
+- Pastikan meng-set environment variables pada platform deploy.
+
+## Kontribusi
+- Ikuti `biome format` sebelum PR.
+- Gunakan branch per fitur dan buat PR dengan deskripsi singkat fitur dan langkah pengujian.
+
+---
+
+Jika Anda ingin, saya bisa: membuat file `AGENTS.md`, `.env.example`, atau menambahkan template migration Drizzle. Mau saya buat sekarang? 

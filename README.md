@@ -1,122 +1,87 @@
 # FomoTracker
 
-FomoTracker — AI-Powered Digital Wellbeing Platform for behavioral analytics and smart notifications.
+FomoTracker adalah aplikasi web berbasis Next.js untuk membantu pelacakan kebiasaan, aktivitas, dan insight penggunaan dengan pendekatan server-side rendering (SSR).
 
-"Understand Your Digital Habits Before They Control You."
+## Tech Stack
 
-## Ringkasan Proyek
-FomoTracker adalah platform digital wellbeing berbasis AI untuk memantau penggunaan media sosial, menganalisis pola perilaku digital, mendeteksi risiko penggunaan berlebihan, dan memberikan notifikasi cerdas serta rekomendasi berbasis perilaku.
+### Architecture & Toolchain
+- Server-Side Rendering (SSR)
+- TypeScript
+- Node.js runtime
+- Bun package manager
+- Biome untuk linting dan formatting
 
-## Fitur Utama
-- Mobile activity tracking (durasi, frekuensi, midnight usage)
-- Behavioral analytics engine (behavioral score, usage patterns)
-- AI insight & recommendation system
-- Risk level analysis (Low / Moderate / High)
-- Smart notification system (behavioral triggers)
-- Digital wellbeing dashboard (visualisasi, trend, timeline)
+### Frontend
+- Next.js
+- Tailwind CSS
+- TanStack Query
+- React Hook Form
+- Zod
+- Recharts
 
-## Teknologi
-- Framework: Next.js (app router)
-- Bahasa: TypeScript
-- Paket & runtime: Bun (direkomendasikan) atau npm/yarn/pnpm
-- Linter & formatter: Biome
-- Styling: Tailwind CSS
-- State & data: TanStack Query, React Hook Form, Zod
-- Visualisasi: Recharts
-- Backend: Supabase (Postgres)
-- ORM: Drizzle
-- AI: OpenRouter API / LLM API
+### Backend & Database
+- PostgreSQL
+- Supabase
+- Drizzle ORM
+- OpenRouter API / LLM API
 
-## Persiapan Lokal (Windows)
-1. Instalasi runtime & tool (pilih salah satu paket manager):
+### Tracking System
+- Android Usage Stats API untuk tracking aktivitas mobile
 
-	 - Bun (direkomendasikan)
-		 - Install dari https://bun.sh
+## Project Goals
 
-	 - Alternatif: Node.js + npm/yarn/pnpm
+- Menyediakan dashboard tracking yang cepat dan mudah dibaca.
+- Menampilkan data historis dan insight dalam bentuk visual.
+- Mendukung form input yang tervalidasi dengan baik.
+- Siap dihubungkan ke backend Supabase dan database PostgreSQL.
 
-2. Clone repository dan masuk ke folder proyek:
+## Getting Started
 
-```powershell
-git clone <repo-url> .
-cd "e:/Lomba OLIVIA 2026/fomotracker"
-```
+1. Install dependency:
 
-3. Salin file env contoh dan isi variabel lingkungan:
-
-```powershell
-copy .env.example .env.local
-```
-
-Atau edit `.env.local` dan isi nilai-nilai berikut (contoh):
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (jika diperlukan di server)
-- `DATABASE_URL` (untuk Drizzle / migrations)
-- `OPENROUTER_API_KEY` atau `OPENAI_API_KEY`
-
-4. Install dependensi
-
-Dengan Bun:
-
-```powershell
+```bash
 bun install
 ```
 
-Dengan npm:
+2. Jalankan development server:
 
-```powershell
-npm install
+```bash
+bun run dev
 ```
 
-5. Jalankan server development
+3. Buka aplikasi di:
 
-```powershell
-bun dev
-# atau
-npm run dev
+```text
+http://localhost:3000
 ```
 
-6. Lint & format
+## Available Scripts
 
-```powershell
-npm run lint
-npm run format
+- `bun run dev` - menjalankan aplikasi dalam mode development.
+- `bun run build` - build production.
+- `bun run start` - menjalankan build production.
+- `bun run lint` - menjalankan Biome check.
+- `bun run format` - formatting kode dengan Biome.
+
+## Suggested Environment Variables
+
+Buat file `.env.local` dan isi sesuai kebutuhan integrasi:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
+OPENROUTER_API_KEY=
 ```
 
-## Supabase & Database
-1. Buat project Supabase dan catat `URL` dan `ANON KEY`.
-2. Buat schema Postgres jika perlu dan isi `DATABASE_URL` pada `.env.local`.
-3. Jalankan migration (jika menggunakan Drizzle):
+## Repository Structure
 
-```powershell
-# contoh dengan bun
-bun run drizzle-kit generate --schema src/db/schema
-bun run drizzle-kit push
-```
+- `src/app` - route dan layout utama Next.js App Router.
+- `public` - aset statis.
+- `biome.json` - konfigurasi Biome.
+- `tsconfig.json` - konfigurasi TypeScript.
 
-Sesuaikan perintah di atas tergantung pada konfigurasi `drizzle-kit` dalam `package.json`.
+## Notes
 
-## Integrasi AI
-1. Daftarkan API key pada penyedia LLM (OpenRouter / OpenAI) dan simpan di `OPENROUTER_API_KEY` atau `OPENAI_API_KEY`.
-2. Pastikan panggilan AI dilakukan dari server-side untuk menjaga kunci tetap privat.
-
-## Struktur Proyek (ringkas)
-- `src/app` — entry Next.js dan halaman
-- `src/components` — komponen UI
-- `src/lib` — helpers, integrasi Supabase / AI
-- `src/server` — API routes, worker, notifications
-- `src/db` — schema/drizzle
-
-## Deployment
-- Recommended: deploy ke Vercel / Supabase Edge Functions + Supabase Postgres untuk backend.
-- Pastikan meng-set environment variables pada platform deploy.
-
-## Kontribusi
-- Ikuti `biome format` sebelum PR.
-- Gunakan branch per fitur dan buat PR dengan deskripsi singkat fitur dan langkah pengujian.
-
----
-
-Jika Anda ingin, saya bisa: membuat file `AGENTS.md`, `.env.example`, atau menambahkan template migration Drizzle. Mau saya buat sekarang? 
+Implementasi integrasi database, tracking Android, dan AI masih perlu ditambahkan sesuai kebutuhan produk. README ini sudah disusun agar selaras dengan arsitektur dan toolchain yang kamu tentukan.

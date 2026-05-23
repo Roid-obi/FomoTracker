@@ -19,9 +19,8 @@ import {
 // ─────────────────────────────────────────────
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  username: varchar("username"),
-  email: varchar("email"),
-  hashedPassword: varchar("hashed_password"),
+  username: varchar("username").notNull(),
+  profileUrl: varchar("profile_url"),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
@@ -30,10 +29,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   session: one(sessions, {
     fields: [users.id],
     references: [sessions.userId],
-  }),
-  profile: one(profiles, {
-    fields: [users.id],
-    references: [profiles.userId],
   }),
   userSetting: one(userSettings, {
     fields: [users.id],
@@ -62,26 +57,6 @@ export const sessions = pgTable("sessions", {
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
-    references: [users.id],
-  }),
-}));
-
-// ─────────────────────────────────────────────
-// Profiles
-// ─────────────────────────────────────────────
-export const profiles = pgTable("profiles", {
-  id: serial("id").primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id),
-  url: varchar("url"),
-  createdAt: timestamp("created_at"),
-  updatedAt: timestamp("updated_at"),
-});
-
-export const profilesRelations = relations(profiles, ({ one }) => ({
-  user: one(users, {
-    fields: [profiles.userId],
     references: [users.id],
   }),
 }));
@@ -318,7 +293,6 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
 export const table = {
   users,
   sessions,
-  profiles,
   notifications,
   behaviourScores,
   weeklyReports,

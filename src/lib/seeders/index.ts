@@ -35,7 +35,6 @@ async function main() {
       columns: {
         username: f.firstName(),
         email: f.email(),
-        hashedPassword: f.string({ isUnique: true }),
         createdAt: f.date({ minDate: "2024-01-01", maxDate: "2024-12-31" }),
         updatedAt: f.date({ minDate: "2025-01-01", maxDate: "2025-06-01" }),
       },

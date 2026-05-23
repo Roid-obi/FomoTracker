@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import {
   UserPlus,
   Laptop,
@@ -56,8 +54,6 @@ export default function Panduan() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
-      {/* Reusable Navbar */}
-      <Navbar />
 
       {/* Hero Header */}
       <section className="relative overflow-hidden py-16 md:py-24 border-b border-border bg-card">
@@ -364,8 +360,6 @@ export default function Panduan() {
         </div>
       </div>
 
-      {/* Reusable Footer */}
-      <Footer />
     </div>
   );
 }

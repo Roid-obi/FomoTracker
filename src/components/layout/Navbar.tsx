@@ -7,10 +7,13 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isExcluded = pathname.startsWith("/auth") || pathname.startsWith("/dashboard");
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
+
+  if (isExcluded) return null;
 
   return (
     <div className="sticky top-4 z-50 w-full px-4 sm:px-6">
@@ -32,7 +35,7 @@ export default function Navbar() {
               href={pathname === "/" ? "#features" : "/#features"}
               className="text-primary/80 hover:text-primary transition-colors font-poppins"
             >
-              Fitur
+              Home
             </Link>
             <Link
               href="/panduan"
@@ -103,7 +106,7 @@ export default function Navbar() {
               onClick={handleLinkClick}
               className="text-sm font-medium hover:text-secondary transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins"
             >
-              Fitur
+              Home
             </Link>
             <Link
               href="/panduan"

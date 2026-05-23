@@ -1,6 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isExcluded = pathname.startsWith("/auth") || pathname.startsWith("/dashboard");
+
+  if (isExcluded) return null;
   return (
     <footer className="mt-auto border-t border-border bg-card py-12 text-muted">
       <div className="container mx-auto px-6 max-w-5xl">

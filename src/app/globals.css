@@ -49,14 +49,33 @@ body {
 }
 
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(3deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -15px, 0) rotate(3deg); }
 }
 @keyframes float-medium {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(-3deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(-3deg); }
 }
 @keyframes float-fast {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(4deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -6px, 0) rotate(4deg); }
+}
+
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate3d(0, 0, 0) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
 }

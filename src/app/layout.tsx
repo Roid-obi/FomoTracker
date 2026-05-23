@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Yellowtail } from "next/font/google";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -30,7 +32,9 @@ export default function RootLayout({
       className={`${poppins.variable} ${yellowtail.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );

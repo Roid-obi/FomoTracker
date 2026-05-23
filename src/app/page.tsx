@@ -1,6 +1,4 @@
 import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import {
   ArrowRight,
   Bell,
@@ -25,8 +23,6 @@ import {
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
-      {/* Reusable Navbar */}
-      <Navbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
@@ -403,8 +399,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reusable Footer */}
-      <Footer />
     </div>
   );
 }

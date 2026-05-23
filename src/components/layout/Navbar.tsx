@@ -7,10 +7,13 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isExcluded = pathname.startsWith("/auth") || pathname.startsWith("/dashboard");
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
+
+  if (isExcluded) return null;
 
   return (
     <div className="sticky top-4 z-50 w-full px-4 sm:px-6">

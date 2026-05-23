@@ -1,5 +1,3 @@
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import {
   Info,
   Target,
@@ -16,8 +14,6 @@ import {
 export default function Tentang() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
-      {/* Reusable Navbar */}
-      <Navbar />
 
       {/* Hero Header */}
       <section className="relative overflow-hidden py-16 md:py-24 border-b border-border bg-card">
@@ -233,8 +229,6 @@ export default function Tentang() {
         </section>
       </main>
 
-      {/* Reusable Footer */}
-      <Footer />
     </div>
   );
 }

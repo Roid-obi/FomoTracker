@@ -1,5 +1,5 @@
+import { reset, seed } from "drizzle-seed";
 import { db } from "../databases";
-import { seed, reset } from "drizzle-seed";
 import { table } from "../databases/schema";
 
 const RISK_LEVELS = ["low", "moderate", "high", "critical"];

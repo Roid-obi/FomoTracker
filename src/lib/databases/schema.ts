@@ -1,18 +1,18 @@
+import { relations } from "drizzle-orm";
 import {
+  boolean,
+  date,
+  integer,
+  jsonb,
   pgTable,
+  real,
+  serial,
+  text,
+  time,
+  timestamp,
   uuid,
   varchar,
-  timestamp,
-  integer,
-  boolean,
-  text,
-  real,
-  date,
-  time,
-  serial,
-  jsonb,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 
 // ─────────────────────────────────────────────
 // Users

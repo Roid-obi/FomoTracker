@@ -2,7 +2,9 @@
   "name": "fomotracker",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["web_extension"],
+  "workspaces": [
+    "web_extension"
+  ],
   "scripts": {
     "dev": "next dev",
     "dev:ext": "cd web_extension && next dev",

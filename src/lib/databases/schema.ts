@@ -10,7 +10,7 @@ import {
   date,
   time,
   serial,
-  json,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -158,7 +158,7 @@ export const weeklyReports = pgTable("weekly_reports", {
   prevWeekScreenTimeSec: integer("prev_week_screen_time_sec"),
   screenTimeChangePct: real("screen_time_change_pct"),
   riskTrend: varchar("risk_trend"),
-  usageSummary: json("usage_summary"),
+  usageSummary: jsonb("usage_summary"),
   aiReflection: text("ai_reflection"),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),

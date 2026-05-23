@@ -1,156 +1,286 @@
-🔐 AUTH FLOW
-/auth
-├── /login → Form email + password, link ke register, Google OAuth
-└── /register → Form nama, email, password, konfirmasi password
+🔐 AUTH
+/auth/login
+├── Form email + password
+├── Tombol "Masuk"
+├── Link "Belum punya akun? Daftar"
+└── Google OAuth (opsional)
 
-🏠 ONBOARDING (setelah register pertama kali)
+/auth/register
+├── Form nama, email, password, konfirmasi password
+├── Tombol "Daftar"
+└── Link "Sudah punya akun? Masuk"
+
+🏠 ONBOARDING (sekali pakai, setelah register)
 /onboarding
-├── Step 1 — Welcome Screen
-│ └── Pengenalan singkat FomoTracker + cara kerja platform
-│
-├── Step 2 — App Selection
-│ └── Pilih aplikasi media sosial yang ingin dipantau
-│ (Instagram, TikTok, Twitter/X, YouTube, WhatsApp, dll.)
-│
-├── Step 3 — Set Productivity Hours
-│ └── Tentukan jam produktif pengguna (misal: 08.00–17.00) → Digunakan untuk indikator "Productivity Hour Usage"
-│
-└── Step 4 — Notification Preference
-└── Aktifkan/nonaktifkan jenis notifikasi (usage warning, focus reminder, midnight alert, dll.)
 
-📊 DASHBOARD
+Step 1 — Selamat Datang
+├── Ilustrasi + penjelasan singkat FomoTracker
+└── Tombol "Mulai Setup"
+
+Step 2 — Pilih Aplikasi yang Dipantau
+├── Daftar aplikasi tersedia (Instagram, TikTok, YouTube, dll.)
+├── Checkbox multi-select
+└── Minimal pilih 1 aplikasi
+
+Step 3 — Atur Jam Produktif
+├── Time picker jam mulai & jam selesai
+└── Contoh: 08.00 – 17.00
+
+Step 4 — Atur Jam Malam
+├── Time picker jam mulai & jam selesai
+└── Contoh: 22.00 – 06.00
+
+Step 5 — Preferensi Notifikasi
+├── Toggle per jenis notifikasi
+│   ├── Usage Warning
+│   ├── Focus Reminder
+│   ├── Midnight Alert
+│   └── Continuous Usage Reminder
+└── Tombol "Selesai & Mulai" → redirect ke /dashboard
+
+🌐 HALAMAN PUBLIK
+/ — Landing Page
+├── Hero Section
+│   ├── Tagline + subjudul
+│   └── CTA → "Mulai Sekarang" & "Pelajari Lebih Lanjut"
+│
+├── Problem Statement
+│   └── 3 masalah relatable (scroll tanpa sadar, susah fokus, begadang)
+│
+├── Cara Kerja (3 langkah)
+│   ├── Step 1 — Pasang & Hubungkan
+│   ├── Step 2 — Pantau Aktivitas
+│   └── Step 3 — Dapatkan Insight
+│
+├── Fitur Unggulan (4 kartu)
+│   ├── Behavioral Analytics
+│   ├── AI Insight Personal
+│   ├── Risk Level Detection
+│   └── Smart Notification
+│
+├── Install Section ← UTAMA
+│   ├── Kartu A — Aplikasi Android
+│   │   └── Tombol "Unduh Aplikasi"
+│   └── Kartu B — Ekstensi Browser
+│       └── Tombol "Pasang Ekstensi"
+│
+├── SDGs Impact
+│   └── SDG 3, SDG 4, SDG 8
+│
+└── CTA Penutup → "Daftar Gratis"
+
+/tentang — Tentang FomoTracker
+├── Apa itu FomoTracker
+├── Misi & Latar Belakang
+├── Landasan Ilmiah (BSMAS, Behavioral Analytics)
+├── Kontribusi SDGs
+├── Komitmen Privasi
+└── Tim Pengembang
+
+/panduan — Panduan Penggunaan
+├── Bagian 1 — Persiapan Awal
+│   ├── Buat akun
+│   ├── Pilih platform tracking (Android / Ekstensi)
+│   └── Hubungkan ke akun FomoTracker
+│
+├── Bagian 2 — Setup Onboarding
+│   ├── Pilih aplikasi yang dipantau
+│   ├── Atur jam produktif & jam malam
+│   └── Atur notifikasi
+│
+├── Bagian 3 — Menggunakan Dashboard
+│   ├── Memahami Behavioral Score
+│   ├── Membaca Risk Level
+│   └── Membaca AI Insight
+│
+├── Bagian 4 — Menggunakan Analytics
+│   ├── Tab Overview
+│   ├── Tab Behavior
+│   ├── Tab Risk
+│   ├── Tab Timeline
+│   └── Tab Weekly Report
+│
+└── Bagian 5 — FAQ
+    ├── Apakah FomoTracker membaca isi chat?
+    ├── Data disimpan di mana?
+    ├── Apakah gratis?
+    └── Beda aplikasi mobile vs ekstensi browser?
+
+📊 DASHBOARD — /dashboard
 /dashboard
-├── Summary Cards (Today's Overview)
-│ ├── Total Screen Time hari ini
-│ ├── Most Used App hari ini
-│ ├── Behavioral Score (0–100)
-│ └── Risk Level Badge (Low / Moderate / High)
+│
+├── Greeting & Tanggal
+│   └── "Selamat pagi, [nama]! — Sabtu, 23 Mei 2026"
+│
+├── Summary Cards (hari ini)
+│   ├── Total Screen Time
+│   ├── Most Used App
+│   ├── Behavioral Score (0–100)
+│   └── Risk Level Badge (Low / Moderate / High)
 │
 ├── Activity Chart
-│ └── Bar/line chart penggunaan per jam hari ini
+│   └── Bar chart penggunaan per jam hari ini (per aplikasi)
+│
+├── Behavioral Indicator Flags
+│   └── Indikator aktif hari ini (badge/chip)
+│       ├── Excessive Usage
+│       ├── Compulsive Checking
+│       ├── Midnight Usage
+│       ├── Continuous Usage
+│       └── Distraction Tendency
 │
 ├── AI Insight Snippet
-│ └── 1–2 kalimat insight terbaru + tombol "See Full Insight"
+│   └── 1–2 kalimat insight terbaru
+│       + Tombol "Lihat Insight Lengkap" → /insight/latest
 │
-├── Quick Stats (minggu ini)
-│ ├── Rata-rata screen time harian
-│ ├── App paling sering dibuka
-│ └── Trend naik/turun dibanding minggu lalu
+├── Quick Stats Minggu Ini
+│   ├── Rata-rata screen time harian
+│   ├── Trend vs minggu lalu (naik/turun %)
+│   └── App paling sering dibuka
 │
-└── Notification Preview
-└── 2–3 notifikasi terbaru + link ke halaman notifikasi
+└── Notifikasi Terbaru
+    └── 2–3 notifikasi terbaru
+        + Link "Lihat Semua" → /notifications
 
-📈 ANALYTICS (dengan tab navigasi internal)
+📈 ANALYTICS — /analytics
 /analytics
 │
 ├── Tab 1 — Overview
-│ ├── Filter: Hari ini / 7 hari / 30 hari / Custom range
-│ ├── Total screen time per aplikasi (bar chart)
-│ ├── Usage trend harian (line chart)
-│ ├── Active hours heatmap
-│ └── App breakdown (pie chart)
+│   ├── Filter rentang waktu (Hari ini / 7 hari / 30 hari / Custom)
+│   ├── Total screen time per aplikasi (bar chart)
+│   ├── Usage trend harian (line chart)
+│   ├── Active hours heatmap (jam paling aktif)
+│   └── App breakdown proporsi (pie chart)
 │
 ├── Tab 2 — Behavior
-│ ├── Behavioral Score breakdown per indikator
-│ │ ├── Usage Duration Score
-│ │ ├── Open Frequency Score
-│ │ ├── Midnight Usage Score
-│ │ ├── Continuous Usage Score
-│ │ └── Productivity Hour Usage Score
-│ ├── Radar chart semua indikator
-│ └── Trend behavioral score per minggu
+│   ├── Behavioral Score hari ini (gauge/angka besar)
+│   ├── Breakdown skor per indikator
+│   │   ├── Usage Duration Score        (bobot 30%)
+│   │   ├── Open Frequency Score        (bobot 20%)
+│   │   ├── Midnight Usage Score        (bobot 20%)
+│   │   ├── Continuous Usage Score      (bobot 15%)
+│   │   └── Productivity Hour Score     (bobot 15%)
+│   ├── Radar chart semua indikator
+│   ├── Trend behavioral score per minggu (line chart)
+│   └── Flag aktif hari ini (badge)
 │
 ├── Tab 3 — Risk
-│ ├── Risk Level saat ini (Low / Moderate / High)
-│ ├── Riwayat risk level per minggu
-│ ├── Indikator kontributor risiko tertinggi
-│ └── Penjelasan singkat tiap risk category
+│   ├── Risk Level saat ini (visual besar: Low/Moderate/High)
+│   ├── Penjelasan makna risk level
+│   ├── Indikator kontributor risiko tertinggi
+│   └── Riwayat risk level per minggu (timeline/chart)
 │
 ├── Tab 4 — Timeline
-│ ├── Timeline aktivitas harian (per jam, per app)
-│ ├── Filter per tanggal
-│ └── Highlight: midnight usage & productivity hour usage
+│   ├── Filter tanggal (date picker)
+│   ├── Timeline aktivitas per jam (per aplikasi)
+│   ├── Highlight otomatis:
+│   │   ├── 🔴 Midnight usage
+│   │   └── 🟡 Productive hour usage
+│   └── Detail durasi per sesi klik
 │
-└── Tab 5 — Weekly Report  
- ├── Summary minggu ini vs minggu lalu
-├── Behavioral score trend
-├── Top 3 aplikasi paling banyak digunakan
-├── Worst day & Best day minggu ini
-├── AI Weekly Reflection
-└── Download report (PDF/PNG)
+└── Tab 5 — Weekly Report
+    ├── Pilih minggu (navigasi prev/next)
+    ├── Summary cards
+    │   ├── Total screen time minggu ini
+    │   ├── Rata-rata behavioral score
+    │   ├── Rata-rata risk level
+    │   └── Perubahan screen time vs minggu lalu (%)
+    ├── Worst day & Best day minggu ini
+    ├── Top 3 aplikasi paling banyak digunakan
+    ├── Risk trend (membaik / memburuk / stabil)
+    ├── AI Weekly Reflection (teks panjang dari AI)
+    └── Tombol "Unduh Laporan" (PDF/PNG)
 
-🤖 AI INSIGHT
+🤖 AI INSIGHT — /insight
 /insight
 │
-├── /insight/latest
-│ ├── Full AI-generated insight terbaru
-│ ├── Behavioral pattern summary
-│ └── Personalized recommendation (3–5 poin)
+├── /insight/latest — Insight Terbaru
+│   ├── Tanggal & periode analisis
+│   ├── Behavioral pattern summary
+│   ├── Full AI-generated insight (paragraf)
+│   ├── Rekomendasi personal (3–5 poin actionable)
+│   └── Link ke analytics terkait
 │
-└── /insight/history
-└── Riwayat insight & weekly reflection per minggu
+└── /insight/history — Riwayat Insight
+    ├── Daftar insight per minggu (card list)
+    ├── Filter bulan
+    └── Klik card → buka detail insight minggu tersebut
 
-🔔 NOTIFICATIONS
+🔔 NOTIFICATIONS — /notifications
 /notifications
 │
-└── Daftar semua notifikasi (terbaru di atas)
-├── Usage Warning
-├── Focus Reminder
-├── Midnight Usage Alert
-├── Continuous Usage Reminder
-└── Digital Wellbeing Suggestion
+├── Filter: Semua / Belum Dibaca / per Tipe
+│
+├── Daftar Notifikasi (terbaru di atas)
+│   ├── Ikon tipe notifikasi
+│   ├── Pesan notifikasi
+│   ├── Timestamp
+│   └── Status read/unread
+│
+└── Tombol "Tandai Semua Sudah Dibaca"
 
-⚙️ SETTINGS
+⚙️ SETTINGS — /settings
 /settings
 │
-├── /settings/profile
-│ ├── Edit nama, email, foto profil
-│ └── Ganti password
+├── /settings/profile — Profil Saya
+│   ├── Foto profil (upload/ubah)
+│   ├── Edit nama & email
+│   └── Ganti password
 │
-├── /settings/apps
-│ ├── Daftar aplikasi yang sedang dipantau
-│ ├── Tambah aplikasi baru
-│ ├── Hapus aplikasi dari pantauan
-│ └── Urutkan prioritas aplikasi
+├── /settings/apps — Kelola Aplikasi Pantau  ← PENTING
+│   ├── Daftar aplikasi yang sedang dipantau (aktif)
+│   ├── Tambah aplikasi dari daftar tersedia
+│   ├── Nonaktifkan / hapus aplikasi dari pantauan
+│   └── Badge platform (Android / Browser)
 │
-├── /settings/productivity-hours
-│ ├── Edit jam produktif (start–end time)
-│ └── Preview jam produktif
+├── /settings/hours — Atur Jam
+│   ├── Jam Produktif (start – end)
+│   └── Jam Malam (start – end)
 │
-├── /settings/notifications
-│ ├── Toggle per jenis notifikasi ON/OFF
-│ └── Set threshold notifikasi
-│ (misal: warning jika screen time > 3 jam/hari)
+├── /settings/notifications — Notifikasi
+│   ├── Toggle ON/OFF per jenis notifikasi
+│   │   ├── Usage Warning
+│   │   ├── Focus Reminder
+│   │   ├── Midnight Alert
+│   │   └── Continuous Usage Reminder
+│   └── Atur threshold
+│       ├── Batas screen time harian (menit)
+│       └── Batas durasi penggunaan terus-menerus (menit)
 │
-└── /settings/privacy
-├── Penjelasan data yang dikumpulkan & tidak dikumpulkan
-├── Export data (JSON/CSV)
-└── Hapus akun & semua data
+└── /settings/privacy — Privasi & Data
+    ├── Penjelasan data yang dikumpulkan
+    ├── Penjelasan data yang TIDAK dikumpulkan
+    ├── Tombol "Ekspor Data Saya" (JSON/CSV)
+    └── Tombol "Hapus Akun & Semua Data"
 
-🗺️ RINGKASAN STRUKTUR NAVIGASI
+🗺️ RINGKASAN LENGKAP
 FomoTracker
 │
-├── /auth
-├── /onboarding
+├── PUBLIK
+│   ├── /                  Landing Page
+│   ├── /tentang           Tentang
+│   ├── /panduan           Panduan Penggunaan
+│   ├── /auth/login        Masuk
+│   └── /auth/register     Daftar
 │
-├── /dashboard ← Home utama
+├── ONBOARDING
+│   └── /onboarding        Setup awal (5 step)
 │
-├── /analytics ← Tab internal
-│ ├── Tab: Overview
-│ ├── Tab: Behavior
-│ ├── Tab: Risk
-│ ├── Tab: Timeline
-│ └── Tab: Weekly Report
-│
-├── /insight
-│ ├── /latest
-│ └── /history
-│
-├── /notifications
-│
-└── /settings
-├── /profile
-├── /apps
-├── /productivity-hours
-├── /notifications
-└── /privacy
+└── APP (butuh login)
+    ├── /dashboard         Beranda
+    ├── /analytics         Analytics (5 tab)
+    │   ├── ?tab=overview
+    │   ├── ?tab=behavior
+    │   ├── ?tab=risk
+    │   ├── ?tab=timeline
+    │   └── ?tab=weekly
+    ├── /insight
+    │   ├── /latest        Insight terbaru
+    │   └── /history       Riwayat insight
+    ├── /notifications     Notifikasi
+    └── /settings
+        ├── /profile
+        ├── /apps
+        ├── /hours
+        ├── /notifications
+        └── /privacy

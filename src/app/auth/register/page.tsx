@@ -1,7 +1,7 @@
 "use client";
 
+import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
-import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 export default function Register() {
@@ -32,7 +32,9 @@ export default function Register() {
               Tracker
             </span>
           </div>
-          <h2 className="text-xl font-bold font-poppins text-primary">Buat Akun Baru</h2>
+          <h2 className="text-xl font-bold font-poppins text-primary">
+            Buat Akun Baru
+          </h2>
           <p className="text-muted text-xs font-poppins font-light mt-1.5">
             Daftar sekarang gratis untuk mulai mengontrol kebiasaan digitalmu.
           </p>
@@ -42,7 +44,10 @@ export default function Register() {
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           {/* Username */}
           <div className="space-y-1.5">
-            <label htmlFor="username" className="text-xs font-bold text-muted uppercase tracking-wider">
+            <label
+              htmlFor="username"
+              className="text-xs font-bold text-muted uppercase tracking-wider"
+            >
               Nama Lengkap
             </label>
             <div className="relative">
@@ -59,7 +64,10 @@ export default function Register() {
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-xs font-bold text-muted uppercase tracking-wider">
+            <label
+              htmlFor="email"
+              className="text-xs font-bold text-muted uppercase tracking-wider"
+            >
               Alamat Email
             </label>
             <div className="relative">
@@ -76,7 +84,10 @@ export default function Register() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-xs font-bold text-muted uppercase tracking-wider">
+            <label
+              htmlFor="password"
+              className="text-xs font-bold text-muted uppercase tracking-wider"
+            >
               Password
             </label>
             <div className="relative">
@@ -93,7 +104,11 @@ export default function Register() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors cursor-pointer"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -106,8 +121,19 @@ export default function Register() {
               required
               className="mt-0.5 rounded border-border text-secondary focus:ring-secondary cursor-pointer animate-[pulse_2s_infinite]"
             />
-            <label htmlFor="terms" className="text-[11px] text-muted font-poppins leading-relaxed font-light cursor-pointer select-none">
-              Saya menyetujui <span className="font-semibold text-secondary hover:underline">Syarat & Ketentuan</span> serta <span className="font-semibold text-secondary hover:underline">Kebijakan Privasi</span> FomoTracker.
+            <label
+              htmlFor="terms"
+              className="text-[11px] text-muted font-poppins leading-relaxed font-light cursor-pointer select-none"
+            >
+              Saya menyetujui{" "}
+              <span className="font-semibold text-secondary hover:underline">
+                Syarat & Ketentuan
+              </span>{" "}
+              serta{" "}
+              <span className="font-semibold text-secondary hover:underline">
+                Kebijakan Privasi
+              </span>{" "}
+              FomoTracker.
             </label>
           </div>
 
@@ -123,7 +149,10 @@ export default function Register() {
         {/* Footer */}
         <p className="text-center text-xs text-muted font-poppins font-light mt-6">
           Sudah memiliki akun?{" "}
-          <Link href="/auth/login" className="text-secondary font-semibold hover:underline">
+          <Link
+            href="/auth/login"
+            className="text-secondary font-semibold hover:underline"
+          >
             Masuk Sekarang
           </Link>
         </p>

@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isExcluded = pathname.startsWith("/auth") || pathname.startsWith("/dashboard");
+  const isExcluded =
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/analytics") ||
+    pathname.startsWith("/insight") ||
+    pathname.startsWith("/notifications") ||
+    pathname.startsWith("/settings");
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -20,7 +27,10 @@ export default function Navbar() {
       <header className="mx-auto max-w-5xl rounded-2xl border border-border bg-card/85 backdrop-blur-md shadow-md shadow-primary/5 p-4 md:py-3 md:px-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-baseline gap-0.5 sm:gap-1 select-none">
+          <Link
+            href="/"
+            className="flex items-baseline gap-0.5 sm:gap-1 select-none"
+          >
             <span className="font-yellowtail text-3xl sm:text-4xl font-normal text-primary leading-none">
               Fomo
             </span>
@@ -40,7 +50,9 @@ export default function Navbar() {
             <Link
               href="/panduan"
               className={`font-poppins transition-colors ${
-                pathname === "/panduan" ? "text-secondary font-semibold" : "text-primary/80 hover:text-primary"
+                pathname === "/panduan"
+                  ? "text-secondary font-semibold"
+                  : "text-primary/80 hover:text-primary"
               }`}
             >
               Panduan
@@ -48,7 +60,9 @@ export default function Navbar() {
             <Link
               href="/tentang"
               className={`font-poppins transition-colors ${
-                pathname === "/tentang" ? "text-secondary font-semibold" : "text-primary/80 hover:text-primary"
+                pathname === "/tentang"
+                  ? "text-secondary font-semibold"
+                  : "text-primary/80 hover:text-primary"
               }`}
             >
               Tentang
@@ -112,7 +126,9 @@ export default function Navbar() {
               href="/panduan"
               onClick={handleLinkClick}
               className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
-                pathname === "/panduan" ? "text-secondary font-semibold bg-muted-light/55" : "hover:text-secondary"
+                pathname === "/panduan"
+                  ? "text-secondary font-semibold bg-muted-light/55"
+                  : "hover:text-secondary"
               }`}
             >
               Panduan
@@ -121,7 +137,9 @@ export default function Navbar() {
               href="/tentang"
               onClick={handleLinkClick}
               className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
-                pathname === "/tentang" ? "text-secondary font-semibold bg-muted-light/55" : "hover:text-secondary"
+                pathname === "/tentang"
+                  ? "text-secondary font-semibold bg-muted-light/55"
+                  : "hover:text-secondary"
               }`}
             >
               Tentang

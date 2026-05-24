@@ -1,7 +1,7 @@
 "use client";
 
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { Mail, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 export default function Login() {
@@ -32,7 +32,9 @@ export default function Login() {
               Tracker
             </span>
           </div>
-          <h2 className="text-xl font-bold font-poppins text-primary">Masuk ke Akun Anda</h2>
+          <h2 className="text-xl font-bold font-poppins text-primary">
+            Masuk ke Akun Anda
+          </h2>
           <p className="text-muted text-xs font-poppins font-light mt-1.5">
             Selamat datang kembali! Silakan masukkan kredensial Anda.
           </p>
@@ -42,7 +44,10 @@ export default function Login() {
         <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
           {/* Email */}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-xs font-bold text-muted uppercase tracking-wider">
+            <label
+              htmlFor="email"
+              className="text-xs font-bold text-muted uppercase tracking-wider"
+            >
               Alamat Email
             </label>
             <div className="relative">
@@ -60,10 +65,16 @@ export default function Login() {
           {/* Password */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <label htmlFor="password" className="text-xs font-bold text-muted uppercase tracking-wider">
+              <label
+                htmlFor="password"
+                className="text-xs font-bold text-muted uppercase tracking-wider"
+              >
                 Password
               </label>
-              <Link href="#" className="text-xs text-secondary hover:underline font-semibold">
+              <Link
+                href="#"
+                className="text-xs text-secondary hover:underline font-semibold"
+              >
                 Lupa Password?
               </Link>
             </div>
@@ -81,7 +92,11 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors cursor-pointer"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -98,7 +113,10 @@ export default function Login() {
         {/* Footer */}
         <p className="text-center text-xs text-muted font-poppins font-light mt-6">
           Belum punya akun?{" "}
-          <Link href="/auth/register" className="text-secondary font-semibold hover:underline">
+          <Link
+            href="/auth/register"
+            className="text-secondary font-semibold hover:underline"
+          >
             Daftar Gratis
           </Link>
         </p>

@@ -1,17 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ArrowRight,
-  BarChart2,
-  Bell,
-  Cpu,
-  Smartphone,
-  Clock,
-  Sparkles,
-  Activity,
-  Shield,
-} from "lucide-react";
 
 export default function DesainPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,10 +23,16 @@ export default function DesainPage() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <a href="#features" className="hover:text-secondary transition-colors">
+              <a
+                href="#features"
+                className="hover:text-secondary transition-colors"
+              >
                 Fitur
               </a>
-              <a href="#palette" className="hover:text-secondary transition-colors">
+              <a
+                href="#palette"
+                className="hover:text-secondary transition-colors"
+              >
                 Palet Warna
               </a>
             </nav>
@@ -177,8 +172,8 @@ export default function DesainPage() {
                   </h4>
                   <p className="text-sm font-poppins text-muted leading-relaxed font-light">
                     Ini adalah paragraf body teks menggunakan font Poppins.
-                    Menggunakan weight 300 (light) dan 400 (normal) untuk tampilan
-                    yang bersih dan mudah dibaca pada device apa saja.
+                    Menggunakan weight 300 (light) dan 400 (normal) untuk
+                    tampilan yang bersih dan mudah dibaca pada device apa saja.
                   </p>
                 </div>
 
@@ -196,7 +191,9 @@ export default function DesainPage() {
                       </span>
                     </div>
                     <p className="text-xs text-muted italic font-poppins mt-2">
-                      Digunakan untuk logo utama ("Fomo" menggunakan font Yellowtail warna primary, sejajar dengan "Tracker" menggunakan font Poppins warna primary).
+                      Digunakan untuk logo utama ("Fomo" menggunakan font
+                      Yellowtail warna primary, sejajar dengan "Tracker"
+                      menggunakan font Poppins warna primary).
                     </p>
                   </div>
                 </div>
@@ -210,8 +207,8 @@ export default function DesainPage() {
       <footer className="mt-auto border-t border-border bg-card py-8 text-center text-xs text-muted">
         <div className="container mx-auto px-6">
           <p className="font-poppins">
-            © {new Date().getFullYear()} FomoTracker. Dibuat dengan cinta menggunakan
-            Next.js & Tailwind CSS.
+            © {new Date().getFullYear()} FomoTracker. Dibuat dengan cinta
+            menggunakan Next.js & Tailwind CSS.
           </p>
         </div>
       </footer>

@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import {
-  UserPlus,
-  Laptop,
-  Smartphone,
-  Key,
-  AppWindow,
-  Clock,
-  Bell,
-  Gauge,
-  ShieldAlert,
-  Brain,
-  Eye,
-  CheckSquare,
   AlertTriangle,
+  AppWindow,
   BarChart,
-  ChevronDown,
+  Bell,
   BookOpen,
+  Brain,
+  CheckSquare,
+  ChevronDown,
+  Clock,
+  Eye,
+  Gauge,
+  Key,
+  Laptop,
+  ShieldAlert,
+  Smartphone,
+  UserPlus,
 } from "lucide-react";
+import { useState } from "react";
 
 // Types for FAQ
 interface FaqItem {
@@ -29,19 +29,23 @@ interface FaqItem {
 const faqs: FaqItem[] = [
   {
     question: "Apakah FomoTracker membaca isi chat saya?",
-    answer: "Tidak. FomoTracker menghormati privasi penuh Anda. Sistem kami hanya mencatat waktu aktif pemakaian aplikasi (Usage Stats) dan riwayat url web media sosial, tanpa pernah membaca pesan pribadi, isi chat, password, ataupun informasi sensitif lainnya.",
+    answer:
+      "Tidak. FomoTracker menghormati privasi penuh Anda. Sistem kami hanya mencatat waktu aktif pemakaian aplikasi (Usage Stats) dan riwayat url web media sosial, tanpa pernah membaca pesan pribadi, isi chat, password, ataupun informasi sensitif lainnya.",
   },
   {
     question: "Data saya disimpan di mana?",
-    answer: "Seluruh data pelacakan Anda disimpan dengan aman pada database PostgreSQL terenkripsi yang di-host di platform Supabase. Data ini sepenuhnya bersifat privat dan hanya dapat diakses oleh Anda sendiri.",
+    answer:
+      "Seluruh data pelacakan Anda disimpan dengan aman pada database PostgreSQL terenkripsi yang di-host di platform Supabase. Data ini sepenuhnya bersifat privat dan hanya dapat diakses oleh Anda sendiri.",
   },
   {
     question: "Apakah FomoTracker gratis?",
-    answer: "Ya, FomoTracker 100% gratis dan bersifat nirlaba. Proyek ini dibangun sebagai instrumen kesejahteraan digital berbasis open-source untuk dampak sosial.",
+    answer:
+      "Ya, FomoTracker 100% gratis dan bersifat nirlaba. Proyek ini dibangun sebagai instrumen kesejahteraan digital berbasis open-source untuk dampak sosial.",
   },
   {
     question: "Apa bedanya aplikasi mobile dan ekstensi browser?",
-    answer: "Aplikasi mobile (Android) mendeteksi pemakaian media sosial langsung di smartphone Anda menggunakan Usage Stats API bawaan Android. Sementara ekstensi browser melacak kunjungan situs media sosial saat Anda berselancar di browser komputer/laptop.",
+    answer:
+      "Aplikasi mobile (Android) mendeteksi pemakaian media sosial langsung di smartphone Anda menggunakan Usage Stats API bawaan Android. Sementara ekstensi browser melacak kunjungan situs media sosial saat Anda berselancar di browser komputer/laptop.",
   },
 ];
 
@@ -54,7 +58,6 @@ export default function Panduan() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
-
       {/* Hero Header */}
       <section className="relative overflow-hidden py-16 md:py-24 border-b border-border bg-card">
         <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
@@ -66,7 +69,8 @@ export default function Panduan() {
             Cara Menggunakan FomoTracker
           </h1>
           <p className="text-muted text-base md:text-lg max-w-2xl mx-auto font-poppins font-light leading-relaxed">
-            Ikuti langkah berikut untuk memulai perjalanan digital wellbeing-mu dan membangun kendali penuh atas waktu berhargamu.
+            Ikuti langkah berikut untuk memulai perjalanan digital wellbeing-mu
+            dan membangun kendali penuh atas waktu berhargamu.
           </p>
         </div>
       </section>
@@ -77,7 +81,9 @@ export default function Panduan() {
           {/* Sidebar Navigation */}
           <aside className="md:col-span-1 hidden md:block">
             <div className="sticky top-24 space-y-2">
-              <p className="text-xs font-bold text-muted uppercase tracking-wider px-3 mb-3">Daftar Isi</p>
+              <p className="text-xs font-bold text-muted uppercase tracking-wider px-3 mb-3">
+                Daftar Isi
+              </p>
               <a
                 href="#persiapan"
                 className="block text-sm font-medium py-2 px-3 rounded-lg hover:bg-muted-light text-muted hover:text-primary transition-all font-poppins"
@@ -116,7 +122,9 @@ export default function Panduan() {
             {/* Bagian 1 — Persiapan Awal */}
             <section id="persiapan" className="scroll-mt-24 space-y-6">
               <h2 className="text-2xl font-bold font-poppins border-b border-border pb-3 flex items-center gap-2">
-                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">01</span>
+                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">
+                  01
+                </span>
                 Persiapan Awal
               </h2>
 
@@ -127,9 +135,13 @@ export default function Panduan() {
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold font-poppins mb-1.5">1.1 Buat Akun FomoTracker</h3>
+                    <h3 className="text-base font-bold font-poppins mb-1.5">
+                      1.1 Buat Akun FomoTracker
+                    </h3>
                     <p className="text-muted text-sm leading-relaxed font-poppins font-light">
-                      Kunjungi halaman pendaftaran di web, isi data diri yang diperlukan, dan verifikasi email Anda untuk mengaktifkan akun.
+                      Kunjungi halaman pendaftaran di web, isi data diri yang
+                      diperlukan, dan verifikasi email Anda untuk mengaktifkan
+                      akun.
                     </p>
                   </div>
                 </div>
@@ -140,27 +152,37 @@ export default function Panduan() {
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <div className="w-full">
-                    <h3 className="text-base font-bold font-poppins mb-1.5">1.2 Pilih Platform Tracking</h3>
+                    <h3 className="text-base font-bold font-poppins mb-1.5">
+                      1.2 Pilih Platform Tracking
+                    </h3>
                     <p className="text-muted text-sm leading-relaxed font-poppins font-light mb-4">
-                      Pilih salah satu atau kedua platform di bawah ini sesuai perangkat Anda:
+                      Pilih salah satu atau kedua platform di bawah ini sesuai
+                      perangkat Anda:
                     </p>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="p-4 rounded-xl border border-border bg-background">
                         <div className="flex items-center gap-2 mb-2">
                           <Smartphone className="w-4 h-4 text-emerald-500" />
-                          <h4 className="text-xs font-bold font-poppins">Aplikasi Mobile (Android)</h4>
+                          <h4 className="text-xs font-bold font-poppins">
+                            Aplikasi Mobile (Android)
+                          </h4>
                         </div>
                         <p className="text-muted text-[11px] leading-relaxed font-poppins font-light">
-                          Unduh file APK resmi, berikan izin akses "Usage Stats" di pengaturan Android agar screen time terdeteksi otomatis.
+                          Unduh file APK resmi, berikan izin akses "Usage Stats"
+                          di pengaturan Android agar screen time terdeteksi
+                          otomatis.
                         </p>
                       </div>
                       <div className="p-4 rounded-xl border border-border bg-background">
                         <div className="flex items-center gap-2 mb-2">
                           <Laptop className="w-4 h-4 text-sky-500" />
-                          <h4 className="text-xs font-bold font-poppins">Ekstensi Browser</h4>
+                          <h4 className="text-xs font-bold font-poppins">
+                            Ekstensi Browser
+                          </h4>
                         </div>
                         <p className="text-muted text-[11px] leading-relaxed font-poppins font-light">
-                          Pasang ekstensi dari Chrome Web Store dan izinkan akses tab untuk melacak kunjungan ke media sosial.
+                          Pasang ekstensi dari Chrome Web Store dan izinkan
+                          akses tab untuk melacak kunjungan ke media sosial.
                         </p>
                       </div>
                     </div>
@@ -173,9 +195,13 @@ export default function Panduan() {
                     <Key className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold font-poppins mb-1.5">1.3 Hubungkan ke Akun</h3>
+                    <h3 className="text-base font-bold font-poppins mb-1.5">
+                      1.3 Hubungkan ke Akun
+                    </h3>
                     <p className="text-muted text-sm leading-relaxed font-poppins font-light">
-                      Buka aplikasi Android atau ekstensi browser yang telah diinstall, kemudian masuk menggunakan akun FomoTracker Anda yang telah didaftarkan.
+                      Buka aplikasi Android atau ekstensi browser yang telah
+                      diinstall, kemudian masuk menggunakan akun FomoTracker
+                      Anda yang telah didaftarkan.
                     </p>
                   </div>
                 </div>
@@ -185,7 +211,9 @@ export default function Panduan() {
             {/* Bagian 2 — Setup Awal */}
             <section id="onboarding" className="scroll-mt-24 space-y-6">
               <h2 className="text-2xl font-bold font-poppins border-b border-border pb-3 flex items-center gap-2">
-                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">02</span>
+                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">
+                  02
+                </span>
                 Setup Awal (Onboarding)
               </h2>
 
@@ -194,9 +222,12 @@ export default function Panduan() {
                   <div className="w-8 h-8 rounded-lg bg-accent/25 text-primary flex items-center justify-center mb-4">
                     <AppWindow className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold font-poppins mb-2">2.1 Pilih Aplikasi</h3>
+                  <h3 className="text-sm font-bold font-poppins mb-2">
+                    2.1 Pilih Aplikasi
+                  </h3>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Tentukan aplikasi media sosial mana saja yang ingin dipantau (seperti Instagram, TikTok, Twitter, dsb).
+                    Tentukan aplikasi media sosial mana saja yang ingin dipantau
+                    (seperti Instagram, TikTok, Twitter, dsb).
                   </p>
                 </div>
 
@@ -204,9 +235,12 @@ export default function Panduan() {
                   <div className="w-8 h-8 rounded-lg bg-accent/25 text-primary flex items-center justify-center mb-4">
                     <Clock className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold font-poppins mb-2">2.2 Atur Jam Kerja</h3>
+                  <h3 className="text-sm font-bold font-poppins mb-2">
+                    2.2 Atur Jam Kerja
+                  </h3>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Atur jam produktif harian Anda (misal: 08:00 - 17:00) agar notifikasi pembatasan aktif selama jam tersebut.
+                    Atur jam produktif harian Anda (misal: 08:00 - 17:00) agar
+                    notifikasi pembatasan aktif selama jam tersebut.
                   </p>
                 </div>
 
@@ -214,9 +248,12 @@ export default function Panduan() {
                   <div className="w-8 h-8 rounded-lg bg-accent/25 text-primary flex items-center justify-center mb-4">
                     <Bell className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold font-poppins mb-2">2.3 Atur Notifikasi</h3>
+                  <h3 className="text-sm font-bold font-poppins mb-2">
+                    2.3 Atur Notifikasi
+                  </h3>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Sesuaikan jenis peringatan/pemberitahuan yang akan dikirim saat screen time terdeteksi berlebihan.
+                    Sesuaikan jenis peringatan/pemberitahuan yang akan dikirim
+                    saat screen time terdeteksi berlebihan.
                   </p>
                 </div>
               </div>
@@ -225,7 +262,9 @@ export default function Panduan() {
             {/* Bagian 3 — Menggunakan Dashboard */}
             <section id="dashboard" className="scroll-mt-24 space-y-6">
               <h2 className="text-2xl font-bold font-poppins border-b border-border pb-3 flex items-center gap-2">
-                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">03</span>
+                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">
+                  03
+                </span>
                 Menggunakan Dashboard
               </h2>
 
@@ -235,9 +274,13 @@ export default function Panduan() {
                     <Gauge className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold font-poppins mb-1">3.1 Memahami Behavioral Score</h3>
+                    <h3 className="text-sm font-bold font-poppins mb-1">
+                      3.1 Memahami Behavioral Score
+                    </h3>
                     <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                      Skor indikator produktivitas kamu (0 - 100). Semakin seimbang screen time media sosialmu selama jam produktif, semakin tinggi skor yang kamu raih.
+                      Skor indikator produktivitas kamu (0 - 100). Semakin
+                      seimbang screen time media sosialmu selama jam produktif,
+                      semakin tinggi skor yang kamu raih.
                     </p>
                   </div>
                 </div>
@@ -247,9 +290,13 @@ export default function Panduan() {
                     <ShieldAlert className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold font-poppins mb-1">3.2 Membaca Risk Level</h3>
+                    <h3 className="text-sm font-bold font-poppins mb-1">
+                      3.2 Membaca Risk Level
+                    </h3>
                     <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                      Indikasi tingkat risiko kecanduan media sosial Anda (Rendah, Sedang, Tinggi) yang dinilai dari frekuensi cek HP dan screen time.
+                      Indikasi tingkat risiko kecanduan media sosial Anda
+                      (Rendah, Sedang, Tinggi) yang dinilai dari frekuensi cek
+                      HP dan screen time.
                     </p>
                   </div>
                 </div>
@@ -259,9 +306,13 @@ export default function Panduan() {
                     <Brain className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold font-poppins mb-1">3.3 Membaca AI Insight</h3>
+                    <h3 className="text-sm font-bold font-poppins mb-1">
+                      3.3 Membaca AI Insight
+                    </h3>
                     <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                      Rekomendasi dari asisten AI kami tentang alternatif aktivitas yang menyehatkan berdasarkan kebiasaan buruk Anda yang berhasil terdeteksi.
+                      Rekomendasi dari asisten AI kami tentang alternatif
+                      aktivitas yang menyehatkan berdasarkan kebiasaan buruk
+                      Anda yang berhasil terdeteksi.
                     </p>
                   </div>
                 </div>
@@ -271,7 +322,9 @@ export default function Panduan() {
             {/* Bagian 4 — Memahami Analytics */}
             <section id="analytics" className="scroll-mt-24 space-y-6">
               <h2 className="text-2xl font-bold font-poppins border-b border-border pb-3 flex items-center gap-2">
-                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">04</span>
+                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">
+                  04
+                </span>
                 Memahami Analytics
               </h2>
 
@@ -279,40 +332,53 @@ export default function Panduan() {
                 <div className="p-5 rounded-2xl border border-border bg-card">
                   <div className="flex items-center gap-2 mb-3">
                     <Eye className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-bold font-poppins">4.1 Tab Overview</h3>
+                    <h3 className="text-sm font-bold font-poppins">
+                      4.1 Tab Overview
+                    </h3>
                   </div>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Melihat visualisasi durasi pemakaian (dalam menit/jam) seluruh media sosial dari hari ke hari dalam format grafik garis dan batang.
+                    Melihat visualisasi durasi pemakaian (dalam menit/jam)
+                    seluruh media sosial dari hari ke hari dalam format grafik
+                    garis dan batang.
                   </p>
                 </div>
 
                 <div className="p-5 rounded-2xl border border-border bg-card">
                   <div className="flex items-center gap-2 mb-3">
                     <CheckSquare className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-bold font-poppins">4.2 Tab Behavior</h3>
+                    <h3 className="text-sm font-bold font-poppins">
+                      4.2 Tab Behavior
+                    </h3>
                   </div>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Memahami pemicu pemakaian media sosial kamu seperti waktu-waktu tersering memegang HP (trigger hours).
+                    Memahami pemicu pemakaian media sosial kamu seperti
+                    waktu-waktu tersering memegang HP (trigger hours).
                   </p>
                 </div>
 
                 <div className="p-5 rounded-2xl border border-border bg-card">
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-bold font-poppins">4.3 Tab Risk</h3>
+                    <h3 className="text-sm font-bold font-poppins">
+                      4.3 Tab Risk
+                    </h3>
                   </div>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Analisis risiko kecanduan dengan instrumen Bergen Social Media Addiction Scale (BSMAS) guna pemantauan psikososial.
+                    Analisis risiko kecanduan dengan instrumen Bergen Social
+                    Media Addiction Scale (BSMAS) guna pemantauan psikososial.
                   </p>
                 </div>
 
                 <div className="p-5 rounded-2xl border border-border bg-card">
                   <div className="flex items-center gap-2 mb-3">
                     <BarChart className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-bold font-poppins">4.4 Tab Weekly Report</h3>
+                    <h3 className="text-sm font-bold font-poppins">
+                      4.4 Tab Weekly Report
+                    </h3>
                   </div>
                   <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                    Rangkuman perbandingan performa keseimbangan digital Anda minggu ini dibandingkan minggu lalu secara otomatis.
+                    Rangkuman perbandingan performa keseimbangan digital Anda
+                    minggu ini dibandingkan minggu lalu secara otomatis.
                   </p>
                 </div>
               </div>
@@ -321,7 +387,9 @@ export default function Panduan() {
             {/* Bagian 5 — FAQ Singkat */}
             <section id="faq" className="scroll-mt-24 space-y-6">
               <h2 className="text-2xl font-bold font-poppins border-b border-border pb-3 flex items-center gap-2">
-                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">05</span>
+                <span className="text-secondary font-yellowtail text-3xl font-normal leading-none">
+                  05
+                </span>
                 Pertanyaan Umum (FAQ)
               </h2>
 
@@ -345,7 +413,9 @@ export default function Panduan() {
                     </button>
                     <div
                       className={`overflow-hidden transition-all duration-300 ${
-                        activeFaq === index ? "max-h-40 border-t border-border/50 p-5 bg-background/30" : "max-h-0"
+                        activeFaq === index
+                          ? "max-h-40 border-t border-border/50 p-5 bg-background/30"
+                          : "max-h-0"
                       }`}
                     >
                       <p className="text-muted text-xs sm:text-sm leading-relaxed font-poppins font-light">
@@ -359,7 +429,6 @@ export default function Panduan() {
           </main>
         </div>
       </div>
-
     </div>
   );
 }

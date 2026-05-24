@@ -1,8 +1,8 @@
 "use client";
 
-import { AppWindow, Bell, Clock, Lock, User } from "lucide-react";
+import { AppWindow, Bell, Clock, Lock, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const settingsTabs = [
   { name: "Profil Saya", href: "/settings/profile", icon: User },
@@ -14,6 +14,11 @@ const settingsTabs = [
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    router.push("/auth/login");
+  };
 
   return (
     <div className="space-y-6 font-poppins">
@@ -46,6 +51,25 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       {/* Main Settings Subpage Content */}
       <div key={pathname} className="animate-page-enter">
         {children}
+      </div>
+
+      {/* Mobile-only logout action */}
+      <div className="md:hidden rounded-3xl border border-red-200 bg-red-50 p-4 shadow-xs">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-red-600 shadow-sm">
+            <LogOut className="h-5 w-5" />
+          </div>
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold text-red-700">Keluar Akun</h3>
+              <p className="mt-1 text-xs leading-relaxed text-red-700/80">Logout dipindahkan ke halaman pengaturan agar Bottom Navigation Bar tetap bersih di mobile.</p>
+            </div>
+            <button type="button" onClick={handleLogout} className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white transition-all hover:bg-red-700">
+              <LogOut className="h-4 w-4" />
+              Keluar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

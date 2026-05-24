@@ -118,9 +118,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           );
         })}
-        <button type="button" onClick={handleLogout} className="flex items-center justify-center w-12 h-12 rounded-xl text-red-600" aria-label="Keluar">
-          <LogOut className="w-5 h-5" />
-        </button>
       </nav>
     </div>
   );

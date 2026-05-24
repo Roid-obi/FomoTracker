@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  BarChart2,
-  Bell,
-  Brain,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { BarChart2, Bell, Brain, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -52,12 +45,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div>
           {/* Logo */}
           <div className="flex items-baseline gap-1 select-none px-2 mb-8">
-            <span className="font-yellowtail text-4xl font-normal text-primary leading-none">
-              Fomo
-            </span>
-            <span className="font-poppins text-xs font-bold tracking-widest text-primary uppercase leading-none">
-              Tracker
-            </span>
+            <span className="font-yellowtail text-4xl font-normal text-primary leading-none">Fomo</span>
+            <span className="font-poppins text-xs font-bold tracking-widest text-primary uppercase leading-none">Tracker</span>
           </div>
 
           {/* Nav List */}
@@ -70,26 +59,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   key={item.name}
                   href={item.href}
                   className={`flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium transition-all group font-poppins cursor-pointer ${
-                    active
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-muted hover:text-primary hover:bg-muted-light/60"
+                    active ? "bg-primary text-white shadow-sm" : "text-muted hover:text-primary hover:bg-muted-light/60"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon
-                      className={`w-5 h-5 transition-transform ${
-                        active
-                          ? "text-accent"
-                          : "text-muted group-hover:text-primary"
-                      }`}
-                    />
+                    <Icon className={`w-5 h-5 transition-transform ${active ? "text-accent" : "text-muted group-hover:text-primary"}`} />
                     <span>{item.name}</span>
                   </div>
-                  {item.badge && !active && (
-                    <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
+                  {item.badge && !active && <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">{item.badge}</span>}
                 </Link>
               );
             })}
@@ -99,16 +76,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* User profile section & logout */}
         <div className="border-t border-border pt-4 space-y-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border">
-              R
-            </div>
+            <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border">R</div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold truncate font-poppins text-primary">
-                Roid Obi
-              </span>
-              <span className="text-xs text-muted truncate font-poppins">
-                roid@fomotracker.com
-              </span>
+              <span className="text-sm font-semibold truncate font-poppins text-primary">Roid Obi</span>
+              <span className="text-xs text-muted truncate font-poppins">roid@fomotracker.com</span>
             </div>
           </div>
 
@@ -124,14 +95,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 md:pl-2 pb-24 md:pb-6 pr-6 pl-6 py-6 overflow-y-auto">
-        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-w-0 md:pl-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6 pr-6 pl-6 py-6 overflow-visible md:overflow-y-auto">
+        <div key={pathname} className="animate-page-enter max-w-7xl w-full mx-auto flex-1 flex flex-col">
           {children}
         </div>
       </main>
 
       {/* Mobile Floating Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50 h-16 rounded-2xl border border-border bg-card/90 backdrop-blur-md shadow-lg flex items-center justify-around px-2">
+      <nav className="md:hidden fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-60 h-16 rounded-2xl border border-border bg-card/90 backdrop-blur-md shadow-lg flex items-center justify-around px-2">
         {navigationItems.map((item) => {
           const active = isActive(item);
           const Icon = item.icon;
@@ -139,24 +110,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all relative ${
-                active ? "text-primary" : "text-muted"
-              }`}
+              className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all relative ${active ? "text-primary" : "text-muted"}`}
               aria-label={item.name}
             >
               <Icon className={`w-5 h-5 ${active ? "scale-110" : ""}`} />
-              {item.badge && !active && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary border-2 border-card rounded-full" />
-              )}
+              {item.badge && !active && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary border-2 border-card rounded-full" />}
             </Link>
           );
         })}
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center justify-center w-12 h-12 rounded-xl text-red-600"
-          aria-label="Keluar"
-        >
+        <button type="button" onClick={handleLogout} className="flex items-center justify-center w-12 h-12 rounded-xl text-red-600" aria-label="Keluar">
           <LogOut className="w-5 h-5" />
         </button>
       </nav>

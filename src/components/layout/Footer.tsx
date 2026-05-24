@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
-  const isExcluded = pathname.startsWith("/auth") || pathname.startsWith("/dashboard");
+  const isExcluded =
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/analytics") ||
+    pathname.startsWith("/insight") ||
+    pathname.startsWith("/notifications") ||
+    pathname.startsWith("/settings");
 
   if (isExcluded) return null;
   return (
@@ -22,31 +29,50 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm font-light leading-relaxed font-poppins">
-              Membantu kamu memahami pola penggunaan media sosial dan membangun kebiasaan digital yang lebih sehat.
+              Membantu kamu memahami pola penggunaan media sosial dan membangun
+              kebiasaan digital yang lebih sehat.
             </p>
           </div>
           <div>
-            <h4 className="text-primary font-semibold text-sm mb-4 font-poppins">Tautan Pintas</h4>
+            <h4 className="text-primary font-semibold text-sm mb-4 font-poppins">
+              Tautan Pintas
+            </h4>
             <div className="flex flex-col gap-2.5 text-sm font-poppins">
-              <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
-              <Link href="/panduan" className="hover:text-primary transition-colors">Panduan Pengguna</Link>
-              <Link href="/tentang" className="hover:text-primary transition-colors">Tentang Kami</Link>
+              <Link href="/" className="hover:text-primary transition-colors">
+                Beranda
+              </Link>
+              <Link
+                href="/panduan"
+                className="hover:text-primary transition-colors"
+              >
+                Panduan Pengguna
+              </Link>
+              <Link
+                href="/tentang"
+                className="hover:text-primary transition-colors"
+              >
+                Tentang Kami
+              </Link>
             </div>
           </div>
           <div>
-            <h4 className="text-primary font-semibold text-sm mb-4 font-poppins">Dampak Sosial</h4>
+            <h4 className="text-primary font-semibold text-sm mb-4 font-poppins">
+              Dampak Sosial
+            </h4>
             <p className="text-xs font-light leading-relaxed mb-3 font-poppins">
-              FomoTracker berkontribusi pada pencapaian SDGs PBB (Kesehatan Baik, Pendidikan Berkualitas, Pertumbuhan Ekonomi).
+              FomoTracker berkontribusi pada pencapaian SDGs PBB (Kesehatan
+              Baik, Pendidikan Berkualitas, Pertumbuhan Ekonomi).
             </p>
             <span className="inline-block text-[10px] font-medium bg-muted-light text-primary px-2.5 py-1 rounded-full font-poppins">
               Platform Nirlaba Dampak Sosial
             </span>
           </div>
         </div>
-        
+
         <div className="border-t border-border/60 pt-6 text-center text-xs">
           <p className="font-poppins">
-            © {new Date().getFullYear()} FomoTracker. Dibuat dengan cinta menggunakan Next.js & Tailwind CSS.
+            © {new Date().getFullYear()} FomoTracker. Dibuat dengan cinta
+            menggunakan Next.js & Tailwind CSS.
           </p>
         </div>
       </div>

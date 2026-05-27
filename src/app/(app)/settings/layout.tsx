@@ -31,22 +31,22 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       {/* Settings Tabs Sub-Navigation */}
       <div className="overflow-x-auto scrollbar-none select-none">
         <div className="inline-flex min-w-max items-center gap-1 rounded-2xl border border-border bg-card p-1 shadow-xs">
-        {settingsTabs.map((tab) => {
-          const active = pathname === tab.href;
-          const Icon = tab.icon;
-          return (
-            <Link
-              key={tab.name}
-              href={tab.href}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
-                active ? "bg-secondary text-white shadow-sm" : "text-muted hover:bg-muted-light hover:text-primary"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.name}</span>
-            </Link>
-          );
-        })}
+          {settingsTabs.map((tab) => {
+            const active = pathname === tab.href;
+            const Icon = tab.icon;
+            return (
+              <Link
+                key={tab.name}
+                href={tab.href}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
+                  active ? "bg-secondary text-white shadow-sm" : "text-muted hover:bg-muted-light hover:text-primary"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{tab.name}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 

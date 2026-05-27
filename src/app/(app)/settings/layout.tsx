@@ -29,7 +29,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       </div>
 
       {/* Settings Tabs Sub-Navigation */}
-      <div className="flex overflow-x-auto gap-2 border-b border-border pb-1 shrink-0 scrollbar-none select-none">
+      <div className="overflow-x-auto scrollbar-none select-none">
+        <div className="inline-flex min-w-max items-center gap-1 rounded-2xl border border-border bg-card p-1 shadow-xs">
         {settingsTabs.map((tab) => {
           const active = pathname === tab.href;
           const Icon = tab.icon;
@@ -37,8 +38,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
             <Link
               key={tab.name}
               href={tab.href}
-              className={`flex items-center gap-2 px-5 py-3 rounded-t-2xl text-xs font-semibold tracking-wider transition-all whitespace-nowrap cursor-pointer ${
-                active ? "bg-secondary text-white shadow-xs" : "text-muted hover:bg-muted-light/60 hover:text-primary"
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
+                active ? "bg-secondary text-white shadow-sm" : "text-muted hover:bg-muted-light hover:text-primary"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -46,12 +47,11 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
             </Link>
           );
         })}
+        </div>
       </div>
 
       {/* Main Settings Subpage Content */}
-      <div>
-        {children}
-      </div>
+      <div>{children}</div>
 
       {/* Mobile-only logout action */}
       <div className="md:hidden rounded-3xl border border-red-200 bg-red-50 p-4 shadow-xs">

@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  Briefcase,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Laptop,
-  Moon,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Briefcase, Check, ChevronLeft, ChevronRight, Laptop, Moon, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -77,11 +68,7 @@ export default function OnboardingPage() {
   });
 
   const handleToggleApp = (appId: string) => {
-    setSelectedApps((prev) =>
-      prev.includes(appId)
-        ? prev.filter((id) => id !== appId)
-        : [...prev, appId],
-    );
+    setSelectedApps((prev) => (prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId]));
   };
 
   const handleToggleNotification = (key: keyof typeof notifications) => {
@@ -111,12 +98,7 @@ export default function OnboardingPage() {
     return (
       <div className="flex items-center gap-1.5 mb-8">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-              i <= step ? "bg-primary" : "bg-muted-light"
-            }`}
-          />
+          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-primary" : "bg-muted-light"}`} />
         ))}
       </div>
     );
@@ -134,21 +116,14 @@ export default function OnboardingPage() {
               <Sparkles className="w-10 h-10 text-primary" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold font-poppins text-primary tracking-tight">
-                Selamat Datang di FomoTracker
-              </h1>
+              <h1 className="text-3xl font-bold font-poppins text-primary tracking-tight">Selamat Datang di FomoTracker</h1>
               <p className="text-muted font-poppins font-light leading-relaxed max-w-md mx-auto text-sm">
-                Asisten kesehatan digital Anda. Kami membantu Anda memantau
-                kebiasaan screen time, meningkatkan produktivitas, serta
-                melindungi waktu istirahat malam Anda.
+                Asisten kesehatan digital Anda. Kami membantu Anda memantau kebiasaan screen time, meningkatkan produktivitas, serta melindungi waktu istirahat malam Anda.
               </p>
             </div>
             <div className="bg-muted-light/45 rounded-2xl p-4 border border-border flex items-center gap-3 text-left">
               <Laptop className="w-5 h-5 text-secondary shrink-0" />
-              <p className="text-xs text-muted font-poppins font-light">
-                Setup awal ini hanya membutuhkan waktu 2 menit untuk
-                menyesuaikan profil dan preferensi pelacakan Anda.
-              </p>
+              <p className="text-xs text-muted font-poppins font-light">Setup awal ini hanya membutuhkan waktu 2 menit untuk menyesuaikan profil dan preferensi pelacakan Anda.</p>
             </div>
             <button
               type="button"
@@ -165,13 +140,8 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold font-poppins text-primary">
-                Aplikasi yang Dipantau
-              </h2>
-              <p className="text-sm text-muted font-poppins font-light">
-                Pilih aplikasi yang sering mengalihkan fokus Anda. Anda harus
-                memilih minimal 1 aplikasi.
-              </p>
+              <h2 className="text-2xl font-bold font-poppins text-primary">Aplikasi yang Dipantau</h2>
+              <p className="text-sm text-muted font-poppins font-light">Pilih aplikasi yang sering mengalihkan fokus Anda. Anda harus memilih minimal 1 aplikasi.</p>
             </div>
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -183,31 +153,19 @@ export default function OnboardingPage() {
                     key={app.id}
                     onClick={() => handleToggleApp(app.id)}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                      isSelected
-                        ? "border-primary bg-muted-light/30"
-                        : "border-border hover:border-muted hover:bg-muted-light/10"
+                      isSelected ? "border-primary bg-muted-light/30" : "border-border hover:border-muted hover:bg-muted-light/10"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${app.color} flex items-center justify-center text-white text-xs font-semibold`}
-                      >
-                        {app.name.substring(0, 2)}
-                      </div>
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${app.color} flex items-center justify-center text-white text-xs font-semibold`}>{app.name.substring(0, 2)}</div>
                       <div>
-                        <p className="font-poppins font-semibold text-primary text-sm">
-                          {app.name}
-                        </p>
-                        <p className="text-xs text-muted font-poppins font-light">
-                          {app.category}
-                        </p>
+                        <p className="font-poppins font-semibold text-primary text-sm">{app.name}</p>
+                        <p className="text-xs text-muted font-poppins font-light">{app.category}</p>
                       </div>
                     </div>
                     <div
                       className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
-                        isSelected
-                          ? "bg-primary border-primary text-white"
-                          : "border-border text-transparent"
+                        isSelected ? "bg-primary border-primary text-white" : "border-border text-transparent"
                       }`}
                     >
                       <Check className="w-3.5 h-3.5" />
@@ -243,13 +201,8 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold font-poppins text-primary">
-                Atur Jam Produktif
-              </h2>
-              <p className="text-sm text-muted font-poppins font-light">
-                Selama jam produktif, FomoTracker akan memantau screen time Anda
-                secara ketat untuk mencegah distraksi.
-              </p>
+              <h2 className="text-2xl font-bold font-poppins text-primary">Atur Jam Produktif</h2>
+              <p className="text-sm text-muted font-poppins font-light">Selama jam produktif, FomoTracker akan memantau screen time Anda secara ketat untuk mencegah distraksi.</p>
             </div>
 
             <div className="p-6 rounded-3xl border border-border bg-muted-light/10 space-y-6">
@@ -258,10 +211,7 @@ export default function OnboardingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label
-                    htmlFor="onb-prod-start"
-                    className="block text-xs font-semibold text-muted font-poppins mb-1.5"
-                  >
+                  <label htmlFor="onb-prod-start" className="block text-xs font-semibold text-muted font-poppins mb-1.5">
                     Mulai Jam
                   </label>
                   <input
@@ -273,10 +223,7 @@ export default function OnboardingPage() {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="onb-prod-end"
-                    className="block text-xs font-semibold text-muted font-poppins mb-1.5"
-                  >
+                  <label htmlFor="onb-prod-end" className="block text-xs font-semibold text-muted font-poppins mb-1.5">
                     Selesai Jam
                   </label>
                   <input
@@ -288,10 +235,7 @@ export default function OnboardingPage() {
                   />
                 </div>
               </div>
-              <p className="text-xs text-center text-muted font-poppins font-light">
-                Contoh standar: 08:00 – 17:00. Notifikasi pengingat fokus akan
-                diaktifkan secara dinamis.
-              </p>
+              <p className="text-xs text-center text-muted font-poppins font-light">Contoh standar: 08:00 – 17:00. Notifikasi pengingat fokus akan diaktifkan secara dinamis.</p>
             </div>
 
             <div className="flex justify-between gap-4 pt-4">
@@ -319,13 +263,8 @@ export default function OnboardingPage() {
         {step === 4 && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold font-poppins text-primary">
-                Atur Jam Malam (Tidur)
-              </h2>
-              <p className="text-sm text-muted font-poppins font-light">
-                Batasi screen time Anda sebelum tidur untuk menjaga kualitas
-                istirahat yang optimal.
-              </p>
+              <h2 className="text-2xl font-bold font-poppins text-primary">Atur Jam Malam (Tidur)</h2>
+              <p className="text-sm text-muted font-poppins font-light">Batasi screen time Anda sebelum tidur untuk menjaga kualitas istirahat yang optimal.</p>
             </div>
 
             <div className="p-6 rounded-3xl border border-border bg-muted-light/10 space-y-6">
@@ -334,10 +273,7 @@ export default function OnboardingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label
-                    htmlFor="onb-bed-start"
-                    className="block text-xs font-semibold text-muted font-poppins mb-1.5"
-                  >
+                  <label htmlFor="onb-bed-start" className="block text-xs font-semibold text-muted font-poppins mb-1.5">
                     Mulai Jam
                   </label>
                   <input
@@ -349,10 +285,7 @@ export default function OnboardingPage() {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="onb-bed-end"
-                    className="block text-xs font-semibold text-muted font-poppins mb-1.5"
-                  >
+                  <label htmlFor="onb-bed-end" className="block text-xs font-semibold text-muted font-poppins mb-1.5">
                     Selesai Jam
                   </label>
                   <input
@@ -364,10 +297,7 @@ export default function OnboardingPage() {
                   />
                 </div>
               </div>
-              <p className="text-xs text-center text-muted font-poppins font-light">
-                Contoh standar: 22:00 – 06:00. Peringatan keras akan dikirim
-                jika ada aktivitas penggunaan di jam tidur.
-              </p>
+              <p className="text-xs text-center text-muted font-poppins font-light">Contoh standar: 22:00 – 06:00. Peringatan keras akan dikirim jika ada aktivitas penggunaan di jam tidur.</p>
             </div>
 
             <div className="flex justify-between gap-4 pt-4">
@@ -395,113 +325,68 @@ export default function OnboardingPage() {
         {step === 5 && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold font-poppins text-primary">
-                Preferensi Notifikasi
-              </h2>
-              <p className="text-sm text-muted font-poppins font-light">
-                Atur jenis peringatan cerdas apa saja yang ingin Anda terima
-                dari FomoTracker.
-              </p>
+              <h2 className="text-2xl font-bold font-poppins text-primary">Preferensi Notifikasi</h2>
+              <p className="text-sm text-muted font-poppins font-light">Atur jenis peringatan cerdas apa saja yang ingin Anda terima dari FomoTracker.</p>
             </div>
 
             <div className="space-y-3">
               {/* Option 1: Usage Warning */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-poppins font-semibold text-primary text-sm">
-                    Usage Warning
-                  </h3>
-                  <p className="text-xs text-muted font-poppins font-light">
-                    Peringatan saat hampir mencapai batas harian.
-                  </p>
+                  <h3 className="font-poppins font-semibold text-primary text-sm">Usage Warning</h3>
+                  <p className="text-xs text-muted font-poppins font-light">Peringatan saat hampir mencapai batas harian.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("usageWarning")}
-                  className={`w-12 h-6.5 rounded-full transition-all relative ${
-                    notifications.usageWarning ? "bg-primary" : "bg-border"
-                  }`}
+                  className={`w-12 h-6.5 rounded-full transition-all relative ${notifications.usageWarning ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${
-                      notifications.usageWarning ? "right-1" : "left-1"
-                    }`}
-                  />
+                  <div className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.usageWarning ? "right-1" : "left-1"}`} />
                 </button>
               </div>
 
               {/* Option 2: Focus Reminder */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-poppins font-semibold text-primary text-sm">
-                    Focus Reminder
-                  </h3>
-                  <p className="text-xs text-muted font-poppins font-light">
-                    Mengingatkan fokus jika membuka medsos di jam kerja.
-                  </p>
+                  <h3 className="font-poppins font-semibold text-primary text-sm">Focus Reminder</h3>
+                  <p className="text-xs text-muted font-poppins font-light">Mengingatkan fokus jika membuka medsos di jam kerja.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("focusReminder")}
-                  className={`w-12 h-6.5 rounded-full transition-all relative ${
-                    notifications.focusReminder ? "bg-primary" : "bg-border"
-                  }`}
+                  className={`w-12 h-6.5 rounded-full transition-all relative ${notifications.focusReminder ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${
-                      notifications.focusReminder ? "right-1" : "left-1"
-                    }`}
-                  />
+                  <div className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.focusReminder ? "right-1" : "left-1"}`} />
                 </button>
               </div>
 
               {/* Option 3: Midnight Alert */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-poppins font-semibold text-primary text-sm">
-                    Midnight Alert
-                  </h3>
-                  <p className="text-xs text-muted font-poppins font-light">
-                    Peringatan tegas saat menggunakan HP larut malam.
-                  </p>
+                  <h3 className="font-poppins font-semibold text-primary text-sm">Midnight Alert</h3>
+                  <p className="text-xs text-muted font-poppins font-light">Peringatan tegas saat menggunakan HP larut malam.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("midnightAlert")}
-                  className={`w-12 h-6.5 rounded-full transition-all relative ${
-                    notifications.midnightAlert ? "bg-primary" : "bg-border"
-                  }`}
+                  className={`w-12 h-6.5 rounded-full transition-all relative ${notifications.midnightAlert ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${
-                      notifications.midnightAlert ? "right-1" : "left-1"
-                    }`}
-                  />
+                  <div className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.midnightAlert ? "right-1" : "left-1"}`} />
                 </button>
               </div>
 
               {/* Option 4: Continuous Usage */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-poppins font-semibold text-primary text-sm">
-                    Continuous Usage
-                  </h3>
-                  <p className="text-xs text-muted font-poppins font-light">
-                    Peringatan saat berselancar tanpa henti selama 30 menit.
-                  </p>
+                  <h3 className="font-poppins font-semibold text-primary text-sm">Continuous Usage</h3>
+                  <p className="text-xs text-muted font-poppins font-light">Peringatan saat berselancar tanpa henti selama 30 menit.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("continuousUsage")}
-                  className={`w-12 h-6.5 rounded-full transition-all relative ${
-                    notifications.continuousUsage ? "bg-primary" : "bg-border"
-                  }`}
+                  className={`w-12 h-6.5 rounded-full transition-all relative ${notifications.continuousUsage ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${
-                      notifications.continuousUsage ? "right-1" : "left-1"
-                    }`}
-                  />
+                  <div className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.continuousUsage ? "right-1" : "left-1"}`} />
                 </button>
               </div>
             </div>

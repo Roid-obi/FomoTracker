@@ -96,9 +96,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 md:pl-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6 pr-6 pl-6 py-6 overflow-visible md:overflow-y-auto">
-        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
-          {children}
-        </div>
+        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">{children}</div>
       </main>
 
       {/* Mobile Floating Bottom Navigation Bar */}

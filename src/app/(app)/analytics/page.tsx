@@ -146,7 +146,8 @@ function AnalyticsContent() {
       </div>
 
       {/* Tabs Menu */}
-      <div className="flex overflow-x-auto gap-2 border-b border-border pb-1 shrink-0 scrollbar-none select-none">
+      <div className="overflow-x-auto scrollbar-none select-none">
+        <div className="inline-flex min-w-max items-center gap-1 rounded-2xl border border-border bg-card p-1 shadow-xs">
         {(
           [
             { id: "overview", name: "Overview", icon: BarChart2 },
@@ -163,10 +164,10 @@ function AnalyticsContent() {
               type="button"
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-t-2xl text-xs font-semibold tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
                 active
-                  ? "bg-primary text-white shadow-xs border-t-2 border-primary"
-                  : "text-muted hover:bg-muted-light/60 hover:text-primary"
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-muted hover:bg-muted-light hover:text-primary"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -174,6 +175,7 @@ function AnalyticsContent() {
             </button>
           );
         })}
+        </div>
       </div>
 
       {/* TAB 1: OVERVIEW */}

@@ -49,7 +49,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       </div>
 
       {/* Main Settings Subpage Content */}
-      <div key={pathname} className="animate-page-enter">
+      <div>
         {children}
       </div>
 

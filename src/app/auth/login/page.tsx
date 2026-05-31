@@ -77,6 +77,9 @@ export default function Login() {
           <button type="submit" className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2">
             Masuk
           </button>
+          <Link href="/dashboard" className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2">
+            Langsung ke Dashboard
+          </Link>
         </form>
 
         {/* Footer */}

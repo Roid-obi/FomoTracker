@@ -26,7 +26,10 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
       if (durationSeconds <= 0) continue;
 
       // 1. Find or create the app in `apps` table
-      let [appRecord] = await db.select().from(apps).where(eq(apps.packageName, stat.packageName));
+      let [appRecord] = await db
+        .select()
+        .from(apps)
+        .where(eq(apps.packageName, stat.packageName));
 
       if (!appRecord) {
         const [newApp] = await db
@@ -46,7 +49,13 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
       const [existingDailyStat] = await db
         .select()
         .from(dailyStats)
-        .where(and(eq(dailyStats.userId, userId), eq(dailyStats.appId, appRecord.id), eq(dailyStats.statDate, today as any)));
+        .where(
+          and(
+            eq(dailyStats.userId, userId),
+            eq(dailyStats.appId, appRecord.id),
+            eq(dailyStats.statDate, today as any),
+          ),
+        );
 
       if (existingDailyStat) {
         // Update the duration
@@ -56,9 +65,14 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
           .update(dailyStats)
           .set({
             totalDurationSeconds: durationSeconds,
-            openFrequency: stat.openFrequency || existingDailyStat.openFrequency,
-            midnightDurationSeconds: stat.midnightDurationSeconds || existingDailyStat.midnightDurationSeconds,
-            productiveHourDurationSeconds: stat.productiveHourDurationSeconds || existingDailyStat.productiveHourDurationSeconds,
+            openFrequency:
+              stat.openFrequency || existingDailyStat.openFrequency,
+            midnightDurationSeconds:
+              stat.midnightDurationSeconds ||
+              existingDailyStat.midnightDurationSeconds,
+            productiveHourDurationSeconds:
+              stat.productiveHourDurationSeconds ||
+              existingDailyStat.productiveHourDurationSeconds,
           })
           .where(eq(dailyStats.id, existingDailyStat.id));
       } else {
@@ -70,7 +84,8 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
           totalDurationSeconds: durationSeconds,
           openFrequency: stat.openFrequency || 1,
           midnightDurationSeconds: stat.midnightDurationSeconds || 0,
-          productiveHourDurationSeconds: stat.productiveHourDurationSeconds || 0,
+          productiveHourDurationSeconds:
+            stat.productiveHourDurationSeconds || 0,
           maxContinuousSeconds: 0,
           peakActiveHour: 0,
         });

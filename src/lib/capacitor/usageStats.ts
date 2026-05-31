@@ -1,5 +1,4 @@
-import { Capacitor } from "@capacitor/core";
-import { registerPlugin } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { getUserSettings } from "@/app/actions/settings";
 import { syncUsageStats } from "@/app/actions/usage";
 import { analyzeUsageEvents, fetchUsageEvents } from "./usageEvents";
@@ -12,16 +11,23 @@ interface UsageStatRecord {
 interface CapacitorUsageStatsManagerPluginType {
   isUsageStatsPermissionGranted(): Promise<{ granted: boolean }>;
   openUsageStatsSettings(): Promise<void>;
-  queryAndAggregateUsageStats(options: { beginTime: number; endTime: number }): Promise<Record<string, UsageStatRecord>>;
+  queryAndAggregateUsageStats(options: {
+    beginTime: number;
+    endTime: number;
+  }): Promise<Record<string, UsageStatRecord>>;
 }
 
-const CapacitorUsageStatsManager = registerPlugin<CapacitorUsageStatsManagerPluginType>("CapacitorUsageStatsManager");
+const CapacitorUsageStatsManager =
+  registerPlugin<CapacitorUsageStatsManagerPluginType>(
+    "CapacitorUsageStatsManager",
+  );
 
 export async function checkAndRequestUsagePermission(): Promise<boolean> {
   if (Capacitor.getPlatform() !== "android") return true;
 
   try {
-    const { granted } = await CapacitorUsageStatsManager.isUsageStatsPermissionGranted();
+    const { granted } =
+      await CapacitorUsageStatsManager.isUsageStatsPermissionGranted();
     if (!granted) {
       await CapacitorUsageStatsManager.openUsageStatsSettings();
       return false;
@@ -49,24 +55,40 @@ export async function fetchAndSyncUsageData(userId: string) {
 
   try {
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
 
     // Ambil setting user untuk jam produktif dan malam hari
     const settingsResponse = await getUserSettings(userId);
-    const settings = settingsResponse.success ? settingsResponse.settings : null;
+    const settings = settingsResponse.success
+      ? settingsResponse.settings
+      : null;
 
     const midnightStartStr = settings?.midnightStart || "00:00:00";
     const midnightEndStr = settings?.midnightEnd || "05:00:00";
     const productiveStartStr = settings?.productivityStart || "09:00:00";
     const productiveEndStr = settings?.productivityEnd || "17:00:00";
 
-    const statsRecord = await CapacitorUsageStatsManager.queryAndAggregateUsageStats({
-      beginTime: startOfDay.getTime(),
-      endTime: now.getTime(),
-    });
+    const statsRecord =
+      await CapacitorUsageStatsManager.queryAndAggregateUsageStats({
+        beginTime: startOfDay.getTime(),
+        endTime: now.getTime(),
+      });
 
-    const rawEvents = await fetchUsageEvents(startOfDay.getTime(), now.getTime());
-    const detailedSessions = analyzeUsageEvents(rawEvents, midnightStartStr, midnightEndStr, productiveStartStr, productiveEndStr);
+    const rawEvents = await fetchUsageEvents(
+      startOfDay.getTime(),
+      now.getTime(),
+    );
+    const detailedSessions = analyzeUsageEvents(
+      rawEvents,
+      midnightStartStr,
+      midnightEndStr,
+      productiveStartStr,
+      productiveEndStr,
+    );
 
     const statsToSync = Object.values(statsRecord).map((stat) => {
       const details = detailedSessions[stat.packageName];
@@ -75,7 +97,9 @@ export async function fetchAndSyncUsageData(userId: string) {
         totalTimeInForeground: stat.totalTimeInForeground,
         openFrequency: details ? details.frequency : 1,
         midnightDurationSeconds: details ? details.midnightDurationSeconds : 0,
-        productiveHourDurationSeconds: details ? details.productiveHourDurationSeconds : 0,
+        productiveHourDurationSeconds: details
+          ? details.productiveHourDurationSeconds
+          : 0,
       };
     });
 

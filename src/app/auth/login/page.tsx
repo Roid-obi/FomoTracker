@@ -2,10 +2,17 @@
 
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push("/dashboard");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary font-poppins relative overflow-hidden justify-center items-center px-4 sm:px-6">
@@ -14,7 +21,10 @@ export default function Login() {
       <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-secondary/15 rounded-full blur-[100px] -z-10" />
 
       {/* Back Button */}
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors font-semibold">
+      <Link
+        href="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors font-semibold"
+      >
         <ArrowLeft className="w-4 h-4" /> Kembali
       </Link>
 
@@ -22,18 +32,29 @@ export default function Login() {
         {/* Header Logo */}
         <div className="text-center mb-8">
           <div className="flex items-baseline justify-center gap-0.5 select-none mb-3">
-            <span className="font-yellowtail text-4xl font-normal text-primary leading-none">Fomo</span>
-            <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase leading-none">Tracker</span>
+            <span className="font-yellowtail text-4xl font-normal text-primary leading-none">
+              Fomo
+            </span>
+            <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase leading-none">
+              Tracker
+            </span>
           </div>
-          <h2 className="text-xl font-bold font-poppins text-primary">Masuk ke Akun Anda</h2>
-          <p className="text-muted text-xs font-poppins font-light mt-1.5">Selamat datang kembali! Silakan masukkan kredensial Anda.</p>
+          <h2 className="text-xl font-bold font-poppins text-primary">
+            Masuk ke Akun Anda
+          </h2>
+          <p className="text-muted text-xs font-poppins font-light mt-1.5">
+            Selamat datang kembali! Silakan masukkan kredensial Anda.
+          </p>
         </div>
 
         {/* Form */}
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-5" onSubmit={handleLoginSubmit}>
           {/* Email */}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-xs font-bold text-muted uppercase tracking-wider">
+            <label
+              htmlFor="email"
+              className="text-xs font-bold text-muted uppercase tracking-wider"
+            >
               Alamat Email
             </label>
             <div className="relative">
@@ -51,10 +72,16 @@ export default function Login() {
           {/* Password */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <label htmlFor="password" className="text-xs font-bold text-muted uppercase tracking-wider">
+              <label
+                htmlFor="password"
+                className="text-xs font-bold text-muted uppercase tracking-wider"
+              >
                 Password
               </label>
-              <Link href="#" className="text-xs text-secondary hover:underline font-semibold">
+              <Link
+                href="#"
+                className="text-xs text-secondary hover:underline font-semibold"
+              >
                 Lupa Password?
               </Link>
             </div>
@@ -67,25 +94,70 @@ export default function Login() {
                 required
                 className="w-full pl-11 pr-11 py-3 rounded-xl border border-border bg-background/50 focus:outline-none focus:border-secondary transition-all text-sm font-light text-primary font-poppins"
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors cursor-pointer">
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors cursor-pointer"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
 
           {/* Submit */}
-          <button type="submit" className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2">
+          <button
+            type="submit"
+            className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2"
+          >
             Masuk
           </button>
-          <Link href="/dashboard" className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2">
-            Langsung ke Dashboard
-          </Link>
+
+          <div className="flex items-center my-4">
+            <div className="flex-1 border-t border-border" />
+            <span className="px-3 text-[10px] text-muted font-semibold uppercase tracking-wider">
+              Atau
+            </span>
+            <div className="flex-1 border-t border-border" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="#EA4335"
+                d="M12 5.04c1.67 0 3.2.58 4.38 1.69l3.27-3.27C17.67 1.54 15.02 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.87 3a7.16 7.16 0 0 1 6.89-5.68z"
+              />
+              <path
+                fill="#4285F4"
+                d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.45h6.46a5.52 5.52 0 0 1-2.4 3.62l3.72 2.89c2.18-2 3.71-4.96 3.71-8.62z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.11 14.72A7.12 7.12 0 0 1 4.75 12c0-.95.16-1.87.46-2.72L1.24 6.28a11.96 11.96 0 0 0 0 11.44l3.87-3z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.72-2.89c-1.03.69-2.35 1.1-4.24 1.1a7.16 7.16 0 0 1-6.89-5.68l-3.87 3A11.97 11.97 0 0 0 12 23z"
+              />
+            </svg>
+            <span>Masuk dengan Google</span>
+          </button>
         </form>
 
         {/* Footer */}
         <p className="text-center text-xs text-muted font-poppins font-light mt-6">
           Belum punya akun?{" "}
-          <Link href="/auth/register" className="text-secondary font-semibold hover:underline">
+          <Link
+            href="/auth/register"
+            className="text-secondary font-semibold hover:underline"
+          >
             Daftar Gratis
           </Link>
         </p>

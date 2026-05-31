@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 import { table } from "@/lib/databases/schema";
 
 export namespace RegisterModel {

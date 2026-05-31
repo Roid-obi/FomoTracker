@@ -44,28 +44,22 @@ const behavioralFlags = [
     variant: "danger",
   },
   {
-    name: "Compulsive Checking",
-    desc: "Membuka HP > 15 kali/jam",
-    active: true,
-    variant: "warning",
-  },
-  {
     name: "Midnight Usage",
     desc: "Aktif di jam tidur",
     active: true,
     variant: "danger",
   },
   {
-    name: "Continuous Usage",
-    desc: "Aktif > 30 mnt tanpa jeda",
-    active: false,
-    variant: "info",
-  },
-  {
     name: "Distraction Tendency",
     desc: "Membuka sosmed di jam kerja",
     active: true,
     variant: "warning",
+  },
+  {
+    name: "Continuous Usage",
+    desc: "Aktif > 30 mnt tanpa jeda",
+    active: false,
+    variant: "info",
   },
 ];
 
@@ -272,7 +266,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <Link
-              href="/insight/latest"
+              href="/insight"
               className="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-white text-primary text-xs font-semibold hover:bg-accent transition-all shrink-0 cursor-pointer self-start sm:self-center"
             >
               <span>Lihat Detail</span>

@@ -1,6 +1,6 @@
 "use server";
 
-import { registerService, loginService } from "@/lib/services/auth.service";
+import { loginService, registerService } from "@/lib/services/auth.service";
 
 export async function register(formData: FormData) {
   return registerService(formData);

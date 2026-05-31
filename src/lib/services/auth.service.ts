@@ -1,6 +1,6 @@
-import { supabase } from "@/lib/databases/supabase";
-import { RegisterModel, LoginModel } from "@/lib/models/auth.model";
 import { z } from "zod";
+import { supabase } from "@/lib/databases/supabase";
+import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 
 export async function registerService(formData: FormData) {
   const raw = Object.fromEntries(formData);
@@ -16,13 +16,17 @@ export async function registerService(formData: FormData) {
   if (profile instanceof File && profile.size > 0) {
     const fileName = `profile_${Date.now()}.${profile.name.split(".").pop()}`;
 
-    const { error: uploadError } = await supabase.storage.from("profiles").upload(fileName, profile);
+    const { error: uploadError } = await supabase.storage
+      .from("profiles")
+      .upload(fileName, profile);
 
     if (uploadError) {
       return { success: false, error: uploadError.message };
     }
 
-    const { data: urlData } = supabase.storage.from("profiles").getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage
+      .from("profiles")
+      .getPublicUrl(fileName);
     profile_url = urlData.publicUrl;
   }
 

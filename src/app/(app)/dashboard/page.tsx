@@ -39,27 +39,28 @@ const hourlyData = [
 const behavioralFlags = [
   {
     name: "Excessive Usage",
-    desc: "Melebihi 4 jam penggunaan",
+    desc: "Melebihi 4 jam penggunaan hari ini",
     active: true,
-    variant: "danger",
   },
   {
     name: "Midnight Usage",
-    desc: "Aktif di jam tidur",
+    desc: "Aktif menggunakan HP di jam tidur malam",
     active: true,
-    variant: "danger",
-  },
-  {
-    name: "Distraction Tendency",
-    desc: "Membuka sosmed di jam kerja",
-    active: true,
-    variant: "warning",
   },
   {
     name: "Continuous Usage",
-    desc: "Aktif > 30 mnt tanpa jeda",
+    desc: "Membuka ponsel > 30 mnt nonstop",
     active: false,
-    variant: "info",
+  },
+  {
+    name: "Compulsive Checking",
+    desc: "Membuka layar > 50 kali hari ini",
+    active: true,
+  },
+  {
+    name: "Distraction Tendency",
+    desc: "Membuka medsos saat jam produktif",
+    active: true,
   },
 ];
 
@@ -280,7 +281,7 @@ export default function DashboardPage() {
           {/* Indicators list */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
             <h3 className="font-bold text-base text-primary mb-4">
-              Indikator Perilaku
+              Detected Behaviors Today
             </h3>
             <div className="space-y-3">
               {behavioralFlags.map((flag) => (

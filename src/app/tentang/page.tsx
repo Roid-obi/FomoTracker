@@ -32,7 +32,7 @@ export default function Tentang() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 max-w-4xl py-16 space-y-20">
-        {/* Section 1: Apa itu FomoTracker? */}
+        {/* Section 1: Apa itu FomoTracker */}
         <section className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h2 className="text-2xl font-bold font-poppins mb-4 flex items-center gap-2">
@@ -67,7 +67,7 @@ export default function Tentang() {
           </div>
         </section>
 
-        {/* Section 2: Misi Kami */}
+        {/* Section 2: Latar Belakang */}
         <section className="p-8 md:p-10 rounded-3xl border border-border bg-card relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-accent/20 rounded-bl-full pointer-events-none" />
           <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -75,45 +75,35 @@ export default function Tentang() {
               <Target className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-poppins mb-2">Misi Kami</h2>
+              <h2 className="text-xl font-bold font-poppins mb-2">
+                Latar Belakang
+              </h2>
               <p className="text-primary text-base md:text-lg font-poppins font-semibold leading-relaxed mb-4">
-                "Membantu masyarakat membangun kebiasaan digital yang lebih
-                sehat, sadar, dan produktif."
+                "Mengembalikan kendali waktu dari distraksi digital yang tanpa
+                disadari menguasai keseharian."
               </p>
               <p className="text-muted text-xs sm:text-sm leading-relaxed font-poppins font-light">
-                Kami percaya teknologi seharusnya menjadi alat bantu yang
-                memberdayakan manusia, bukan rantai tak kasat mata yang mendikte
-                fokus, waktu, dan kebahagiaan hidup kita sehari-hari.
+                Teknologi dirancang untuk membantu produktivitas kita, namun
+                algoritma media sosial modern sering kali memicu kebiasaan
+                scroll tanpa henti (*infinite scrolling*), mengorbankan waktu
+                produktif dan waktu istirahat malam. FomoTracker hadir sebagai
+                solusi alternatif mandiri berbasis kecerdasan buatan.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Section 3: Landasan Ilmiah */}
+        {/* Section 3: Metode & Landasan Ilmiah (Behavioral Analytics, Risk Detection, AI Insight) */}
         <section className="space-y-6">
           <h2 className="text-2xl font-bold font-poppins mb-4 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-secondary" /> Landasan Ilmiah
+            <FileText className="w-5 h-5 text-secondary" /> Metode dan Landasan
+            Ilmiah
           </h2>
           <p className="text-muted text-sm font-poppins font-light mb-6">
-            FomoTracker tidak dibangun atas dasar asumsi belaka, melainkan
-            dirancang berdasarkan studi akademis dan metodologi ilmiah digital
-            wellbeing:
+            FomoTracker dirancang menggunakan pendekatan ilmiah untuk memastikan
+            efektivitas pemantauan dan analisis kebiasaan digital Anda:
           </p>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl border border-border bg-card">
-              <div className="w-10 h-10 rounded-xl bg-accent/25 text-primary flex items-center justify-center mb-4">
-                <Scale className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold font-poppins mb-2">
-                BSMAS Scale
-              </h3>
-              <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                Mengintegrasikan indikator *Bergen Social Media Addiction Scale*
-                (BSMAS) untuk menilai tingkat risiko ketergantungan secara
-                klinis.
-              </p>
-            </div>
-
             <div className="p-6 rounded-2xl border border-border bg-card">
               <div className="w-10 h-10 rounded-xl bg-accent/25 text-primary flex items-center justify-center mb-4">
                 <Brain className="w-5 h-5" />
@@ -122,9 +112,23 @@ export default function Tentang() {
                 Behavioral Analytics
               </h3>
               <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                Penerapan teori psikologi perilaku (*behavioral psychology*)
-                untuk memetakan pemicu (*triggers*) refleks membuka media
-                sosial.
+                Menganalisis indikator perilaku digital utama: durasi
+                penggunaan, frekuensi membuka aplikasi, jam malam, penggunaan
+                nonstop, dan produktivitas.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-border bg-card">
+              <div className="w-10 h-10 rounded-xl bg-accent/25 text-primary flex items-center justify-center mb-4">
+                <Scale className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold font-poppins mb-2">
+                Risk Detection Method
+              </h3>
+              <p className="text-muted text-xs leading-relaxed font-poppins font-light">
+                Mengintegrasikan klasifikasi risiko perilaku (Low, Moderate,
+                High) untuk mendeteksi kecenderungan kecanduan media sosial
+                sejak dini.
               </p>
             </div>
 
@@ -133,11 +137,12 @@ export default function Tentang() {
                 <GraduationCap className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold font-poppins mb-2">
-                Wellbeing Research
+                AI Insight Engine
               </h3>
               <p className="text-muted text-xs leading-relaxed font-poppins font-light">
-                Merujuk pada riset terbaru seputar kesejahteraan digital untuk
-                menyusun rekomendasi personalisasi asisten AI.
+                Mesin analisis cerdas berbasis AI yang memetakan data perilaku
+                mingguan dan merekomendasikan saran kebiasaan sehat secara
+                personal.
               </p>
             </div>
           </div>
@@ -147,11 +152,10 @@ export default function Tentang() {
         <section className="space-y-6">
           <h2 className="text-2xl font-bold font-poppins mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-secondary" /> Kontribusi SDGs
-            PBB
           </h2>
           <div className="space-y-4">
             <div className="p-5 rounded-2xl border border-border bg-card flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 mt-0.5 font-bold font-poppins text-xs">
+              <div className="w-10 h-10 rounded-xl bg-red-50/10 text-red-500 flex items-center justify-center shrink-0 mt-0.5 font-bold font-poppins text-xs">
                 3
               </div>
               <div>
@@ -167,7 +171,7 @@ export default function Tentang() {
             </div>
 
             <div className="p-5 rounded-2xl border border-border bg-card flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5 font-bold font-poppins text-xs">
+              <div className="w-10 h-10 rounded-xl bg-amber-50/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5 font-bold font-poppins text-xs">
                 4
               </div>
               <div>
@@ -183,7 +187,7 @@ export default function Tentang() {
             </div>
 
             <div className="p-5 rounded-2xl border border-border bg-card flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold font-poppins text-xs">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50/10 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold font-poppins text-xs">
                 8
               </div>
               <div>
@@ -207,7 +211,7 @@ export default function Tentang() {
           </div>
           <div>
             <h2 className="text-lg font-bold font-poppins mb-2">
-              Komitmen Privasi Kami
+              Komitmen Privasi
             </h2>
             <p className="text-muted text-xs sm:text-sm leading-relaxed font-poppins font-light mb-4">
               Privasi Anda adalah prioritas mutlak kami. FomoTracker didesain
@@ -237,7 +241,10 @@ export default function Tentang() {
         {/* Section 6: Tim Pengembang */}
         <section className="space-y-6 text-center">
           <h2 className="text-2xl font-bold font-poppins mb-2 flex items-center justify-center gap-2">
-            <Users className="w-5 h-5 text-secondary" /> Tim Pengembang
+            <>
+              <Users className="w-5 h-5 text-secondary" />
+              <span>Tim Pengembang</span>
+            </>
           </h2>
           <p className="text-muted text-sm font-poppins font-light max-w-xl mx-auto mb-8">
             FomoTracker dirancang oleh tim akademisi dan developer berdedikasi

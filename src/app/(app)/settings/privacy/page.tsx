@@ -3,37 +3,16 @@
 import { Download, Eye, EyeOff, ShieldAlert, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { settingsDummy } from "@/lib/databases/dummyData";
 
 export default function PrivacySettingsPage() {
   const router = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleExportJSON = () => {
-    // Generate a mock JSON file and download it
-    const exportData = {
-      username: "Roid Obi",
-      email: "roid@fomotracker.com",
-      created_at: "2026-05-22T10:00:00Z",
-      timezone: "GMT+7",
-      monitored_apps: [
-        { name: "Instagram", platform: "Android", enabled: true },
-        { name: "TikTok", platform: "Both", enabled: true },
-        { name: "YouTube", platform: "Browser", enabled: true },
-      ],
-      hours_configuration: {
-        productive: { start: "08:00", end: "17:00" },
-        bedtime: { start: "22:00", end: "06:00" },
-      },
-      recent_daily_screentime: [
-        { date: "2026-05-23", minutes: 255, behavioral_score: 68 },
-        { date: "2026-05-22", minutes: 280, behavioral_score: 65 },
-        { date: "2026-05-21", minutes: 310, behavioral_score: 60 },
-      ],
-    };
+    const exportData = settingsDummy.privacyExportData;
 
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(exportData, null, 2),
-    )}`;
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(exportData, null, 2))}`;
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", jsonString);
     downloadAnchor.setAttribute("download", "fomotracker_ekspor_data.json");
@@ -43,9 +22,7 @@ export default function PrivacySettingsPage() {
   };
 
   const handleDeleteAccount = () => {
-    alert(
-      "Akun Anda dan semua data pelacakan terkait telah dihapus secara permanen.",
-    );
+    alert("Akun Anda dan semua data pelacakan terkait telah dihapus secara permanen.");
     router.push("/");
   };
 
@@ -58,28 +35,16 @@ export default function PrivacySettingsPage() {
             <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
               <Eye className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-sm text-primary">
-              Data yang Kami Kumpulkan
-            </h3>
+            <h3 className="font-bold text-sm text-primary">Data yang Kami Kumpulkan</h3>
           </div>
           <p className="text-xs text-muted font-light leading-relaxed">
-            FomoTracker berkomitmen penuh terhadap keterbukaan data. Kami hanya
-            mengumpulkan data telemetri penggunaan dasar untuk menyusun skor
-            perilaku Anda:
+            FomoTracker berkomitmen penuh terhadap keterbukaan data. Kami hanya mengumpulkan data telemetri penggunaan dasar untuk menyusun skor perilaku Anda:
           </p>
           <ul className="space-y-2 text-xs text-muted font-light pl-4 list-disc">
             <li>Identitas akun dasar (Nama, email, password terenkripsi).</li>
-            <li>
-              Metadata penggunaan aplikasi (Durasi screen time per aplikasi per
-              jam).
-            </li>
-            <li>
-              Frekuensi pembukaan aplikasi (Berapa kali ikon aplikasi diklik).
-            </li>
-            <li>
-              Konfigurasi personal (Jadwal jam produktif, jam malam, preferensi
-              notifikasi).
-            </li>
+            <li>Metadata penggunaan aplikasi (Durasi screen time per aplikasi per jam).</li>
+            <li>Frekuensi pembukaan aplikasi (Berapa kali ikon aplikasi diklik).</li>
+            <li>Konfigurasi personal (Jadwal jam produktif, jam malam, preferensi notifikasi).</li>
           </ul>
         </div>
 
@@ -89,24 +54,13 @@ export default function PrivacySettingsPage() {
             <div className="p-2.5 rounded-xl bg-red-50 text-red-600 border border-red-100">
               <EyeOff className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-sm text-primary">
-              Data yang TIDAK Kami Kumpulkan
-            </h3>
+            <h3 className="font-bold text-sm text-primary">Data yang TIDAK Kami Kumpulkan</h3>
           </div>
-          <p className="text-xs text-muted font-light leading-relaxed">
-            Privasi Anda adalah hak mutlak. FomoTracker tidak pernah menyentuh
-            atau merekam konten sensitif pribadi Anda:
-          </p>
+          <p className="text-xs text-muted font-light leading-relaxed">Privasi Anda adalah hak mutlak. FomoTracker tidak pernah menyentuh atau merekam konten sensitif pribadi Anda:</p>
           <ul className="space-y-2 text-xs text-muted font-light pl-4 list-disc">
-            <li>
-              Isi pesan percakapan chat (WhatsApp, Telegram, DM Instagram,
-              dll.).
-            </li>
+            <li>Isi pesan percakapan chat (WhatsApp, Telegram, DM Instagram, dll.).</li>
             <li>Password akun media sosial Anda.</li>
-            <li>
-              Foto, video, file dokumen, atau riwayat galeri lokal di ponsel
-              Anda.
-            </li>
+            <li>Foto, video, file dokumen, atau riwayat galeri lokal di ponsel Anda.</li>
             <li>Ketikan keyboard (keystrokes) atau data kamera/mikrofon.</li>
           </ul>
         </div>
@@ -116,10 +70,7 @@ export default function PrivacySettingsPage() {
       <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1 max-w-xl">
           <h3 className="font-bold text-sm text-primary">Ekspor Data Saya</h3>
-          <p className="text-xs text-muted font-light leading-relaxed">
-            Unduh seluruh riwayat penggunaan screen time, skor perilaku, dan
-            preferensi pengaturan akun Anda dalam berkas berformat JSON.
-          </p>
+          <p className="text-xs text-muted font-light leading-relaxed">Unduh seluruh riwayat penggunaan screen time, skor perilaku, dan preferensi pengaturan akun Anda dalam berkas berformat JSON.</p>
         </div>
         <button
           type="button"
@@ -136,13 +87,9 @@ export default function PrivacySettingsPage() {
         <div className="flex items-start gap-4">
           <ShieldAlert className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h3 className="font-bold text-sm text-primary">
-              Zona Bahaya: Hapus Akun & Semua Data
-            </h3>
+            <h3 className="font-bold text-sm text-primary">Zona Bahaya: Hapus Akun & Semua Data</h3>
             <p className="text-xs text-muted font-light leading-relaxed">
-              Tindakan ini akan menghapus akun FomoTracker Anda secara permanen
-              beserta semua data riwayat screen time, analisis perilaku
-              mingguan, dan konfigurasi pelacakan. Tindakan ini tidak dapat
+              Tindakan ini akan menghapus akun FomoTracker Anda secara permanen beserta semua data riwayat screen time, analisis perilaku mingguan, dan konfigurasi pelacakan. Tindakan ini tidak dapat
               dibatalkan.
             </p>
           </div>
@@ -159,9 +106,7 @@ export default function PrivacySettingsPage() {
           </button>
         ) : (
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-red-100 animate-page-enter">
-            <span className="text-xs font-bold text-red-700">
-              Apakah Anda yakin ingin menghapus akun?
-            </span>
+            <span className="text-xs font-bold text-red-700">Apakah Anda yakin ingin menghapus akun?</span>
             <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
               <button
                 type="button"

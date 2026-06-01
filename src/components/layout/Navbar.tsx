@@ -67,6 +67,16 @@ export default function Navbar() {
             >
               Tentang
             </Link>
+            <Link
+              href="/test-get-indicator-mobile"
+              className={`font-poppins transition-colors ${
+                pathname === "/test-get-indicator-mobile"
+                  ? "text-secondary font-semibold"
+                  : "text-primary/80 hover:text-primary"
+              }`}
+            >
+              Test-get-android
+            </Link>
           </nav>
 
           {/* Desktop CTA Button */}
@@ -143,6 +153,17 @@ export default function Navbar() {
               }`}
             >
               Tentang
+            </Link>
+            <Link
+              href="/test-get-indicator-mobile"
+              onClick={handleLinkClick}
+              className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
+                pathname === "/test-get-indicator-mobile"
+                  ? "text-secondary font-semibold bg-muted-light/55"
+                  : "hover:text-secondary"
+              }`}
+            >
+              Test-get-android
             </Link>
             <Link
               href="/auth/login"

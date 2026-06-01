@@ -10,6 +10,7 @@ export type UsageStatInput = {
   openFrequency?: number;
   midnightDurationSeconds?: number;
   productiveHourDurationSeconds?: number;
+  maxContinuousSeconds?: number;
 };
 
 export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
@@ -73,6 +74,9 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
             productiveHourDurationSeconds:
               stat.productiveHourDurationSeconds ||
               existingDailyStat.productiveHourDurationSeconds,
+            maxContinuousSeconds:
+              stat.maxContinuousSeconds ||
+              existingDailyStat.maxContinuousSeconds,
           })
           .where(eq(dailyStats.id, existingDailyStat.id));
       } else {
@@ -86,7 +90,7 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
           midnightDurationSeconds: stat.midnightDurationSeconds || 0,
           productiveHourDurationSeconds:
             stat.productiveHourDurationSeconds || 0,
-          maxContinuousSeconds: 0,
+          maxContinuousSeconds: stat.maxContinuousSeconds || 0,
           peakActiveHour: 0,
         });
       }

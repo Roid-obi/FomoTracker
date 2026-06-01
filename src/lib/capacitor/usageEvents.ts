@@ -73,6 +73,7 @@ export function analyzeUsageEvents(
       frequency: number;
       midnightDurationSeconds: number;
       productiveHourDurationSeconds: number;
+      maxContinuousSeconds: number;
       lastResumedTime: number | null;
     }
   > = {};
@@ -83,6 +84,7 @@ export function analyzeUsageEvents(
         frequency: 0,
         midnightDurationSeconds: 0,
         productiveHourDurationSeconds: 0,
+        maxContinuousSeconds: 0,
         lastResumedTime: null,
       };
     }
@@ -95,6 +97,16 @@ export function analyzeUsageEvents(
     } else if (event.eventType === 2 && session.lastResumedTime !== null) {
       const resumedTime = session.lastResumedTime;
       const pausedTime = event.timeStamp;
+
+      // Calculate session duration in seconds
+      const sessionDurationSeconds = Math.max(
+        0,
+        Math.floor((pausedTime - resumedTime) / 1000),
+      );
+      session.maxContinuousSeconds = Math.max(
+        session.maxContinuousSeconds,
+        sessionDurationSeconds,
+      );
 
       const resumedDate = new Date(resumedTime);
       const pausedDate = new Date(pausedTime);

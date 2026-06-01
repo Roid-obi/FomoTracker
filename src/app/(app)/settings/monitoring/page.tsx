@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  Briefcase,
-  Check,
-  Laptop,
-  Moon,
-  Plus,
-  ShieldAlert,
-  Smartphone,
-  Trash2,
-} from "lucide-react";
+import { Briefcase, Check, Laptop, Moon, Plus, ShieldAlert, Smartphone, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { monitoringSettingsDummy } from "@/lib/databases/dummyData";
 
 interface MonitoredApp {
   id: string;
@@ -21,80 +13,25 @@ interface MonitoredApp {
   color: string;
 }
 
-const INITIAL_APPS: MonitoredApp[] = [
-  {
-    id: "instagram",
-    name: "Instagram",
-    platform: "Android",
-    enabled: true,
-    category: "Sosial Media",
-    color: "bg-pink-600",
-  },
-  {
-    id: "tiktok",
-    name: "TikTok",
-    platform: "Both",
-    enabled: true,
-    category: "Sosial Media",
-    color: "bg-black",
-  },
-  {
-    id: "youtube",
-    name: "YouTube",
-    platform: "Browser",
-    enabled: true,
-    category: "Hiburan",
-    color: "bg-red-600",
-  },
-  {
-    id: "whatsapp",
-    name: "WhatsApp",
-    platform: "Android",
-    enabled: false,
-    category: "Chatting",
-    color: "bg-green-600",
-  },
-];
-
-const AVAILABLE_ADD_APPS = [
-  {
-    id: "x",
-    name: "X (Twitter)",
-    category: "Sosial Media",
-    color: "bg-zinc-800",
-  },
-  {
-    id: "facebook",
-    name: "Facebook",
-    category: "Sosial Media",
-    color: "bg-blue-600",
-  },
-  { id: "reddit", name: "Reddit", category: "Diskusi", color: "bg-orange-500" },
-];
+const INITIAL_APPS: MonitoredApp[] = monitoringSettingsDummy.initialApps as MonitoredApp[];
+const AVAILABLE_ADD_APPS = monitoringSettingsDummy.availableAddApps;
 
 export default function MonitoringSettingsPage() {
   // App monitoring state
-  const [monitoredApps, setMonitoredApps] =
-    useState<MonitoredApp[]>(INITIAL_APPS);
+  const [monitoredApps, setMonitoredApps] = useState<MonitoredApp[]>(INITIAL_APPS);
   const [isAdding, setIsAdding] = useState(false);
   const [newAppName, setNewAppName] = useState("x");
-  const [newAppPlatform, setNewAppPlatform] = useState<"Android" | "Browser">(
-    "Android",
-  );
+  const [newAppPlatform, setNewAppPlatform] = useState<"Android" | "Browser">("Android");
 
   // Hours monitoring state
-  const [productiveStart, setProductiveStart] = useState("08:00");
-  const [productiveEnd, setProductiveEnd] = useState("17:00");
-  const [bedtimeStart, setBedtimeStart] = useState("22:00");
-  const [bedtimeEnd, setBedtimeEnd] = useState("06:00");
+  const [productiveStart, setProductiveStart] = useState(monitoringSettingsDummy.hours.productiveStart);
+  const [productiveEnd, setProductiveEnd] = useState(monitoringSettingsDummy.hours.productiveEnd);
+  const [bedtimeStart, setBedtimeStart] = useState(monitoringSettingsDummy.hours.bedtimeStart);
+  const [bedtimeEnd, setBedtimeEnd] = useState(monitoringSettingsDummy.hours.bedtimeEnd);
   const [hoursSaved, setHoursSaved] = useState(false);
 
   const handleToggleEnable = (id: string) => {
-    setMonitoredApps((prev) =>
-      prev.map((app) =>
-        app.id === id ? { ...app, enabled: !app.enabled } : app,
-      ),
-    );
+    setMonitoredApps((prev) => prev.map((app) => (app.id === id ? { ...app, enabled: !app.enabled } : app)));
   };
 
   const handleDeleteApp = (id: string) => {
@@ -106,11 +43,7 @@ export default function MonitoringSettingsPage() {
     const sourceApp = AVAILABLE_ADD_APPS.find((a) => a.id === newAppName);
     if (!sourceApp) return;
 
-    const exists = monitoredApps.find(
-      (app) =>
-        app.id === sourceApp.id &&
-        (app.platform === newAppPlatform || app.platform === "Both"),
-    );
+    const exists = monitoredApps.find((app) => app.id === sourceApp.id && (app.platform === newAppPlatform || app.platform === "Both"));
     if (exists) {
       alert("Aplikasi pada platform ini sudah ditambahkan!");
       return;
@@ -141,12 +74,8 @@ export default function MonitoringSettingsPage() {
       <div className="lg:col-span-7 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="font-bold text-base text-primary">
-              Aplikasi Dipantau
-            </h3>
-            <p className="text-xs text-muted font-light mt-0.5">
-              Daftar media sosial yang diamati oleh FomoTracker
-            </p>
+            <h3 className="font-bold text-base text-primary">Aplikasi Dipantau</h3>
+            <p className="text-xs text-muted font-light mt-0.5">Daftar media sosial yang diamati oleh FomoTracker</p>
           </div>
           <button
             type="button"
@@ -160,19 +89,11 @@ export default function MonitoringSettingsPage() {
 
         {/* Add app form panel */}
         {isAdding && (
-          <form
-            onSubmit={handleAddApp}
-            className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4 animate-page-enter"
-          >
-            <h4 className="font-bold text-xs text-primary uppercase tracking-wider">
-              Tambah Pelacakan Baru
-            </h4>
+          <form onSubmit={handleAddApp} className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4 animate-page-enter">
+            <h4 className="font-bold text-xs text-primary uppercase tracking-wider">Tambah Pelacakan Baru</h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label
-                  htmlFor="add-app-select"
-                  className="block text-[10px] font-semibold text-muted mb-1"
-                >
+                <label htmlFor="add-app-select" className="block text-[10px] font-semibold text-muted mb-1">
                   Pilih Aplikasi
                 </label>
                 <select
@@ -189,10 +110,7 @@ export default function MonitoringSettingsPage() {
                 </select>
               </div>
               <div>
-                <label
-                  htmlFor="add-platform-select"
-                  className="block text-[10px] font-semibold text-muted mb-1"
-                >
+                <label htmlFor="add-platform-select" className="block text-[10px] font-semibold text-muted mb-1">
                   Platform
                 </label>
                 <select
@@ -206,10 +124,7 @@ export default function MonitoringSettingsPage() {
                 </select>
               </div>
               <div className="flex items-end">
-                <button
-                  type="submit"
-                  className="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-secondary transition-all cursor-pointer shadow-xs"
-                >
+                <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-secondary transition-all cursor-pointer shadow-xs">
                   Tambahkan
                 </button>
               </div>
@@ -222,35 +137,23 @@ export default function MonitoringSettingsPage() {
           {monitoredApps.map((app) => (
             <div
               key={`${app.id}-${app.platform}`}
-              className={`p-4 rounded-3xl border bg-card flex items-center justify-between gap-3 transition-all shadow-xs ${
-                app.enabled ? "border-border" : "border-border/60 opacity-60"
-              }`}
+              className={`p-4 rounded-3xl border bg-card flex items-center justify-between gap-3 transition-all shadow-xs ${app.enabled ? "border-border" : "border-border/60 opacity-60"}`}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 ${app.color}`}
-                >
-                  {app.name.substring(0, 2)}
-                </div>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 ${app.color}`}>{app.name.substring(0, 2)}</div>
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="text-xs sm:text-sm font-bold text-primary truncate leading-none">
-                      {app.name}
-                    </h4>
-                    <span className="text-[8px] text-muted bg-muted-light px-1 rounded-md font-light leading-none">
-                      {app.category}
-                    </span>
+                    <h4 className="text-xs sm:text-sm font-bold text-primary truncate leading-none">{app.name}</h4>
+                    <span className="text-[8px] text-muted bg-muted-light px-1 rounded-md font-light leading-none">{app.category}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {(app.platform === "Android" ||
-                      app.platform === "Both") && (
+                    {(app.platform === "Android" || app.platform === "Both") && (
                       <span className="inline-flex items-center gap-0.5 text-[8px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-1 rounded-md">
                         <Smartphone className="w-2.5 h-2.5" />
                         <span>Android</span>
                       </span>
                     )}
-                    {(app.platform === "Browser" ||
-                      app.platform === "Both") && (
+                    {(app.platform === "Browser" || app.platform === "Both") && (
                       <span className="inline-flex items-center gap-0.5 text-[8px] font-semibold text-teal-700 bg-teal-50 border border-teal-100 px-1 rounded-md">
                         <Laptop className="w-2.5 h-2.5" />
                         <span>Browser</span>
@@ -262,21 +165,10 @@ export default function MonitoringSettingsPage() {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => handleToggleEnable(app.id)}
-                  className={`w-9 h-5 rounded-full transition-all relative ${app.enabled ? "bg-primary" : "bg-border"}`}
-                >
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${app.enabled ? "right-0.75" : "left-0.75"}`}
-                  />
+                <button type="button" onClick={() => handleToggleEnable(app.id)} className={`w-9 h-5 rounded-full transition-all relative ${app.enabled ? "bg-primary" : "bg-border"}`}>
+                  <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${app.enabled ? "right-0.75" : "left-0.75"}`} />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteApp(app.id)}
-                  className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-all cursor-pointer"
-                  title="Hapus"
-                >
+                <button type="button" onClick={() => handleDeleteApp(app.id)} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-all cursor-pointer" title="Hapus">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -288,13 +180,9 @@ export default function MonitoringSettingsPage() {
         <div className="bg-muted-light/35 border border-border rounded-3xl p-5 flex gap-3.5 items-start">
           <ShieldAlert className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="text-xs font-bold text-primary">
-              Catatan Integrasi Seluler
-            </h4>
+            <h4 className="text-xs font-bold text-primary">Catatan Integrasi Seluler</h4>
             <p className="text-[11px] text-muted font-light leading-relaxed">
-              Untuk pelacakan aplikasi seluler (badge Android), pastikan Anda
-              telah memasang aplikasi FomoTracker di ponsel Android Anda dan
-              memberikan izin "Akses Penggunaan" (Usage Stats API) agar
+              Untuk pelacakan aplikasi seluler (badge Android), pastikan Anda telah memasang aplikasi FomoTracker di ponsel Android Anda dan memberikan izin "Akses Penggunaan" (Usage Stats API) agar
               sinkronisasi data screen time berjalan otomatis.
             </p>
           </div>
@@ -306,9 +194,7 @@ export default function MonitoringSettingsPage() {
         <form onSubmit={handleHoursSave} className="space-y-6">
           <div>
             <h3 className="font-bold text-base text-primary">Jam Pemantauan</h3>
-            <p className="text-xs text-muted font-light mt-0.5">
-              Atur jadwal produktif dan istirahat Anda
-            </p>
+            <p className="text-xs text-muted font-light mt-0.5">Atur jadwal produktif dan istirahat Anda</p>
           </div>
 
           <div className="space-y-4">
@@ -319,20 +205,13 @@ export default function MonitoringSettingsPage() {
                   <Briefcase className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-primary">
-                    Jam Produktif
-                  </h4>
-                  <p className="text-[10px] text-muted font-light">
-                    Waktu fokus bekerja atau belajar
-                  </p>
+                  <h4 className="font-bold text-xs sm:text-sm text-primary">Jam Produktif</h4>
+                  <p className="text-[10px] text-muted font-light">Waktu fokus bekerja atau belajar</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label
-                    htmlFor="prod-start"
-                    className="block text-[10px] font-semibold text-muted mb-1"
-                  >
+                  <label htmlFor="prod-start" className="block text-[10px] font-semibold text-muted mb-1">
                     Mulai Jam
                   </label>
                   <input
@@ -344,10 +223,7 @@ export default function MonitoringSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="prod-end"
-                    className="block text-[10px] font-semibold text-muted mb-1"
-                  >
+                  <label htmlFor="prod-end" className="block text-[10px] font-semibold text-muted mb-1">
                     Selesai Jam
                   </label>
                   <input
@@ -359,10 +235,7 @@ export default function MonitoringSettingsPage() {
                   />
                 </div>
               </div>
-              <p className="text-[10px] text-muted font-light leading-relaxed">
-                Penggunaan media sosial di jam ini akan memicu notifikasi
-                **Focus Reminder**.
-              </p>
+              <p className="text-[10px] text-muted font-light leading-relaxed">Penggunaan media sosial di jam ini akan memicu notifikasi **Focus Reminder**.</p>
             </div>
 
             {/* Jam Malam */}
@@ -372,20 +245,13 @@ export default function MonitoringSettingsPage() {
                   <Moon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-primary">
-                    Jam Malam (Tidur)
-                  </h4>
-                  <p className="text-[10px] text-muted font-light">
-                    Jadwal istirahat reguler Anda
-                  </p>
+                  <h4 className="font-bold text-xs sm:text-sm text-primary">Jam Malam (Tidur)</h4>
+                  <p className="text-[10px] text-muted font-light">Jadwal istirahat reguler Anda</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label
-                    htmlFor="bedtime-start"
-                    className="block text-[10px] font-semibold text-muted mb-1"
-                  >
+                  <label htmlFor="bedtime-start" className="block text-[10px] font-semibold text-muted mb-1">
                     Mulai Jam
                   </label>
                   <input
@@ -397,10 +263,7 @@ export default function MonitoringSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="bedtime-end"
-                    className="block text-[10px] font-semibold text-muted mb-1"
-                  >
+                  <label htmlFor="bedtime-end" className="block text-[10px] font-semibold text-muted mb-1">
                     Selesai Jam
                   </label>
                   <input
@@ -412,10 +275,7 @@ export default function MonitoringSettingsPage() {
                   />
                 </div>
               </div>
-              <p className="text-[10px] text-muted font-light leading-relaxed">
-                Membuka media sosial di jam ini akan memicu notifikasi
-                **Midnight Alert**.
-              </p>
+              <p className="text-[10px] text-muted font-light leading-relaxed">Membuka media sosial di jam ini akan memicu notifikasi **Midnight Alert**.</p>
             </div>
           </div>
 
@@ -431,10 +291,7 @@ export default function MonitoringSettingsPage() {
                 <span>Berlaku segera di sesi berikutnya</span>
               </div>
             )}
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-secondary transition-all cursor-pointer shadow-xs shrink-0"
-            >
+            <button type="submit" className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-secondary transition-all cursor-pointer shadow-xs shrink-0">
               Simpan Jam
             </button>
           </div>

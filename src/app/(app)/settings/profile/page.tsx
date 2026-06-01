@@ -5,6 +5,7 @@ import { Camera, Check, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as zod from "zod";
+import { settingsDummy } from "@/lib/databases/dummyData";
 
 // Zod Schemas
 const profileSchema = zod.object({
@@ -39,8 +40,8 @@ export default function ProfileSettingsPage() {
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: "Roid Obi",
-      email: "roid@fomotracker.com",
+      name: settingsDummy.profile.name,
+      email: settingsDummy.profile.email,
     },
   });
 
@@ -87,29 +88,14 @@ export default function ProfileSettingsPage() {
         <h3 className="font-bold text-sm text-primary mb-6">Foto Profil</h3>
         <div className="relative group mb-4">
           <div className="w-28 h-28 rounded-full bg-muted-light flex items-center justify-center overflow-hidden border-2 border-border">
-            {avatar ? (
-              <img
-                src={avatar}
-                alt="Avatar Preview"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-3xl font-black text-primary">R</span>
-            )}
+            {avatar ? <img src={avatar} alt="Avatar Preview" className="w-full h-full object-cover" /> : <span className="text-3xl font-black text-primary">R</span>}
           </div>
           <label className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer hover:bg-secondary transition-all shadow-md">
             <Camera className="w-4 h-4" />
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarChange}
-            />
+            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           </label>
         </div>
-        <p className="text-xs text-muted font-light leading-relaxed max-w-xs">
-          Unggah file JPG, PNG atau GIF. Maksimal ukuran 2MB.
-        </p>
+        <p className="text-xs text-muted font-light leading-relaxed max-w-xs">Unggah file JPG, PNG atau GIF. Maksimal ukuran 2MB.</p>
       </div>
 
       {/* Main Forms Grid */}
@@ -121,15 +107,9 @@ export default function ProfileSettingsPage() {
             <span>Detail Profil</span>
           </h3>
 
-          <form
-            onSubmit={handleProfileSubmit(onProfileSave)}
-            className="space-y-4"
-          >
+          <form onSubmit={handleProfileSubmit(onProfileSave)} className="space-y-4">
             <div>
-              <label
-                htmlFor="profile-name"
-                className="block text-xs font-semibold text-muted mb-1.5"
-              >
+              <label htmlFor="profile-name" className="block text-xs font-semibold text-muted mb-1.5">
                 Nama Lengkap
               </label>
               <div className="relative">
@@ -141,18 +121,11 @@ export default function ProfileSettingsPage() {
                 />
                 <User className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
               </div>
-              {profileErrors.name && (
-                <p className="text-[10px] text-red-500 mt-1">
-                  {profileErrors.name.message}
-                </p>
-              )}
+              {profileErrors.name && <p className="text-[10px] text-red-500 mt-1">{profileErrors.name.message}</p>}
             </div>
 
             <div>
-              <label
-                htmlFor="profile-email"
-                className="block text-xs font-semibold text-muted mb-1.5"
-              >
+              <label htmlFor="profile-email" className="block text-xs font-semibold text-muted mb-1.5">
                 Email
               </label>
               <div className="relative">
@@ -164,11 +137,7 @@ export default function ProfileSettingsPage() {
                 />
                 <Mail className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
               </div>
-              {profileErrors.email && (
-                <p className="text-[10px] text-red-500 mt-1">
-                  {profileErrors.email.message}
-                </p>
-              )}
+              {profileErrors.email && <p className="text-[10px] text-red-500 mt-1">{profileErrors.email.message}</p>}
             </div>
 
             <div className="flex items-center justify-between pt-2">
@@ -197,15 +166,9 @@ export default function ProfileSettingsPage() {
             <span>Ganti Password</span>
           </h3>
 
-          <form
-            onSubmit={handlePasswordSubmit(onPasswordSave)}
-            className="space-y-4"
-          >
+          <form onSubmit={handlePasswordSubmit(onPasswordSave)} className="space-y-4">
             <div>
-              <label
-                htmlFor="pwd-old"
-                className="block text-xs font-semibold text-muted mb-1.5"
-              >
+              <label htmlFor="pwd-old" className="block text-xs font-semibold text-muted mb-1.5">
                 Password Lama
               </label>
               <div className="relative">
@@ -217,19 +180,12 @@ export default function ProfileSettingsPage() {
                 />
                 <Lock className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
               </div>
-              {passwordErrors.oldPassword && (
-                <p className="text-[10px] text-red-500 mt-1">
-                  {passwordErrors.oldPassword.message}
-                </p>
-              )}
+              {passwordErrors.oldPassword && <p className="text-[10px] text-red-500 mt-1">{passwordErrors.oldPassword.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label
-                  htmlFor="pwd-new"
-                  className="block text-xs font-semibold text-muted mb-1.5"
-                >
+                <label htmlFor="pwd-new" className="block text-xs font-semibold text-muted mb-1.5">
                   Password Baru
                 </label>
                 <div className="relative">
@@ -241,18 +197,11 @@ export default function ProfileSettingsPage() {
                   />
                   <Lock className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
                 </div>
-                {passwordErrors.newPassword && (
-                  <p className="text-[10px] text-red-500 mt-1">
-                    {passwordErrors.newPassword.message}
-                  </p>
-                )}
+                {passwordErrors.newPassword && <p className="text-[10px] text-red-500 mt-1">{passwordErrors.newPassword.message}</p>}
               </div>
 
               <div>
-                <label
-                  htmlFor="pwd-confirm"
-                  className="block text-xs font-semibold text-muted mb-1.5"
-                >
+                <label htmlFor="pwd-confirm" className="block text-xs font-semibold text-muted mb-1.5">
                   Konfirmasi Password Baru
                 </label>
                 <div className="relative">
@@ -264,11 +213,7 @@ export default function ProfileSettingsPage() {
                   />
                   <Lock className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
                 </div>
-                {passwordErrors.confirmPassword && (
-                  <p className="text-[10px] text-red-500 mt-1">
-                    {passwordErrors.confirmPassword.message}
-                  </p>
-                )}
+                {passwordErrors.confirmPassword && <p className="text-[10px] text-red-500 mt-1">{passwordErrors.confirmPassword.message}</p>}
               </div>
             </div>
 

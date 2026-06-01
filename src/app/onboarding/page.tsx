@@ -1,87 +1,26 @@
 "use client";
 
-import {
-  ArrowRight,
-  Bell,
-  Briefcase,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Laptop,
-  Moon,
-  Smartphone,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Bell, Briefcase, Check, ChevronLeft, ChevronRight, Eye, Laptop, Moon, Smartphone, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { onboardingDummy } from "@/lib/databases/dummyData";
 
-// Predefined available apps for monitoring
-const AVAILABLE_APPS = [
-  {
-    id: "instagram",
-    name: "Instagram",
-    category: "Sosial Media",
-    color: "from-pink-500 to-purple-600",
-  },
-  {
-    id: "tiktok",
-    name: "TikTok",
-    category: "Sosial Media",
-    color: "from-gray-900 to-black",
-  },
-  {
-    id: "youtube",
-    name: "YouTube",
-    category: "Hiburan",
-    color: "from-red-600 to-red-700",
-  },
-  {
-    id: "x",
-    name: "X (Twitter)",
-    category: "Sosial Media",
-    color: "from-zinc-800 to-zinc-900",
-  },
-  {
-    id: "whatsapp",
-    name: "WhatsApp",
-    category: "Chatting",
-    color: "from-green-500 to-green-600",
-  },
-  {
-    id: "facebook",
-    name: "Facebook",
-    category: "Sosial Media",
-    color: "from-blue-600 to-blue-700",
-  },
-];
+const AVAILABLE_APPS = onboardingDummy.availableApps;
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
   // Form States
-  const [selectedApps, setSelectedApps] = useState<string[]>([
-    "instagram",
-    "tiktok",
-  ]);
-  const [productiveStart, setProductiveStart] = useState("08:00");
-  const [productiveEnd, setProductiveEnd] = useState("17:00");
-  const [bedtimeStart, setBedtimeStart] = useState("22:00");
-  const [bedtimeEnd, setBedtimeEnd] = useState("06:00");
-  const [notifications, setNotifications] = useState({
-    usageWarning: true,
-    focusReminder: true,
-    midnightAlert: true,
-    continuousUsage: false,
-  });
+  const [selectedApps, setSelectedApps] = useState<string[]>(onboardingDummy.selectedApps);
+  const [productiveStart, setProductiveStart] = useState(onboardingDummy.productiveStart);
+  const [productiveEnd, setProductiveEnd] = useState(onboardingDummy.productiveEnd);
+  const [bedtimeStart, setBedtimeStart] = useState(onboardingDummy.bedtimeStart);
+  const [bedtimeEnd, setBedtimeEnd] = useState(onboardingDummy.bedtimeEnd);
+  const [notifications, setNotifications] = useState(onboardingDummy.notifications);
 
   const handleToggleApp = (appId: string) => {
-    setSelectedApps((prev) =>
-      prev.includes(appId)
-        ? prev.filter((id) => id !== appId)
-        : [...prev, appId],
-    );
+    setSelectedApps((prev) => (prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId]));
   };
 
   const handleToggleNotification = (key: keyof typeof notifications) => {
@@ -110,10 +49,7 @@ export default function OnboardingPage() {
     return (
       <div className="flex items-center gap-1.5 mb-8">
         {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-primary" : "bg-muted-light"}`}
-          />
+          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-primary" : "bg-muted-light"}`} />
         ))}
       </div>
     );
@@ -131,21 +67,14 @@ export default function OnboardingPage() {
               <Sparkles className="w-10 h-10 text-primary" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-primary tracking-tight">
-                Selamat Datang di FomoTracker
-              </h1>
+              <h1 className="text-3xl font-bold text-primary tracking-tight">Selamat Datang di FomoTracker</h1>
               <p className="text-muted font-light leading-relaxed max-w-md mx-auto text-sm">
-                Asisten kesehatan digital Anda. Kami membantu Anda memantau
-                kebiasaan screen time, meningkatkan produktivitas, serta
-                melindungi kualitas tidur malam Anda.
+                Asisten kesehatan digital Anda. Kami membantu Anda memantau kebiasaan screen time, meningkatkan produktivitas, serta melindungi kualitas tidur malam Anda.
               </p>
             </div>
             <div className="bg-muted-light/45 rounded-2xl p-4 border border-border flex items-center gap-3 text-left">
               <Laptop className="w-5 h-5 text-secondary shrink-0" />
-              <p className="text-xs text-muted font-light">
-                Mulai konfigurasi pemantauan Anda untuk menyesuaikan preferensi
-                pelacakan.
-              </p>
+              <p className="text-xs text-muted font-light">Mulai konfigurasi pemantauan Anda untuk menyesuaikan preferensi pelacakan.</p>
             </div>
             <button
               type="button"
@@ -162,20 +91,13 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-primary">
-                Monitoring Setup
-              </h2>
-              <p className="text-xs text-muted font-light">
-                Pilih aplikasi yang ingin dipantau serta atur jadwal harian
-                Anda.
-              </p>
+              <h2 className="text-xl font-bold text-primary">Monitoring Setup</h2>
+              <p className="text-xs text-muted font-light">Pilih aplikasi yang ingin dipantau serta atur jadwal harian Anda.</p>
             </div>
 
             {/* Apps selection list */}
             <div className="space-y-2">
-              <span className="block text-xs font-bold text-muted uppercase tracking-wider">
-                Aplikasi yang Dipantau
-              </span>
+              <span className="block text-xs font-bold text-muted uppercase tracking-wider">Aplikasi yang Dipantau</span>
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
                 {AVAILABLE_APPS.map((app) => {
                   const isSelected = selectedApps.includes(app.id);
@@ -185,26 +107,16 @@ export default function OnboardingPage() {
                       key={app.id}
                       onClick={() => handleToggleApp(app.id)}
                       className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-muted-light/35"
-                          : "border-border hover:border-muted hover:bg-muted-light/10"
+                        isSelected ? "border-primary bg-muted-light/35" : "border-border hover:border-muted hover:bg-muted-light/10"
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <div
-                          className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${app.color} flex items-center justify-center text-white text-[10px] font-bold`}
-                        >
-                          {app.name.substring(0, 2)}
-                        </div>
-                        <span className="font-semibold text-primary text-xs truncate max-w-[80px]">
-                          {app.name}
-                        </span>
+                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${app.color} flex items-center justify-center text-white text-[10px] font-bold`}>{app.name.substring(0, 2)}</div>
+                        <span className="font-semibold text-primary text-xs truncate max-w-[80px]">{app.name}</span>
                       </div>
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                          isSelected
-                            ? "bg-primary border-primary text-white"
-                            : "border-border text-transparent"
+                          isSelected ? "bg-primary border-primary text-white" : "border-border text-transparent"
                         }`}
                       >
                         <Check className="w-2.5 h-2.5" />
@@ -221,16 +133,11 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">
-                    Jam Produktif
-                  </span>
+                  <span className="text-xs font-bold text-primary">Jam Produktif</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label
-                      htmlFor="productive-start"
-                      className="block text-[9px] font-semibold text-muted uppercase mb-1"
-                    >
+                    <label htmlFor="productive-start" className="block text-[9px] font-semibold text-muted uppercase mb-1">
                       Mulai
                     </label>
                     <input
@@ -242,10 +149,7 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="productive-end"
-                      className="block text-[9px] font-semibold text-muted uppercase mb-1"
-                    >
+                    <label htmlFor="productive-end" className="block text-[9px] font-semibold text-muted uppercase mb-1">
                       Selesai
                     </label>
                     <input
@@ -257,25 +161,18 @@ export default function OnboardingPage() {
                     />
                   </div>
                 </div>
-                <p className="text-[10px] text-muted font-light leading-relaxed">
-                  Mendeteksi aktivitas media sosial di jam belajar/fokus.
-                </p>
+                <p className="text-[10px] text-muted font-light leading-relaxed">Mendeteksi aktivitas media sosial di jam belajar/fokus.</p>
               </div>
 
               {/* Jam Malam */}
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Moon className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">
-                    Jam Malam
-                  </span>
+                  <span className="text-xs font-bold text-primary">Jam Malam</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label
-                      htmlFor="bedtime-start"
-                      className="block text-[9px] font-semibold text-muted uppercase mb-1"
-                    >
+                    <label htmlFor="bedtime-start" className="block text-[9px] font-semibold text-muted uppercase mb-1">
                       Mulai
                     </label>
                     <input
@@ -287,10 +184,7 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="bedtime-end"
-                      className="block text-[9px] font-semibold text-muted uppercase mb-1"
-                    >
+                    <label htmlFor="bedtime-end" className="block text-[9px] font-semibold text-muted uppercase mb-1">
                       Selesai
                     </label>
                     <input
@@ -302,10 +196,7 @@ export default function OnboardingPage() {
                     />
                   </div>
                 </div>
-                <p className="text-[10px] text-muted font-light leading-relaxed">
-                  Mendeteksi scrolling larut malam yang mengganggu istirahat
-                  tidur.
-                </p>
+                <p className="text-[10px] text-muted font-light leading-relaxed">Mendeteksi scrolling larut malam yang mengganggu istirahat tidur.</p>
               </div>
             </div>
 
@@ -334,96 +225,68 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-primary">
-                Notification Setup
-              </h2>
-              <p className="text-xs text-muted font-light">
-                Sesuaikan jenis pemberitahuan cerdas dari FomoTracker.
-              </p>
+              <h2 className="text-xl font-bold text-primary">Notification Setup</h2>
+              <p className="text-xs text-muted font-light">Sesuaikan jenis pemberitahuan cerdas dari FomoTracker.</p>
             </div>
 
             <div className="space-y-2.5">
               {/* Option 1: Usage Warning */}
               <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-semibold text-primary text-xs sm:text-sm">
-                    Usage Warning
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted font-light">
-                    Peringatan saat hampir melewati batas harian.
-                  </p>
+                  <h3 className="font-semibold text-primary text-xs sm:text-sm">Usage Warning</h3>
+                  <p className="text-[10px] sm:text-xs text-muted font-light">Peringatan saat hampir melewati batas harian.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("usageWarning")}
                   className={`w-10 h-5.5 rounded-full transition-all relative shrink-0 ${notifications.usageWarning ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.usageWarning ? "right-0.75" : "left-0.75"}`}
-                  />
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.usageWarning ? "right-0.75" : "left-0.75"}`} />
                 </button>
               </div>
 
               {/* Option 2: Focus Reminder */}
               <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-semibold text-primary text-xs sm:text-sm">
-                    Focus Reminder
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted font-light">
-                    Pengingat fokus saat membuka medsos di jam kerja.
-                  </p>
+                  <h3 className="font-semibold text-primary text-xs sm:text-sm">Focus Reminder</h3>
+                  <p className="text-[10px] sm:text-xs text-muted font-light">Pengingat fokus saat membuka medsos di jam kerja.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("focusReminder")}
                   className={`w-10 h-5.5 rounded-full transition-all relative shrink-0 ${notifications.focusReminder ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.focusReminder ? "right-0.75" : "left-0.75"}`}
-                  />
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.focusReminder ? "right-0.75" : "left-0.75"}`} />
                 </button>
               </div>
 
               {/* Option 3: Midnight Alert */}
               <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-semibold text-primary text-xs sm:text-sm">
-                    Midnight Alert
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted font-light">
-                    Peringatan tegas saat bermain HP larut malam.
-                  </p>
+                  <h3 className="font-semibold text-primary text-xs sm:text-sm">Midnight Alert</h3>
+                  <p className="text-[10px] sm:text-xs text-muted font-light">Peringatan tegas saat bermain HP larut malam.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("midnightAlert")}
                   className={`w-10 h-5.5 rounded-full transition-all relative shrink-0 ${notifications.midnightAlert ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.midnightAlert ? "right-0.75" : "left-0.75"}`}
-                  />
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.midnightAlert ? "right-0.75" : "left-0.75"}`} />
                 </button>
               </div>
 
               {/* Option 4: Continuous Usage */}
               <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-semibold text-primary text-xs sm:text-sm">
-                    Continuous Usage Reminder
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted font-light">
-                    Peringatan saat menggunakan HP nonstop tanpa jeda.
-                  </p>
+                  <h3 className="font-semibold text-primary text-xs sm:text-sm">Continuous Usage Reminder</h3>
+                  <p className="text-[10px] sm:text-xs text-muted font-light">Peringatan saat menggunakan HP nonstop tanpa jeda.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleToggleNotification("continuousUsage")}
                   className={`w-10 h-5.5 rounded-full transition-all relative shrink-0 ${notifications.continuousUsage ? "bg-primary" : "bg-border"}`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.continuousUsage ? "right-0.75" : "left-0.75"}`}
-                  />
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${notifications.continuousUsage ? "right-0.75" : "left-0.75"}`} />
                 </button>
               </div>
             </div>
@@ -456,26 +319,17 @@ export default function OnboardingPage() {
               <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-100">
                 <Check className="w-6 h-6" />
               </div>
-              <h2 className="text-2xl font-bold text-primary">
-                Setup Selesai!
-              </h2>
-              <p className="text-xs text-muted font-light leading-relaxed">
-                Berikut ringkasan preferensi pemantauan digital Anda.
-              </p>
+              <h2 className="text-2xl font-bold text-primary">Setup Selesai!</h2>
+              <p className="text-xs text-muted font-light leading-relaxed">Berikut ringkasan preferensi pemantauan digital Anda.</p>
             </div>
 
             {/* Config Summary Cards */}
             <div className="space-y-3 p-5 rounded-2xl border border-border bg-muted-light/10">
               <div className="flex justify-between items-center text-xs pb-2.5 border-b border-border">
-                <span className="font-semibold text-muted">
-                  Aplikasi Dipantau
-                </span>
+                <span className="font-semibold text-muted">Aplikasi Dipantau</span>
                 <div className="flex gap-1 flex-wrap justify-end max-w-[200px]">
                   {selectedApps.map((app) => (
-                    <span
-                      key={app}
-                      className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase"
-                    >
+                    <span key={app} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase">
                       {app}
                     </span>
                   ))}
@@ -494,30 +348,12 @@ export default function OnboardingPage() {
                 </span>
               </div>
               <div className="flex justify-between items-start text-xs">
-                <span className="font-semibold text-muted">
-                  Notifikasi Aktif
-                </span>
+                <span className="font-semibold text-muted">Notifikasi Aktif</span>
                 <div className="flex flex-col items-end gap-0.5">
-                  {notifications.usageWarning && (
-                    <span className="text-[9px] text-emerald-600 font-semibold">
-                      ✓ Usage Warning
-                    </span>
-                  )}
-                  {notifications.focusReminder && (
-                    <span className="text-[9px] text-emerald-600 font-semibold">
-                      ✓ Focus Reminder
-                    </span>
-                  )}
-                  {notifications.midnightAlert && (
-                    <span className="text-[9px] text-emerald-600 font-semibold">
-                      ✓ Midnight Alert
-                    </span>
-                  )}
-                  {notifications.continuousUsage && (
-                    <span className="text-[9px] text-emerald-600 font-semibold">
-                      ✓ Continuous Usage
-                    </span>
-                  )}
+                  {notifications.usageWarning && <span className="text-[9px] text-emerald-600 font-semibold">✓ Usage Warning</span>}
+                  {notifications.focusReminder && <span className="text-[9px] text-emerald-600 font-semibold">✓ Focus Reminder</span>}
+                  {notifications.midnightAlert && <span className="text-[9px] text-emerald-600 font-semibold">✓ Midnight Alert</span>}
+                  {notifications.continuousUsage && <span className="text-[9px] text-emerald-600 font-semibold">✓ Continuous Usage</span>}
                 </div>
               </div>
             </div>

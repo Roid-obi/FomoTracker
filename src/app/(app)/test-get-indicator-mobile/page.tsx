@@ -38,16 +38,17 @@ export default function TestGetIndicatorMobilePage() {
     setPlatform(Capacitor.getPlatform());
 
     async function loadUserAndPerms() {
-      // Get real user session if exists
-      try {
-        const { supabase } = await import("@/lib/databases/supabase");
-        const { data } = await supabase.auth.getUser();
-        if (data?.user?.id) {
-          setUserId(data.user.id);
-        }
-      } catch (e) {
-        console.error("Failed to load authenticated user:", e);
-      }
+      // TODO: Restore Supabase auth integration when backend is ready
+      // For now, using hardcoded userId for testing
+      // try {
+      //   const { supabase } = await import("@/lib/databases/supabase");
+      //   const { data } = await supabase.auth.getUser();
+      //   if (data?.user?.id) {
+      //     setUserId(data.user.id);
+      //   }
+      // } catch (e) {
+      //   console.error("Failed to load authenticated user:", e);
+      // }
 
       // Check permission
       setIsCheckingPermission(true);

@@ -13,12 +13,17 @@ import { usePathname, useRouter } from "next/navigation";
 
 const navigationItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Analytics", href: "/analytics", icon: BarChart2 },
+  {
+    name: "Analytics",
+    href: "/analytics/overview",
+    icon: BarChart2,
+    matchPrefix: "/analytics",
+  },
   {
     name: "AI Insight",
-    href: "/insight",
+    href: "/insights/latest",
     icon: Brain,
-    matchPrefix: "/insight",
+    matchPrefix: "/insights",
   },
   { name: "Notifikasi", href: "/notifications", icon: Bell, badge: 3 },
   {

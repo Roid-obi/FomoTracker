@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { insightDummy } from "@/lib/databases/dummyData";
+import { insightDummy } from "@/lib/data/initialData";
 
 export default function LatestInsightPage() {
   const [isNewUser, setIsNewUser] = useState(false);

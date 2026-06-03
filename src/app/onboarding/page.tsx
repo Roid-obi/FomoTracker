@@ -3,7 +3,7 @@
 import { ArrowRight, Bell, Briefcase, Check, ChevronLeft, ChevronRight, Eye, Laptop, Moon, Smartphone, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { onboardingDummy } from "@/lib/databases/dummyData";
+import { onboardingDummy } from "@/lib/data/initialData";
 
 const AVAILABLE_APPS = onboardingDummy.availableApps;
 

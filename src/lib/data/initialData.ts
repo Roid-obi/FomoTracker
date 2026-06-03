@@ -1,356 +1,5 @@
-export type TableUser = {
-  id: string;
-  username: string;
-  profileUrl: string | null;
-  timezone: string;
-  onboardingCompletedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type TableSession = {
-  id: number;
-  userId: string;
-  expiredAt: string;
-  createdAt: string;
-};
-
-export type TableApp = {
-  id: number;
-  packageName: string;
-  appName: string;
-  category: string;
-  platform: "Android" | "Browser" | "Both";
-  isActive: boolean;
-  createdAt: string;
-};
-
-export type TableUserMonitoredApp = {
-  id: number;
-  userId: string;
-  appId: number;
-  platform: "Android" | "Browser" | "Both";
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type TableUserSetting = {
-  id: number;
-  userId: string;
-  productivityStart: string;
-  productivityEnd: string;
-  midnightStart: string;
-  midnightEnd: string;
-  screenTimeThresholdSec: number;
-  continuousThresholdSec: number;
-  notificationEnabled: boolean;
-  usageWarningEnabled: boolean;
-  focusReminderEnabled: boolean;
-  midnightAlertEnabled: boolean;
-  continuousUsageEnabled: boolean;
-  updatedAt: string;
-};
-
-export const dummyTables = {
-  users: [
-    {
-      id: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      username: "Roid Obi",
-      profileUrl: null,
-      timezone: "GMT+7",
-      onboardingCompletedAt: "2026-05-22T10:30:00Z",
-      createdAt: "2026-05-22T10:00:00Z",
-      updatedAt: "2026-06-01T03:00:00Z",
-    },
-  ] as TableUser[],
-
-  sessions: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      expiredAt: "2026-06-02T10:00:00Z",
-      createdAt: "2026-06-01T10:00:00Z",
-    },
-  ] as TableSession[],
-
-  apps: [
-    {
-      id: 1,
-      packageName: "com.instagram.android",
-      appName: "Instagram",
-      category: "Sosial Media",
-      platform: "Android",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-    {
-      id: 2,
-      packageName: "com.zhiliaoapp.musically",
-      appName: "TikTok",
-      category: "Sosial Media",
-      platform: "Both",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-    {
-      id: 3,
-      packageName: "com.google.android.youtube",
-      appName: "YouTube",
-      category: "Hiburan",
-      platform: "Browser",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-    {
-      id: 4,
-      packageName: "com.whatsapp",
-      appName: "WhatsApp",
-      category: "Chatting",
-      platform: "Android",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-    {
-      id: 5,
-      packageName: "com.twitter.android",
-      appName: "X (Twitter)",
-      category: "Sosial Media",
-      platform: "Both",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-    {
-      id: 6,
-      packageName: "com.facebook.katana",
-      appName: "Facebook",
-      category: "Sosial Media",
-      platform: "Both",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-    {
-      id: 7,
-      packageName: "com.reddit.frontpage",
-      appName: "Reddit",
-      category: "Diskusi",
-      platform: "Both",
-      isActive: true,
-      createdAt: "2026-05-22T10:00:00Z",
-    },
-  ] as TableApp[],
-
-  userMonitoredApps: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 1,
-      platform: "Android",
-      enabled: true,
-      createdAt: "2026-05-22T10:10:00Z",
-      updatedAt: "2026-06-01T03:00:00Z",
-    },
-    {
-      id: 2,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 2,
-      platform: "Both",
-      enabled: true,
-      createdAt: "2026-05-22T10:10:00Z",
-      updatedAt: "2026-06-01T03:00:00Z",
-    },
-    {
-      id: 3,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 3,
-      platform: "Browser",
-      enabled: true,
-      createdAt: "2026-05-22T10:10:00Z",
-      updatedAt: "2026-06-01T03:00:00Z",
-    },
-    {
-      id: 4,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 4,
-      platform: "Android",
-      enabled: false,
-      createdAt: "2026-05-22T10:10:00Z",
-      updatedAt: "2026-06-01T03:00:00Z",
-    },
-  ] as TableUserMonitoredApp[],
-
-  userSettings: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      productivityStart: "08:00",
-      productivityEnd: "17:00",
-      midnightStart: "22:00",
-      midnightEnd: "06:00",
-      screenTimeThresholdSec: 5400,
-      continuousThresholdSec: 1800,
-      notificationEnabled: true,
-      usageWarningEnabled: true,
-      focusReminderEnabled: true,
-      midnightAlertEnabled: true,
-      continuousUsageEnabled: false,
-      updatedAt: "2026-06-01T03:00:00Z",
-    },
-  ] as TableUserSetting[],
-
-  dailyStats: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 1,
-      statDate: "2026-06-01",
-      totalDurationSeconds: 5100,
-      openFrequency: 34,
-      midnightDurationSeconds: 360,
-      productiveHourDurationSeconds: 1740,
-      maxContinuousSeconds: 1260,
-      peakActiveHour: 20,
-    },
-    {
-      id: 2,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 2,
-      statDate: "2026-06-01",
-      totalDurationSeconds: 6300,
-      openFrequency: 41,
-      midnightDurationSeconds: 840,
-      productiveHourDurationSeconds: 1560,
-      maxContinuousSeconds: 1980,
-      peakActiveHour: 21,
-    },
-    {
-      id: 3,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 3,
-      statDate: "2026-06-01",
-      totalDurationSeconds: 3300,
-      openFrequency: 12,
-      midnightDurationSeconds: 120,
-      productiveHourDurationSeconds: 1200,
-      maxContinuousSeconds: 960,
-      peakActiveHour: 18,
-    },
-    {
-      id: 4,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      appId: 4,
-      statDate: "2026-06-01",
-      totalDurationSeconds: 2700,
-      openFrequency: 26,
-      midnightDurationSeconds: 60,
-      productiveHourDurationSeconds: 900,
-      maxContinuousSeconds: 780,
-      peakActiveHour: 10,
-    },
-  ],
-
-  behaviourScores: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      scoreDate: "2026-06-01T23:00:00Z",
-      usageDurationScore: 82,
-      openFrequencyScore: 78,
-      midnightUsageScore: 90,
-      continuousUsageScore: 70,
-      productivityHourScore: 55,
-      totalScore: 78,
-      riskLevel: "HIGH",
-      excessiveUsageFlag: true,
-      compulsiveCheckingFlag: true,
-      midnightTendencyFlag: true,
-      continuousUsageFlag: false,
-      distractionTendencyFlag: true,
-      createdAt: "2026-06-01T23:00:00Z",
-      updatedAt: "2026-06-01T23:00:00Z",
-    },
-  ],
-
-  weeklyReports: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      weekStart: "2026-05-25",
-      weekEnd: "2026-05-31",
-      totalScreenTimeSeconds: 123480,
-      avgBehavioralScore: 63,
-      avgRiskLevel: "MODERATE",
-      prevWeekScreenTimeSec: 135120,
-      screenTimeChangePct: -8.6,
-      riskTrend: "improving",
-      usageSummary: {
-        topApps: ["Instagram", "TikTok", "YouTube"],
-        peakHours: ["20:00", "21:00", "22:00"],
-      },
-      aiReflection: "Kontrol siang hari membaik, namun penggunaan malam masih tinggi dan berpotensi mengganggu kualitas tidur.",
-      createdAt: "2026-06-01T00:00:00Z",
-      updatedAt: "2026-06-01T00:00:00Z",
-    },
-  ],
-
-  aiInsights: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      behavioralId: 1,
-      weeklyReportId: 1,
-      insightType: "weekly_summary",
-      content: "Penggunaan TikTok meningkat 35% setelah jam 20:00. Risiko utama berasal dari midnight usage dan compulsive checking.",
-      recommendation: "Batasi screen time malam dan aktifkan focus reminder pada jam produktif.",
-      createdAt: "2026-06-01T00:00:00Z",
-    },
-  ],
-
-  notifications: [
-    {
-      id: 1,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      notificationType: "Midnight Alert",
-      title: "Midnight Usage Terdeteksi",
-      message: "Anda membuka Instagram pada jam 23:45 tadi malam.",
-      isRead: false,
-      severity: "high",
-      sourceAppId: 1,
-      payload: null,
-      createdAt: "2026-06-01T00:45:00Z",
-    },
-    {
-      id: 2,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      notificationType: "Usage Warning",
-      title: "Batas Harian Tercapai",
-      message: "TikTok hari ini telah digunakan selama 1 jam 45 menit (Batas wajar: 1.5 jam).",
-      isRead: false,
-      severity: "medium",
-      sourceAppId: 2,
-      payload: null,
-      createdAt: "2026-05-31T22:30:00Z",
-    },
-    {
-      id: 3,
-      userId: "2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803",
-      notificationType: "Focus Reminder",
-      title: "Peringatan Fokus",
-      message: "Terdeteksi membuka YouTube selama jam produktif (13:10 – 13:40).",
-      isRead: true,
-      severity: "low",
-      sourceAppId: 3,
-      payload: null,
-      createdAt: "2026-05-31T13:40:00Z",
-    },
-  ],
-} as const;
-
-const primaryUser = dummyTables.users[0];
-const userSetting = dummyTables.userSettings[0];
-
 export const dashboardDummy = {
-  userName: primaryUser.username.split(" ")[0],
+  userName: "Roid",
   today: "Minggu, 1 Juni 2026",
   hourlyData: [
     { jam: "08:00", Instagram: 10, TikTok: 5, YouTube: 0, WhatsApp: 15 },
@@ -363,31 +12,11 @@ export const dashboardDummy = {
     { jam: "22:00", Instagram: 15, TikTok: 25, YouTube: 10, WhatsApp: 5 },
   ],
   behavioralFlags: [
-    {
-      name: "Excessive Usage",
-      desc: "Melebihi 4 jam penggunaan hari ini",
-      active: true,
-    },
-    {
-      name: "Midnight Usage",
-      desc: "Aktif menggunakan HP di jam tidur malam",
-      active: true,
-    },
-    {
-      name: "Continuous Usage",
-      desc: "Membuka ponsel > 30 mnt nonstop",
-      active: false,
-    },
-    {
-      name: "Compulsive Checking",
-      desc: "Membuka layar > 50 kali hari ini",
-      active: true,
-    },
-    {
-      name: "Distraction Tendency",
-      desc: "Membuka medsos saat jam produktif",
-      active: true,
-    },
+    { name: "Excessive Usage", desc: "Melebihi 4 jam penggunaan hari ini", active: true },
+    { name: "Midnight Usage", desc: "Aktif menggunakan HP di jam tidur malam", active: true },
+    { name: "Continuous Usage", desc: "Membuka ponsel > 30 mnt nonstop", active: false },
+    { name: "Compulsive Checking", desc: "Membuka layar > 50 kali hari ini", active: true },
+    { name: "Distraction Tendency", desc: "Membuka medsos saat jam produktif", active: true },
   ],
 };
 
@@ -497,14 +126,12 @@ export const analyticsDummy = {
       ],
     },
   },
-
   behaviorPeriodDates: {
     hari: "1 Juni 2026",
     "7hari": "25 Mei – 31 Mei 2026",
     "30hari": "2 Mei – 31 Mei 2026",
     custom: "1 Mei – 31 Mei 2026",
   },
-
   behaviorPeriodData: {
     hari: {
       score: 78,
@@ -597,7 +224,7 @@ export const analyticsDummy = {
         { name: "Open Frequency", label: "Rata-rata membuka aplikasi", valueText: "49 kali/hari", pct: 67, desc: "Frekuensi membuka layar harian" },
         { name: "Midnight Usage", label: "Midnight Usage terdeteksi", valueText: "18 dari 31 hari", pct: 58, desc: "Aktivitas larut malam periode kustom" },
         { name: "Continuous Usage", label: "Penggunaan tanpa jeda >60 menit", valueText: "24 sesi", pct: 52, desc: "Akumulasi sesi panjang selama periode" },
-        { name: "Productive Hour Usage", label: "Penggunaan pada jam produktif", valueText: "39%", pct: 39, desc: "Porsi screen time di jam produktif" },
+        { name: "Productive Hour Usage", label: "Penggunaan pada jam produktif", valueText: "39%", pct: 39, desc: "Porsi screen time di jam produktif periode kustom" },
       ],
       radar: [
         { subject: "Duration", A: 62, fullMark: 100 },
@@ -615,7 +242,6 @@ export const analyticsDummy = {
       ],
     },
   },
-
   behaviorTrend: [
     { week: "M1", score: 72 },
     { week: "M2", score: 69 },
@@ -635,7 +261,10 @@ export const insightDummy = {
       summary: "Terjadi peningkatan durasi screen time di hari libur sebesar 45%. Sesi malam hari sangat mendominasi aktivitas.",
       details:
         "Pada pertengahan Mei, kami mencatat kenaikan signifikan pada penggunaan YouTube di tablet/browser Anda pada hari Sabtu dan Minggu. Total screen time harian menyentuh angka 6.2 jam. Kontributor utama adalah binge-watching video hiburan. Kami merekomendasikan pengetatan kuota harian khusus weekend.",
-      recommendations: ["Batas 2 Jam Weekend: Terapkan batas waktu kumulatif maksimal 2 jam untuk hari Sabtu dan Minggu.", "No Screen Zone: Definisikan area meja makan sebagai area bebas gadget."],
+      recommendations: [
+        "Batas 2 Jam Weekend: Terapkan batas waktu kumulatif maksimal 2 jam untuk hari Sabtu dan Minggu.",
+        "No Screen Zone: Definisikan area meja makan sebagai area bebas gadget.",
+      ],
     },
     {
       id: "w2",
@@ -646,7 +275,10 @@ export const insightDummy = {
       summary: "Penggunaan jam kerja produktif membaik secara perlahan. Namun, frekuensi mengecek notifikasi instan masih tinggi.",
       details:
         "Skor perilaku Anda naik menjadi 72 karena Anda sukses menekan pemakaian Instagram di sela-sela jam kantor. Masalah yang tersisa adalah kebiasaan membuka WhatsApp Web secara berulang setiap 5 menit. Disarankan menutup tab WhatsApp Web saat membutuhkan konsentrasi penuh.",
-      recommendations: ["Tab Pemblokir Mandiri: Gunakan pemblokir situs web untuk menutup akses chat selama sesi fokus.", "Metode Pomodoro: Terapkan jeda 5 menit setiap 25 menit bekerja."],
+      recommendations: [
+        "Tab Pemblokir Mandiri: Gunakan pemblokir situs web untuk menutup akses chat selama sesi fokus.",
+        "Metode Pomodoro: Terapkan jeda 5 menit setiap 25 menit bekerja.",
+      ],
     },
     {
       id: "w1",
@@ -657,7 +289,10 @@ export const insightDummy = {
       summary: "Awal pelacakan yang sehat. Kontrol diri prima dengan tingkat istirahat malam yang sangat teratur.",
       details:
         "Minggu pertama perekaman menunjukkan performa ideal. Screen time harian rata-rata berada pada 2.5 jam. Tidak terdeteksi adanya pelanggaran jam malam atau distraksi jam produktif yang berat. Pertahankan kestabilan ini.",
-      recommendations: ["Pertahankan Rutinitas: Jaga konsistensi jadwal tidur pukul 22:00.", "Review Harian: Buka dashboard setiap malam untuk memantau performa."],
+      recommendations: [
+        "Pertahankan Rutinitas: Jaga konsistensi jadwal tidur pukul 22:00.",
+        "Review Harian: Buka dashboard setiap malam untuk memantau performa.",
+      ],
     },
   ],
   analysisPeriod: "17 Mei – 23 Mei 2026",
@@ -732,88 +367,54 @@ export const notificationPageDummy = {
 };
 
 export const monitoringSettingsDummy = {
-  initialApps: dummyTables.userMonitoredApps.map((row) => {
-    const app = dummyTables.apps.find((item) => item.id === row.appId);
-    return {
-      id: app?.appName.toLowerCase().replace(/\s+/g, "-") ?? `app-${row.appId}`,
-      name: app?.appName ?? "Unknown",
-      platform: row.platform,
-      enabled: row.enabled,
-      category: app?.category ?? "Lainnya",
-      color:
-        app?.appName === "Instagram"
-          ? "bg-pink-600"
-          : app?.appName === "TikTok"
-            ? "bg-black"
-            : app?.appName === "YouTube"
-              ? "bg-red-600"
-              : app?.appName === "WhatsApp"
-                ? "bg-green-600"
-                : "bg-zinc-700",
-    };
-  }),
+  initialApps: [
+    { id: "instagram", name: "Instagram", platform: "Android", enabled: true, category: "Sosial Media", color: "bg-pink-600" },
+    { id: "tiktok", name: "TikTok", platform: "Both", enabled: true, category: "Sosial Media", color: "bg-black" },
+    { id: "youtube", name: "YouTube", platform: "Browser", enabled: true, category: "Hiburan", color: "bg-red-600" },
+    { id: "whatsapp", name: "WhatsApp", platform: "Android", enabled: true, category: "Chatting", color: "bg-green-600" },
+  ],
   availableAddApps: [
-    {
-      id: "x",
-      name: "X (Twitter)",
-      category: "Sosial Media",
-      color: "bg-zinc-800",
-    },
-    {
-      id: "facebook",
-      name: "Facebook",
-      category: "Sosial Media",
-      color: "bg-blue-600",
-    },
-    {
-      id: "reddit",
-      name: "Reddit",
-      category: "Diskusi",
-      color: "bg-orange-500",
-    },
+    { id: "x", name: "X (Twitter)", category: "Sosial Media", color: "bg-zinc-800" },
+    { id: "facebook", name: "Facebook", category: "Sosial Media", color: "bg-blue-600" },
+    { id: "reddit", name: "Reddit", category: "Diskusi", color: "bg-orange-500" },
   ],
   hours: {
-    productiveStart: userSetting.productivityStart,
-    productiveEnd: userSetting.productivityEnd,
-    bedtimeStart: userSetting.midnightStart,
-    bedtimeEnd: userSetting.midnightEnd,
+    productiveStart: "08:00",
+    productiveEnd: "17:00",
+    bedtimeStart: "22:00",
+    bedtimeEnd: "06:00",
   },
 };
 
 export const settingsDummy = {
   profile: {
-    name: primaryUser.username,
+    name: "Roid Obi",
     email: "roid@fomotracker.com",
   },
   notificationSettings: {
     toggles: {
-      usageWarning: userSetting.usageWarningEnabled,
-      focusReminder: userSetting.focusReminderEnabled,
-      midnightAlert: userSetting.midnightAlertEnabled,
-      continuousUsage: userSetting.continuousUsageEnabled,
+      usageWarning: true,
+      focusReminder: true,
+      midnightAlert: true,
+      continuousUsage: true,
     },
-    thresholdDaily: Math.floor(userSetting.screenTimeThresholdSec / 60),
-    thresholdContinuous: Math.floor(userSetting.continuousThresholdSec / 60),
+    thresholdDaily: 180,
+    thresholdContinuous: 45,
   },
   privacyExportData: {
-    username: primaryUser.username,
+    username: "Roid Obi",
     email: "roid@fomotracker.com",
-    created_at: primaryUser.createdAt,
-    timezone: primaryUser.timezone,
-    monitored_apps: monitoringSettingsDummy.initialApps.map((app) => ({
-      name: app.name,
-      platform: app.platform,
-      enabled: app.enabled,
-    })),
+    created_at: "2026-05-22T10:00:00Z",
+    timezone: "GMT+7",
+    monitored_apps: [
+      { name: "Instagram", platform: "Android", enabled: true },
+      { name: "TikTok", platform: "Both", enabled: true },
+      { name: "YouTube", platform: "Browser", enabled: true },
+      { name: "WhatsApp", platform: "Android", enabled: true },
+    ],
     hours_configuration: {
-      productive: {
-        start: userSetting.productivityStart,
-        end: userSetting.productivityEnd,
-      },
-      bedtime: {
-        start: userSetting.midnightStart,
-        end: userSetting.midnightEnd,
-      },
+      productive: { start: "08:00", end: "17:00" },
+      bedtime: { start: "22:00", end: "06:00" },
     },
     recent_daily_screentime: [
       { date: "2026-05-23", minutes: 255, behavioral_score: 68 },
@@ -825,52 +426,22 @@ export const settingsDummy = {
 
 export const onboardingDummy = {
   availableApps: [
-    {
-      id: "instagram",
-      name: "Instagram",
-      category: "Sosial Media",
-      color: "from-pink-500 to-purple-600",
-    },
-    {
-      id: "tiktok",
-      name: "TikTok",
-      category: "Sosial Media",
-      color: "from-gray-900 to-black",
-    },
-    {
-      id: "youtube",
-      name: "YouTube",
-      category: "Hiburan",
-      color: "from-red-600 to-red-700",
-    },
-    {
-      id: "x",
-      name: "X (Twitter)",
-      category: "Sosial Media",
-      color: "from-zinc-800 to-zinc-900",
-    },
-    {
-      id: "whatsapp",
-      name: "WhatsApp",
-      category: "Chatting",
-      color: "from-green-500 to-green-600",
-    },
-    {
-      id: "facebook",
-      name: "Facebook",
-      category: "Sosial Media",
-      color: "from-blue-600 to-blue-700",
-    },
+    { id: "instagram", name: "Instagram", category: "Sosial Media", color: "from-pink-500 to-purple-600" },
+    { id: "tiktok", name: "TikTok", category: "Sosial Media", color: "from-gray-900 to-black" },
+    { id: "youtube", name: "YouTube", category: "Hiburan", color: "from-red-600 to-red-700" },
+    { id: "x", name: "X (Twitter)", category: "Sosial Media", color: "from-zinc-800 to-zinc-900" },
+    { id: "whatsapp", name: "WhatsApp", category: "Chatting", color: "from-green-500 to-green-600" },
+    { id: "facebook", name: "Facebook", category: "Sosial Media", color: "from-blue-600 to-blue-700" },
   ],
   selectedApps: ["instagram", "tiktok"],
-  productiveStart: userSetting.productivityStart,
-  productiveEnd: userSetting.productivityEnd,
-  bedtimeStart: userSetting.midnightStart,
-  bedtimeEnd: userSetting.midnightEnd,
+  productiveStart: "08:00",
+  productiveEnd: "17:00",
+  bedtimeStart: "22:00",
+  bedtimeEnd: "06:00",
   notifications: {
-    usageWarning: userSetting.usageWarningEnabled,
-    focusReminder: userSetting.focusReminderEnabled,
-    midnightAlert: userSetting.midnightAlertEnabled,
-    continuousUsage: userSetting.continuousUsageEnabled,
+    usageWarning: true,
+    focusReminder: true,
+    midnightAlert: true,
+    continuousUsage: true,
   },
 };

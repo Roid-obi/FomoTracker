@@ -2,7 +2,7 @@
 
 import { Activity, AlertTriangle, ArrowRight, Bell, Brain, Clock, Flame, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { dashboardDummy } from "@/lib/databases/dummyData";
+import { dashboardDummy } from "@/lib/data/initialData";
 import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const hourlyData = dashboardDummy.hourlyData;

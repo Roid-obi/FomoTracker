@@ -3,7 +3,7 @@
 import { Download, Eye, EyeOff, ShieldAlert, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { settingsDummy } from "@/lib/databases/dummyData";
+import { settingsDummy } from "@/lib/data/initialData";
 
 export default function PrivacySettingsPage() {
   const router = useRouter();

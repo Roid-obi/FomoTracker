@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { insightDummy } from "@/lib/databases/dummyData";
+import { insightDummy } from "@/lib/data/initialData";
 
 // Define generateStaticParams to allow static export for dynamic route
 export async function generateStaticParams() {

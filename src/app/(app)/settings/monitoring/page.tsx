@@ -2,7 +2,7 @@
 
 import { Briefcase, Check, Laptop, Moon, Plus, ShieldAlert, Smartphone, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { monitoringSettingsDummy } from "@/lib/databases/dummyData";
+import { monitoringSettingsDummy } from "@/lib/data/initialData";
 
 interface MonitoredApp {
   id: string;

@@ -5,7 +5,7 @@ import { Camera, Check, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as zod from "zod";
-import { settingsDummy } from "@/lib/databases/dummyData";
+import { settingsDummy } from "@/lib/data/initialData";
 
 // Zod Schemas
 const profileSchema = zod.object({

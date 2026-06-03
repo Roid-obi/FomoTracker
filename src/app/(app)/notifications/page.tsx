@@ -2,7 +2,7 @@
 
 import { Ban, Bell, CheckCircle2, Clock, ShieldAlert } from "lucide-react";
 import { useState } from "react";
-import { notificationPageDummy } from "@/lib/databases/dummyData";
+import { notificationPageDummy } from "@/lib/data/initialData";
 
 const iconByKey = {
   shield: ShieldAlert,

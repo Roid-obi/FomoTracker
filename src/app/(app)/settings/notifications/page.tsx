@@ -2,7 +2,7 @@
 
 import { Bell, Check, Sliders } from "lucide-react";
 import { useState } from "react";
-import { settingsDummy } from "@/lib/databases/dummyData";
+import { settingsDummy } from "@/lib/data/initialData";
 
 export default function NotificationsSettingsPage() {
   const [toggles, setToggles] = useState(settingsDummy.notificationSettings.toggles);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { analyticsDummy } from "@/lib/databases/dummyData";
+import { analyticsDummy } from "@/lib/data/initialData";
 import {
   AlertTriangle,
   Brain,

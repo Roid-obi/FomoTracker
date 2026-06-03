@@ -12,25 +12,24 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 const navigationItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
   {
-    name: "Analytics",
-    href: "/analytics/overview",
+    name: "Statistik",
+    href: "/statistik",
     icon: BarChart2,
-    matchPrefix: "/analytics",
+    matchPrefix: "/statistik",
   },
   {
-    name: "AI Insight",
-    href: "/insights/latest",
+    name: "Insight",
+    href: "/insight",
     icon: Brain,
-    matchPrefix: "/insights",
+    matchPrefix: "/insight",
   },
-  { name: "Notifikasi", href: "/notifications", icon: Bell, badge: 3 },
   {
     name: "Pengaturan",
-    href: "/settings/profile",
+    href: "/pengaturan/profil",
     icon: Settings,
-    matchPrefix: "/settings",
+    matchPrefix: "/pengaturan",
   },
 ];
 
@@ -86,11 +85,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     />
                     <span>{item.name}</span>
                   </div>
-                  {item.badge && !active && (
-                    <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -144,9 +138,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               aria-label={item.name}
             >
               <Icon className={`w-5 h-5 ${active ? "scale-110" : ""}`} />
-              {item.badge && !active && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary border-2 border-card rounded-full" />
-              )}
             </Link>
           );
         })}

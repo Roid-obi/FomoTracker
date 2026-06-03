@@ -8,7 +8,9 @@ const now = new Date();
 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
 const weekStart = new Date(today);
-weekStart.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+weekStart.setDate(
+  today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1),
+);
 
 const weekEnd = new Date(weekStart);
 weekEnd.setDate(weekStart.getDate() + 6);
@@ -443,7 +445,8 @@ export const initialNotifications = [
     id: "550e8400-e29b-41d4-a716-446655440080",
     user_id: "550e8400-e29b-41d4-a716-446655440000",
     type: "midnight",
-    message: "Midnight Usage Terdeteksi: Anda membuka Instagram pada jam 23:45 tadi malam. Hindari screen time sebelum tidur untuk kualitas istirahat yang lebih baik.",
+    message:
+      "Midnight Usage Terdeteksi: Anda membuka Instagram pada jam 23:45 tadi malam. Hindari screen time sebelum tidur untuk kualitas istirahat yang lebih baik.",
     is_read: false,
     created_at: "2026-06-03T23:50:00Z",
   },
@@ -451,7 +454,8 @@ export const initialNotifications = [
     id: "550e8400-e29b-41d4-a716-446655440081",
     user_id: "550e8400-e29b-41d4-a716-446655440000",
     type: "screen_time",
-    message: "Batas Harian Tercapai: Total screen time hari ini telah mencapai 3 jam 15 menit. Pertimbangkan untuk istirahat sebentar.",
+    message:
+      "Batas Harian Tercapai: Total screen time hari ini telah mencapai 3 jam 15 menit. Pertimbangkan untuk istirahat sebentar.",
     is_read: true,
     created_at: "2026-06-03T20:30:00Z",
   },
@@ -459,7 +463,8 @@ export const initialNotifications = [
     id: "550e8400-e29b-41d4-a716-446655440082",
     user_id: "550e8400-e29b-41d4-a716-446655440000",
     type: "productive_hour",
-    message: "Peringatan Fokus: Terdeteksi membuka TikTok selama jam produktif (10:00 - 11:00). Tetap fokus pada tugas penting Anda!",
+    message:
+      "Peringatan Fokus: Terdeteksi membuka TikTok selama jam produktif (10:00 - 11:00). Tetap fokus pada tugas penting Anda!",
     is_read: true,
     created_at: "2026-06-03T11:05:00Z",
   },
@@ -467,7 +472,8 @@ export const initialNotifications = [
     id: "550e8400-e29b-41d4-a716-446655440083",
     user_id: "550e8400-e29b-41d4-a716-446655440000",
     type: "continuous",
-    message: "Sesi Tanpa Jeda: Anda menggunakan TikTok selama 55 menit tanpa henti. Ambil istirahat sebentar untuk kesehatan mata Anda!",
+    message:
+      "Sesi Tanpa Jeda: Anda menggunakan TikTok selama 55 menit tanpa henti. Ambil istirahat sebentar untuk kesehatan mata Anda!",
     is_read: true,
     created_at: "2026-06-03T20:10:00Z",
   },
@@ -509,11 +515,31 @@ export const dashboardDummy = {
     { jam: "22:00", Instagram: 20, TikTok: 0, YouTube: 0, WhatsApp: 5 },
   ],
   behavioralFlags: [
-    { name: "Excessive Usage", desc: "Melebihi 4 jam penggunaan hari ini", active: true },
-    { name: "Midnight Usage", desc: "Aktif menggunakan HP di jam tidur malam", active: true },
-    { name: "Continuous Usage", desc: "Membuka ponsel > 30 mnt nonstop", active: true },
-    { name: "Compulsive Checking", desc: "Membuka layar > 50 kali hari ini", active: true },
-    { name: "Distraction Tendency", desc: "Membuka medsos saat jam produktif", active: true },
+    {
+      name: "Excessive Usage",
+      desc: "Melebihi 4 jam penggunaan hari ini",
+      active: true,
+    },
+    {
+      name: "Midnight Usage",
+      desc: "Aktif menggunakan HP di jam tidur malam",
+      active: true,
+    },
+    {
+      name: "Continuous Usage",
+      desc: "Membuka ponsel > 30 mnt nonstop",
+      active: true,
+    },
+    {
+      name: "Compulsive Checking",
+      desc: "Membuka layar > 50 kali hari ini",
+      active: true,
+    },
+    {
+      name: "Distraction Tendency",
+      desc: "Membuka medsos saat jam produktif",
+      active: true,
+    },
   ],
 };
 
@@ -541,10 +567,28 @@ export const analyticsDummy = {
       ],
       totalMin: 315,
       topApps: [
-        { rank: 1, name: "TikTok", time: "1j 45m", pct: 33, color: "bg-primary" },
-        { rank: 2, name: "Instagram", time: "1j 25m", pct: 27, color: "bg-secondary" },
+        {
+          rank: 1,
+          name: "TikTok",
+          time: "1j 45m",
+          pct: 33,
+          color: "bg-primary",
+        },
+        {
+          rank: 2,
+          name: "Instagram",
+          time: "1j 25m",
+          pct: 27,
+          color: "bg-secondary",
+        },
         { rank: 3, name: "YouTube", time: "55m", pct: 18, color: "bg-muted" },
-        { rank: 4, name: "WhatsApp", time: "45m", pct: 14, color: "bg-emerald-600" },
+        {
+          rank: 4,
+          name: "WhatsApp",
+          time: "45m",
+          pct: 14,
+          color: "bg-emerald-600",
+        },
       ],
     },
     "7hari": {
@@ -568,10 +612,34 @@ export const analyticsDummy = {
       ],
       totalMin: 2538,
       topApps: [
-        { rank: 1, name: "Instagram", time: "15j 26m", pct: 45, color: "bg-primary" },
-        { rank: 2, name: "TikTok", time: "10j 17m", pct: 30, color: "bg-secondary" },
-        { rank: 3, name: "YouTube", time: "8j 35m", pct: 25, color: "bg-muted" },
-        { rank: 4, name: "WhatsApp", time: "5j 15m", pct: 15, color: "bg-emerald-600" },
+        {
+          rank: 1,
+          name: "Instagram",
+          time: "15j 26m",
+          pct: 45,
+          color: "bg-primary",
+        },
+        {
+          rank: 2,
+          name: "TikTok",
+          time: "10j 17m",
+          pct: 30,
+          color: "bg-secondary",
+        },
+        {
+          rank: 3,
+          name: "YouTube",
+          time: "8j 35m",
+          pct: 25,
+          color: "bg-muted",
+        },
+        {
+          rank: 4,
+          name: "WhatsApp",
+          time: "5j 15m",
+          pct: 15,
+          color: "bg-emerald-600",
+        },
       ],
     },
   },
@@ -586,18 +654,68 @@ export const analyticsDummy = {
       riskColor: "text-amber-800 bg-amber-50 border-amber-100",
       desc: "Aktivitas Anda hari ini memerlukan perhatian. Durasi screen time cukup tinggi dan terdeteksi midnight usage yang mengganggu pola tidur.",
       breakdown: [
-        { name: "Usage Duration", label: "Screen Time Hari Ini", valueText: "5,25 jam", pct: 85, desc: "Durasi total hari ini cukup tinggi" },
-        { name: "Open Frequency", label: "Membuka aplikasi hari ini", valueText: "23 kali", pct: 65, desc: "Cukup sering memeriksa gawai" },
-        { name: "Midnight Usage", label: "Midnight Usage", valueText: "Terdeteksi aktif", pct: 60, desc: "Aktivitas di jam tidur (22:00 - 06:00)" },
-        { name: "Continuous Usage", label: "Penggunaan nonstop >45 menit", valueText: "1 sesi", pct: 55, desc: "Sesi tanpa jeda" },
-        { name: "Productive Hour Usage", label: "Penggunaan di jam produktif", valueText: "32%", pct: 32, desc: "Distraksi cukup tinggi saat jam kerja" },
+        {
+          name: "Usage Duration",
+          label: "Screen Time Hari Ini",
+          valueText: "5,25 jam",
+          pct: 85,
+          desc: "Durasi total hari ini cukup tinggi",
+        },
+        {
+          name: "Open Frequency",
+          label: "Membuka aplikasi hari ini",
+          valueText: "23 kali",
+          pct: 65,
+          desc: "Cukup sering memeriksa gawai",
+        },
+        {
+          name: "Midnight Usage",
+          label: "Midnight Usage",
+          valueText: "Terdeteksi aktif",
+          pct: 60,
+          desc: "Aktivitas di jam tidur (22:00 - 06:00)",
+        },
+        {
+          name: "Continuous Usage",
+          label: "Penggunaan nonstop >45 menit",
+          valueText: "1 sesi",
+          pct: 55,
+          desc: "Sesi tanpa jeda",
+        },
+        {
+          name: "Productive Hour Usage",
+          label: "Penggunaan di jam produktif",
+          valueText: "32%",
+          pct: 32,
+          desc: "Distraksi cukup tinggi saat jam kerja",
+        },
       ],
       indicators: [
-        { name: "Midnight Usage", value: "Terdeteksi", desc: "Aktif di jam tidur utama (22:00 - 06:00)" },
-        { name: "Excessive Usage", value: "Terdeteksi", desc: "Durasi total screen time hari ini telah melebihi 3 jam" },
-        { name: "Continuous Usage", value: "1 sesi", desc: "Sesi penggunaan layar nonstop tanpa jeda > 45 menit" },
-        { name: "Compulsive Checking", value: "23 kali", desc: "Frekuensi membuka gawai hari ini" },
-        { name: "Distraction Tendency", value: "32%", desc: "Porsi screen time yang terjadi pada jam belajar/kerja" },
+        {
+          name: "Midnight Usage",
+          value: "Terdeteksi",
+          desc: "Aktif di jam tidur utama (22:00 - 06:00)",
+        },
+        {
+          name: "Excessive Usage",
+          value: "Terdeteksi",
+          desc: "Durasi total screen time hari ini telah melebihi 3 jam",
+        },
+        {
+          name: "Continuous Usage",
+          value: "1 sesi",
+          desc: "Sesi penggunaan layar nonstop tanpa jeda > 45 menit",
+        },
+        {
+          name: "Compulsive Checking",
+          value: "23 kali",
+          desc: "Frekuensi membuka gawai hari ini",
+        },
+        {
+          name: "Distraction Tendency",
+          value: "32%",
+          desc: "Porsi screen time yang terjadi pada jam belajar/kerja",
+        },
       ],
     },
   },
@@ -611,7 +729,8 @@ export const insightDummy = {
       score: 75,
       risk: "Low",
       riskColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
-      summary: "Awal pelacakan yang sehat. Kontrol diri prima dengan tingkat istirahat malam yang sangat teratur.",
+      summary:
+        "Awal pelacakan yang sehat. Kontrol diri prima dengan tingkat istirahat malam yang sangat teratur.",
       details:
         "Minggu pertama perekaman menunjukkan performa ideal. Screen time harian rata-rata berada pada 2.5 jam. Tidak terdeteksi adanya pelanggaran jam malam atau distraksi jam produktif yang berat. Pertahankan kestabilan ini.",
       recommendations: [
@@ -642,7 +761,8 @@ export const notificationPageDummy = {
     {
       id: "1",
       type: "Midnight Alert",
-      message: "Midnight Usage Terdeteksi: Anda membuka Instagram pada jam 23:45 tadi malam.",
+      message:
+        "Midnight Usage Terdeteksi: Anda membuka Instagram pada jam 23:45 tadi malam.",
       timestamp: "10 jam yang lalu",
       read: false,
       iconKey: "shield",
@@ -651,7 +771,8 @@ export const notificationPageDummy = {
     {
       id: "2",
       type: "Usage Warning",
-      message: "Batas Harian Tercapai: Total screen time telah mencapai 3 jam 15 menit.",
+      message:
+        "Batas Harian Tercapai: Total screen time telah mencapai 3 jam 15 menit.",
       timestamp: "12 jam yang lalu",
       read: false,
       iconKey: "ban",
@@ -662,15 +783,58 @@ export const notificationPageDummy = {
 
 export const monitoringSettingsDummy = {
   initialApps: [
-    { id: "instagram", name: "Instagram", platform: "both", enabled: true, category: "Sosial Media", color: "bg-pink-600" },
-    { id: "tiktok", name: "TikTok", platform: "both", enabled: true, category: "Sosial Media", color: "bg-black" },
-    { id: "youtube", name: "YouTube", platform: "both", enabled: true, category: "Hiburan", color: "bg-red-600" },
-    { id: "whatsapp", name: "WhatsApp", platform: "both", enabled: true, category: "Messaging", color: "bg-green-600" },
+    {
+      id: "instagram",
+      name: "Instagram",
+      platform: "both",
+      enabled: true,
+      category: "Sosial Media",
+      color: "bg-pink-600",
+    },
+    {
+      id: "tiktok",
+      name: "TikTok",
+      platform: "both",
+      enabled: true,
+      category: "Sosial Media",
+      color: "bg-black",
+    },
+    {
+      id: "youtube",
+      name: "YouTube",
+      platform: "both",
+      enabled: true,
+      category: "Hiburan",
+      color: "bg-red-600",
+    },
+    {
+      id: "whatsapp",
+      name: "WhatsApp",
+      platform: "both",
+      enabled: true,
+      category: "Messaging",
+      color: "bg-green-600",
+    },
   ],
   availableAddApps: [
-    { id: "x", name: "X (Twitter)", category: "Sosial Media", color: "bg-zinc-800" },
-    { id: "facebook", name: "Facebook", category: "Sosial Media", color: "bg-blue-600" },
-    { id: "reddit", name: "Reddit", category: "Diskusi", color: "bg-orange-500" },
+    {
+      id: "x",
+      name: "X (Twitter)",
+      category: "Sosial Media",
+      color: "bg-zinc-800",
+    },
+    {
+      id: "facebook",
+      name: "Facebook",
+      category: "Sosial Media",
+      color: "bg-blue-600",
+    },
+    {
+      id: "reddit",
+      name: "Reddit",
+      category: "Diskusi",
+      color: "bg-orange-500",
+    },
   ],
   hours: {
     productiveStart: "08:00",
@@ -720,12 +884,42 @@ export const settingsDummy = {
 
 export const onboardingDummy = {
   availableApps: [
-    { id: "instagram", name: "Instagram", category: "Sosial Media", color: "from-pink-500 to-purple-600" },
-    { id: "tiktok", name: "TikTok", category: "Sosial Media", color: "from-gray-900 to-black" },
-    { id: "youtube", name: "YouTube", category: "Hiburan", color: "from-red-600 to-red-700" },
-    { id: "x", name: "X (Twitter)", category: "Sosial Media", color: "from-zinc-800 to-zinc-900" },
-    { id: "whatsapp", name: "WhatsApp", category: "Messaging", color: "from-green-500 to-green-600" },
-    { id: "facebook", name: "Facebook", category: "Sosial Media", color: "from-blue-600 to-blue-700" },
+    {
+      id: "instagram",
+      name: "Instagram",
+      category: "Sosial Media",
+      color: "from-pink-500 to-purple-600",
+    },
+    {
+      id: "tiktok",
+      name: "TikTok",
+      category: "Sosial Media",
+      color: "from-gray-900 to-black",
+    },
+    {
+      id: "youtube",
+      name: "YouTube",
+      category: "Hiburan",
+      color: "from-red-600 to-red-700",
+    },
+    {
+      id: "x",
+      name: "X (Twitter)",
+      category: "Sosial Media",
+      color: "from-zinc-800 to-zinc-900",
+    },
+    {
+      id: "whatsapp",
+      name: "WhatsApp",
+      category: "Messaging",
+      color: "from-green-500 to-green-600",
+    },
+    {
+      id: "facebook",
+      name: "Facebook",
+      category: "Sosial Media",
+      color: "from-blue-600 to-blue-700",
+    },
   ],
   selectedApps: ["instagram", "tiktok"],
   productiveStart: "08:00",

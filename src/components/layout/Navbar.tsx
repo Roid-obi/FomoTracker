@@ -11,10 +11,10 @@ export default function Navbar() {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/analytics") ||
+    pathname.startsWith("/statistik") ||
     pathname.startsWith("/insight") ||
     pathname.startsWith("/notifications") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/pengaturan");
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);

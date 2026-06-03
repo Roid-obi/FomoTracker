@@ -12,11 +12,31 @@ export const dashboardDummy = {
     { jam: "22:00", Instagram: 15, TikTok: 25, YouTube: 10, WhatsApp: 5 },
   ],
   behavioralFlags: [
-    { name: "Excessive Usage", desc: "Melebihi 4 jam penggunaan hari ini", active: true },
-    { name: "Midnight Usage", desc: "Aktif menggunakan HP di jam tidur malam", active: true },
-    { name: "Continuous Usage", desc: "Membuka ponsel > 30 mnt nonstop", active: false },
-    { name: "Compulsive Checking", desc: "Membuka layar > 50 kali hari ini", active: true },
-    { name: "Distraction Tendency", desc: "Membuka medsos saat jam produktif", active: true },
+    {
+      name: "Excessive Usage",
+      desc: "Melebihi 4 jam penggunaan hari ini",
+      active: true,
+    },
+    {
+      name: "Midnight Usage",
+      desc: "Aktif menggunakan HP di jam tidur malam",
+      active: true,
+    },
+    {
+      name: "Continuous Usage",
+      desc: "Membuka ponsel > 30 mnt nonstop",
+      active: false,
+    },
+    {
+      name: "Compulsive Checking",
+      desc: "Membuka layar > 50 kali hari ini",
+      active: true,
+    },
+    {
+      name: "Distraction Tendency",
+      desc: "Membuka medsos saat jam produktif",
+      active: true,
+    },
   ],
 };
 
@@ -44,10 +64,28 @@ export const analyticsDummy = {
       ],
       totalMin: 315,
       topApps: [
-        { rank: 1, name: "TikTok", time: "1j 45m", pct: 33, color: "bg-primary" },
-        { rank: 2, name: "Instagram", time: "1j 25m", pct: 27, color: "bg-secondary" },
+        {
+          rank: 1,
+          name: "TikTok",
+          time: "1j 45m",
+          pct: 33,
+          color: "bg-primary",
+        },
+        {
+          rank: 2,
+          name: "Instagram",
+          time: "1j 25m",
+          pct: 27,
+          color: "bg-secondary",
+        },
         { rank: 3, name: "YouTube", time: "55m", pct: 18, color: "bg-muted" },
-        { rank: 4, name: "WhatsApp", time: "45m", pct: 14, color: "bg-emerald-600" },
+        {
+          rank: 4,
+          name: "WhatsApp",
+          time: "45m",
+          pct: 14,
+          color: "bg-emerald-600",
+        },
       ],
     },
     "7hari": {
@@ -71,10 +109,34 @@ export const analyticsDummy = {
       ],
       totalMin: 2538,
       topApps: [
-        { rank: 1, name: "Instagram", time: "15j 26m", pct: 45, color: "bg-primary" },
-        { rank: 2, name: "TikTok", time: "10j 17m", pct: 30, color: "bg-secondary" },
-        { rank: 3, name: "YouTube", time: "8j 35m", pct: 25, color: "bg-muted" },
-        { rank: 4, name: "WhatsApp", time: "5j 15m", pct: 15, color: "bg-emerald-600" },
+        {
+          rank: 1,
+          name: "Instagram",
+          time: "15j 26m",
+          pct: 45,
+          color: "bg-primary",
+        },
+        {
+          rank: 2,
+          name: "TikTok",
+          time: "10j 17m",
+          pct: 30,
+          color: "bg-secondary",
+        },
+        {
+          rank: 3,
+          name: "YouTube",
+          time: "8j 35m",
+          pct: 25,
+          color: "bg-muted",
+        },
+        {
+          rank: 4,
+          name: "WhatsApp",
+          time: "5j 15m",
+          pct: 15,
+          color: "bg-emerald-600",
+        },
       ],
     },
     "30hari": {
@@ -95,10 +157,34 @@ export const analyticsDummy = {
       ],
       totalMin: 8820,
       topApps: [
-        { rank: 1, name: "YouTube", time: "66j 9m", pct: 45, color: "bg-primary" },
-        { rank: 2, name: "Instagram", time: "44j 6m", pct: 30, color: "bg-secondary" },
-        { rank: 3, name: "TikTok", time: "29j 24m", pct: 20, color: "bg-muted" },
-        { rank: 4, name: "WhatsApp", time: "22j 3m", pct: 15, color: "bg-emerald-600" },
+        {
+          rank: 1,
+          name: "YouTube",
+          time: "66j 9m",
+          pct: 45,
+          color: "bg-primary",
+        },
+        {
+          rank: 2,
+          name: "Instagram",
+          time: "44j 6m",
+          pct: 30,
+          color: "bg-secondary",
+        },
+        {
+          rank: 3,
+          name: "TikTok",
+          time: "29j 24m",
+          pct: 20,
+          color: "bg-muted",
+        },
+        {
+          rank: 4,
+          name: "WhatsApp",
+          time: "22j 3m",
+          pct: 15,
+          color: "bg-emerald-600",
+        },
       ],
     },
     custom: {
@@ -119,10 +205,28 @@ export const analyticsDummy = {
       ],
       totalMin: 9120,
       topApps: [
-        { rank: 1, name: "Instagram", time: "60j 48m", pct: 40, color: "bg-primary" },
-        { rank: 2, name: "TikTok", time: "45j 36m", pct: 30, color: "bg-secondary" },
+        {
+          rank: 1,
+          name: "Instagram",
+          time: "60j 48m",
+          pct: 40,
+          color: "bg-primary",
+        },
+        {
+          rank: 2,
+          name: "TikTok",
+          time: "45j 36m",
+          pct: 30,
+          color: "bg-secondary",
+        },
         { rank: 3, name: "YouTube", time: "38j", pct: 25, color: "bg-muted" },
-        { rank: 4, name: "WhatsApp", time: "22j 48m", pct: 15, color: "bg-emerald-600" },
+        {
+          rank: 4,
+          name: "WhatsApp",
+          time: "22j 48m",
+          pct: 15,
+          color: "bg-emerald-600",
+        },
       ],
     },
   },
@@ -139,11 +243,41 @@ export const analyticsDummy = {
       riskColor: "text-red-800 bg-red-50 border-red-100",
       desc: "Aktivitas Anda hari ini sangat berisiko. Durasi screen time tinggi dan terdeteksi midnight usage yang mengganggu pola tidur Anda.",
       breakdown: [
-        { name: "Usage Duration", label: "Screen Time Hari Ini", valueText: "6,2 jam", pct: 82, desc: "Durasi total hari ini melebihi batas sehat" },
-        { name: "Open Frequency", label: "Membuka aplikasi hari ini", valueText: "68 kali", pct: 78, desc: "Sangat sering memeriksa gawai secara impulsif" },
-        { name: "Midnight Usage", label: "Midnight Usage", valueText: "Terdeteksi aktif", pct: 90, desc: "Aktivitas di jam tidur utama (23:00 - 04:00)" },
-        { name: "Continuous Usage", label: "Penggunaan nonstop >60 menit", valueText: "3 sesi", pct: 70, desc: "Sesi panjang tanpa jeda relaksasi mata" },
-        { name: "Productive Hour Usage", label: "Penggunaan di jam produktif", valueText: "55%", pct: 55, desc: "Distraksi cukup tinggi saat jam belajar/kerja" },
+        {
+          name: "Usage Duration",
+          label: "Screen Time Hari Ini",
+          valueText: "6,2 jam",
+          pct: 82,
+          desc: "Durasi total hari ini melebihi batas sehat",
+        },
+        {
+          name: "Open Frequency",
+          label: "Membuka aplikasi hari ini",
+          valueText: "68 kali",
+          pct: 78,
+          desc: "Sangat sering memeriksa gawai secara impulsif",
+        },
+        {
+          name: "Midnight Usage",
+          label: "Midnight Usage",
+          valueText: "Terdeteksi aktif",
+          pct: 90,
+          desc: "Aktivitas di jam tidur utama (23:00 - 04:00)",
+        },
+        {
+          name: "Continuous Usage",
+          label: "Penggunaan nonstop >60 menit",
+          valueText: "3 sesi",
+          pct: 70,
+          desc: "Sesi panjang tanpa jeda relaksasi mata",
+        },
+        {
+          name: "Productive Hour Usage",
+          label: "Penggunaan di jam produktif",
+          valueText: "55%",
+          pct: 55,
+          desc: "Distraksi cukup tinggi saat jam belajar/kerja",
+        },
       ],
       radar: [
         { subject: "Duration", A: 82, fullMark: 100 },
@@ -153,11 +287,31 @@ export const analyticsDummy = {
         { subject: "Productivity", A: 55, fullMark: 100 },
       ],
       indicators: [
-        { name: "Midnight Usage", value: "Terdeteksi", desc: "Aktif di jam tidur utama (23:00 - 04:00) dini hari ini" },
-        { name: "Excessive Usage", value: "Terdeteksi", desc: "Durasi total screen time hari ini telah melebihi batas sehat 4 jam" },
-        { name: "Continuous Usage", value: "3 sesi", desc: "Sesi penggunaan layar nonstop tanpa jeda istirahat > 30 menit" },
-        { name: "Compulsive Checking", value: "68 kali", desc: "Frekuensi membuka kunci layar gawai hari ini" },
-        { name: "Distraction Tendency", value: "55%", desc: "Porsi screen time yang terjadi pada jam belajar/kerja" },
+        {
+          name: "Midnight Usage",
+          value: "Terdeteksi",
+          desc: "Aktif di jam tidur utama (23:00 - 04:00) dini hari ini",
+        },
+        {
+          name: "Excessive Usage",
+          value: "Terdeteksi",
+          desc: "Durasi total screen time hari ini telah melebihi batas sehat 4 jam",
+        },
+        {
+          name: "Continuous Usage",
+          value: "3 sesi",
+          desc: "Sesi penggunaan layar nonstop tanpa jeda istirahat > 30 menit",
+        },
+        {
+          name: "Compulsive Checking",
+          value: "68 kali",
+          desc: "Frekuensi membuka kunci layar gawai hari ini",
+        },
+        {
+          name: "Distraction Tendency",
+          value: "55%",
+          desc: "Porsi screen time yang terjadi pada jam belajar/kerja",
+        },
       ],
     },
     "7hari": {
@@ -166,11 +320,41 @@ export const analyticsDummy = {
       riskColor: "text-amber-800 bg-amber-50 border-amber-100",
       desc: "Tingkat risiko Anda selama 7 hari terakhir tergolong sedang. Anda memiliki kontrol diri yang cukup baik di siang hari, namun rentan terpengaruh distraksi impulsif di jam malam.",
       breakdown: [
-        { name: "Usage Duration", label: "Rata-rata Screen Time", valueText: "4,8 jam/hari", pct: 60, desc: "Rata-rata durasi harian dalam 7 hari terakhir" },
-        { name: "Open Frequency", label: "Rata-rata membuka aplikasi", valueText: "47 kali/hari", pct: 65, desc: "Frekuensi cek instan harian" },
-        { name: "Midnight Usage", label: "Midnight Usage terdeteksi", valueText: "5 dari 7 hari", pct: 71, desc: "Menggunakan gawai menjelang atau saat jam tidur" },
-        { name: "Continuous Usage", label: "Penggunaan tanpa jeda >60 menit", valueText: "8 sesi", pct: 50, desc: "Total sesi panjang selama 7 hari analisis" },
-        { name: "Productive Hour Usage", label: "Penggunaan pada jam produktif", valueText: "38%", pct: 38, desc: "Porsi screen time yang terjadi di jam produktif" },
+        {
+          name: "Usage Duration",
+          label: "Rata-rata Screen Time",
+          valueText: "4,8 jam/hari",
+          pct: 60,
+          desc: "Rata-rata durasi harian dalam 7 hari terakhir",
+        },
+        {
+          name: "Open Frequency",
+          label: "Rata-rata membuka aplikasi",
+          valueText: "47 kali/hari",
+          pct: 65,
+          desc: "Frekuensi cek instan harian",
+        },
+        {
+          name: "Midnight Usage",
+          label: "Midnight Usage terdeteksi",
+          valueText: "5 dari 7 hari",
+          pct: 71,
+          desc: "Menggunakan gawai menjelang atau saat jam tidur",
+        },
+        {
+          name: "Continuous Usage",
+          label: "Penggunaan tanpa jeda >60 menit",
+          valueText: "8 sesi",
+          pct: 50,
+          desc: "Total sesi panjang selama 7 hari analisis",
+        },
+        {
+          name: "Productive Hour Usage",
+          label: "Penggunaan pada jam produktif",
+          valueText: "38%",
+          pct: 38,
+          desc: "Porsi screen time yang terjadi di jam produktif",
+        },
       ],
       radar: [
         { subject: "Duration", A: 60, fullMark: 100 },
@@ -180,11 +364,31 @@ export const analyticsDummy = {
         { subject: "Productivity", A: 38, fullMark: 100 },
       ],
       indicators: [
-        { name: "Midnight Usage", value: "5/7 hari", desc: "Kecenderungan membuka aplikasi medsos sebelum tidur" },
-        { name: "Excessive Usage", value: "4/7 hari", desc: "Hari-hari di mana durasi screen time harian Anda melebihi 4 jam" },
-        { name: "Continuous Usage", value: "8 sesi", desc: "Total sesi penggunaan nonstop > 60 menit terdeteksi dalam seminggu" },
-        { name: "Compulsive Checking", value: "52 kali/hari", desc: "Rata-rata frekuensi membuka gawai harian dalam 7 hari terakhir" },
-        { name: "Distraction Tendency", value: "34%", desc: "Porsi penggunaan aplikasi hiburan selama jam produktif" },
+        {
+          name: "Midnight Usage",
+          value: "5/7 hari",
+          desc: "Kecenderungan membuka aplikasi medsos sebelum tidur",
+        },
+        {
+          name: "Excessive Usage",
+          value: "4/7 hari",
+          desc: "Hari-hari di mana durasi screen time harian Anda melebihi 4 jam",
+        },
+        {
+          name: "Continuous Usage",
+          value: "8 sesi",
+          desc: "Total sesi penggunaan nonstop > 60 menit terdeteksi dalam seminggu",
+        },
+        {
+          name: "Compulsive Checking",
+          value: "52 kali/hari",
+          desc: "Rata-rata frekuensi membuka gawai harian dalam 7 hari terakhir",
+        },
+        {
+          name: "Distraction Tendency",
+          value: "34%",
+          desc: "Porsi penggunaan aplikasi hiburan selama jam produktif",
+        },
       ],
     },
     "30hari": {
@@ -193,11 +397,41 @@ export const analyticsDummy = {
       riskColor: "text-amber-800 bg-amber-50 border-amber-100",
       desc: "Evaluasi 30 hari menunjukkan tren yang stabil dan cenderung membaik. Pengendalian diri Anda secara umum konsisten, dengan beberapa pengecualian di akhir pekan.",
       breakdown: [
-        { name: "Usage Duration", label: "Rata-rata Screen Time", valueText: "4,2 jam/hari", pct: 52, desc: "Rata-rata durasi harian dalam 30 hari terakhir" },
-        { name: "Open Frequency", label: "Rata-rata membuka aplikasi", valueText: "42 kali/hari", pct: 58, desc: "Frekuensi membuka layar harian" },
-        { name: "Midnight Usage", label: "Midnight Usage terdeteksi", valueText: "16 dari 30 hari", pct: 53, desc: "Aktivitas larut malam diakumulasikan sebulan" },
-        { name: "Continuous Usage", label: "Penggunaan tanpa jeda >60 menit", valueText: "22 sesi", pct: 45, desc: "Total akumulasi sesi panjang selama sebulan" },
-        { name: "Productive Hour Usage", label: "Penggunaan pada jam produktif", valueText: "42%", pct: 42, desc: "Porsi screen time di jam produktif dalam sebulan" },
+        {
+          name: "Usage Duration",
+          label: "Rata-rata Screen Time",
+          valueText: "4,2 jam/hari",
+          pct: 52,
+          desc: "Rata-rata durasi harian dalam 30 hari terakhir",
+        },
+        {
+          name: "Open Frequency",
+          label: "Rata-rata membuka aplikasi",
+          valueText: "42 kali/hari",
+          pct: 58,
+          desc: "Frekuensi membuka layar harian",
+        },
+        {
+          name: "Midnight Usage",
+          label: "Midnight Usage terdeteksi",
+          valueText: "16 dari 30 hari",
+          pct: 53,
+          desc: "Aktivitas larut malam diakumulasikan sebulan",
+        },
+        {
+          name: "Continuous Usage",
+          label: "Penggunaan tanpa jeda >60 menit",
+          valueText: "22 sesi",
+          pct: 45,
+          desc: "Total akumulasi sesi panjang selama sebulan",
+        },
+        {
+          name: "Productive Hour Usage",
+          label: "Penggunaan pada jam produktif",
+          valueText: "42%",
+          pct: 42,
+          desc: "Porsi screen time di jam produktif dalam sebulan",
+        },
       ],
       radar: [
         { subject: "Duration", A: 52, fullMark: 100 },
@@ -207,11 +441,31 @@ export const analyticsDummy = {
         { subject: "Productivity", A: 42, fullMark: 100 },
       ],
       indicators: [
-        { name: "Midnight Usage", value: "16/30 hari", desc: "Akumulasi aktivitas larut malam selama periode sebulan" },
-        { name: "Excessive Usage", value: "18/30 hari", desc: "Banyaknya hari di mana Anda menghabiskan > 4 jam screen time" },
-        { name: "Continuous Usage", value: "22 sesi", desc: "Total sesi penggunaan nonstop > 60 menit sebulan terakhir" },
-        { name: "Compulsive Checking", value: "42 kali/hari", desc: "Rata-rata frekuensi membuka layar gawai harian dalam 30 hari" },
-        { name: "Distraction Tendency", value: "42%", desc: "Persentase distraksi di jam produktif dalam sebulan terakhir" },
+        {
+          name: "Midnight Usage",
+          value: "16/30 hari",
+          desc: "Akumulasi aktivitas larut malam selama periode sebulan",
+        },
+        {
+          name: "Excessive Usage",
+          value: "18/30 hari",
+          desc: "Banyaknya hari di mana Anda menghabiskan > 4 jam screen time",
+        },
+        {
+          name: "Continuous Usage",
+          value: "22 sesi",
+          desc: "Total sesi penggunaan nonstop > 60 menit sebulan terakhir",
+        },
+        {
+          name: "Compulsive Checking",
+          value: "42 kali/hari",
+          desc: "Rata-rata frekuensi membuka layar gawai harian dalam 30 hari",
+        },
+        {
+          name: "Distraction Tendency",
+          value: "42%",
+          desc: "Persentase distraksi di jam produktif dalam sebulan terakhir",
+        },
       ],
     },
     custom: {
@@ -220,11 +474,41 @@ export const analyticsDummy = {
       riskColor: "text-amber-800 bg-amber-50 border-amber-100",
       desc: "Hasil analisis periode kustom (1 Mei - 31 Mei 2026). Perilaku Anda menunjukkan tingkat ketergantungan sedang dengan kecenderungan FOMO di malam hari.",
       breakdown: [
-        { name: "Usage Duration", label: "Rata-rata Screen Time", valueText: "4,9 jam/hari", pct: 62, desc: "Rata-rata durasi harian periode kustom" },
-        { name: "Open Frequency", label: "Rata-rata membuka aplikasi", valueText: "49 kali/hari", pct: 67, desc: "Frekuensi membuka layar harian" },
-        { name: "Midnight Usage", label: "Midnight Usage terdeteksi", valueText: "18 dari 31 hari", pct: 58, desc: "Aktivitas larut malam periode kustom" },
-        { name: "Continuous Usage", label: "Penggunaan tanpa jeda >60 menit", valueText: "24 sesi", pct: 52, desc: "Akumulasi sesi panjang selama periode" },
-        { name: "Productive Hour Usage", label: "Penggunaan pada jam produktif", valueText: "39%", pct: 39, desc: "Porsi screen time di jam produktif periode kustom" },
+        {
+          name: "Usage Duration",
+          label: "Rata-rata Screen Time",
+          valueText: "4,9 jam/hari",
+          pct: 62,
+          desc: "Rata-rata durasi harian periode kustom",
+        },
+        {
+          name: "Open Frequency",
+          label: "Rata-rata membuka aplikasi",
+          valueText: "49 kali/hari",
+          pct: 67,
+          desc: "Frekuensi membuka layar harian",
+        },
+        {
+          name: "Midnight Usage",
+          label: "Midnight Usage terdeteksi",
+          valueText: "18 dari 31 hari",
+          pct: 58,
+          desc: "Aktivitas larut malam periode kustom",
+        },
+        {
+          name: "Continuous Usage",
+          label: "Penggunaan tanpa jeda >60 menit",
+          valueText: "24 sesi",
+          pct: 52,
+          desc: "Akumulasi sesi panjang selama periode",
+        },
+        {
+          name: "Productive Hour Usage",
+          label: "Penggunaan pada jam produktif",
+          valueText: "39%",
+          pct: 39,
+          desc: "Porsi screen time di jam produktif periode kustom",
+        },
       ],
       radar: [
         { subject: "Duration", A: 62, fullMark: 100 },
@@ -234,11 +518,31 @@ export const analyticsDummy = {
         { subject: "Productivity", A: 39, fullMark: 100 },
       ],
       indicators: [
-        { name: "Midnight Usage", value: "18/31 hari", desc: "Akumulasi aktivitas larut malam selama periode kustom" },
-        { name: "Excessive Usage", value: "20/31 hari", desc: "Banyaknya hari melebihi batas wajar screen time" },
-        { name: "Continuous Usage", value: "24 sesi", desc: "Sesi penggunaan layar nonstop tanpa jeda periode kustom" },
-        { name: "Compulsive Checking", value: "49 kali/hari", desc: "Rata-rata frekuensi membuka gawai harian periode kustom" },
-        { name: "Distraction Tendency", value: "39%", desc: "Persentase distraksi di jam produktif periode kustom" },
+        {
+          name: "Midnight Usage",
+          value: "18/31 hari",
+          desc: "Akumulasi aktivitas larut malam selama periode kustom",
+        },
+        {
+          name: "Excessive Usage",
+          value: "20/31 hari",
+          desc: "Banyaknya hari melebihi batas wajar screen time",
+        },
+        {
+          name: "Continuous Usage",
+          value: "24 sesi",
+          desc: "Sesi penggunaan layar nonstop tanpa jeda periode kustom",
+        },
+        {
+          name: "Compulsive Checking",
+          value: "49 kali/hari",
+          desc: "Rata-rata frekuensi membuka gawai harian periode kustom",
+        },
+        {
+          name: "Distraction Tendency",
+          value: "39%",
+          desc: "Persentase distraksi di jam produktif periode kustom",
+        },
       ],
     },
   },
@@ -258,7 +562,8 @@ export const insightDummy = {
       score: 65,
       risk: "High",
       riskColor: "bg-red-100 text-red-800 border-red-200",
-      summary: "Terjadi peningkatan durasi screen time di hari libur sebesar 45%. Sesi malam hari sangat mendominasi aktivitas.",
+      summary:
+        "Terjadi peningkatan durasi screen time di hari libur sebesar 45%. Sesi malam hari sangat mendominasi aktivitas.",
       details:
         "Pada pertengahan Mei, kami mencatat kenaikan signifikan pada penggunaan YouTube di tablet/browser Anda pada hari Sabtu dan Minggu. Total screen time harian menyentuh angka 6.2 jam. Kontributor utama adalah binge-watching video hiburan. Kami merekomendasikan pengetatan kuota harian khusus weekend.",
       recommendations: [
@@ -272,7 +577,8 @@ export const insightDummy = {
       score: 72,
       risk: "Moderate",
       riskColor: "bg-amber-100 text-amber-800 border-amber-200",
-      summary: "Penggunaan jam kerja produktif membaik secara perlahan. Namun, frekuensi mengecek notifikasi instan masih tinggi.",
+      summary:
+        "Penggunaan jam kerja produktif membaik secara perlahan. Namun, frekuensi mengecek notifikasi instan masih tinggi.",
       details:
         "Skor perilaku Anda naik menjadi 72 karena Anda sukses menekan pemakaian Instagram di sela-sela jam kantor. Masalah yang tersisa adalah kebiasaan membuka WhatsApp Web secara berulang setiap 5 menit. Disarankan menutup tab WhatsApp Web saat membutuhkan konsentrasi penuh.",
       recommendations: [
@@ -286,7 +592,8 @@ export const insightDummy = {
       score: 75,
       risk: "Low",
       riskColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
-      summary: "Awal pelacakan yang sehat. Kontrol diri prima dengan tingkat istirahat malam yang sangat teratur.",
+      summary:
+        "Awal pelacakan yang sehat. Kontrol diri prima dengan tingkat istirahat malam yang sangat teratur.",
       details:
         "Minggu pertama perekaman menunjukkan performa ideal. Screen time harian rata-rata berada pada 2.5 jam. Tidak terdeteksi adanya pelanggaran jam malam atau distraksi jam produktif yang berat. Pertahankan kestabilan ini.",
       recommendations: [
@@ -321,7 +628,8 @@ export const notificationPageDummy = {
     {
       id: "1",
       type: "Midnight Alert",
-      message: "Midnight Usage Terdeteksi: Anda membuka Instagram pada jam 23:45 tadi malam.",
+      message:
+        "Midnight Usage Terdeteksi: Anda membuka Instagram pada jam 23:45 tadi malam.",
       timestamp: "10 jam yang lalu",
       read: false,
       iconKey: "shield",
@@ -330,7 +638,8 @@ export const notificationPageDummy = {
     {
       id: "2",
       type: "Usage Warning",
-      message: "Batas Harian Tercapai: TikTok hari ini telah digunakan selama 1 jam 45 menit (Batas wajar: 1.5 jam).",
+      message:
+        "Batas Harian Tercapai: TikTok hari ini telah digunakan selama 1 jam 45 menit (Batas wajar: 1.5 jam).",
       timestamp: "12 jam yang lalu",
       read: false,
       iconKey: "ban",
@@ -339,7 +648,8 @@ export const notificationPageDummy = {
     {
       id: "3",
       type: "Focus Reminder",
-      message: "Peringatan Fokus: Terdeteksi membuka YouTube selama jam produktif (13:10 – 13:40). Tetap fokus pada tugas Anda!",
+      message:
+        "Peringatan Fokus: Terdeteksi membuka YouTube selama jam produktif (13:10 – 13:40). Tetap fokus pada tugas Anda!",
       timestamp: "1 hari yang lalu",
       read: true,
       iconKey: "clock",
@@ -348,7 +658,8 @@ export const notificationPageDummy = {
     {
       id: "4",
       type: "Continuous Usage Reminder",
-      message: "Sesi Tanpa Jeda: Anda berselancar di TikTok selama 40 menit tanpa henti. Regangkan otot Anda!",
+      message:
+        "Sesi Tanpa Jeda: Anda berselancar di TikTok selama 40 menit tanpa henti. Regangkan otot Anda!",
       timestamp: "2 hari yang lalu",
       read: true,
       iconKey: "bell",
@@ -357,7 +668,8 @@ export const notificationPageDummy = {
     {
       id: "5",
       type: "Focus Reminder",
-      message: "Peringatan Fokus: Terdeteksi membuka X (Twitter) pada jam 09:30. Lindungi jam kerja produktif Anda.",
+      message:
+        "Peringatan Fokus: Terdeteksi membuka X (Twitter) pada jam 09:30. Lindungi jam kerja produktif Anda.",
       timestamp: "3 hari yang lalu",
       read: true,
       iconKey: "clock",
@@ -368,15 +680,58 @@ export const notificationPageDummy = {
 
 export const monitoringSettingsDummy = {
   initialApps: [
-    { id: "instagram", name: "Instagram", platform: "Android", enabled: true, category: "Sosial Media", color: "bg-pink-600" },
-    { id: "tiktok", name: "TikTok", platform: "Both", enabled: true, category: "Sosial Media", color: "bg-black" },
-    { id: "youtube", name: "YouTube", platform: "Browser", enabled: true, category: "Hiburan", color: "bg-red-600" },
-    { id: "whatsapp", name: "WhatsApp", platform: "Android", enabled: true, category: "Chatting", color: "bg-green-600" },
+    {
+      id: "instagram",
+      name: "Instagram",
+      platform: "Android",
+      enabled: true,
+      category: "Sosial Media",
+      color: "bg-pink-600",
+    },
+    {
+      id: "tiktok",
+      name: "TikTok",
+      platform: "Both",
+      enabled: true,
+      category: "Sosial Media",
+      color: "bg-black",
+    },
+    {
+      id: "youtube",
+      name: "YouTube",
+      platform: "Browser",
+      enabled: true,
+      category: "Hiburan",
+      color: "bg-red-600",
+    },
+    {
+      id: "whatsapp",
+      name: "WhatsApp",
+      platform: "Android",
+      enabled: true,
+      category: "Chatting",
+      color: "bg-green-600",
+    },
   ],
   availableAddApps: [
-    { id: "x", name: "X (Twitter)", category: "Sosial Media", color: "bg-zinc-800" },
-    { id: "facebook", name: "Facebook", category: "Sosial Media", color: "bg-blue-600" },
-    { id: "reddit", name: "Reddit", category: "Diskusi", color: "bg-orange-500" },
+    {
+      id: "x",
+      name: "X (Twitter)",
+      category: "Sosial Media",
+      color: "bg-zinc-800",
+    },
+    {
+      id: "facebook",
+      name: "Facebook",
+      category: "Sosial Media",
+      color: "bg-blue-600",
+    },
+    {
+      id: "reddit",
+      name: "Reddit",
+      category: "Diskusi",
+      color: "bg-orange-500",
+    },
   ],
   hours: {
     productiveStart: "08:00",
@@ -426,12 +781,42 @@ export const settingsDummy = {
 
 export const onboardingDummy = {
   availableApps: [
-    { id: "instagram", name: "Instagram", category: "Sosial Media", color: "from-pink-500 to-purple-600" },
-    { id: "tiktok", name: "TikTok", category: "Sosial Media", color: "from-gray-900 to-black" },
-    { id: "youtube", name: "YouTube", category: "Hiburan", color: "from-red-600 to-red-700" },
-    { id: "x", name: "X (Twitter)", category: "Sosial Media", color: "from-zinc-800 to-zinc-900" },
-    { id: "whatsapp", name: "WhatsApp", category: "Chatting", color: "from-green-500 to-green-600" },
-    { id: "facebook", name: "Facebook", category: "Sosial Media", color: "from-blue-600 to-blue-700" },
+    {
+      id: "instagram",
+      name: "Instagram",
+      category: "Sosial Media",
+      color: "from-pink-500 to-purple-600",
+    },
+    {
+      id: "tiktok",
+      name: "TikTok",
+      category: "Sosial Media",
+      color: "from-gray-900 to-black",
+    },
+    {
+      id: "youtube",
+      name: "YouTube",
+      category: "Hiburan",
+      color: "from-red-600 to-red-700",
+    },
+    {
+      id: "x",
+      name: "X (Twitter)",
+      category: "Sosial Media",
+      color: "from-zinc-800 to-zinc-900",
+    },
+    {
+      id: "whatsapp",
+      name: "WhatsApp",
+      category: "Chatting",
+      color: "from-green-500 to-green-600",
+    },
+    {
+      id: "facebook",
+      name: "Facebook",
+      category: "Sosial Media",
+      color: "from-blue-600 to-blue-700",
+    },
   ],
   selectedApps: ["instagram", "tiktok"],
   productiveStart: "08:00",

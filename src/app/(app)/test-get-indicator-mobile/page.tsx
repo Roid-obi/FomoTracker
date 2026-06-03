@@ -1,9 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { fetchInstalledApps, checkAndRequestUsagePermission, InstalledApp, syncUsageStatsClient } from "@/lib/capacitor/usageStats";
-import { Smartphone, Search, Check, RefreshCw, Database, Moon, Clock, Flame, Activity, Briefcase, AlertCircle, ShieldCheck, CheckSquare, Square, HelpCircle } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
+import {
+  Activity,
+  AlertCircle,
+  Briefcase,
+  Check,
+  CheckSquare,
+  Clock,
+  Database,
+  Flame,
+  HelpCircle,
+  Moon,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Smartphone,
+  Square,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  checkAndRequestUsagePermission,
+  fetchInstalledApps,
+  type InstalledApp,
+  syncUsageStatsClient,
+} from "@/lib/capacitor/usageStats";
 
 export default function TestGetIndicatorMobilePage() {
   const [userId, setUserId] = useState("2f57a6f4-7ccb-4f34-bebf-b0d2c4c2f803");
@@ -82,7 +103,9 @@ export default function TestGetIndicatorMobilePage() {
     try {
       const apps = await fetchInstalledApps();
       // Sort alphabetically
-      const sorted = [...apps].sort((a, b) => a.appName.localeCompare(b.appName));
+      const sorted = [...apps].sort((a, b) =>
+        a.appName.localeCompare(b.appName),
+      );
       setInstalledApps(sorted);
     } catch (error) {
       console.error("Failed to load apps:", error);
@@ -149,15 +172,25 @@ export default function TestGetIndicatorMobilePage() {
         // Browser/Mock Mode - calculate indicators using web sliders
         const mockResults = selectedPackages.map((pkg) => {
           const appInfo = installedApps.find((a) => a.packageName === pkg);
-          const appName = appInfo ? appInfo.appName : pkg.split(".").pop() || pkg;
+          const appName = appInfo
+            ? appInfo.appName
+            : pkg.split(".").pop() || pkg;
 
           // Introduce a bit of variation based on package name length
           const varianceFactor = (pkg.length % 5) * 0.1 + 0.8; // between 0.8 and 1.2
-          const totalDurationSec = Math.floor(mockDurationMin * 60 * varianceFactor);
+          const totalDurationSec = Math.floor(
+            mockDurationMin * 60 * varianceFactor,
+          );
           const openFreq = Math.round(mockFrequency * varianceFactor);
-          const midnightSec = Math.floor(mockMidnightMin * 60 * (varianceFactor > 1 ? 0.8 : 1.2));
-          const continuousSec = Math.floor(mockContinuousMin * 60 * (varianceFactor * 0.9));
-          const productiveSec = Math.floor(mockProductiveMin * 60 * varianceFactor);
+          const midnightSec = Math.floor(
+            mockMidnightMin * 60 * (varianceFactor > 1 ? 0.8 : 1.2),
+          );
+          const continuousSec = Math.floor(
+            mockContinuousMin * 60 * (varianceFactor * 0.9),
+          );
+          const productiveSec = Math.floor(
+            mockProductiveMin * 60 * varianceFactor,
+          );
 
           return {
             packageName: pkg,
@@ -173,7 +206,9 @@ export default function TestGetIndicatorMobilePage() {
       } else {
         // Native Capacitor Integration
         // Dynamically import Capacitor plugins only on Android
-        const { analyzeUsageEvents, fetchUsageEvents } = await import("../../../lib/capacitor/usageEvents");
+        const { analyzeUsageEvents, fetchUsageEvents } = await import(
+          "../../../lib/capacitor/usageEvents"
+        );
         const { registerPlugin } = await import("@capacitor/core");
 
         // Define types locally for compilation safety
@@ -182,28 +217,43 @@ export default function TestGetIndicatorMobilePage() {
           totalTimeInForeground: number;
         }
         interface CapacitorUsageStatsPlugin {
-          queryAndAggregateUsageStats(options: { beginTime: number; endTime: number }): Promise<Record<string, UsageStatRecord>>;
+          queryAndAggregateUsageStats(options: {
+            beginTime: number;
+            endTime: number;
+          }): Promise<Record<string, UsageStatRecord>>;
         }
 
-        const CapacitorUsageStats = registerPlugin<CapacitorUsageStatsPlugin>("CapacitorUsageStatsManager");
+        const CapacitorUsageStats = registerPlugin<CapacitorUsageStatsPlugin>(
+          "CapacitorUsageStatsManager",
+        );
 
         const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfDay = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
 
         // Get raw aggregated duration today
-        const statsRecord = await CapacitorUsageStats.queryAndAggregateUsageStats({
-          beginTime: startOfDay.getTime(),
-          endTime: now.getTime(),
-        });
+        const statsRecord =
+          await CapacitorUsageStats.queryAndAggregateUsageStats({
+            beginTime: startOfDay.getTime(),
+            endTime: now.getTime(),
+          });
 
         // Get events for detailed indicators
-        const rawEvents = await fetchUsageEvents(startOfDay.getTime(), now.getTime());
+        const rawEvents = await fetchUsageEvents(
+          startOfDay.getTime(),
+          now.getTime(),
+        );
         const detailedSessions = analyzeUsageEvents(rawEvents);
 
         // Map outcomes
         const nativeResults = selectedPackages.map((pkg) => {
           const appInfo = installedApps.find((a) => a.packageName === pkg);
-          const appName = appInfo ? appInfo.appName : pkg.split(".").pop() || pkg;
+          const appName = appInfo
+            ? appInfo.appName
+            : pkg.split(".").pop() || pkg;
 
           const stat = statsRecord[pkg];
           const details = detailedSessions[pkg];
@@ -211,11 +261,17 @@ export default function TestGetIndicatorMobilePage() {
           return {
             packageName: pkg,
             appName,
-            totalDurationSeconds: stat ? Math.floor(stat.totalTimeInForeground / 1000) : 0,
+            totalDurationSeconds: stat
+              ? Math.floor(stat.totalTimeInForeground / 1000)
+              : 0,
             openFrequency: details ? details.frequency : 0,
-            midnightDurationSeconds: details ? details.midnightDurationSeconds : 0,
+            midnightDurationSeconds: details
+              ? details.midnightDurationSeconds
+              : 0,
             maxContinuousSeconds: details ? details.maxContinuousSeconds : 0,
-            productiveHourDurationSeconds: details ? details.productiveHourDurationSeconds : 0,
+            productiveHourDurationSeconds: details
+              ? details.productiveHourDurationSeconds
+              : 0,
           };
         });
         setIndicatorData(nativeResults);
@@ -279,20 +335,33 @@ export default function TestGetIndicatorMobilePage() {
   };
 
   // Filtering apps list based on query
-  const filteredApps = installedApps.filter((app) => app.appName.toLowerCase().includes(searchQuery.toLowerCase()) || app.packageName.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredApps = installedApps.filter(
+    (app) =>
+      app.appName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.packageName.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
-    <div className="space-y-6 font-poppins text-primary" id="testing-page-container">
+    <div
+      className="space-y-6 font-poppins text-primary"
+      id="testing-page-container"
+    >
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-primary tracking-tight">Mobile Indicator Tester</h1>
-          <p className="text-xs sm:text-sm text-muted font-light mt-1">Uji pembacaan data aplikasi mobile (Android) dan kalkulasi indikator FoMO.</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-primary tracking-tight">
+            Mobile Indicator Tester
+          </h1>
+          <p className="text-xs sm:text-sm text-muted font-light mt-1">
+            Uji pembacaan data aplikasi mobile (Android) dan kalkulasi indikator
+            FoMO.
+          </p>
         </div>
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card shadow-xs text-xs font-semibold text-primary">
           <Smartphone className="w-4 h-4 text-secondary" />
           <span>
-            Platform: <span className="uppercase text-secondary">{platform}</span>
+            Platform:{" "}
+            <span className="uppercase text-secondary">{platform}</span>
           </span>
         </div>
       </div>
@@ -301,11 +370,19 @@ export default function TestGetIndicatorMobilePage() {
       <div className="bg-card border border-border rounded-3xl p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className={`p-3 rounded-2xl ${hasPermission ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
-              {hasPermission ? <ShieldCheck className="w-6 h-6 animate-pulse" /> : <AlertCircle className="w-6 h-6 animate-bounce" />}
+            <div
+              className={`p-3 rounded-2xl ${hasPermission ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}
+            >
+              {hasPermission ? (
+                <ShieldCheck className="w-6 h-6 animate-pulse" />
+              ) : (
+                <AlertCircle className="w-6 h-6 animate-bounce" />
+              )}
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-primary">Izin Akses Penggunaan Aplikasi</h3>
+              <h3 className="text-sm font-bold text-primary">
+                Izin Akses Penggunaan Aplikasi
+              </h3>
               <p className="text-xs text-muted font-light leading-relaxed">
                 {hasPermission
                   ? "Izin akses statistik penggunaan (Usage Access) telah diberikan. Aplikasi dapat membaca durasi dan aktivitas."
@@ -332,11 +409,19 @@ export default function TestGetIndicatorMobilePage() {
           <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="font-bold text-base text-primary">1. Pilih Aplikasi</h3>
-                <p className="text-xs text-muted font-light mt-0.5">Tentukan aplikasi media sosial atau produktivitas yang ingin dipantau.</p>
+                <h3 className="font-bold text-base text-primary">
+                  1. Pilih Aplikasi
+                </h3>
+                <p className="text-xs text-muted font-light mt-0.5">
+                  Tentukan aplikasi media sosial atau produktivitas yang ingin
+                  dipantau.
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={handleSelectAll} className="px-3 py-1.5 rounded-xl border border-border hover:bg-muted-light text-[10px] font-semibold transition-all cursor-pointer">
+                <button
+                  onClick={handleSelectAll}
+                  className="px-3 py-1.5 rounded-xl border border-border hover:bg-muted-light text-[10px] font-semibold transition-all cursor-pointer"
+                >
                   Pilih Semua
                 </button>
                 <button
@@ -366,20 +451,34 @@ export default function TestGetIndicatorMobilePage() {
                 className="p-2.5 rounded-xl border border-border hover:bg-muted-light transition-all cursor-pointer self-stretch sm:self-auto flex items-center justify-center"
                 title="Refresh Daftar Aplikasi"
               >
-                <RefreshCw className={`w-4 h-4 text-muted ${isLoadingApps ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-4 h-4 text-muted ${isLoadingApps ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
 
             {/* Selected Apps Pills */}
             {selectedPackages.length > 0 && (
               <div className="flex flex-wrap gap-1.5 p-2 rounded-2xl bg-muted-light/60 border border-border/50">
-                <span className="text-[10px] font-bold text-muted uppercase self-center px-1.5">Terpilih ({selectedPackages.length}):</span>
+                <span className="text-[10px] font-bold text-muted uppercase self-center px-1.5">
+                  Terpilih ({selectedPackages.length}):
+                </span>
                 {selectedPackages.map((pkg) => {
-                  const appObj = installedApps.find((a) => a.packageName === pkg);
+                  const appObj = installedApps.find(
+                    (a) => a.packageName === pkg,
+                  );
                   return (
-                    <span key={pkg} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-medium">
-                      <span>{appObj ? appObj.appName : pkg.split(".").pop()}</span>
-                      <button onClick={() => handleToggleApp(pkg)} className="hover:text-accent font-bold ml-1 text-xs">
+                    <span
+                      key={pkg}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-medium"
+                    >
+                      <span>
+                        {appObj ? appObj.appName : pkg.split(".").pop()}
+                      </span>
+                      <button
+                        onClick={() => handleToggleApp(pkg)}
+                        className="hover:text-accent font-bold ml-1 text-xs"
+                      >
                         ×
                       </button>
                     </span>
@@ -393,14 +492,20 @@ export default function TestGetIndicatorMobilePage() {
               {isLoadingApps ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-2">
                   <RefreshCw className="w-8 h-8 text-secondary animate-spin" />
-                  <p className="text-xs text-muted font-light">Membaca aplikasi dari mobile...</p>
+                  <p className="text-xs text-muted font-light">
+                    Membaca aplikasi dari mobile...
+                  </p>
                 </div>
               ) : filteredApps.length === 0 ? (
-                <div className="text-center py-12 text-xs text-muted font-light">Aplikasi tidak ditemukan.</div>
+                <div className="text-center py-12 text-xs text-muted font-light">
+                  Aplikasi tidak ditemukan.
+                </div>
               ) : (
                 <div className="divide-y divide-border">
                   {filteredApps.map((app) => {
-                    const isSelected = selectedPackages.includes(app.packageName);
+                    const isSelected = selectedPackages.includes(
+                      app.packageName,
+                    );
                     return (
                       <div
                         key={app.packageName}
@@ -408,17 +513,33 @@ export default function TestGetIndicatorMobilePage() {
                         className={`flex items-center justify-between p-3.5 hover:bg-muted-light/30 transition-all cursor-pointer select-none ${isSelected ? "bg-muted-light/40" : ""}`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white uppercase shadow-xs ${app.isSystem ? "bg-secondary" : "bg-primary"}`}>
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white uppercase shadow-xs ${app.isSystem ? "bg-secondary" : "bg-primary"}`}
+                          >
                             {app.appName.substring(0, 2)}
                           </div>
                           <div className="space-y-0.5">
-                            <span className="text-xs font-bold text-primary block">{app.appName}</span>
-                            <span className="text-[10px] text-muted block truncate font-mono">{app.packageName}</span>
+                            <span className="text-xs font-bold text-primary block">
+                              {app.appName}
+                            </span>
+                            <span className="text-[10px] text-muted block truncate font-mono">
+                              {app.packageName}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {app.isSystem && <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded bg-muted-light text-muted uppercase">System</span>}
-                          <div>{isSelected ? <CheckSquare className="w-5 h-5 text-secondary" /> : <Square className="w-5 h-5 text-border hover:text-muted" />}</div>
+                          {app.isSystem && (
+                            <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded bg-muted-light text-muted uppercase">
+                              System
+                            </span>
+                          )}
+                          <div>
+                            {isSelected ? (
+                              <CheckSquare className="w-5 h-5 text-secondary" />
+                            ) : (
+                              <Square className="w-5 h-5 text-border hover:text-muted" />
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -454,7 +575,9 @@ export default function TestGetIndicatorMobilePage() {
                   <span className="text-muted flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" /> Total Durasi
                   </span>
-                  <span className="text-primary font-bold">{mockDurationMin} menit</span>
+                  <span className="text-primary font-bold">
+                    {mockDurationMin} menit
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -473,7 +596,9 @@ export default function TestGetIndicatorMobilePage() {
                   <span className="text-muted flex items-center gap-1">
                     <Activity className="w-3.5 h-3.5" /> Frekuensi Buka
                   </span>
-                  <span className="text-primary font-bold">{mockFrequency} kali</span>
+                  <span className="text-primary font-bold">
+                    {mockFrequency} kali
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -492,7 +617,9 @@ export default function TestGetIndicatorMobilePage() {
                   <span className="text-muted flex items-center gap-1">
                     <Moon className="w-3.5 h-3.5" /> Durasi Malam Hari
                   </span>
-                  <span className="text-primary font-bold">{mockMidnightMin} menit</span>
+                  <span className="text-primary font-bold">
+                    {mockMidnightMin} menit
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -500,7 +627,11 @@ export default function TestGetIndicatorMobilePage() {
                   max={mockDurationMin}
                   disabled={platform === "android"}
                   value={mockMidnightMin}
-                  onChange={(e) => setMockMidnightMin(Math.min(Number(e.target.value), mockDurationMin))}
+                  onChange={(e) =>
+                    setMockMidnightMin(
+                      Math.min(Number(e.target.value), mockDurationMin),
+                    )
+                  }
                   className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
                 />
               </div>
@@ -511,7 +642,9 @@ export default function TestGetIndicatorMobilePage() {
                   <span className="text-muted flex items-center gap-1">
                     <Flame className="w-3.5 h-3.5" /> Durasi Tanpa Jeda
                   </span>
-                  <span className="text-primary font-bold">{mockContinuousMin} menit</span>
+                  <span className="text-primary font-bold">
+                    {mockContinuousMin} menit
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -519,7 +652,11 @@ export default function TestGetIndicatorMobilePage() {
                   max={mockDurationMin}
                   disabled={platform === "android"}
                   value={mockContinuousMin}
-                  onChange={(e) => setMockContinuousMin(Math.min(Number(e.target.value), mockDurationMin))}
+                  onChange={(e) =>
+                    setMockContinuousMin(
+                      Math.min(Number(e.target.value), mockDurationMin),
+                    )
+                  }
                   className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
                 />
               </div>
@@ -530,7 +667,9 @@ export default function TestGetIndicatorMobilePage() {
                   <span className="text-muted flex items-center gap-1">
                     <Briefcase className="w-3.5 h-3.5" /> Jam Produktif
                   </span>
-                  <span className="text-primary font-bold">{mockProductiveMin} menit</span>
+                  <span className="text-primary font-bold">
+                    {mockProductiveMin} menit
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -538,7 +677,11 @@ export default function TestGetIndicatorMobilePage() {
                   max={mockDurationMin}
                   disabled={platform === "android"}
                   value={mockProductiveMin}
-                  onChange={(e) => setMockProductiveMin(Math.min(Number(e.target.value), mockDurationMin))}
+                  onChange={(e) =>
+                    setMockProductiveMin(
+                      Math.min(Number(e.target.value), mockDurationMin),
+                    )
+                  }
                   className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
                 />
               </div>
@@ -551,8 +694,13 @@ export default function TestGetIndicatorMobilePage() {
       <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="font-bold text-base text-primary">2. Hasil Kalkulasi Indikator</h3>
-            <p className="text-xs text-muted font-light mt-0.5">Tekan tombol di samping untuk mengambil dan menguji kalkulasi indikator.</p>
+            <h3 className="font-bold text-base text-primary">
+              2. Hasil Kalkulasi Indikator
+            </h3>
+            <p className="text-xs text-muted font-light mt-0.5">
+              Tekan tombol di samping untuk mengambil dan menguji kalkulasi
+              indikator.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -599,7 +747,9 @@ export default function TestGetIndicatorMobilePage() {
         {syncStatus && (
           <div
             className={`p-4 rounded-2xl border text-xs font-semibold flex items-center gap-2 ${
-              syncStatus.success ? "bg-emerald-50 border-emerald-100 text-emerald-800" : "bg-red-50 border-red-100 text-red-800"
+              syncStatus.success
+                ? "bg-emerald-50 border-emerald-100 text-emerald-800"
+                : "bg-red-50 border-red-100 text-red-800"
             }`}
           >
             <Check className="w-4 h-4" />
@@ -610,18 +760,28 @@ export default function TestGetIndicatorMobilePage() {
         {/* Indicator Cards List */}
         {indicatorData.length === 0 ? (
           <div className="text-center py-12 border border-dashed border-border rounded-2xl text-xs text-muted font-light">
-            Belum ada data indikator. Silakan pilih aplikasi dan tekan tombol "Ambil Data Indikator".
+            Belum ada data indikator. Silakan pilih aplikasi dan tekan tombol
+            "Ambil Data Indikator".
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {indicatorData.map((data) => (
-              <div key={data.packageName} className="bg-card border border-border rounded-2xl p-5 space-y-4 hover:border-secondary transition-all group">
+              <div
+                key={data.packageName}
+                className="bg-card border border-border rounded-2xl p-5 space-y-4 hover:border-secondary transition-all group"
+              >
                 {/* Header app */}
                 <div className="flex items-center gap-3 pb-3 border-b border-border">
-                  <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center text-sm font-black uppercase">{data.appName.substring(0, 2)}</div>
+                  <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center text-sm font-black uppercase">
+                    {data.appName.substring(0, 2)}
+                  </div>
                   <div>
-                    <h4 className="text-sm font-bold text-primary">{data.appName}</h4>
-                    <p className="text-[10px] text-muted font-mono">{data.packageName}</p>
+                    <h4 className="text-sm font-bold text-primary">
+                      {data.appName}
+                    </h4>
+                    <p className="text-[10px] text-muted font-mono">
+                      {data.packageName}
+                    </p>
                   </div>
                 </div>
 
@@ -633,7 +793,9 @@ export default function TestGetIndicatorMobilePage() {
                       <Clock className="w-3.5 h-3.5 text-indigo-500" />
                       <span>Usage Duration</span>
                     </span>
-                    <p className="text-sm font-bold text-primary">{formatDuration(data.totalDurationSeconds)}</p>
+                    <p className="text-sm font-bold text-primary">
+                      {formatDuration(data.totalDurationSeconds)}
+                    </p>
                   </div>
 
                   {/* Open Frequency */}
@@ -642,7 +804,9 @@ export default function TestGetIndicatorMobilePage() {
                       <Activity className="w-3.5 h-3.5 text-emerald-500" />
                       <span>Open Frequency</span>
                     </span>
-                    <p className="text-sm font-bold text-primary">{data.openFrequency} kali</p>
+                    <p className="text-sm font-bold text-primary">
+                      {data.openFrequency} kali
+                    </p>
                   </div>
 
                   {/* Midnight Usage */}
@@ -651,7 +815,9 @@ export default function TestGetIndicatorMobilePage() {
                       <Moon className="w-3.5 h-3.5 text-amber-500" />
                       <span>Midnight Usage</span>
                     </span>
-                    <p className="text-sm font-bold text-primary">{formatDuration(data.midnightDurationSeconds)}</p>
+                    <p className="text-sm font-bold text-primary">
+                      {formatDuration(data.midnightDurationSeconds)}
+                    </p>
                   </div>
 
                   {/* Continuous Usage */}
@@ -660,7 +826,9 @@ export default function TestGetIndicatorMobilePage() {
                       <Flame className="w-3.5 h-3.5 text-orange-500" />
                       <span>Continuous Usage</span>
                     </span>
-                    <p className="text-sm font-bold text-primary">{formatDuration(data.maxContinuousSeconds)}</p>
+                    <p className="text-sm font-bold text-primary">
+                      {formatDuration(data.maxContinuousSeconds)}
+                    </p>
                   </div>
 
                   {/* Productivity Hour Usage */}
@@ -669,7 +837,9 @@ export default function TestGetIndicatorMobilePage() {
                       <Briefcase className="w-3.5 h-3.5 text-blue-500" />
                       <span>Productivity Hour Usage</span>
                     </span>
-                    <p className="text-sm font-bold text-primary">{formatDuration(data.productiveHourDurationSeconds)}</p>
+                    <p className="text-sm font-bold text-primary">
+                      {formatDuration(data.productiveHourDurationSeconds)}
+                    </p>
                   </div>
                 </div>
               </div>

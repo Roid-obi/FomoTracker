@@ -173,7 +173,8 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
           .from("daily_stats")
           .update({
             total_duration_seconds: durationSeconds,
-            open_frequency: stat.openFrequency || existingDailyStat.open_frequency,
+            open_frequency:
+              stat.openFrequency || existingDailyStat.open_frequency,
             midnight_duration_seconds:
               stat.midnightDurationSeconds ||
               existingDailyStat.midnight_duration_seconds,
@@ -191,20 +192,18 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
           continue;
         }
       } else {
-        const { error: insertErr } = await supabase
-          .from("daily_stats")
-          .insert({
-            user_id: userId,
-            app_id: appRecord.id,
-            stat_date: today,
-            total_duration_seconds: durationSeconds,
-            open_frequency: stat.openFrequency || 1,
-            midnight_duration_seconds: stat.midnightDurationSeconds || 0,
-            productive_hour_duration_seconds:
-              stat.productiveHourDurationSeconds || 0,
-            max_continuous_seconds: stat.maxContinuousSeconds || 0,
-            peak_active_hour: 0,
-          });
+        const { error: insertErr } = await supabase.from("daily_stats").insert({
+          user_id: userId,
+          app_id: appRecord.id,
+          stat_date: today,
+          total_duration_seconds: durationSeconds,
+          open_frequency: stat.openFrequency || 1,
+          midnight_duration_seconds: stat.midnightDurationSeconds || 0,
+          productive_hour_duration_seconds:
+            stat.productiveHourDurationSeconds || 0,
+          max_continuous_seconds: stat.maxContinuousSeconds || 0,
+          peak_active_hour: 0,
+        });
 
         if (insertErr) {
           console.error("Failed to insert daily stats:", insertErr);

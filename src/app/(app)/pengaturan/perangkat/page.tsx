@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Briefcase,
   Check,
@@ -12,6 +11,7 @@ import {
   Smartphone,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
 import {
   initialApps,
   initialUserDevices,
@@ -23,28 +23,34 @@ export default function PerangkatSettingsPage() {
 
   // Connection states simulation
   const [androidConnected, setAndroidConnected] = useState(
-    initialUserDevices.find((d) => d.platform === "android_app")?.is_connected ?? true
+    initialUserDevices.find((d) => d.platform === "android_app")
+      ?.is_connected ?? true,
   );
   const [browserConnected, setBrowserConnected] = useState(
-    initialUserDevices.find((d) => d.platform === "browser_extension")?.is_connected ?? true
+    initialUserDevices.find((d) => d.platform === "browser_extension")
+      ?.is_connected ?? true,
   );
 
   // Time settings
-  const [prodStart, setProdStart] = useState(settings?.productive_start || "08:00");
+  const [prodStart, setProdStart] = useState(
+    settings?.productive_start || "08:00",
+  );
   const [prodEnd, setProdEnd] = useState(settings?.productive_end || "17:00");
-  const [sleepStart, setSleepStart] = useState(settings?.sleep_start || "22:00");
+  const [sleepStart, setSleepStart] = useState(
+    settings?.sleep_start || "22:00",
+  );
   const [sleepEnd, setSleepEnd] = useState(settings?.sleep_end || "06:00");
 
   // Tracked apps
   const [trackedApps, setTrackedApps] = useState(
-    initialApps.slice(0, 4) // mock first 4 as active
+    initialApps.slice(0, 4), // mock first 4 as active
   );
   const [availableAppsToConnect, setAvailableAppsToConnect] = useState(
-    initialApps.slice(4) // mock rest as inactives
+    initialApps.slice(4), // mock rest as inactives
   );
   const [isAddingApp, setIsAddingApp] = useState(false);
 
-  const handleAddApp = (app: typeof initialApps[0]) => {
+  const handleAddApp = (app: (typeof initialApps)[0]) => {
     setTrackedApps((prev) => [...prev, app]);
     setAvailableAppsToConnect((prev) => prev.filter((a) => a.id !== app.id));
     setIsAddingApp(false);
@@ -83,15 +89,20 @@ export default function PerangkatSettingsPage() {
     <div className="space-y-8 font-poppins">
       {/* Header */}
       <div>
-        <h2 className="text-base font-extrabold text-primary">Perangkat & Aplikasi</h2>
+        <h2 className="text-base font-extrabold text-primary">
+          Perangkat & Aplikasi
+        </h2>
         <p className="text-[11px] text-muted font-light mt-0.5">
-          Hubungkan gawai pelacak Anda, kelola batasan aplikasi media sosial, dan atur waktu produktif.
+          Hubungkan gawai pelacak Anda, kelola batasan aplikasi media sosial,
+          dan atur waktu produktif.
         </p>
       </div>
 
       {/* Perangkat Terhubung */}
       <section className="space-y-4">
-        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Perangkat Terhubung</h3>
+        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
+          Perangkat Terhubung
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Android App Card */}
           <div className="p-4 rounded-2xl border border-border bg-background/50 flex flex-col justify-between h-36">
@@ -101,8 +112,12 @@ export default function PerangkatSettingsPage() {
                   <Smartphone className="w-5 h-5" />
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-primary">Android App</h4>
-                  <p className="text-[10px] text-muted font-light leading-normal">Samsung Galaxy S23</p>
+                  <h4 className="text-xs font-bold text-primary">
+                    Android App
+                  </h4>
+                  <p className="text-[10px] text-muted font-light leading-normal">
+                    Samsung Galaxy S23
+                  </p>
                 </div>
               </div>
               <div>
@@ -120,7 +135,9 @@ export default function PerangkatSettingsPage() {
 
             <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
               <span className="text-[10px] text-muted font-light">
-                {androidConnected ? "Terakhir sinkron: 20 menit lalu" : "Belum tersinkron"}
+                {androidConnected
+                  ? "Terakhir sinkron: 20 menit lalu"
+                  : "Belum tersinkron"}
               </span>
               <button
                 type="button"
@@ -140,8 +157,12 @@ export default function PerangkatSettingsPage() {
                   <Laptop className="w-5 h-5" />
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-primary">Browser Extension</h4>
-                  <p className="text-[10px] text-muted font-light leading-normal">Google Chrome</p>
+                  <h4 className="text-xs font-bold text-primary">
+                    Browser Extension
+                  </h4>
+                  <p className="text-[10px] text-muted font-light leading-normal">
+                    Google Chrome
+                  </p>
                 </div>
               </div>
               <div>
@@ -159,7 +180,9 @@ export default function PerangkatSettingsPage() {
 
             <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
               <span className="text-[10px] text-muted font-light">
-                {browserConnected ? "Terakhir sinkron: 15 menit lalu" : "Belum tersinkron"}
+                {browserConnected
+                  ? "Terakhir sinkron: 15 menit lalu"
+                  : "Belum tersinkron"}
               </span>
               <button
                 type="button"
@@ -176,7 +199,9 @@ export default function PerangkatSettingsPage() {
       {/* Aplikasi yang Dipantau */}
       <section className="space-y-4">
         <div className="flex justify-between items-baseline">
-          <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Aplikasi yang Dipantau</h3>
+          <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
+            Aplikasi yang Dipantau
+          </h3>
           <button
             type="button"
             onClick={() => setIsAddingApp(!isAddingApp)}
@@ -189,10 +214,14 @@ export default function PerangkatSettingsPage() {
         {/* Modal-like inline selection for adding apps */}
         {isAddingApp && (
           <div className="p-4 border border-primary/20 bg-primary/[0.01] rounded-2xl space-y-3">
-            <span className="block text-[10px] font-bold text-muted uppercase">Pilih Aplikasi untuk Ditambahkan</span>
+            <span className="block text-[10px] font-bold text-muted uppercase">
+              Pilih Aplikasi untuk Ditambahkan
+            </span>
             <div className="flex flex-wrap gap-2">
               {availableAppsToConnect.length === 0 ? (
-                <span className="text-xs text-muted font-light">Semua aplikasi sudah dipantau.</span>
+                <span className="text-xs text-muted font-light">
+                  Semua aplikasi sudah dipantau.
+                </span>
               ) : (
                 availableAppsToConnect.map((app) => (
                   <button
@@ -219,12 +248,14 @@ export default function PerangkatSettingsPage() {
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
                   className={`w-7.5 h-7.5 rounded-lg bg-gradient-to-tr ${getAppColor(
-                    app.name
+                    app.name,
                   )} flex items-center justify-center text-white text-[9px] font-bold shrink-0 shadow-2xs`}
                 >
                   {app.name.substring(0, 2)}
                 </div>
-                <span className="text-xs font-bold text-primary truncate">{app.name}</span>
+                <span className="text-xs font-bold text-primary truncate">
+                  {app.name}
+                </span>
               </div>
               <button
                 type="button"
@@ -241,20 +272,29 @@ export default function PerangkatSettingsPage() {
 
       {/* Target Jam Waktu */}
       <section className="space-y-4">
-        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">Target Waktu Penggunaan</h3>
+        <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
+          Target Waktu Penggunaan
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Jam Belajar / Kerja */}
           <div className="p-5 rounded-2xl border border-border bg-background/40 space-y-4">
             <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
               <Briefcase className="w-4.5 h-4.5 text-primary shrink-0" />
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-primary">Jam Belajar / Kerja</h4>
-                <p className="text-[10px] text-muted font-light">Mendeteksi distraksi media sosial saat berfokus.</p>
+                <h4 className="text-xs font-bold text-primary">
+                  Jam Belajar / Kerja
+                </h4>
+                <p className="text-[10px] text-muted font-light">
+                  Mendeteksi distraksi media sosial saat berfokus.
+                </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="prod-start-picker" className="block text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="prod-start-picker"
+                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Jam Mulai
                 </label>
                 <input
@@ -266,7 +306,10 @@ export default function PerangkatSettingsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label htmlFor="prod-end-picker" className="block text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="prod-end-picker"
+                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Jam Selesai
                 </label>
                 <input
@@ -285,13 +328,20 @@ export default function PerangkatSettingsPage() {
             <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
               <Moon className="w-4.5 h-4.5 text-primary shrink-0" />
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-primary">Jam Tidur Malam</h4>
-                <p className="text-[10px] text-muted font-light">Mendeteksi aktivitas scroll larut malam sebelum tidur.</p>
+                <h4 className="text-xs font-bold text-primary">
+                  Jam Tidur Malam
+                </h4>
+                <p className="text-[10px] text-muted font-light">
+                  Mendeteksi aktivitas scroll larut malam sebelum tidur.
+                </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="sleep-start-picker" className="block text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="sleep-start-picker"
+                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Jam Mulai
                 </label>
                 <input
@@ -303,7 +353,10 @@ export default function PerangkatSettingsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label htmlFor="sleep-end-picker" className="block text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="sleep-end-picker"
+                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Jam Selesai
                 </label>
                 <input

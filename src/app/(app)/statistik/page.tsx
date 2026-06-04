@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Activity,
   ArrowDownRight,
@@ -13,11 +12,7 @@ import {
   Moon,
   Smartphone,
 } from "lucide-react";
-import {
-  initialDailyStats,
-  initialApps,
-  initialWeeklyInsights,
-} from "@/lib/data/databaseInitialData";
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -27,6 +22,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  initialApps,
+  initialDailyStats,
+  initialWeeklyInsights,
+} from "@/lib/data/databaseInitialData";
 
 // Helper for formatting time (seconds to hours/minutes)
 const formatSecToHoursMins = (seconds: number) => {
@@ -39,8 +39,8 @@ const formatSecToHoursMins = (seconds: number) => {
 // Mock data for high fidelity charts matching the database metrics
 const dataMingguIni = {
   totalSec: 72000, // 20 hours for Mon-Wed
-  avgSec: 24000,   // ~6j 40m per day
-  diffSec: 7200,   // 2 hours shorter than same period last week
+  avgSec: 24000, // ~6j 40m per day
+  diffSec: 7200, // 2 hours shorter than same period last week
   diffDirection: "down", // 'up' | 'down' | 'same'
   dailyData: [
     { hari: "Sen", Instagram: 130, TikTok: 180, YouTube: 45, WhatsApp: 60 },
@@ -58,17 +58,42 @@ const dataMingguIni = {
     { name: "YouTube", sec: 8100, color: "bg-accent" },
   ],
   flags: [
-    { name: "Terlalu lama main HP", count: 2, total: 3, label: "Muncul 2 dari 3 hari" },
-    { name: "Sering buka-tutup aplikasi", count: 3, total: 3, label: "Muncul 3 dari 3 hari" },
-    { name: "Main HP waktu tidur", count: 1, total: 3, label: "Muncul 1 dari 3 hari" },
-    { name: "Nonstop tanpa jeda", count: 2, total: 3, label: "Muncul 2 dari 3 hari" },
-    { name: "Distraksi jam produktif", count: 2, total: 3, label: "Muncul 2 dari 3 hari" },
+    {
+      name: "Terlalu lama main HP",
+      count: 2,
+      total: 3,
+      label: "Muncul 2 dari 3 hari",
+    },
+    {
+      name: "Sering buka-tutup aplikasi",
+      count: 3,
+      total: 3,
+      label: "Muncul 3 dari 3 hari",
+    },
+    {
+      name: "Main HP waktu tidur",
+      count: 1,
+      total: 3,
+      label: "Muncul 1 dari 3 hari",
+    },
+    {
+      name: "Nonstop tanpa jeda",
+      count: 2,
+      total: 3,
+      label: "Muncul 2 dari 3 hari",
+    },
+    {
+      name: "Distraksi jam produktif",
+      count: 2,
+      total: 3,
+      label: "Muncul 2 dari 3 hari",
+    },
   ],
 };
 
 const dataMingguLaju = {
   totalSec: 165600, // ~46 hours (matches database)
-  avgSec: 23657,   // ~6.5 hours per day
+  avgSec: 23657, // ~6.5 hours per day
   dailyData: [
     { hari: "Sen", Instagram: 120, TikTok: 150, YouTube: 60, WhatsApp: 45 },
     { hari: "Sel", Instagram: 110, TikTok: 180, YouTube: 40, WhatsApp: 50 },
@@ -85,11 +110,36 @@ const dataMingguLaju = {
     { name: "WhatsApp", sec: 25200, color: "bg-emerald-500" },
   ],
   flags: [
-    { name: "Terlalu lama main HP", count: 5, total: 7, label: "Muncul 5 dari 7 hari" },
-    { name: "Sering buka-tutup aplikasi", count: 6, total: 7, label: "Muncul 6 dari 7 hari" },
-    { name: "Main HP waktu tidur", count: 3, total: 7, label: "Muncul 3 dari 7 hari" },
-    { name: "Nonstop tanpa jeda", count: 4, total: 7, label: "Muncul 4 dari 7 hari" },
-    { name: "Distraksi jam produktif", count: 4, total: 7, label: "Muncul 4 dari 7 hari" },
+    {
+      name: "Terlalu lama main HP",
+      count: 5,
+      total: 7,
+      label: "Muncul 5 dari 7 hari",
+    },
+    {
+      name: "Sering buka-tutup aplikasi",
+      count: 6,
+      total: 7,
+      label: "Muncul 6 dari 7 hari",
+    },
+    {
+      name: "Main HP waktu tidur",
+      count: 3,
+      total: 7,
+      label: "Muncul 3 dari 7 hari",
+    },
+    {
+      name: "Nonstop tanpa jeda",
+      count: 4,
+      total: 7,
+      label: "Muncul 4 dari 7 hari",
+    },
+    {
+      name: "Distraksi jam produktif",
+      count: 4,
+      total: 7,
+      label: "Muncul 4 dari 7 hari",
+    },
   ],
 };
 
@@ -163,7 +213,9 @@ export default function StatistikPage() {
           type="button"
           onClick={() => setPeriod("ini")}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            period === "ini" ? "bg-primary text-white" : "text-muted hover:text-primary"
+            period === "ini"
+              ? "bg-primary text-white"
+              : "text-muted hover:text-primary"
           }`}
         >
           Minggu Ini
@@ -172,7 +224,9 @@ export default function StatistikPage() {
           type="button"
           onClick={() => setPeriod("lalu")}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            period === "lalu" ? "bg-primary text-white" : "text-muted hover:text-primary"
+            period === "lalu"
+              ? "bg-primary text-white"
+              : "text-muted hover:text-primary"
           }`}
         >
           Minggu Lalu
@@ -184,7 +238,8 @@ export default function StatistikPage() {
         <div className="flex gap-3 items-start p-4 rounded-2xl border border-blue-100 bg-blue-50/50 text-blue-800">
           <Info className="w-5 h-5 shrink-0 mt-0.5" />
           <p className="text-xs font-medium font-poppins">
-            Minggu ini baru dimulai hari ini. Data statistik akan terakumulasi seiring berjalannya hari.
+            Minggu ini baru dimulai hari ini. Data statistik akan terakumulasi
+            seiring berjalannya hari.
           </p>
         </div>
       )}
@@ -200,7 +255,9 @@ export default function StatistikPage() {
             <h3 className="text-2xl sm:text-3xl font-black text-primary">
               {formatSecToHoursMins(currentData.totalSec)}
             </h3>
-            <p className="text-[10px] text-muted font-light mt-0.5">Terakumulasi dalam rentang periode</p>
+            <p className="text-[10px] text-muted font-light mt-0.5">
+              Terakumulasi dalam rentang periode
+            </p>
           </div>
         </div>
 
@@ -213,7 +270,9 @@ export default function StatistikPage() {
             <h3 className="text-2xl sm:text-3xl font-black text-primary">
               {formatSecToHoursMins(currentData.avgSec)}
             </h3>
-            <p className="text-[10px] text-muted font-light mt-0.5">Rata-rata screen time per hari</p>
+            <p className="text-[10px] text-muted font-light mt-0.5">
+              Rata-rata screen time per hari
+            </p>
           </div>
         </div>
 
@@ -230,7 +289,10 @@ export default function StatistikPage() {
                     <ArrowDownRight className="w-8 h-8" />
                     <span>-{Math.round(dataMingguIni.diffSec / 60)} Menit</span>
                   </h3>
-                  <p className="text-[10px] text-emerald-600 font-bold mt-0.5"> Lebih singkat dari minggu lalu</p>
+                  <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                    {" "}
+                    Lebih singkat dari minggu lalu
+                  </p>
                 </div>
               ) : dataMingguIni.diffDirection === "up" ? (
                 <div>
@@ -238,7 +300,10 @@ export default function StatistikPage() {
                     <ArrowUpRight className="w-8 h-8" />
                     <span>+{Math.round(dataMingguIni.diffSec / 60)} Menit</span>
                   </h3>
-                  <p className="text-[10px] text-red-500 font-bold mt-0.5"> Lebih lama dari minggu lalu</p>
+                  <p className="text-[10px] text-red-500 font-bold mt-0.5">
+                    {" "}
+                    Lebih lama dari minggu lalu
+                  </p>
                 </div>
               ) : (
                 <div>
@@ -246,7 +311,9 @@ export default function StatistikPage() {
                     <Minus className="w-7 h-7" />
                     <span>Sama</span>
                   </h3>
-                  <p className="text-[10px] text-muted font-bold mt-0.5">Sama seperti minggu lalu</p>
+                  <p className="text-[10px] text-muted font-bold mt-0.5">
+                    Sama seperti minggu lalu
+                  </p>
                 </div>
               )}
             </div>
@@ -259,15 +326,33 @@ export default function StatistikPage() {
         {/* Daily stacked bar (2 cols) */}
         <div className="lg:col-span-2 bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
           <div className="mb-6">
-            <h3 className="font-extrabold text-base text-primary">Grafik Penggunaan Harian</h3>
-            <p className="text-xs text-muted font-light mt-0.5">Rincian durasi harian per aplikasi (dalam menit)</p>
+            <h3 className="font-extrabold text-base text-primary">
+              Grafik Penggunaan Harian
+            </h3>
+            <p className="text-xs text-muted font-light mt-0.5">
+              Rincian durasi harian per aplikasi (dalam menit)
+            </p>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={currentData.dailyData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-                <XAxis dataKey="hari" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
+              <BarChart
+                data={currentData.dailyData}
+                margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
+              >
+                <XAxis
+                  dataKey="hari"
+                  stroke="#888888"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#ffffff",
@@ -278,11 +363,35 @@ export default function StatistikPage() {
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
                   }}
                 />
-                <Legend iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                <Bar dataKey="Instagram" stackId="a" fill="#062743" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="TikTok" stackId="a" fill="#113a5d" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="YouTube" stackId="a" fill="#c4ffdd" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="WhatsApp" stackId="a" fill="#e6eef4" radius={[4, 4, 0, 0]} />
+                <Legend
+                  iconSize={8}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
+                />
+                <Bar
+                  dataKey="Instagram"
+                  stackId="a"
+                  fill="#062743"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="TikTok"
+                  stackId="a"
+                  fill="#113a5d"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="YouTube"
+                  stackId="a"
+                  fill="#c4ffdd"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="WhatsApp"
+                  stackId="a"
+                  fill="#e6eef4"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -291,8 +400,12 @@ export default function StatistikPage() {
         {/* Top apps horizontal list (1 col) */}
         <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col">
           <div className="mb-4">
-            <h3 className="font-extrabold text-base text-primary">Aplikasi Paling Sering Dibuka</h3>
-            <p className="text-xs text-muted font-light mt-0.5">Durasi pemakaian total tertinggi</p>
+            <h3 className="font-extrabold text-base text-primary">
+              Aplikasi Paling Sering Dibuka
+            </h3>
+            <p className="text-xs text-muted font-light mt-0.5">
+              Durasi pemakaian total tertinggi
+            </p>
           </div>
 
           <div className="space-y-4 flex-1 justify-center flex flex-col">
@@ -303,7 +416,9 @@ export default function StatistikPage() {
                 <div key={app.name} className="space-y-1.5">
                   <div className="flex justify-between text-xs font-bold">
                     <span className="text-primary">{app.name}</span>
-                    <span className="text-muted">{formatSecToHoursMins(app.sec)}</span>
+                    <span className="text-muted">
+                      {formatSecToHoursMins(app.sec)}
+                    </span>
                   </div>
                   <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
                     <div
@@ -322,8 +437,12 @@ export default function StatistikPage() {
       <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div>
-            <h3 className="font-extrabold text-base text-primary">Jam Berapa Kamu Paling Sering Online?</h3>
-            <p className="text-xs text-muted font-light mt-0.5">Heatmap interaktif pemakaian HP per jam per hari</p>
+            <h3 className="font-extrabold text-base text-primary">
+              Jam Berapa Kamu Paling Sering Online?
+            </h3>
+            <p className="text-xs text-muted font-light mt-0.5">
+              Heatmap interaktif pemakaian HP per jam per hari
+            </p>
           </div>
           <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
             <div className="flex items-center gap-1.5">
@@ -360,7 +479,9 @@ export default function StatistikPage() {
                   className="grid gap-1 items-center"
                   style={{ gridTemplateColumns: "repeat(25, minmax(0, 1fr))" }}
                 >
-                  <div className="text-[10px] font-bold text-primary">{dayLabel}</div>
+                  <div className="text-[10px] font-bold text-primary">
+                    {dayLabel}
+                  </div>
                   {row.map((cell) => {
                     // Check if current cell falls into productive hours (08:00 - 17:00)
                     const isProductive = cell.hour >= 8 && cell.hour <= 17;
@@ -370,9 +491,11 @@ export default function StatistikPage() {
                     // Border style based on hours highlight
                     let highlightClass = "";
                     if (isSleep) {
-                      highlightClass = "border border-pink-300 shadow-[0_0_2px_rgba(244,63,94,0.1)] bg-[#fff0f3]/25";
+                      highlightClass =
+                        "border border-pink-300 shadow-[0_0_2px_rgba(244,63,94,0.1)] bg-[#fff0f3]/25";
                     } else if (isProductive) {
-                      highlightClass = "border border-amber-300 shadow-[0_0_2px_rgba(245,158,11,0.1)] bg-[#fffbeb]/25";
+                      highlightClass =
+                        "border border-amber-300 shadow-[0_0_2px_rgba(245,158,11,0.1)] bg-[#fffbeb]/25";
                     } else {
                       highlightClass = "border border-transparent";
                     }
@@ -381,19 +504,20 @@ export default function StatistikPage() {
                       <div
                         key={cell.hour}
                         className={`h-5 rounded-md transition-all relative group ${getHeatmapColor(
-                          cell.val
+                          cell.val,
                         )} ${highlightClass}`}
                       >
                         {/* Tooltip */}
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none mb-1.5 whitespace-nowrap">
-                          {cell.day}, Jam {String(cell.hour).padStart(2, "0")}.00 —{" "}
+                          {cell.day}, Jam {String(cell.hour).padStart(2, "0")}
+                          .00 —{" "}
                           {cell.val === 0
                             ? "Aman (0m)"
                             : cell.val === 1
-                            ? "Ringan (1-15m)"
-                            : cell.val === 2
-                            ? "Sedang (16-30m)"
-                            : "Berat (>30m)"}
+                              ? "Ringan (1-15m)"
+                              : cell.val === 2
+                                ? "Sedang (16-30m)"
+                                : "Berat (>30m)"}
                         </div>
                       </div>
                     );
@@ -421,23 +545,36 @@ export default function StatistikPage() {
       {/* Kebiasaan yang Sering Muncul */}
       <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
         <div className="mb-4">
-          <h3 className="font-extrabold text-base text-primary">Kebiasaan yang Sering Muncul</h3>
-          <p className="text-xs text-muted font-light mt-0.5">Seberapa sering kebiasaan digital buruk terdeteksi</p>
+          <h3 className="font-extrabold text-base text-primary">
+            Kebiasaan yang Sering Muncul
+          </h3>
+          <p className="text-xs text-muted font-light mt-0.5">
+            Seberapa sering kebiasaan digital buruk terdeteksi
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {currentData.flags.map((flag) => {
             const pct = Math.round((flag.count / flag.total) * 100);
             return (
-              <div key={flag.name} className="space-y-1.5 p-3 rounded-2xl border border-border/60 bg-background/30">
+              <div
+                key={flag.name}
+                className="space-y-1.5 p-3 rounded-2xl border border-border/60 bg-background/30"
+              >
                 <div className="flex justify-between items-baseline text-xs">
                   <span className="font-bold text-primary">{flag.name}</span>
-                  <span className="text-[10px] text-muted font-light">{flag.label}</span>
+                  <span className="text-[10px] text-muted font-light">
+                    {flag.label}
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      pct >= 70 ? "bg-red-500" : pct >= 40 ? "bg-amber-500" : "bg-emerald-500"
+                      pct >= 70
+                        ? "bg-red-500"
+                        : pct >= 40
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
                     }`}
                     style={{ width: `${pct}%` }}
                   />

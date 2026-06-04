@@ -1,23 +1,31 @@
 "use client";
 
-import { useState } from "react";
 import { Activity, Bell, Briefcase, Check, Clock, Moon } from "lucide-react";
+import { useState } from "react";
 import { initialUserSettings } from "@/lib/data/databaseInitialData";
 
 export default function NotifikasiSettingsPage() {
   const settings = initialUserSettings[0];
 
-  const [notifExcessive, setNotifExcessive] = useState(settings?.notif_screen_time_enabled ?? true);
+  const [notifExcessive, setNotifExcessive] = useState(
+    settings?.notif_screen_time_enabled ?? true,
+  );
   const [excessiveHours, setExcessiveHours] = useState(
-    Math.round((settings?.screen_time_limit_seconds || 10800) / 3600)
+    Math.round((settings?.screen_time_limit_seconds || 10800) / 3600),
   );
 
-  const [notifProductive, setNotifProductive] = useState(settings?.notif_productive_hour_enabled ?? true);
-  const [notifMidnight, setNotifMidnight] = useState(settings?.notif_midnight_enabled ?? true);
+  const [notifProductive, setNotifProductive] = useState(
+    settings?.notif_productive_hour_enabled ?? true,
+  );
+  const [notifMidnight, setNotifMidnight] = useState(
+    settings?.notif_midnight_enabled ?? true,
+  );
 
-  const [notifContinuous, setNotifContinuous] = useState(settings?.notif_continuous_enabled ?? true);
+  const [notifContinuous, setNotifContinuous] = useState(
+    settings?.notif_continuous_enabled ?? true,
+  );
   const [continuousMinutes, setContinuousMinutes] = useState(
-    Math.round((settings?.continuous_limit_seconds || 2700) / 60)
+    Math.round((settings?.continuous_limit_seconds || 2700) / 60),
   );
 
   const [isSaved, setIsSaved] = useState(false);
@@ -32,9 +40,12 @@ export default function NotifikasiSettingsPage() {
     <div className="space-y-6 font-poppins flex-1 flex flex-col justify-between">
       <div className="space-y-6">
         <div>
-          <h2 className="text-base font-extrabold text-primary">Preferensi Pengingat</h2>
+          <h2 className="text-base font-extrabold text-primary">
+            Preferensi Pengingat
+          </h2>
           <p className="text-[11px] text-muted font-light mt-0.5">
-            Aktifkan dan atur parameter ambang batas untuk pengingat cerdas kesejahteraan digital Anda.
+            Aktifkan dan atur parameter ambang batas untuk pengingat cerdas
+            kesejahteraan digital Anda.
           </p>
         </div>
 
@@ -47,8 +58,12 @@ export default function NotifikasiSettingsPage() {
                   <Clock className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-primary">Batas Pemakaian Harian</h4>
-                  <p className="text-[10px] text-muted font-light">Ingatkan saya saat total screen time harian melewati batas.</p>
+                  <h4 className="text-xs font-bold text-primary">
+                    Batas Pemakaian Harian
+                  </h4>
+                  <p className="text-[10px] text-muted font-light">
+                    Ingatkan saya saat total screen time harian melewati batas.
+                  </p>
                 </div>
               </div>
               <button
@@ -67,7 +82,9 @@ export default function NotifikasiSettingsPage() {
             </div>
             {notifExcessive && (
               <div className="flex items-center gap-2 border-t border-border/40 pt-3">
-                <span className="text-[10px] text-muted font-light">Batas waktu penggunaan per hari:</span>
+                <span className="text-[10px] text-muted font-light">
+                  Batas waktu penggunaan per hari:
+                </span>
                 <input
                   type="number"
                   min="1"
@@ -88,8 +105,13 @@ export default function NotifikasiSettingsPage() {
                 <Briefcase className="w-4.5 h-4.5 text-primary" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-primary">Pengingat Jam Produktif</h4>
-                <p className="text-[10px] text-muted font-light">Kirim pengingat jika membuka media sosial di jam belajar/kerja.</p>
+                <h4 className="text-xs font-bold text-primary">
+                  Pengingat Jam Produktif
+                </h4>
+                <p className="text-[10px] text-muted font-light">
+                  Kirim pengingat jika membuka media sosial di jam
+                  belajar/kerja.
+                </p>
               </div>
             </div>
             <button
@@ -114,8 +136,13 @@ export default function NotifikasiSettingsPage() {
                 <Moon className="w-4.5 h-4.5 text-primary" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-primary">Pengingat Larut Malam</h4>
-                <p className="text-[10px] text-muted font-light">Kirim pengingat jika mendeteksi penggunaan HP di jam tidur malam.</p>
+                <h4 className="text-xs font-bold text-primary">
+                  Pengingat Larut Malam
+                </h4>
+                <p className="text-[10px] text-muted font-light">
+                  Kirim pengingat jika mendeteksi penggunaan HP di jam tidur
+                  malam.
+                </p>
               </div>
             </div>
             <button
@@ -141,8 +168,12 @@ export default function NotifikasiSettingsPage() {
                   <Activity className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-primary">Batas Penggunaan Nonstop</h4>
-                  <p className="text-[10px] text-muted font-light">Ingatkan jika membuka HP nonstop tanpa istirahat.</p>
+                  <h4 className="text-xs font-bold text-primary">
+                    Batas Penggunaan Nonstop
+                  </h4>
+                  <p className="text-[10px] text-muted font-light">
+                    Ingatkan jika membuka HP nonstop tanpa istirahat.
+                  </p>
                 </div>
               </div>
               <button
@@ -161,7 +192,9 @@ export default function NotifikasiSettingsPage() {
             </div>
             {notifContinuous && (
               <div className="flex items-center gap-2 border-t border-border/40 pt-3">
-                <span className="text-[10px] text-muted font-light">Durasi pemakaian nonstop maksimal:</span>
+                <span className="text-[10px] text-muted font-light">
+                  Durasi pemakaian nonstop maksimal:
+                </span>
                 <input
                   type="number"
                   min="5"

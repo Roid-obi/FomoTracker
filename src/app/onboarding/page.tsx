@@ -46,7 +46,9 @@ export default function OnboardingPage() {
 
   const handleToggleApp = (appId: string) => {
     setSelectedApps((prev) =>
-      prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId]
+      prev.includes(appId)
+        ? prev.filter((id) => id !== appId)
+        : [...prev, appId],
     );
   };
 
@@ -125,13 +127,16 @@ export default function OnboardingPage() {
                 Kenali Kebiasaan Digitalmu
               </h1>
               <p className="text-muted font-light leading-relaxed max-w-md mx-auto text-sm">
-                FomoTracker membantu Anda memahami seberapa sering dan berapa lama Anda membuka media sosial. Dapatkan kendali atas fokus Anda kembali.
+                FomoTracker membantu Anda memahami seberapa sering dan berapa
+                lama Anda membuka media sosial. Dapatkan kendali atas fokus Anda
+                kembali.
               </p>
             </div>
             <div className="bg-muted-light/45 rounded-2xl p-4 border border-border flex items-center gap-3 text-left">
               <Info className="w-5 h-5 text-secondary shrink-0" />
               <p className="text-xs text-muted font-light">
-                Setup hanya memakan waktu 2 menit dan akan menyesuaikan pengaturan pengingat Anda secara personal.
+                Setup hanya memakan waktu 2 menit dan akan menyesuaikan
+                pengaturan pengingat Anda secara personal.
               </p>
             </div>
             <button
@@ -149,7 +154,9 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-primary">Hubungkan HP atau Browsermu</h2>
+              <h2 className="text-xl font-bold text-primary">
+                Hubungkan HP atau Browsermu
+              </h2>
               <p className="text-xs text-muted font-light">
                 FomoTracker butuh izin untuk membaca aktivitas media sosialmu.
               </p>
@@ -163,9 +170,12 @@ export default function OnboardingPage() {
                     <Smartphone className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-primary">Untuk Pengguna HP Android</h3>
+                    <h3 className="text-sm font-bold text-primary">
+                      Untuk Pengguna HP Android
+                    </h3>
                     <p className="text-[11px] text-muted leading-relaxed font-light">
-                      Memantau semua aplikasi media sosial yang kamu pakai di HP.
+                      Memantau semua aplikasi media sosial yang kamu pakai di
+                      HP.
                     </p>
                     <button
                       type="button"
@@ -177,7 +187,9 @@ export default function OnboardingPage() {
                       }`}
                     >
                       <Download className="w-3 h-3" />
-                      {isAndroidConnected ? "Unduh Lagi (APK)" : "Unduh Aplikasi"}
+                      {isAndroidConnected
+                        ? "Unduh Lagi (APK)"
+                        : "Unduh Aplikasi"}
                     </button>
                   </div>
                 </div>
@@ -201,9 +213,12 @@ export default function OnboardingPage() {
                     <Laptop className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-primary">Untuk Pengguna Laptop/Komputer</h3>
+                    <h3 className="text-sm font-bold text-primary">
+                      Untuk Pengguna Laptop/Komputer
+                    </h3>
                     <p className="text-[11px] text-muted leading-relaxed font-light">
-                      Memantau media sosial yang kamu buka lewat browser seperti Chrome.
+                      Memantau media sosial yang kamu buka lewat browser seperti
+                      Chrome.
                     </p>
                     <button
                       type="button"
@@ -258,7 +273,9 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-primary">Aplikasi mana yang ingin kamu pantau?</h2>
+              <h2 className="text-xl font-bold text-primary">
+                Aplikasi mana yang ingin kamu pantau?
+              </h2>
               <p className="text-xs text-muted font-light">
                 Pilih aplikasi media sosial yang biasa kamu pakai sehari-hari.
               </p>
@@ -281,7 +298,7 @@ export default function OnboardingPage() {
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
                         className={`w-8 h-8 rounded-xl bg-gradient-to-tr ${getAppColor(
-                          app.name
+                          app.name,
                         )} flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-xs`}
                       >
                         {app.name.substring(0, 2)}
@@ -329,9 +346,12 @@ export default function OnboardingPage() {
         {step === 4 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-primary">Kapan kamu biasanya belajar/kerja dan tidur?</h2>
+              <h2 className="text-xl font-bold text-primary">
+                Kapan kamu biasanya belajar/kerja dan tidur?
+              </h2>
               <p className="text-xs text-muted font-light">
-                Ini membantu FomoTracker mendeteksi apakah HP mengganggu waktu pentingmu.
+                Ini membantu FomoTracker mendeteksi apakah HP mengganggu waktu
+                pentingmu.
               </p>
             </div>
 
@@ -340,12 +360,19 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">Jam Belajar / Kerja</span>
-                  <span className="text-[10px] text-muted font-light ml-auto">Contoh: 08.00 – 17.00</span>
+                  <span className="text-xs font-bold text-primary">
+                    Jam Belajar / Kerja
+                  </span>
+                  <span className="text-[10px] text-muted font-light ml-auto">
+                    Contoh: 08.00 – 17.00
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="prod-start" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="prod-start"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Jam Mulai
                     </label>
                     <input
@@ -357,7 +384,10 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="prod-end" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="prod-end"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Jam Selesai
                     </label>
                     <input
@@ -375,12 +405,19 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Moon className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">Jam Tidur</span>
-                  <span className="text-[10px] text-muted font-light ml-auto">Contoh: 22.00 – 06.00</span>
+                  <span className="text-xs font-bold text-primary">
+                    Jam Tidur
+                  </span>
+                  <span className="text-[10px] text-muted font-light ml-auto">
+                    Contoh: 22.00 – 06.00
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="sl-start" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="sl-start"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Mulai Istirahat
                     </label>
                     <input
@@ -392,7 +429,10 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="sl-end" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="sl-end"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Bangun Tidur
                     </label>
                     <input
@@ -432,9 +472,12 @@ export default function OnboardingPage() {
         {step === 5 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-primary">Mau diingatkan kalau kebablasan?</h2>
+              <h2 className="text-xl font-bold text-primary">
+                Mau diingatkan kalau kebablasan?
+              </h2>
               <p className="text-xs text-muted font-light">
-                FomoTracker bisa mengirim pengingat saat kamu perlu istirahat dari HP.
+                FomoTracker bisa mengirim pengingat saat kamu perlu istirahat
+                dari HP.
               </p>
             </div>
 
@@ -443,8 +486,12 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-primary text-xs sm:text-sm">Batas Pemakaian HP</h3>
-                    <p className="text-[10px] text-muted font-light">Ingatkan jika pakai HP terlalu lama hari ini.</p>
+                    <h3 className="font-bold text-primary text-xs sm:text-sm">
+                      Batas Pemakaian HP
+                    </h3>
+                    <p className="text-[10px] text-muted font-light">
+                      Ingatkan jika pakai HP terlalu lama hari ini.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -462,16 +509,22 @@ export default function OnboardingPage() {
                 </div>
                 {notifExcessive && (
                   <div className="flex items-center gap-2 border-t border-border/50 pt-2.5">
-                    <span className="text-[11px] text-muted font-light">Batas berapa jam per hari?</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Batas berapa jam per hari?
+                    </span>
                     <input
                       type="number"
                       min="1"
                       max="24"
                       value={excessiveHours}
-                      onChange={(e) => setExcessiveHours(Number(e.target.value))}
+                      onChange={(e) =>
+                        setExcessiveHours(Number(e.target.value))
+                      }
                       className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none focus:border-primary"
                     />
-                    <span className="text-[11px] text-muted font-light">Jam</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Jam
+                    </span>
                   </div>
                 )}
               </div>
@@ -479,8 +532,12 @@ export default function OnboardingPage() {
               {/* Jam Produktif */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Jam Produktif</h3>
-                  <p className="text-[10px] text-muted font-light">Ingatkan saat jam belajar/kerja jika membuka medsos.</p>
+                  <h3 className="font-bold text-primary text-xs sm:text-sm">
+                    Pengingat Jam Produktif
+                  </h3>
+                  <p className="text-[10px] text-muted font-light">
+                    Ingatkan saat jam belajar/kerja jika membuka medsos.
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -500,8 +557,12 @@ export default function OnboardingPage() {
               {/* Main Malam */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Jam Tidur</h3>
-                  <p className="text-[10px] text-muted font-light">Ingatkan saat main HP malam hari di jam tidur.</p>
+                  <h3 className="font-bold text-primary text-xs sm:text-sm">
+                    Pengingat Jam Tidur
+                  </h3>
+                  <p className="text-[10px] text-muted font-light">
+                    Ingatkan saat main HP malam hari di jam tidur.
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -522,8 +583,12 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Sesi Nonstop</h3>
-                    <p className="text-[10px] text-muted font-light">Ingatkan jika membuka HP nonstop tanpa jeda.</p>
+                    <h3 className="font-bold text-primary text-xs sm:text-sm">
+                      Pengingat Sesi Nonstop
+                    </h3>
+                    <p className="text-[10px] text-muted font-light">
+                      Ingatkan jika membuka HP nonstop tanpa jeda.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -541,16 +606,22 @@ export default function OnboardingPage() {
                 </div>
                 {notifContinuous && (
                   <div className="flex items-center gap-2 border-t border-border/50 pt-2.5">
-                    <span className="text-[11px] text-muted font-light">Batas waktu nonstop?</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Batas waktu nonstop?
+                    </span>
                     <input
                       type="number"
                       min="5"
                       max="180"
                       value={continuousMinutes}
-                      onChange={(e) => setContinuousMinutes(Number(e.target.value))}
+                      onChange={(e) =>
+                        setContinuousMinutes(Number(e.target.value))
+                      }
                       className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none focus:border-primary"
                     />
-                    <span className="text-[11px] text-muted font-light">Menit</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Menit
+                    </span>
                   </div>
                 )}
               </div>
@@ -584,7 +655,9 @@ export default function OnboardingPage() {
               <div className="mx-auto w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <CheckCircle className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-extrabold text-primary">Semua siap! 🎉</h2>
+              <h2 className="text-2xl font-extrabold text-primary">
+                Semua siap! 🎉
+              </h2>
               <p className="text-xs text-muted font-light">
                 Konfigurasi Anda berhasil disimpan.
               </p>
@@ -593,19 +666,27 @@ export default function OnboardingPage() {
             {/* Config Summary */}
             <div className="space-y-3.5 p-5 rounded-2xl border border-border bg-muted-light/10 text-xs">
               <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Perangkat Terhubung</span>
+                <span className="font-semibold text-muted">
+                  Perangkat Terhubung
+                </span>
                 <div className="text-right space-y-0.5">
                   <div className="font-bold text-primary">
-                    {isAndroidConnected ? "✅ HP Android" : "⏳ HP Android (Belum)"}
+                    {isAndroidConnected
+                      ? "✅ HP Android"
+                      : "⏳ HP Android (Belum)"}
                   </div>
                   <div className="font-bold text-primary">
-                    {isBrowserConnected ? "✅ Browser Extension" : "⏳ Browser Extension (Belum)"}
+                    {isBrowserConnected
+                      ? "✅ Browser Extension"
+                      : "⏳ Browser Extension (Belum)"}
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Aplikasi Dipantau</span>
+                <span className="font-semibold text-muted">
+                  Aplikasi Dipantau
+                </span>
                 <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
                   {selectedApps.length > 0 ? (
                     initialApps
@@ -619,13 +700,17 @@ export default function OnboardingPage() {
                         </span>
                       ))
                   ) : (
-                    <span className="text-[10px] text-red-500 font-semibold">Belum memilih</span>
+                    <span className="text-[10px] text-red-500 font-semibold">
+                      Belum memilih
+                    </span>
                   )}
                 </div>
               </div>
 
               <div className="flex justify-between items-center pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Jam Belajar / Kerja</span>
+                <span className="font-semibold text-muted">
+                  Jam Belajar / Kerja
+                </span>
                 <span className="font-bold text-primary">
                   {productiveStart} – {productiveEnd}
                 </span>
@@ -639,7 +724,9 @@ export default function OnboardingPage() {
               </div>
 
               <div className="flex justify-between items-start">
-                <span className="font-semibold text-muted">Pengingat Aktif</span>
+                <span className="font-semibold text-muted">
+                  Pengingat Aktif
+                </span>
                 <div className="flex flex-col items-end gap-1">
                   {notifExcessive && (
                     <span className="text-[10px] text-emerald-600 font-bold">

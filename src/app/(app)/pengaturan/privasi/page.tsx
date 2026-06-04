@@ -1,7 +1,14 @@
 "use client";
 
+import {
+  AlertTriangle,
+  CheckCircle,
+  Database,
+  Download,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
-import { AlertTriangle, CheckCircle, Database, Download, ShieldCheck, Trash2 } from "lucide-react";
 import { initialDatabaseData } from "@/lib/data/databaseInitialData";
 
 export default function PrivasiSettingsPage() {
@@ -13,7 +20,9 @@ export default function PrivasiSettingsPage() {
     setIsExporting("json");
     setTimeout(() => {
       // Create and download a mock JSON file from initialDatabaseData
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(initialDatabaseData, null, 2));
+      const dataStr =
+        "data:text/json;charset=utf-8," +
+        encodeURIComponent(JSON.stringify(initialDatabaseData, null, 2));
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", "fomotracker_data_export.json");
@@ -29,12 +38,18 @@ export default function PrivasiSettingsPage() {
     setTimeout(() => {
       // Create and download a simple CSV string representing daily stats
       const csvHeader = "ID,Stat Date,App Name,Total Seconds,Open Count\n";
-      const csvRows = initialDatabaseData.daily_stats.map((row) => {
-        const appName = initialDatabaseData.apps.find((a) => a.id === row.app_id)?.name || "Unknown";
-        return `${row.id},${row.stat_date},${appName},${row.total_duration_seconds},${row.open_frequency}`;
-      }).join("\n");
-      
-      const csvStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvHeader + csvRows);
+      const csvRows = initialDatabaseData.daily_stats
+        .map((row) => {
+          const appName =
+            initialDatabaseData.apps.find((a) => a.id === row.app_id)?.name ||
+            "Unknown";
+          return `${row.id},${row.stat_date},${appName},${row.total_duration_seconds},${row.open_frequency}`;
+        })
+        .join("\n");
+
+      const csvStr =
+        "data:text/csv;charset=utf-8," +
+        encodeURIComponent(csvHeader + csvRows);
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", csvStr);
       downloadAnchor.setAttribute("download", "fomotracker_daily_stats.csv");
@@ -58,9 +73,12 @@ export default function PrivasiSettingsPage() {
     <div className="space-y-8 font-poppins relative flex-1 flex flex-col justify-between">
       <div className="space-y-6">
         <div>
-          <h2 className="text-base font-extrabold text-primary">Privasi & Data</h2>
+          <h2 className="text-base font-extrabold text-primary">
+            Privasi & Data
+          </h2>
           <p className="text-[11px] text-muted font-light mt-0.5">
-            Kelola data pelacakan aktivitas gawai Anda dan transparansi pengolahan data pribadi.
+            Kelola data pelacakan aktivitas gawai Anda dan transparansi
+            pengolahan data pribadi.
           </p>
         </div>
 
@@ -75,23 +93,38 @@ export default function PrivasiSettingsPage() {
             <ul className="space-y-2 text-xs font-light text-muted leading-relaxed">
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                <span><strong>Nama Aplikasi:</strong> Identifikasi media sosial yang sedang dibuka.</span>
+                <span>
+                  <strong>Nama Aplikasi:</strong> Identifikasi media sosial yang
+                  sedang dibuka.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                <span><strong>Durasi Screen Time:</strong> Total detik layar aktif pada aplikasi.</span>
+                <span>
+                  <strong>Durasi Screen Time:</strong> Total detik layar aktif
+                  pada aplikasi.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                <span><strong>Frekuensi Membuka:</strong> Berapa kali aplikasi dibuka per hari.</span>
+                <span>
+                  <strong>Frekuensi Membuka:</strong> Berapa kali aplikasi
+                  dibuka per hari.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                <span><strong>Waktu Aktivitas:</strong> Detik/menit mulai dan selesai online.</span>
+                <span>
+                  <strong>Waktu Aktivitas:</strong> Detik/menit mulai dan
+                  selesai online.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                <span><strong>Domain Website:</strong> Domain utama web medsos yang dilacak (misal: <code>instagram.com</code>).</span>
+                <span>
+                  <strong>Domain Website:</strong> Domain utama web medsos yang
+                  dilacak (misal: <code>instagram.com</code>).
+                </span>
               </li>
             </ul>
           </div>
@@ -105,23 +138,38 @@ export default function PrivasiSettingsPage() {
             <ul className="space-y-2 text-xs font-light text-muted leading-relaxed">
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                <span><strong>Isi Percakapan:</strong> Kami tidak pernah membaca isi chat atau pesan privat Anda.</span>
+                <span>
+                  <strong>Isi Percakapan:</strong> Kami tidak pernah membaca isi
+                  chat atau pesan privat Anda.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                <span><strong>Kata Sandi / Kredensial:</strong> Pengisian form sandi diabaikan pelacak.</span>
+                <span>
+                  <strong>Kata Sandi / Kredensial:</strong> Pengisian form sandi
+                  diabaikan pelacak.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                <span><strong>Berkas Pribadi:</strong> Foto, video, audio, dan dokumen tidak akan pernah diakses.</span>
+                <span>
+                  <strong>Berkas Pribadi:</strong> Foto, video, audio, dan
+                  dokumen tidak akan pernah diakses.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                <span><strong>URL Lengkap:</strong> Hanya merekam domain utama, mengabaikan URL detail.</span>
+                <span>
+                  <strong>URL Lengkap:</strong> Hanya merekam domain utama,
+                  mengabaikan URL detail.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                <span><strong>Konten yang Dibaca:</strong> Isi postingan, teks berita, atau video yang ditonton tidak dilacak.</span>
+                <span>
+                  <strong>Konten yang Dibaca:</strong> Isi postingan, teks
+                  berita, atau video yang ditonton tidak dilacak.
+                </span>
               </li>
             </ul>
           </div>
@@ -134,7 +182,8 @@ export default function PrivasiSettingsPage() {
             <span>Ekspor Salinan Data</span>
           </h3>
           <p className="text-[11px] text-muted font-light leading-relaxed">
-            Anda dapat mengunduh seluruh salinan data statistik aktivitas digital yang tersimpan pada server FomoTracker kapan saja.
+            Anda dapat mengunduh seluruh salinan data statistik aktivitas
+            digital yang tersimpan pada server FomoTracker kapan saja.
           </p>
           <div className="flex flex-wrap gap-3 pt-1">
             <button
@@ -144,7 +193,11 @@ export default function PrivasiSettingsPage() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-background hover:bg-muted-light font-bold text-xs text-primary transition-all cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
               <Download className="w-4 h-4 text-muted" />
-              <span>{isExporting === "json" ? "Mengekspor JSON..." : "Ekspor Salinan (JSON)"}</span>
+              <span>
+                {isExporting === "json"
+                  ? "Mengekspor JSON..."
+                  : "Ekspor Salinan (JSON)"}
+              </span>
             </button>
             <button
               type="button"
@@ -153,7 +206,11 @@ export default function PrivasiSettingsPage() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-background hover:bg-muted-light font-bold text-xs text-primary transition-all cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
               <Download className="w-4 h-4 text-muted" />
-              <span>{isExporting === "csv" ? "Mengekspor CSV..." : "Ekspor Statistik (CSV)"}</span>
+              <span>
+                {isExporting === "csv"
+                  ? "Mengekspor CSV..."
+                  : "Ekspor Statistik (CSV)"}
+              </span>
             </button>
           </div>
         </section>
@@ -165,7 +222,9 @@ export default function PrivasiSettingsPage() {
             <span>Zona Bahaya — Hapus Akun</span>
           </h3>
           <p className="text-[11px] text-muted font-light leading-relaxed">
-            Menghapus akun Anda akan menghapus seluruh data statistik screen time, preferensi pengingat, dan kredensial login secara permanen dari basis data FomoTracker. Tindakan ini tidak dapat dibatalkan.
+            Menghapus akun Anda akan menghapus seluruh data statistik screen
+            time, preferensi pengingat, dan kredensial login secara permanen
+            dari basis data FomoTracker. Tindakan ini tidak dapat dibatalkan.
           </p>
           <button
             type="button"
@@ -185,12 +244,18 @@ export default function PrivasiSettingsPage() {
               <div className="mx-auto w-12 h-12 rounded-full bg-red-50 text-red-600 border border-red-100 flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-extrabold text-primary">Apakah Anda Yakin?</h3>
+              <h3 className="text-sm font-extrabold text-primary">
+                Apakah Anda Yakin?
+              </h3>
               <p className="text-[11px] text-muted font-light leading-relaxed">
-                Tindakan ini permanen. Silakan ketik <strong className="font-bold text-primary">"hapus akun saya"</strong> di bawah untuk mengonfirmasi.
+                Tindakan ini permanen. Silakan ketik{" "}
+                <strong className="font-bold text-primary">
+                  "hapus akun saya"
+                </strong>{" "}
+                di bawah untuk mengonfirmasi.
               </p>
             </div>
-            
+
             <input
               type="text"
               placeholder='Ketik "hapus akun saya"'

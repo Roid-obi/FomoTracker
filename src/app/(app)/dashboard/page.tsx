@@ -19,14 +19,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
-  initialActivityLogs,
-  initialBehavioralScores,
-  initialDailyStats,
-  initialWeeklyInsights,
-  initialUsers,
-  initialApps,
-} from "@/lib/data/databaseInitialData";
-import {
   Bar,
   BarChart,
   Legend,
@@ -35,6 +27,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  initialActivityLogs,
+  initialApps,
+  initialBehavioralScores,
+  initialDailyStats,
+  initialUsers,
+  initialWeeklyInsights,
+} from "@/lib/data/databaseInitialData";
 
 export default function DashboardPage() {
   const user = initialUsers[0];
@@ -43,7 +43,7 @@ export default function DashboardPage() {
   // 1. Calculate stats from daily_stats
   const totalDurationSeconds = initialDailyStats.reduce(
     (acc, curr) => acc + curr.total_duration_seconds,
-    0
+    0,
   );
   const totalHours = Math.floor(totalDurationSeconds / 3600);
   const totalMinutes = Math.floor((totalDurationSeconds % 3600) / 60);
@@ -97,7 +97,7 @@ export default function DashboardPage() {
       const app = initialApps.find((a) => a.id === log.app_id);
       if (app && startHour >= 0 && startHour < 24) {
         hourlyChartData[startHour][app.name] += Math.round(
-          log.duration_seconds / 60
+          log.duration_seconds / 60,
         );
       }
     }
@@ -126,7 +126,7 @@ export default function DashboardPage() {
     if (scoreData.flag_compulsive_checking) {
       const totalChecks = initialDailyStats.reduce(
         (acc, curr) => acc + curr.open_frequency,
-        0
+        0,
       );
       flagsList.push({
         id: "compulsive",
@@ -139,7 +139,7 @@ export default function DashboardPage() {
     if (scoreData.flag_midnight_usage) {
       const midnightSec = initialDailyStats.reduce(
         (acc, curr) => acc + curr.midnight_duration_seconds,
-        0
+        0,
       );
       flagsList.push({
         id: "midnight",
@@ -151,7 +151,7 @@ export default function DashboardPage() {
     }
     if (scoreData.flag_continuous_usage) {
       const maxCont = Math.max(
-        ...initialDailyStats.map((d) => d.max_continuous_seconds)
+        ...initialDailyStats.map((d) => d.max_continuous_seconds),
       );
       flagsList.push({
         id: "continuous",
@@ -164,7 +164,7 @@ export default function DashboardPage() {
     if (scoreData.flag_productive_hour_distraction) {
       const prodSec = initialDailyStats.reduce(
         (acc, curr) => acc + curr.productive_hour_duration_seconds,
-        0
+        0,
       );
       flagsList.push({
         id: "productive",
@@ -181,22 +181,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 font-poppins">
-      {/* Navbar Atas */}
-      <div className="flex items-center justify-between border-b border-border/60 pb-4 bg-background">
-        <div className="flex items-baseline gap-0.5">
-          <span className="font-yellowtail text-3xl font-normal text-primary">Fomo</span>
-          <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase">
-            Tracker
-          </span>
-        </div>
-        <Link
-          href="/notifications"
-          className="relative p-2 rounded-xl border border-border bg-card text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border border-card rounded-full" />
-        </Link>
-      </div>
 
       {/* Sapaan & Tanggal */}
       <div>
@@ -207,25 +191,44 @@ export default function DashboardPage() {
       </div>
 
       {/* Status Hari Ini (Elemen Utama Tampil Paling Besar) */}
-      <div className={`p-6 md:p-8 rounded-3xl border shadow-xs transition-all ${statusColor}`}>
+      <div
+        className={`p-6 md:p-8 rounded-3xl border shadow-xs transition-all ${statusColor}`}
+      >
         <div className="flex items-center gap-4">
-          <span className="text-5xl md:text-6xl shrink-0 select-none">{statusEmoji}</span>
+          <span className="text-5xl md:text-6xl shrink-0 select-none">
+            {statusEmoji}
+          </span>
           <div className="space-y-1.5">
-            <h2 className="text-2xl font-black tracking-tight leading-none">{statusTitle}</h2>
-            <p className="text-sm font-light leading-relaxed max-w-xl">{statusDesc}</p>
+            <h2 className="text-2xl font-black tracking-tight leading-none">
+              {statusTitle}
+            </h2>
+            <p className="text-sm font-light leading-relaxed max-w-xl">
+              {statusDesc}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Ringkasan Singkat */}
       <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
-        <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Ringkasan Hari Ini</h3>
+        <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
+          Ringkasan Hari Ini
+        </h3>
         <p className="text-sm text-primary font-normal leading-relaxed">
           Kamu sudah menggunakan media sosial selama{" "}
-          <strong className="font-bold">{totalHours} jam {totalMinutes} menit</strong> hari ini.{" "}
-          <strong className="font-bold">{topApp.name}</strong> paling banyak kamu buka.{" "}
+          <strong className="font-bold">
+            {totalHours} jam {totalMinutes} menit
+          </strong>{" "}
+          hari ini. <strong className="font-bold">{topApp.name}</strong> paling
+          banyak kamu buka.{" "}
           {flagsList.length > 0 ? (
-            <span>Terdeteksi <strong className="font-bold">{flagsList.length} kebiasaan bermasalah</strong> yang memerlukan perhatianmu.</span>
+            <span>
+              Terdeteksi{" "}
+              <strong className="font-bold">
+                {flagsList.length} kebiasaan bermasalah
+              </strong>{" "}
+              yang memerlukan perhatianmu.
+            </span>
           ) : (
             <span>Belum ada kebiasaan bermasalah terdeteksi. Pertahankan!</span>
           )}
@@ -237,15 +240,33 @@ export default function DashboardPage() {
         {/* Chart Column (2 cols) */}
         <div className="lg:col-span-2 bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs flex flex-col justify-between">
           <div className="mb-4">
-            <h3 className="font-extrabold text-base text-primary">Penggunaan per Jam Hari Ini</h3>
-            <p className="text-xs text-muted font-light mt-0.5">Stacked bar chart durasi penggunaan (menit)</p>
+            <h3 className="font-extrabold text-base text-primary">
+              Penggunaan per Jam Hari Ini
+            </h3>
+            <p className="text-xs text-muted font-light mt-0.5">
+              Stacked bar chart durasi penggunaan (menit)
+            </p>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={filteredChartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-                <XAxis dataKey="jam" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
+              <BarChart
+                data={filteredChartData}
+                margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
+              >
+                <XAxis
+                  dataKey="jam"
+                  stroke="#888888"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#ffffff",
@@ -256,11 +277,35 @@ export default function DashboardPage() {
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
                   }}
                 />
-                <Legend iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                <Bar dataKey="Instagram" stackId="a" fill="#062743" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="TikTok" stackId="a" fill="#113a5d" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="YouTube" stackId="a" fill="#c4ffdd" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="WhatsApp" stackId="a" fill="#e6eef4" radius={[4, 4, 0, 0]} />
+                <Legend
+                  iconSize={8}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
+                />
+                <Bar
+                  dataKey="Instagram"
+                  stackId="a"
+                  fill="#062743"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="TikTok"
+                  stackId="a"
+                  fill="#113a5d"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="YouTube"
+                  stackId="a"
+                  fill="#c4ffdd"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="WhatsApp"
+                  stackId="a"
+                  fill="#e6eef4"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -268,8 +313,10 @@ export default function DashboardPage() {
 
         {/* Detected Behaviors (1 col) */}
         <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col">
-          <h3 className="font-extrabold text-base text-primary mb-4">Kebiasaan Hari Ini</h3>
-          
+          <h3 className="font-extrabold text-base text-primary mb-4">
+            Kebiasaan Hari Ini
+          </h3>
+
           {flagsList.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3">
               <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold">
@@ -288,12 +335,18 @@ export default function DashboardPage() {
                     key={flag.id}
                     className="flex gap-3 items-start p-3 rounded-2xl border border-border bg-background/50 hover:bg-muted-light/10 transition-all"
                   >
-                    <div className={`w-8 h-8 rounded-xl ${flag.iconColor} flex items-center justify-center shrink-0 mt-0.5`}>
+                    <div
+                      className={`w-8 h-8 rounded-xl ${flag.iconColor} flex items-center justify-center shrink-0 mt-0.5`}
+                    >
                       <IconComponent className="w-4 h-4 text-primary" />
                     </div>
                     <div className="space-y-0.5">
-                      <h4 className="text-xs font-bold text-primary">{flag.name}</h4>
-                      <p className="text-[10px] text-muted font-light leading-normal">{flag.desc}</p>
+                      <h4 className="text-xs font-bold text-primary">
+                        {flag.name}
+                      </h4>
+                      <p className="text-[10px] text-muted font-light leading-normal">
+                        {flag.desc}
+                      </p>
                     </div>
                   </div>
                 );
@@ -310,11 +363,13 @@ export default function DashboardPage() {
             <div className="flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-accent animate-pulse" />
               <span className="text-[10px] font-bold tracking-wider uppercase text-accent">
-                AI Insight Minggu Ini ({latestInsight.week_start} – {latestInsight.week_end})
+                AI Insight Minggu Ini ({latestInsight.week_start} –{" "}
+                {latestInsight.week_end})
               </span>
             </div>
             <p className="text-xs font-light leading-relaxed leading-normal text-white/90">
-              "{latestInsight.ai_positive_notes} Namun, {latestInsight.ai_concern_notes.toLowerCase()}"
+              "{latestInsight.ai_positive_notes} Namun,{" "}
+              {latestInsight.ai_concern_notes.toLowerCase()}"
             </p>
           </div>
           <Link

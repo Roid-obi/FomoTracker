@@ -1,12 +1,16 @@
 "use client";
 
+import { Bell, ShieldCheck, Smartphone, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, ShieldCheck, Smartphone, User } from "lucide-react";
 
 const subNavigationItems = [
   { name: "Profil Saya", href: "/pengaturan/profil", icon: User },
-  { name: "Perangkat & Aplikasi", href: "/pengaturan/perangkat", icon: Smartphone },
+  {
+    name: "Perangkat & Aplikasi",
+    href: "/pengaturan/perangkat",
+    icon: Smartphone,
+  },
   { name: "Pengingat", href: "/pengaturan/notifikasi", icon: Bell },
   { name: "Privasi & Data", href: "/pengaturan/privasi", icon: ShieldCheck },
 ];
@@ -26,7 +30,8 @@ export default function PengaturanLayout({
           Pengaturan Aplikasi
         </h1>
         <p className="text-xs text-muted font-light mt-0.5">
-          Kelola profil diri, koneksi gawai, parameter waktu produktif, dan preferensi pengingat.
+          Kelola profil diri, koneksi gawai, parameter waktu produktif, dan
+          preferensi pengingat.
         </p>
       </div>
 
@@ -48,7 +53,9 @@ export default function PengaturanLayout({
                       : "text-muted hover:text-primary hover:bg-muted-light/40"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${active ? "text-accent" : "text-muted"}`} />
+                  <Icon
+                    className={`w-4 h-4 ${active ? "text-accent" : "text-muted"}`}
+                  />
                   <span>{item.name}</span>
                 </Link>
               );

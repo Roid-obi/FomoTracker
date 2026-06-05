@@ -120,8 +120,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 md:pl-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6 pr-6 pl-6 py-6 overflow-visible md:overflow-y-auto">
-        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
-          {children}
+        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col space-y-6">
+          {/* Navbar Atas */}
+          <div className="flex items-center justify-between border-b border-border/60 pb-4 bg-background">
+            <div className="flex items-baseline gap-0.5">
+              <span className="font-yellowtail text-3xl font-normal text-primary">
+                Fomo
+              </span>
+              <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase">
+                Tracker
+              </span>
+            </div>
+            <Link
+              href="/notifications"
+              className="relative p-2 rounded-xl border border-border bg-card text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border border-card rounded-full" />
+            </Link>
+          </div>
+
+          <div className="flex-1 flex flex-col">{children}</div>
         </div>
       </main>
 

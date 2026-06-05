@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Activity,
   Bell,
@@ -10,6 +9,7 @@ import {
   Moon,
   Smartphone,
 } from "lucide-react";
+import { useState } from "react";
 import { initialNotifications } from "@/lib/data/databaseInitialData";
 
 export default function NotificationsPage() {
@@ -20,22 +20,24 @@ export default function NotificationsPage() {
       message: n.message,
       isRead: n.is_read,
       createdAt: n.created_at,
-    }))
+    })),
   );
 
-  const [filterType, setFilterType] = useState<"semua" | "belum-dibaca">("semua");
+  const [filterType, setFilterType] = useState<"semua" | "belum-dibaca">(
+    "semua",
+  );
 
   const toggleReadStatus = (id: string) => {
     setNotifications((prev) =>
       prev.map((notif) =>
-        notif.id === id ? { ...notif, isRead: !notif.isRead } : notif
-      )
+        notif.id === id ? { ...notif, isRead: !notif.isRead } : notif,
+      ),
     );
   };
 
   const handleMarkAllRead = () => {
     setNotifications((prev) =>
-      prev.map((notif) => ({ ...notif, isRead: true }))
+      prev.map((notif) => ({ ...notif, isRead: true })),
     );
   };
 
@@ -92,7 +94,7 @@ export default function NotificationsPage() {
     if (diffMins < 1) return "Baru saja";
     if (diffMins < 60) return `${diffMins} menit yang lalu`;
     if (diffHours < 24) return `${diffHours} jam yang lalu`;
-    
+
     // Fallback format DD MMM
     return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
   };
@@ -175,21 +177,29 @@ export default function NotificationsPage() {
                 )}
 
                 {/* Left Side Icon */}
-                <div className={`p-3 rounded-xl border shrink-0 self-start ${config.color}`}>
+                <div
+                  className={`p-3 rounded-xl border shrink-0 self-start ${config.color}`}
+                >
                   <Icon className="w-5 h-5" />
                 </div>
 
                 {/* Content */}
                 <div className="space-y-1 pr-6">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold text-primary">{config.label}</span>
-                    <span className="text-[10px] text-muted font-light">• {formatTimeAgo(notif.createdAt)}</span>
+                    <span className="text-xs font-bold text-primary">
+                      {config.label}
+                    </span>
+                    <span className="text-[10px] text-muted font-light">
+                      • {formatTimeAgo(notif.createdAt)}
+                    </span>
                   </div>
                   <p className="text-xs sm:text-sm text-primary font-normal leading-relaxed leading-normal">
                     {notif.message}
                   </p>
                   <span className="text-[9px] text-muted font-light hidden group-hover:block pt-1 transition-all">
-                    {notif.isRead ? "Klik untuk tandai belum dibaca" : "Klik untuk tandai sudah dibaca"}
+                    {notif.isRead
+                      ? "Klik untuk tandai belum dibaca"
+                      : "Klik untuk tandai sudah dibaca"}
                   </span>
                 </div>
               </button>

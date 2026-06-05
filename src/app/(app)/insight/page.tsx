@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -18,9 +17,10 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import {
-  initialWeeklyInsights,
   initialUsers,
+  initialWeeklyInsights,
 } from "@/lib/data/databaseInitialData";
 
 // Mock past reports for history
@@ -77,17 +77,24 @@ export default function InsightPage() {
             <Brain className="w-8 h-8 text-primary animate-pulse" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-black text-primary">🔍 Insight pertamamu sedang disiapkan!</h3>
+            <h3 className="text-lg font-black text-primary">
+              🔍 Insight pertamamu sedang disiapkan!
+            </h3>
             <p className="text-xs text-muted leading-relaxed font-light">
-              Kami butuh data satu minggu penuh untuk bisa mengenali pola penggunaan HP-mu.
+              Kami butuh data satu minggu penuh untuk bisa mengenali pola
+              penggunaan HP-mu.
             </p>
           </div>
           <div className="bg-muted-light/30 border border-border p-4 rounded-2xl text-xs text-primary font-bold">
-            Insight pertama akan muncul pada:<br />
-            <span className="text-secondary text-sm mt-1 block">Senin, 8 Juni 2026</span>
+            Insight pertama akan muncul pada:
+            <br />
+            <span className="text-secondary text-sm mt-1 block">
+              Senin, 8 Juni 2026
+            </span>
           </div>
           <p className="text-[10px] text-muted font-light">
-            Sementara itu, pantau aktivitas harianmu di halaman Beranda dan Statistik.
+            Sementara itu, pantau aktivitas harianmu di halaman Beranda dan
+            Statistik.
           </p>
         </div>
       </div>
@@ -151,7 +158,8 @@ export default function InsightPage() {
           Insight AI
         </h1>
         <p className="text-xs text-muted font-light mt-0.5">
-          Asisten AI menganalisis data mingguanmu secara personal dengan bahasa yang ramah.
+          Asisten AI menganalisis data mingguanmu secara personal dengan bahasa
+          yang ramah.
         </p>
       </div>
 
@@ -160,19 +168,28 @@ export default function InsightPage() {
         <section className="space-y-6">
           <div className="flex items-center gap-2 border-b border-border/60 pb-2">
             <Sparkles className="w-5 h-5 text-secondary animate-pulse" />
-            <h2 className="text-base font-extrabold text-primary">Insight Minggu Ini</h2>
+            <h2 className="text-base font-extrabold text-primary">
+              Insight Minggu Ini
+            </h2>
             <span className="text-xs text-muted font-light ml-auto">
               {currentInsight.week_start} – {currentInsight.week_end}
             </span>
           </div>
 
           {/* Kondisi Minggu Ini */}
-          <div className={`p-6 rounded-3xl border flex items-center gap-4 ${getStatusColor(currentInsight.weekly_status)}`}>
-            <span className="text-4xl select-none">{getStatusEmoji(currentInsight.weekly_status)}</span>
+          <div
+            className={`p-6 rounded-3xl border flex items-center gap-4 ${getStatusColor(currentInsight.weekly_status)}`}
+          >
+            <span className="text-4xl select-none">
+              {getStatusEmoji(currentInsight.weekly_status)}
+            </span>
             <div>
-              <h3 className="text-lg font-black">{currentInsight.ai_weekly_status_label}</h3>
+              <h3 className="text-lg font-black">
+                {currentInsight.ai_weekly_status_label}
+              </h3>
               <p className="text-xs font-light mt-0.5 leading-relaxed">
-                Rata-rata skor perilakumu berada pada {currentInsight.avg_behavioral_score}/100.
+                Rata-rata skor perilakumu berada pada{" "}
+                {currentInsight.avg_behavioral_score}/100.
               </p>
             </div>
           </div>
@@ -205,7 +222,9 @@ export default function InsightPage() {
           <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2">
               <Brain className="w-5 h-5 text-primary" />
-              <h3 className="font-extrabold text-base text-primary">Analisis Minggu Ini</h3>
+              <h3 className="font-extrabold text-base text-primary">
+                Analisis Minggu Ini
+              </h3>
             </div>
             <p className="text-xs sm:text-sm text-muted leading-relaxed font-light whitespace-pre-line">
               {currentInsight.ai_analysis}
@@ -216,16 +235,22 @@ export default function InsightPage() {
           <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2">
               <Lightbulb className="w-5 h-5 text-primary" />
-              <h3 className="font-extrabold text-base text-primary">Tips untuk Minggu Depan</h3>
+              <h3 className="font-extrabold text-base text-primary">
+                Tips untuk Minggu Depan
+              </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {tips.map((tip, idx) => (
                 <div
-                  key={idx}
+                  key={tip}
                   className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
                 >
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Tips 0{idx + 1}</span>
-                  <p className="text-xs text-primary font-semibold leading-relaxed">{tip}</p>
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                    Tips 0{idx + 1}
+                  </span>
+                  <p className="text-xs text-primary font-semibold leading-relaxed">
+                    {tip}
+                  </p>
                 </div>
               ))}
             </div>
@@ -238,7 +263,9 @@ export default function InsightPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-2">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-muted" />
-            <h2 className="text-base font-extrabold text-primary">Insight Sebelumnya</h2>
+            <h2 className="text-base font-extrabold text-primary">
+              Insight Sebelumnya
+            </h2>
           </div>
 
           {/* Filter Bulan */}

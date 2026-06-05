@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Camera, Check, Key, Mail, User } from "lucide-react";
+import { useState } from "react";
 import { initialUsers } from "@/lib/data/databaseInitialData";
 
 export default function ProfilSettingsPage() {
@@ -53,7 +53,8 @@ export default function ProfilSettingsPage() {
             <div className="space-y-0.5">
               <h3 className="text-xs font-bold text-primary">Foto Profil</h3>
               <p className="text-[10px] text-muted font-light leading-normal">
-                Ubah gambar profil melalui unggahan berkas gambar JPG atau PNG (maksimal 2MB).
+                Ubah gambar profil melalui unggahan berkas gambar JPG atau PNG
+                (maksimal 2MB).
               </p>
             </div>
           </div>
@@ -61,7 +62,10 @@ export default function ProfilSettingsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Nama */}
             <div className="space-y-1.5">
-              <label htmlFor="name-input" className="text-[10px] font-bold text-muted uppercase tracking-wider">
+              <label
+                htmlFor="name-input"
+                className="text-[10px] font-bold text-muted uppercase tracking-wider"
+              >
                 Nama Lengkap
               </label>
               <div className="relative">
@@ -79,7 +83,10 @@ export default function ProfilSettingsPage() {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label htmlFor="email-input" className="text-[10px] font-bold text-muted uppercase tracking-wider">
+              <label
+                htmlFor="email-input"
+                className="text-[10px] font-bold text-muted uppercase tracking-wider"
+              >
                 Alamat Email
               </label>
               <div className="relative">
@@ -104,7 +111,10 @@ export default function ProfilSettingsPage() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label htmlFor="old-pass" className="text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="old-pass"
+                  className="text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Password Lama
                 </label>
                 <input
@@ -117,7 +127,10 @@ export default function ProfilSettingsPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="new-pass" className="text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="new-pass"
+                  className="text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Password Baru
                 </label>
                 <input
@@ -130,7 +143,10 @@ export default function ProfilSettingsPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="confirm-pass" className="text-[9px] font-bold text-muted uppercase tracking-wider">
+                <label
+                  htmlFor="confirm-pass"
+                  className="text-[9px] font-bold text-muted uppercase tracking-wider"
+                >
                   Konfirmasi Baru
                 </label>
                 <input

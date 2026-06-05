@@ -5,29 +5,29 @@ import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 export async function registerService(formData: FormData) {
   const raw = Object.fromEntries(formData);
   const parsed = RegisterModel.registerRequest.safeParse(raw);
-  let profile_url: string | null = null;
+  let avatar_url: string | null = null;
 
   if (!parsed.success) {
     return { success: false, error: z.treeifyError(parsed.error) };
   }
 
-  const { email, password, username, profile } = parsed.data;
+  const { email, password, name, avatar } = parsed.data;
 
-  if (profile instanceof File && profile.size > 0) {
-    const fileName = `profile_${Date.now()}.${profile.name.split(".").pop()}`;
+  if (avatar instanceof File && avatar.size > 0) {
+    const fileName = `avatar_${Date.now()}.${avatar.name.split(".").pop()}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("profiles")
-      .upload(fileName, profile);
+      .from("avatars")
+      .upload(fileName, avatar);
 
     if (uploadError) {
       return { success: false, error: uploadError.message };
     }
 
     const { data: urlData } = supabase.storage
-      .from("profiles")
+      .from("avatars")
       .getPublicUrl(fileName);
-    profile_url = urlData.publicUrl;
+    avatar_url = urlData.publicUrl;
   }
 
   const { error } = await supabase.auth.signUp({
@@ -35,8 +35,8 @@ export async function registerService(formData: FormData) {
     password,
     options: {
       data: {
-        username: username,
-        profile_url: profile_url,
+        name: name,
+        avatar_url: avatar_url,
       },
     },
   });

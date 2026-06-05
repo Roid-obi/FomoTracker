@@ -2,7 +2,12 @@
 
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/databases";
-import { activityLog, apps, dailyStats } from "@/lib/databases/schema";
+import {
+  activityLogs,
+  apps,
+  dailyStats,
+  userDevices,
+} from "@/lib/databases/schema";
 
 export type UsageStatInput = {
   packageName: string;
@@ -25,6 +30,7 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
 
       const durationSeconds = Math.floor(stat.totalTimeInForeground / 1000);
       if (durationSeconds <= 0) continue;
+      const source = "android_app";
 
       // 1. Find or create the app in `apps` table
       let [appRecord] = await db
@@ -37,13 +43,37 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
           .insert(apps)
           .values({
             packageName: stat.packageName,
-            appName: stat.packageName.split(".").pop() || stat.packageName, // fallback name
-            platform: "Android",
+            name: stat.packageName.split(".").pop() || stat.packageName,
+            platform: "android",
             isActive: true,
             createdAt: new Date(),
           })
           .returning();
         appRecord = newApp;
+      }
+
+      let [deviceRecord] = await db
+        .select()
+        .from(userDevices)
+        .where(
+          and(eq(userDevices.userId, userId), eq(userDevices.platform, source)),
+        );
+
+      if (!deviceRecord) {
+        const now = new Date();
+        const [newDevice] = await db
+          .insert(userDevices)
+          .values({
+            userId,
+            platform: source,
+            deviceName: "Android Device",
+            isConnected: true,
+            lastSyncedAt: now,
+            connectedAt: now,
+            createdAt: now,
+          })
+          .returning();
+        deviceRecord = newDevice;
       }
 
       // 2. Check if there's already a dailyStats record for today
@@ -54,7 +84,7 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
           and(
             eq(dailyStats.userId, userId),
             eq(dailyStats.appId, appRecord.id),
-            eq(dailyStats.statDate, today as any),
+            eq(dailyStats.statDate, today),
           ),
         );
 
@@ -67,15 +97,15 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
           .set({
             totalDurationSeconds: durationSeconds,
             openFrequency:
-              stat.openFrequency || existingDailyStat.openFrequency,
+              stat.openFrequency ?? existingDailyStat.openFrequency,
             midnightDurationSeconds:
-              stat.midnightDurationSeconds ||
+              stat.midnightDurationSeconds ??
               existingDailyStat.midnightDurationSeconds,
             productiveHourDurationSeconds:
-              stat.productiveHourDurationSeconds ||
+              stat.productiveHourDurationSeconds ??
               existingDailyStat.productiveHourDurationSeconds,
             maxContinuousSeconds:
-              stat.maxContinuousSeconds ||
+              stat.maxContinuousSeconds ??
               existingDailyStat.maxContinuousSeconds,
           })
           .where(eq(dailyStats.id, existingDailyStat.id));
@@ -97,15 +127,19 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
 
       // 3. (Optional) log to activityLog if we want detailed history
       // Usually activityLog is for specific sessions, but we can insert a bulk update entry
-      await db.insert(activityLog).values({
+      const endedAt = new Date();
+      const startedAt = new Date(endedAt.getTime() - durationSeconds * 1000);
+      await db.insert(activityLogs).values({
         userId,
         appId: appRecord.id,
-        startedAt: new Date(),
-        endedAt: new Date(),
+        deviceId: deviceRecord.id,
+        startedAt,
+        endedAt,
         durationSeconds,
         isMidnight: false,
         isProductiveHour: false,
         isContinuous: false,
+        source,
         createdAt: new Date(),
       });
 
@@ -113,8 +147,12 @@ export async function syncUsageStats(userId: string, stats: UsageStatInput[]) {
     }
 
     return { success: true, count: insertedCount };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error syncing usage stats:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown error";
 }

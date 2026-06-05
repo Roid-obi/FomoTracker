@@ -5,7 +5,7 @@ import { table } from "@/lib/databases/schema";
 export namespace RegisterModel {
   const baseUserInsert = createInsertSchema(table.users).omit({
     id: true,
-    profileUrl: true,
+    avatarUrl: true,
     createdAt: true,
     updatedAt: true,
   });
@@ -13,7 +13,7 @@ export namespace RegisterModel {
   export const registerRequest = baseUserInsert.extend({
     email: z.email(),
     password: z.string(),
-    profile: z.instanceof(File).optional(),
+    avatar: z.instanceof(File).optional(),
   });
   export type registerRequest = z.infer<typeof registerRequest>;
 }

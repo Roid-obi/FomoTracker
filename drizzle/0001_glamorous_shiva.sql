@@ -1,1 +1,0 @@
-ALTER TABLE "weekly_reports" ALTER COLUMN "usage_summary" SET DATA TYPE jsonb;

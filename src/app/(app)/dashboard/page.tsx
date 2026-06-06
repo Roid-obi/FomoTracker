@@ -223,12 +223,6 @@ export default function DashboardPage() {
 
             <div className="space-y-4 max-w-md relative z-10 text-left">
               {/* Badge for Current Date */}
-              {/* {todayStr && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold tracking-wide border border-secondary/10 backdrop-blur-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-                  {todayStr}
-                </div>
-              )} */}
               <h2 className="text-2xl md:text-3xl font-black tracking-tight text-primary leading-tight">
                 Halo, {user?.name || "Budi"}!
               </h2>
@@ -246,7 +240,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Premium Flat Vector SVG Illustration of Connected Gadgets */}
+            {/* Premium Flat Vector SVG Illustration of Digital Wellbeing & Gadgets */}
             <div className="w-56 h-40 shrink-0 relative z-10 hidden sm:block">
               <svg
                 viewBox="0 0 220 150"
@@ -254,40 +248,29 @@ export default function DashboardPage() {
                 aria-hidden="true"
               >
                 <defs>
-                  {/* Laptop Screen Gradient */}
-                  <linearGradient
-                    id="laptopScreen"
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#0a2a4a" />
-                    <stop offset="100%" stopColor="#021426" />
-                  </linearGradient>
-
-                  {/* Tablet Screen Gradient */}
-                  <linearGradient
-                    id="tabletScreen"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#113a5d" />
-                    <stop offset="100%" stopColor="#0b233a" />
-                  </linearGradient>
-
-                  {/* Phone Screen Gradient */}
-                  <linearGradient
-                    id="phoneScreen"
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
+                  {/* Soothing Sunset Screen Gradient */}
+                  <linearGradient id="wellbeingScreen" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="#1e3a8a" />
-                    <stop offset="100%" stopColor="#0f172a" />
+                    <stop offset="50%" stopColor="#2563eb" />
+                    <stop offset="100%" stopColor="#f472b6" />
+                  </linearGradient>
+
+                  {/* Leaf Green Gradient */}
+                  <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#a7f3d0" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+
+                  {/* Sun Rise Glow Gradient */}
+                  <linearGradient id="sunGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="100%" stopColor="#f97316" />
+                  </linearGradient>
+
+                  {/* Tea Cup Gradient */}
+                  <linearGradient id="cupGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f1f5f9" />
+                    <stop offset="100%" stopColor="#cbd5e1" />
                   </linearGradient>
 
                   {/* Glow Radial Gradient */}
@@ -295,483 +278,128 @@ export default function DashboardPage() {
                     <stop offset="0%" stopColor="#c4ffdd" stopOpacity="0.4" />
                     <stop offset="100%" stopColor="#c4ffdd" stopOpacity="0" />
                   </radialGradient>
-
-                  {/* Chart Gradient */}
-                  <linearGradient
-                    id="chartAreaGradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#c4ffdd" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#c4ffdd" stopOpacity="0.0" />
-                  </linearGradient>
                 </defs>
 
                 {/* Desk/Surface Line */}
-                <line
-                  x1="15"
-                  y1="135"
-                  x2="205"
-                  y2="135"
-                  stroke="#cbd5e1"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
+                <line x1="15" y1="130" x2="205" y2="130" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
 
-                {/* Ambient Glow in background */}
-                <circle
-                  cx="110"
-                  cy="80"
-                  r="50"
-                  fill="url(#glowAccent)"
-                  className="animate-pulse"
-                />
+                {/* Ambient Wellbeing Glow */}
+                <circle cx="110" cy="75" r="45" fill="url(#glowAccent)" className="animate-pulse" />
 
-                {/* Connected synchronization wave arcs */}
-                <path
-                  d="M45,95 Q110,65 175,90"
-                  stroke="#a2f2c2"
-                  strokeWidth="1.5"
-                  strokeDasharray="3 3"
-                  fill="none"
-                  opacity="0.6"
-                />
-                <path
-                  d="M38,82 Q110,40 182,78"
-                  stroke="#506e86"
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                  fill="none"
-                  opacity="0.3"
-                />
+                {/* Mindfulness Wave Arcs */}
+                <path d="M30,85 C70,60 140,60 190,85" stroke="#4ade80" strokeWidth="1" strokeDasharray="3 5" fill="none" opacity="0.35" />
+                <path d="M45,95 Q110,75 175,95" stroke="#a2f2c2" strokeWidth="1.5" strokeDasharray="2 3" fill="none" opacity="0.5" />
 
-                {/* 1. LAPTOP (Center) */}
+                {/* 1. OFF-LINE READING: Open Book (Center-Left Base) */}
+                <g>
+                  {/* Book Pages */}
+                  <path d="M58,122 C70,119 86,123 86,123 L86,127 C86,127 70,123 58,126 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.5" />
+                  <path d="M114,122 C102,119 86,123 86,123 L86,127 C86,127 102,123 114,126 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.5" />
+                  {/* Book Cover */}
+                  <path d="M56,123 Q86,120 116,123" stroke="#475569" strokeWidth="1.5" fill="none" />
+                </g>
+
+                {/* 2. NATURE: Left Potted Plant (Monstera-style Wellbeing plant) */}
+                <g>
+                  {/* Pot */}
+                  <rect x="22" y="102" width="18" height="20" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.5" />
+                  <ellipse cx="31" cy="102" rx="8" ry="1.5" fill="#78350f" />
+                  {/* Stems & Leaves */}
+                  <path d="M31,102 Q26,85 16,80" fill="none" stroke="#059669" strokeWidth="1.2" />
+                  <path d="M16,80 C8,75 4,86 12,90 C16,92 18,84 16,80 Z" fill="url(#leafGrad)" />
+                  
+                  <path d="M31,102 Q35,78 45,77" fill="none" stroke="#059669" strokeWidth="1.2" />
+                  <path d="M45,77 C53,72 58,83 50,87 C46,89 44,81 45,77 Z" fill="url(#leafGrad)" />
+
+                  <path d="M31,102 Q28,68 24,60" fill="none" stroke="#059669" strokeWidth="1.2" />
+                  <path d="M24,60 C16,56 12,66 20,70 C24,72 26,64 24,60 Z" fill="url(#leafGrad)" />
+                </g>
+
+                {/* 3. LAPTOP (Mindful sunset screen & dashboard stats) */}
                 <g>
                   {/* Screen Bezel */}
-                  <rect
-                    x="60"
-                    y="55"
-                    width="100"
-                    height="66"
-                    rx="6"
-                    fill="#1e293b"
-                  />
+                  <rect x="65" y="52" width="90" height="60" rx="5" fill="#1e293b" />
                   {/* Screen Inner Display */}
-                  <rect
-                    x="64"
-                    y="59"
-                    width="92"
-                    height="54"
-                    rx="3"
-                    fill="url(#laptopScreen)"
-                  />
+                  <rect x="69" y="56" width="82" height="48" rx="2" fill="url(#wellbeingScreen)" />
+                  
+                  {/* Sunset scenery inside screen */}
+                  <circle cx="110" cy="84" r="13" fill="url(#sunGrad)" />
+                  {/* Peaceful Hills */}
+                  <path d="M69,96 Q90,82 120,104 L69,104 Z" fill="#0f172a" opacity="0.6" />
+                  <path d="M100,104 Q125,86 151,96 L151,104 Z" fill="#0d9488" opacity="0.5" />
+                  
+                  {/* Safe check icon on screen */}
+                  <circle cx="77" cy="64" r="3.5" fill="#10b981" />
+                  <path d="M75,64 L76.5,65.5 L79,62.5" fill="none" stroke="#ffffff" strokeWidth="0.8" strokeLinecap="round" />
+                  <rect x="83" y="62.5" width="20" height="3" rx="1" fill="#ffffff" opacity="0.9" />
 
-                  {/* Laptop Dashboard UI */}
-                  {/* Grid Lines */}
-                  <line
-                    x1="68"
-                    y1="75"
-                    x2="152"
-                    y2="75"
-                    stroke="#cbd5e1"
-                    strokeWidth="0.5"
-                    opacity="0.1"
-                  />
-                  <line
-                    x1="68"
-                    y1="90"
-                    x2="152"
-                    y2="90"
-                    stroke="#cbd5e1"
-                    strokeWidth="0.5"
-                    opacity="0.1"
-                  />
-                  <line
-                    x1="68"
-                    y1="102"
-                    x2="152"
-                    y2="102"
-                    stroke="#cbd5e1"
-                    strokeWidth="0.5"
-                    opacity="0.1"
-                  />
-
-                  {/* Charts */}
-                  <path
-                    d="M68,102 L80,92 L92,96 L104,80 L116,88 L128,70 L140,82 L152,65"
-                    fill="none"
-                    stroke="#c4ffdd"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M68,102 L80,92 L92,96 L104,80 L116,88 L128,70 L140,82 L152,65 L152,110 L68,110 Z"
-                    fill="url(#chartAreaGradient)"
-                  />
-
-                  {/* Small UI Details on Screen */}
-                  <circle cx="70" cy="65" r="2" fill="#c4ffdd" />
-                  <rect
-                    x="76"
-                    y="64"
-                    width="20"
-                    height="2"
-                    rx="1"
-                    fill="#ffffff"
-                    opacity="0.8"
-                  />
-                  <circle cx="148" cy="65" r="2" fill="#60a5fa" />
-
-                  {/* Base / Keyboard Part */}
-                  {/* Hinge */}
-                  <rect x="90" y="120" width="40" height="3" fill="#0f172a" />
-                  {/* Keyboard Base */}
-                  <path
-                    d="M50,121 L170,121 L164,127 L56,127 Z"
-                    fill="#cbd5e1"
-                    stroke="#94a3b8"
-                    strokeWidth="0.5"
-                  />
+                  {/* Base / Keyboard */}
+                  <rect x="95" y="112" width="30" height="2" fill="#0f172a" />
+                  <path d="M55,114 L165,114 L160,119 L60,119 Z" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="0.5" />
                   {/* Base Profile Shadow */}
-                  <path
-                    d="M56,127 L164,127 L160,130 L60,130 Z"
-                    fill="#94a3b8"
-                  />
+                  <path d="M60,119 L160,119 L156,122 L64,122 Z" fill="#94a3b8" />
                   {/* Trackpad */}
-                  <rect
-                    x="100"
-                    y="122"
-                    width="20"
-                    height="3"
-                    rx="1"
-                    fill="#94a3b8"
-                    opacity="0.6"
-                  />
+                  <rect x="105" y="115" width="10" height="2" rx="0.5" fill="#94a3b8" opacity="0.6" />
                 </g>
 
-                {/* 2. TABLET (Left side, slightly rotated) */}
-                <g transform="rotate(-6 35 105)">
-                  {/* Tablet Body */}
-                  <rect
-                    x="15"
-                    y="72"
-                    width="42"
-                    height="58"
-                    rx="5"
-                    fill="#475569"
-                    stroke="#334155"
-                    strokeWidth="0.5"
-                  />
-                  {/* Inner Screen */}
-                  <rect
-                    x="18"
-                    y="75"
-                    width="36"
-                    height="52"
-                    rx="3.5"
-                    fill="url(#tabletScreen)"
-                  />
-                  {/* Progress Ring Chart */}
-                  <circle
-                    cx="36"
-                    cy="98"
-                    r="11"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                    fill="none"
-                    opacity="0.15"
-                  />
-                  <circle
-                    cx="36"
-                    cy="98"
-                    r="11"
-                    stroke="#c4ffdd"
-                    strokeWidth="2.5"
-                    fill="none"
-                    strokeDasharray="69.1"
-                    strokeDashoffset="22"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="36" cy="98" r="5" fill="#ffffff" opacity="0.1" />
-                  {/* UI Lines */}
-                  <rect
-                    x="24"
-                    y="115"
-                    width="24"
-                    height="2"
-                    rx="1"
-                    fill="#ffffff"
-                    opacity="0.7"
-                  />
-                  <rect
-                    x="28"
-                    y="120"
-                    width="16"
-                    height="1.5"
-                    rx="0.75"
-                    fill="#a2f2c2"
-                    opacity="0.9"
-                  />
-                  {/* Camera Dot */}
-                  <circle cx="36" cy="73.5" r="0.75" fill="#1e293b" />
+                {/* 4. SELF-CARE: Steaming Tea/Coffee Mug (Right Base) */}
+                <g>
+                  {/* Saucer */}
+                  <ellipse cx="180" cy="125" rx="12" ry="2" fill="#cbd5e1" />
+                  {/* Mug Body */}
+                  <path d="M171,111 L189,111 L186,123 C185,125 175,125 174,123 Z" fill="url(#cupGrad)" stroke="#94a3b8" strokeWidth="0.5" />
+                  {/* Mug Handle */}
+                  <path d="M189,114 C193,114 193,120 189,120" stroke="#94a3b8" strokeWidth="1.2" fill="none" />
+                  {/* Steam Waves */}
+                  <path d="M176,105 Q174,100 178,95" stroke="#94a3b8" strokeWidth="0.75" fill="none" strokeLinecap="round" className="animate-pulse" />
+                  <path d="M182,106 Q180,99 184,93" stroke="#94a3b8" strokeWidth="0.75" fill="none" strokeLinecap="round" className="animate-pulse" />
                 </g>
 
-                {/* 3. SMARTPHONE (Right side, on a stand, slightly rotated) */}
-                <g transform="rotate(5 185 95)">
-                  {/* Mobile Stand */}
-                  <path
-                    d="M176,132 L194,132 L190,118 L180,118 Z"
-                    fill="#334155"
-                  />
+                {/* 5. SMARTPHONE (Balanced next to the laptop, displaying green heart) */}
+                <g transform="rotate(8 152 100)">
                   {/* Phone Body */}
-                  <rect
-                    x="170"
-                    y="68"
-                    width="30"
-                    height="56"
-                    rx="6"
-                    fill="#0f172a"
-                    stroke="#334155"
-                    strokeWidth="0.5"
-                  />
+                  <rect x="142" y="82" width="20" height="38" rx="4" fill="#1e293b" stroke="#334155" strokeWidth="0.5" />
                   {/* Inner Screen */}
-                  <rect
-                    x="173"
-                    y="71"
-                    width="24"
-                    height="50"
-                    rx="4.5"
-                    fill="url(#phoneScreen)"
-                  />
-                  {/* Top Notch */}
-                  <rect
-                    x="181"
-                    y="71"
-                    width="8"
-                    height="2"
-                    rx="1"
-                    fill="#0f172a"
-                  />
-                  {/* Notification/App UI Card */}
-                  <rect
-                    x="176"
-                    y="78"
-                    width="18"
-                    height="8"
-                    rx="2"
-                    fill="#c4ffdd"
-                  />
-                  <rect
-                    x="179"
-                    y="81"
-                    width="10"
-                    height="2"
-                    rx="0.5"
-                    fill="#062743"
-                  />
-
-                  <rect
-                    x="176"
-                    y="88"
-                    width="18"
-                    height="8"
-                    rx="2"
-                    fill="#ffffff"
-                    opacity="0.9"
-                  />
-                  <rect
-                    x="179"
-                    y="91"
-                    width="12"
-                    height="2"
-                    rx="0.5"
-                    fill="#062743"
-                    opacity="0.7"
-                  />
-
-                  <rect
-                    x="176"
-                    y="98"
-                    width="18"
-                    height="8"
-                    rx="2"
-                    fill="#113a5d"
-                  />
-                  <rect
-                    x="179"
-                    y="101"
-                    width="8"
-                    height="2"
-                    rx="0.5"
-                    fill="#c4ffdd"
-                  />
-
+                  <rect x="144" y="84" width="16" height="34" rx="2.5" fill="#0f172a" />
+                  {/* Glowing Green Heart */}
+                  <path d="M152,94 C152,94 150,92.2 148.5,93.5 C147,94.8 148.5,97 152,99.2 C155.5,97 157,94.8 155.5,93.5 C154,92.2 152,94 152,94 Z" fill="#10b981" className="animate-pulse" />
+                  {/* Sleep Moon */}
+                  <path d="M150,108 A2,2 0 0,0 154,110 A1.8,1.8 0 0,1 150,108" fill="#fde047" />
                   {/* Home indicator */}
-                  <rect
-                    x="182"
-                    y="117"
-                    width="6"
-                    height="1"
-                    rx="0.5"
-                    fill="#ffffff"
-                    opacity="0.6"
-                  />
+                  <rect x="149" y="115" width="4" height="0.6" rx="0.3" fill="#ffffff" opacity="0.6" />
                 </g>
 
-                {/* 4. SMARTWATCH (Front Center-Left) */}
+                {/* 6. SMARTWATCH (Healthy vitals / Green Heart rate on watch face) */}
                 <g>
                   {/* Straps */}
-                  <rect
-                    x="83"
-                    y="131"
-                    width="14"
-                    height="4"
-                    rx="1"
-                    fill="#334155"
-                  />
+                  <rect x="83" y="123" width="14" height="3" rx="0.75" fill="#334155" />
                   {/* Watch Case */}
-                  <rect
-                    x="86"
-                    y="128"
-                    width="8"
-                    height="9"
-                    rx="2"
-                    fill="#475569"
-                    stroke="#94a3b8"
-                    strokeWidth="0.5"
-                  />
-                  {/* Dial */}
-                  <circle cx="90" cy="132.5" r="3.5" fill="#0a2a4a" />
-                  {/* Glow dot */}
-                  <circle
-                    cx="90"
-                    cy="132.5"
-                    r="1"
-                    fill="#c4ffdd"
-                    className="animate-pulse"
-                  />
+                  <rect x="86" y="120" width="8" height="9" rx="1.5" fill="#475569" stroke="#94a3b8" strokeWidth="0.5" />
+                  {/* Heartbeat pulse */}
+                  <polyline points="87,124.5 88.5,124.5 89,122 90,126 90.5,124.5 92,124.5" fill="none" stroke="#10b981" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round" />
                 </g>
 
-                {/* 5. WIRELESS HEADPHONES (Front Right, resting on desk) */}
-                <g>
-                  {/* Left Ear Pad */}
-                  <rect
-                    x="142"
-                    y="123"
-                    width="3"
-                    height="7"
-                    rx="1.5"
-                    fill="#334155"
-                  />
-                  {/* Right Ear Pad */}
-                  <rect
-                    x="151"
-                    y="123"
-                    width="3"
-                    height="7"
-                    rx="1.5"
-                    fill="#334155"
-                  />
-                  {/* headband */}
-                  <path
-                    d="M143.5,124 C143.5,119 149.5,119 149.5,124"
-                    stroke="#475569"
-                    strokeWidth="1.5"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                </g>
-
-                {/* 6. FLOATING WIDGET 1 (Top Left) */}
+                {/* 7. FLOATING ORGANIC WELLBEING ELEMENTS */}
+                {/* Floating Leaf (Top-Right) */}
                 <g className="animate-float-slow">
-                  <rect
-                    x="20"
-                    y="22"
-                    width="28"
-                    height="16"
-                    rx="4"
-                    fill="#ffffff"
-                    filter="drop-shadow(0 4px 6px rgba(0,0,0,0.05))"
-                  />
-                  <circle cx="27" cy="30" r="3" fill="#c4ffdd" />
-                  {/* Heartbeat pulse path */}
-                  <path
-                    d="M25,30 L26.5,30 L27,28 L27.5,32 L28,30 L29.5,30"
-                    fill="none"
-                    stroke="#062743"
-                    strokeWidth="0.75"
-                  />
-                  <rect
-                    x="33"
-                    y="29"
-                    width="10"
-                    height="2"
-                    rx="0.5"
-                    fill="#506e86"
-                  />
+                  <path d="M175,40 C166,37 166,51 178,48 C178,48 181,41 175,40 Z" fill="url(#leafGrad)" opacity="0.85" />
+                  <path d="M178,48 Q182,50 185,49" fill="none" stroke="#059669" strokeWidth="0.8" />
                 </g>
 
-                {/* 7. FLOATING WIDGET 2 (Top Right) */}
+                {/* Floating Heart (Top-Left) */}
                 <g className="animate-float-medium">
-                  <rect
-                    x="175"
-                    y="18"
-                    width="30"
-                    height="16"
-                    rx="4"
-                    fill="#062743"
-                    filter="drop-shadow(0 4px 6px rgba(0,0,0,0.15))"
-                  />
-                  {/* Notification Bell shape */}
-                  <path
-                    d="M182,28 C182,26.5 183.5,26.5 183.5,28 L183.5,29.5 L180.5,29.5 L180.5,28 Z"
-                    fill="#c4ffdd"
-                  />
-                  <circle cx="182.5" cy="30.5" r="0.75" fill="#c4ffdd" />
-                  <rect
-                    x="188"
-                    y="26"
-                    width="12"
-                    height="1.5"
-                    rx="0.5"
-                    fill="#ffffff"
-                  />
-                  <rect
-                    x="188"
-                    y="29"
-                    width="8"
-                    height="1"
-                    rx="0.5"
-                    fill="#ffffff"
-                    opacity="0.6"
-                  />
+                  <path d="M42,43 C42,43 39.5,40.5 38,41.8 C36.5,43 38,45.2 42,47.5 C46,45.2 47.5,43 46,41.8 C44.5,40.5 42,43 42,43 Z" fill="#fca5a5" />
                 </g>
 
-                {/* Sparkles / Syncing dots */}
-                <circle
-                  cx="110"
-                  cy="50"
-                  r="2.5"
-                  fill="#c4ffdd"
-                  className="animate-pulse"
-                />
-                <circle
-                  cx="58"
-                  cy="85"
-                  r="1.5"
-                  fill="#c4ffdd"
-                  className="animate-pulse"
-                />
-                <circle
-                  cx="162"
-                  cy="88"
-                  r="2"
-                  fill="#a2f2c2"
-                  className="animate-pulse"
-                />
+                {/* Floating Sparkles & Healthy Sleep Stars */}
+                <g className="animate-pulse">
+                  {/* Sparkle 1 */}
+                  <path d="M102,34 L103.5,37 L106.5,38 L103.5,39 L102,42 L100.5,39 L97.5,38 L100.5,37 Z" fill="#fde047" />
+                  {/* Sparkle 2 */}
+                  <path d="M135,26 L136,28.5 L138.5,29 L136,29.5 L135,32 L134,29.5 L131.5,29 L134,28.5 Z" fill="#fde047" opacity="0.8" />
+                  {/* Little Star near Phone */}
+                  <circle cx="160" cy="74" r="1" fill="#fde047" />
+                </g>
               </svg>
             </div>
           </div>

@@ -803,7 +803,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border border-pink-300 block" />
+                  <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border  border-pink-300 block" />
                   <span>🌙 Jam Tidur</span>
                 </div>
                 <div className="flex items-center gap-1.5">

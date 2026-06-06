@@ -1,6 +1,18 @@
 "use client";
 
-import { ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
+import {
+  Activity,
+  ArrowDownRight,
+  ArrowUpRight,
+  Briefcase,
+  ChevronRight,
+  Clock,
+  Info,
+  Minus,
+  Moon,
+  RotateCcw,
+} from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import {
   Bar,
@@ -19,6 +31,57 @@ const formatSecToHoursMins = (seconds: number) => {
   const m = Math.floor((seconds % 3600) / 60);
   if (h === 0) return `${m}m`;
   return `${h}j ${m}m`;
+};
+
+// Helper for formatting minutes to hours/minutes
+const formatMinutesToHoursMins = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  return `${h}j ${m}m`;
+};
+
+// Helper to generate date strings and names
+const getDayDateInfo = (dayIdx: number, isPrevWeek: boolean) => {
+  // Monday of current week is 2026-06-01
+  // Monday of previous week is 2026-05-25
+  const baseDate = isPrevWeek ? new Date(2026, 4, 25) : new Date(2026, 5, 1);
+  const targetDate = new Date(baseDate);
+  targetDate.setDate(baseDate.getDate() + dayIdx);
+
+  const yyyy = targetDate.getFullYear();
+  const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(targetDate.getDate()).padStart(2, "0");
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  const dayNames = [
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+    "Minggu",
+  ];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ];
+
+  const label = `${targetDate.getDate()} ${monthNames[targetDate.getMonth()]}`;
+  const dayName = dayNames[dayIdx];
+
+  return { dateStr, label, dayName };
 };
 
 // Mock data for high fidelity charts matching the database metrics
@@ -179,6 +242,53 @@ const CustomBar = (props: any) => {
   const radius = isTop ? [4, 4, 0, 0] : [0, 0, 0, 0];
 
   return <Rectangle {...props} radius={radius} />;
+};
+
+const flagConfigs: Record<
+  string,
+  {
+    icon: React.ElementType;
+    weight: string;
+    iconBg: string;
+    iconColor: string;
+    barColor: string;
+  }
+> = {
+  "Terlalu lama main HP": {
+    icon: Clock,
+    weight: "Berkontribusi 30% terhadap skor harian",
+    iconBg: "bg-red-50 border-red-100",
+    iconColor: "text-red-600",
+    barColor: "bg-red-500",
+  },
+  "Sering buka-tutup aplikasi": {
+    icon: RotateCcw,
+    weight: "Berkontribusi 20% terhadap skor harian",
+    iconBg: "bg-amber-50 border-amber-100",
+    iconColor: "text-amber-600",
+    barColor: "bg-amber-500",
+  },
+  "Main HP waktu tidur": {
+    icon: Moon,
+    weight: "Berkontribusi 20% terhadap skor harian",
+    iconBg: "bg-indigo-50 border-indigo-100",
+    iconColor: "text-indigo-600",
+    barColor: "bg-indigo-500",
+  },
+  "Nonstop tanpa jeda": {
+    icon: Activity,
+    weight: "Berkontribusi 15% terhadap skor harian",
+    iconBg: "bg-orange-50 border-orange-100",
+    iconColor: "text-orange-600",
+    barColor: "bg-orange-500",
+  },
+  "Distraksi jam produktif": {
+    icon: Briefcase,
+    weight: "Berkontribusi 15% terhadap skor harian",
+    iconBg: "bg-pink-50 border-pink-100",
+    iconColor: "text-pink-600",
+    barColor: "bg-pink-500",
+  },
 };
 
 export default function StatistikPage() {
@@ -349,6 +459,83 @@ export default function StatistikPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Analisis Harian (Drill-down) */}
+      <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
+        <div className="mb-4">
+          <h3 className="font-extrabold text-base text-primary">
+            Analisis Harian
+          </h3>
+          <p className="text-xs text-muted font-light mt-0.5">
+            Pilih hari untuk melihat rincian aktivitas gawai per jam secara
+            detail.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          {currentData.dailyData.map(
+            (dayData: Record<string, string | number>, index) => {
+              const { dateStr, label, dayName } = getDayDateInfo(
+                index,
+                period === "lalu",
+              );
+              const totalMinutes =
+                ((dayData.Instagram as number) || 0) +
+                ((dayData.TikTok as number) || 0) +
+                ((dayData.YouTube as number) || 0) +
+                ((dayData.WhatsApp as number) || 0);
+
+              const hasData = totalMinutes > 0;
+
+              if (hasData) {
+                return (
+                  <Link
+                    key={dateStr}
+                    href={`/statistik/${dateStr}`}
+                    className="group relative flex flex-col justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-xs transition-all duration-300 min-h-24 cursor-pointer"
+                  >
+                    <div>
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                        {dayName}
+                      </span>
+                      <h4 className="text-xs font-black text-primary mt-0.5">
+                        {label}
+                      </h4>
+                    </div>
+                    <div className="flex justify-between items-end mt-4">
+                      <span className="text-xs font-extrabold text-primary">
+                        {formatMinutesToHoursMins(totalMinutes)}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0" />
+                    </div>
+                  </Link>
+                );
+              }
+
+              return (
+                <div
+                  key={dateStr}
+                  className="flex flex-col justify-between p-4 rounded-2xl border border-border/40 bg-muted-light/10 opacity-50 min-h-24 select-none"
+                >
+                  <div>
+                    <span className="text-[10px] font-bold text-muted/60 uppercase tracking-wider">
+                      {dayName}
+                    </span>
+                    <h4 className="text-xs font-black text-muted/60 mt-0.5">
+                      {label}
+                    </h4>
+                  </div>
+                  <div className="mt-4">
+                    <span className="text-[10px] text-muted/50 font-light block leading-none">
+                      Belum ada data
+                    </span>
+                  </div>
+                </div>
+              );
+            },
+          )}
+        </div>
       </div>
 
       {/* Main Widgets: Daily stacked bar + Top apps */}
@@ -537,10 +724,10 @@ export default function StatistikPage() {
                     let highlightClass = "";
                     if (isSleep) {
                       highlightClass =
-                        "border border-pink-300 shadow-[0_0_2px_rgba(244,63,94,0.1)] bg-[#fff0f3]/25";
+                        "border border-[2px] border-pink-300 shadow-[0_0_2px_rgba(244,63,94,0.1)] bg-[#fff0f3]/25";
                     } else if (isProductive) {
                       highlightClass =
-                        "border border-amber-300 shadow-[0_0_2px_rgba(245,158,11,0.1)] bg-[#fffbeb]/25";
+                        "border border-[2px] border-amber-300 shadow-[0_0_2px_rgba(245,158,11,0.1)] bg-[#fffbeb]/25";
                     } else {
                       highlightClass = "border border-transparent";
                     }
@@ -604,36 +791,54 @@ export default function StatistikPage() {
           <h3 className="font-extrabold text-base text-primary">
             Kebiasaan yang Sering Muncul
           </h3>
-          <p className="text-xs text-muted font-light mt-0.5">
-            Seberapa sering kebiasaan digital buruk terdeteksi
+          <p className="text-xs text-muted font-light mt-0.5 leading-relaxed">
+            Seberapa sering kebiasaan ini muncul, dan seberapa besar pengaruhnya
+            terhadap skor harianmu?
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {currentData.flags.map((flag) => {
+            const config = flagConfigs[flag.name] || {
+              icon: Clock,
+              weight: "",
+              iconBg: "bg-muted-light border-border",
+              iconColor: "text-muted",
+              barColor: "bg-primary",
+            };
+            const IconComp = config.icon;
             const pct = Math.round((flag.count / flag.total) * 100);
             return (
               <div
                 key={flag.name}
-                className="space-y-1.5 p-3 rounded-2xl border border-border/60 bg-background/30"
+                className="flex gap-4 p-4 rounded-3xl border border-border bg-card shadow-xs items-center"
               >
-                <div className="flex justify-between items-baseline text-xs">
-                  <span className="font-bold text-primary">{flag.name}</span>
-                  <span className="text-[10px] text-muted font-light">
-                    {flag.label}
-                  </span>
+                <div
+                  className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${config.iconBg} ${config.iconColor}`}
+                >
+                  <IconComp className="w-5 h-5" />
                 </div>
-                <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      pct >= 70
-                        ? "bg-red-500"
-                        : pct >= 40
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
-                    }`}
-                    style={{ width: `${pct}%` }}
-                  />
+
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex justify-between items-baseline">
+                    <h4 className="text-xs font-bold text-primary truncate">
+                      {flag.name}
+                    </h4>
+                    <span className="text-[10px] text-muted font-medium shrink-0">
+                      {flag.label}
+                    </span>
+                  </div>
+
+                  <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${config.barColor}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+
+                  <p className="text-[9px] text-muted font-light leading-none">
+                    {config.weight}
+                  </p>
                 </div>
               </div>
             );

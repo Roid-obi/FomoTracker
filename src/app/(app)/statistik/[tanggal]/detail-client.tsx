@@ -551,8 +551,6 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
             </span>
           )}
 
-          
-
           {hasNext ? (
             <Link
               href={`/statistik/${nextStr}`}

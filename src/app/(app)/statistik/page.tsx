@@ -337,40 +337,42 @@ export default function StatistikPage() {
 
   return (
     <div className="space-y-6 font-poppins">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
-          Statistik Mingguan
-        </h1>
-        <p className="text-xs text-muted font-light mt-0.5">
-          Analisis pola pemakaian gawai secara transparan tanpa istilah rumit.
-        </p>
-      </div>
+      {/* Page Header & Filter Periode */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
+            Statistik Mingguan
+          </h1>
+          <p className="text-xs text-muted font-light mt-0.5">
+            Analisis pola pemakaian gawai secara transparan tanpa istilah rumit.
+          </p>
+        </div>
 
-      {/* Filter Periode */}
-      <div className="flex gap-2 p-1.5 bg-card border border-border rounded-2xl w-fit">
-        <button
-          type="button"
-          onClick={() => setPeriod("ini")}
-          className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            period === "ini"
-              ? "bg-primary text-white"
-              : "text-muted hover:text-primary"
-          }`}
-        >
-          Minggu Ini
-        </button>
-        <button
-          type="button"
-          onClick={() => setPeriod("lalu")}
-          className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            period === "lalu"
-              ? "bg-primary text-white"
-              : "text-muted hover:text-primary"
-          }`}
-        >
-          Minggu Lalu
-        </button>
+        {/* Filter Periode */}
+        <div className="flex gap-2 p-1.5 bg-card border border-border rounded-2xl w-fit shrink-0">
+          <button
+            type="button"
+            onClick={() => setPeriod("ini")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              period === "ini"
+                ? "bg-primary text-white"
+                : "text-muted hover:text-primary"
+            }`}
+          >
+            Minggu Ini
+          </button>
+          <button
+            type="button"
+            onClick={() => setPeriod("lalu")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              period === "lalu"
+                ? "bg-primary text-white"
+                : "text-muted hover:text-primary"
+            }`}
+          >
+            Minggu Lalu
+          </button>
+        </div>
       </div>
 
       {/* Banner Keterangan Jika Senin dan memilih "Minggu Ini" */}

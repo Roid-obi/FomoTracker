@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -17,15 +16,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  initialActivityLogs,
-  initialBehavioralScores,
-  initialDailyStats,
-  initialWeeklyInsights,
-  initialUsers,
-  initialApps,
-  initialUserDevices,
-} from "@/lib/data/databaseInitialData";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -35,10 +26,54 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  initialActivityLogs,
+  initialApps,
+  initialBehavioralScores,
+  initialDailyStats,
+  initialUserDevices,
+  initialUsers,
+  initialWeeklyInsights,
+} from "@/lib/data/databaseInitialData";
 
 export default function DashboardPage() {
   const user = initialUsers[0];
-  const todayStr = "Rabu, 4 Juni 2026"; // Explicit date aligned with sitemap greeting
+  const [todayStr, setTodayStr] = useState("");
+
+  useEffect(() => {
+    const formatIndonesianDate = () => {
+      const days = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+      ];
+      const months = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      const now = new Date();
+      const dayName = days[now.getDay()];
+      const date = now.getDate();
+      const monthName = months[now.getMonth()];
+      const year = now.getFullYear();
+      return `${dayName}, ${date} ${monthName} ${year}`;
+    };
+    setTodayStr(formatIndonesianDate());
+  }, []);
 
   // 1. Calculate stats from daily_stats
   const totalDurationSeconds = initialDailyStats.reduce(
@@ -187,13 +222,20 @@ export default function DashboardPage() {
             <div className="absolute left-1/3 bottom-0 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none" />
 
             <div className="space-y-4 max-w-md relative z-10 text-left">
+              {/* Badge for Current Date */}
+              {/* {todayStr && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold tracking-wide border border-secondary/10 backdrop-blur-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                  {todayStr}
+                </div>
+              )} */}
               <h2 className="text-2xl md:text-3xl font-black tracking-tight text-primary leading-tight">
                 Halo, {user?.name || "Budi"}!
               </h2>
               <p className="text-xs sm:text-sm text-muted font-light leading-relaxed">
                 Selamat datang kembali. FomoTracker siap membantumu memantau
-                waktu pemakaian media sosial dan membangun kebiasaan digital yang
-                lebih produktif hari ini.
+                waktu pemakaian media sosial dan membangun kebiasaan digital
+                yang lebih produktif hari ini.
               </p>
               <Link
                 href="/statistik"
@@ -204,39 +246,532 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Premium Flat Vector SVG Illustration */}
-            <div className="w-48 h-36 shrink-0 relative z-10 hidden sm:block">
+            {/* Premium Flat Vector SVG Illustration of Connected Gadgets */}
+            <div className="w-56 h-40 shrink-0 relative z-10 hidden sm:block">
               <svg
-                viewBox="0 0 200 150"
+                viewBox="0 0 220 150"
                 className="w-full h-full"
                 aria-hidden="true"
               >
-                {/* Chair / Block */}
-                <rect x="100" y="80" width="55" height="45" rx="8" fill="#e1e8ef" />
-                <rect x="105" y="85" width="45" height="40" rx="4" fill="#f9f9f9" />
-                
-                {/* Small Plant decoration */}
-                <path d="M45,120 Q35,90 55,80 Q65,100 50,120 Z" fill="#c4ffdd" />
-                <path d="M50,120 Q55,95 68,92 Q72,110 52,120 Z" fill="#a2f2c2" />
-                <rect x="44" y="115" width="12" height="15" rx="2" fill="#506e86" />
+                <defs>
+                  {/* Laptop Screen Gradient */}
+                  <linearGradient
+                    id="laptopScreen"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#0a2a4a" />
+                    <stop offset="100%" stopColor="#021426" />
+                  </linearGradient>
 
-                {/* Character Sitting */}
-                {/* Legs */}
-                <path d="M125,80 L105,115 L95,115" stroke="#113a5d" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                {/* Torso */}
-                <path d="M125,50 L128,82 L115,82" stroke="#062743" strokeWidth="16" strokeLinecap="round" fill="none" />
-                {/* Jacket Orange */}
-                <path d="M123,48 L126,80 L115,80" stroke="#f97316" strokeWidth="12" strokeLinecap="round" fill="none" />
-                {/* Head */}
-                <circle cx="123" cy="35" r="9" fill="#e5c5b5" />
-                {/* Hair */}
-                <path d="M117,32 Q122,25 129,32 C129,28 123,26 117,32 Z" fill="#062743" />
-                {/* Arm / Hand holding device */}
-                <path d="M128,58 L115,62 L105,58" stroke="#e5c5b5" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                
-                {/* Screen / Phone Glow */}
-                <rect x="98" y="50" width="6" height="11" rx="1" transform="rotate(-15 98 50)" fill="#062743" />
-                <circle cx="95" cy="52" r="8" fill="#c4ffdd" opacity="0.45" className="animate-pulse" />
+                  {/* Tablet Screen Gradient */}
+                  <linearGradient
+                    id="tabletScreen"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#113a5d" />
+                    <stop offset="100%" stopColor="#0b233a" />
+                  </linearGradient>
+
+                  {/* Phone Screen Gradient */}
+                  <linearGradient
+                    id="phoneScreen"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#1e3a8a" />
+                    <stop offset="100%" stopColor="#0f172a" />
+                  </linearGradient>
+
+                  {/* Glow Radial Gradient */}
+                  <radialGradient id="glowAccent" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#c4ffdd" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#c4ffdd" stopOpacity="0" />
+                  </radialGradient>
+
+                  {/* Chart Gradient */}
+                  <linearGradient
+                    id="chartAreaGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#c4ffdd" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#c4ffdd" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Desk/Surface Line */}
+                <line
+                  x1="15"
+                  y1="135"
+                  x2="205"
+                  y2="135"
+                  stroke="#cbd5e1"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+
+                {/* Ambient Glow in background */}
+                <circle
+                  cx="110"
+                  cy="80"
+                  r="50"
+                  fill="url(#glowAccent)"
+                  className="animate-pulse"
+                />
+
+                {/* Connected synchronization wave arcs */}
+                <path
+                  d="M45,95 Q110,65 175,90"
+                  stroke="#a2f2c2"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 3"
+                  fill="none"
+                  opacity="0.6"
+                />
+                <path
+                  d="M38,82 Q110,40 182,78"
+                  stroke="#506e86"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                  fill="none"
+                  opacity="0.3"
+                />
+
+                {/* 1. LAPTOP (Center) */}
+                <g>
+                  {/* Screen Bezel */}
+                  <rect
+                    x="60"
+                    y="55"
+                    width="100"
+                    height="66"
+                    rx="6"
+                    fill="#1e293b"
+                  />
+                  {/* Screen Inner Display */}
+                  <rect
+                    x="64"
+                    y="59"
+                    width="92"
+                    height="54"
+                    rx="3"
+                    fill="url(#laptopScreen)"
+                  />
+
+                  {/* Laptop Dashboard UI */}
+                  {/* Grid Lines */}
+                  <line
+                    x1="68"
+                    y1="75"
+                    x2="152"
+                    y2="75"
+                    stroke="#cbd5e1"
+                    strokeWidth="0.5"
+                    opacity="0.1"
+                  />
+                  <line
+                    x1="68"
+                    y1="90"
+                    x2="152"
+                    y2="90"
+                    stroke="#cbd5e1"
+                    strokeWidth="0.5"
+                    opacity="0.1"
+                  />
+                  <line
+                    x1="68"
+                    y1="102"
+                    x2="152"
+                    y2="102"
+                    stroke="#cbd5e1"
+                    strokeWidth="0.5"
+                    opacity="0.1"
+                  />
+
+                  {/* Charts */}
+                  <path
+                    d="M68,102 L80,92 L92,96 L104,80 L116,88 L128,70 L140,82 L152,65"
+                    fill="none"
+                    stroke="#c4ffdd"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M68,102 L80,92 L92,96 L104,80 L116,88 L128,70 L140,82 L152,65 L152,110 L68,110 Z"
+                    fill="url(#chartAreaGradient)"
+                  />
+
+                  {/* Small UI Details on Screen */}
+                  <circle cx="70" cy="65" r="2" fill="#c4ffdd" />
+                  <rect
+                    x="76"
+                    y="64"
+                    width="20"
+                    height="2"
+                    rx="1"
+                    fill="#ffffff"
+                    opacity="0.8"
+                  />
+                  <circle cx="148" cy="65" r="2" fill="#60a5fa" />
+
+                  {/* Base / Keyboard Part */}
+                  {/* Hinge */}
+                  <rect x="90" y="120" width="40" height="3" fill="#0f172a" />
+                  {/* Keyboard Base */}
+                  <path
+                    d="M50,121 L170,121 L164,127 L56,127 Z"
+                    fill="#cbd5e1"
+                    stroke="#94a3b8"
+                    strokeWidth="0.5"
+                  />
+                  {/* Base Profile Shadow */}
+                  <path
+                    d="M56,127 L164,127 L160,130 L60,130 Z"
+                    fill="#94a3b8"
+                  />
+                  {/* Trackpad */}
+                  <rect
+                    x="100"
+                    y="122"
+                    width="20"
+                    height="3"
+                    rx="1"
+                    fill="#94a3b8"
+                    opacity="0.6"
+                  />
+                </g>
+
+                {/* 2. TABLET (Left side, slightly rotated) */}
+                <g transform="rotate(-6 35 105)">
+                  {/* Tablet Body */}
+                  <rect
+                    x="15"
+                    y="72"
+                    width="42"
+                    height="58"
+                    rx="5"
+                    fill="#475569"
+                    stroke="#334155"
+                    strokeWidth="0.5"
+                  />
+                  {/* Inner Screen */}
+                  <rect
+                    x="18"
+                    y="75"
+                    width="36"
+                    height="52"
+                    rx="3.5"
+                    fill="url(#tabletScreen)"
+                  />
+                  {/* Progress Ring Chart */}
+                  <circle
+                    cx="36"
+                    cy="98"
+                    r="11"
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                    fill="none"
+                    opacity="0.15"
+                  />
+                  <circle
+                    cx="36"
+                    cy="98"
+                    r="11"
+                    stroke="#c4ffdd"
+                    strokeWidth="2.5"
+                    fill="none"
+                    strokeDasharray="69.1"
+                    strokeDashoffset="22"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="36" cy="98" r="5" fill="#ffffff" opacity="0.1" />
+                  {/* UI Lines */}
+                  <rect
+                    x="24"
+                    y="115"
+                    width="24"
+                    height="2"
+                    rx="1"
+                    fill="#ffffff"
+                    opacity="0.7"
+                  />
+                  <rect
+                    x="28"
+                    y="120"
+                    width="16"
+                    height="1.5"
+                    rx="0.75"
+                    fill="#a2f2c2"
+                    opacity="0.9"
+                  />
+                  {/* Camera Dot */}
+                  <circle cx="36" cy="73.5" r="0.75" fill="#1e293b" />
+                </g>
+
+                {/* 3. SMARTPHONE (Right side, on a stand, slightly rotated) */}
+                <g transform="rotate(5 185 95)">
+                  {/* Mobile Stand */}
+                  <path
+                    d="M176,132 L194,132 L190,118 L180,118 Z"
+                    fill="#334155"
+                  />
+                  {/* Phone Body */}
+                  <rect
+                    x="170"
+                    y="68"
+                    width="30"
+                    height="56"
+                    rx="6"
+                    fill="#0f172a"
+                    stroke="#334155"
+                    strokeWidth="0.5"
+                  />
+                  {/* Inner Screen */}
+                  <rect
+                    x="173"
+                    y="71"
+                    width="24"
+                    height="50"
+                    rx="4.5"
+                    fill="url(#phoneScreen)"
+                  />
+                  {/* Top Notch */}
+                  <rect
+                    x="181"
+                    y="71"
+                    width="8"
+                    height="2"
+                    rx="1"
+                    fill="#0f172a"
+                  />
+                  {/* Notification/App UI Card */}
+                  <rect
+                    x="176"
+                    y="78"
+                    width="18"
+                    height="8"
+                    rx="2"
+                    fill="#c4ffdd"
+                  />
+                  <rect
+                    x="179"
+                    y="81"
+                    width="10"
+                    height="2"
+                    rx="0.5"
+                    fill="#062743"
+                  />
+
+                  <rect
+                    x="176"
+                    y="88"
+                    width="18"
+                    height="8"
+                    rx="2"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+                  <rect
+                    x="179"
+                    y="91"
+                    width="12"
+                    height="2"
+                    rx="0.5"
+                    fill="#062743"
+                    opacity="0.7"
+                  />
+
+                  <rect
+                    x="176"
+                    y="98"
+                    width="18"
+                    height="8"
+                    rx="2"
+                    fill="#113a5d"
+                  />
+                  <rect
+                    x="179"
+                    y="101"
+                    width="8"
+                    height="2"
+                    rx="0.5"
+                    fill="#c4ffdd"
+                  />
+
+                  {/* Home indicator */}
+                  <rect
+                    x="182"
+                    y="117"
+                    width="6"
+                    height="1"
+                    rx="0.5"
+                    fill="#ffffff"
+                    opacity="0.6"
+                  />
+                </g>
+
+                {/* 4. SMARTWATCH (Front Center-Left) */}
+                <g>
+                  {/* Straps */}
+                  <rect
+                    x="83"
+                    y="131"
+                    width="14"
+                    height="4"
+                    rx="1"
+                    fill="#334155"
+                  />
+                  {/* Watch Case */}
+                  <rect
+                    x="86"
+                    y="128"
+                    width="8"
+                    height="9"
+                    rx="2"
+                    fill="#475569"
+                    stroke="#94a3b8"
+                    strokeWidth="0.5"
+                  />
+                  {/* Dial */}
+                  <circle cx="90" cy="132.5" r="3.5" fill="#0a2a4a" />
+                  {/* Glow dot */}
+                  <circle
+                    cx="90"
+                    cy="132.5"
+                    r="1"
+                    fill="#c4ffdd"
+                    className="animate-pulse"
+                  />
+                </g>
+
+                {/* 5. WIRELESS HEADPHONES (Front Right, resting on desk) */}
+                <g>
+                  {/* Left Ear Pad */}
+                  <rect
+                    x="142"
+                    y="123"
+                    width="3"
+                    height="7"
+                    rx="1.5"
+                    fill="#334155"
+                  />
+                  {/* Right Ear Pad */}
+                  <rect
+                    x="151"
+                    y="123"
+                    width="3"
+                    height="7"
+                    rx="1.5"
+                    fill="#334155"
+                  />
+                  {/* headband */}
+                  <path
+                    d="M143.5,124 C143.5,119 149.5,119 149.5,124"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                </g>
+
+                {/* 6. FLOATING WIDGET 1 (Top Left) */}
+                <g className="animate-float-slow">
+                  <rect
+                    x="20"
+                    y="22"
+                    width="28"
+                    height="16"
+                    rx="4"
+                    fill="#ffffff"
+                    filter="drop-shadow(0 4px 6px rgba(0,0,0,0.05))"
+                  />
+                  <circle cx="27" cy="30" r="3" fill="#c4ffdd" />
+                  {/* Heartbeat pulse path */}
+                  <path
+                    d="M25,30 L26.5,30 L27,28 L27.5,32 L28,30 L29.5,30"
+                    fill="none"
+                    stroke="#062743"
+                    strokeWidth="0.75"
+                  />
+                  <rect
+                    x="33"
+                    y="29"
+                    width="10"
+                    height="2"
+                    rx="0.5"
+                    fill="#506e86"
+                  />
+                </g>
+
+                {/* 7. FLOATING WIDGET 2 (Top Right) */}
+                <g className="animate-float-medium">
+                  <rect
+                    x="175"
+                    y="18"
+                    width="30"
+                    height="16"
+                    rx="4"
+                    fill="#062743"
+                    filter="drop-shadow(0 4px 6px rgba(0,0,0,0.15))"
+                  />
+                  {/* Notification Bell shape */}
+                  <path
+                    d="M182,28 C182,26.5 183.5,26.5 183.5,28 L183.5,29.5 L180.5,29.5 L180.5,28 Z"
+                    fill="#c4ffdd"
+                  />
+                  <circle cx="182.5" cy="30.5" r="0.75" fill="#c4ffdd" />
+                  <rect
+                    x="188"
+                    y="26"
+                    width="12"
+                    height="1.5"
+                    rx="0.5"
+                    fill="#ffffff"
+                  />
+                  <rect
+                    x="188"
+                    y="29"
+                    width="8"
+                    height="1"
+                    rx="0.5"
+                    fill="#ffffff"
+                    opacity="0.6"
+                  />
+                </g>
+
+                {/* Sparkles / Syncing dots */}
+                <circle
+                  cx="110"
+                  cy="50"
+                  r="2.5"
+                  fill="#c4ffdd"
+                  className="animate-pulse"
+                />
+                <circle
+                  cx="58"
+                  cy="85"
+                  r="1.5"
+                  fill="#c4ffdd"
+                  className="animate-pulse"
+                />
+                <circle
+                  cx="162"
+                  cy="88"
+                  r="2"
+                  fill="#a2f2c2"
+                  className="animate-pulse"
+                />
               </svg>
             </div>
           </div>
@@ -244,7 +779,9 @@ export default function DashboardPage() {
           {/* Row of 3 Cards side-by-side */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Card 1: Status Hari Ini & Skor */}
-            <div className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}>
+            <div
+              className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
+            >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
                   Status & Skor
@@ -256,7 +793,9 @@ export default function DashboardPage() {
                   {scoreData ? `${scoreData.total_score}/100` : "—"}
                 </h3>
                 <h4 className="text-xs font-bold">{statusTitle}</h4>
-                <p className="text-[9px] font-light leading-normal opacity-85">{statusDesc}</p>
+                <p className="text-[9px] font-light leading-normal opacity-85">
+                  {statusDesc}
+                </p>
               </div>
             </div>
 
@@ -304,15 +843,33 @@ export default function DashboardPage() {
           {/* Grafik Aktivitas Hari Ini */}
           <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
             <div className="mb-6">
-              <h3 className="font-extrabold text-base text-primary">Analitis Aktivitas</h3>
-              <p className="text-xs text-muted font-light mt-0.5">Stacked bar chart durasi penggunaan gawai per jam (menit)</p>
+              <h3 className="font-extrabold text-base text-primary">
+                Analitis Aktivitas
+              </h3>
+              <p className="text-xs text-muted font-light mt-0.5">
+                Stacked bar chart durasi penggunaan gawai per jam (menit)
+              </p>
             </div>
 
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={filteredChartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="jam" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
+                <BarChart
+                  data={filteredChartData}
+                  margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="jam"
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
@@ -323,11 +880,20 @@ export default function DashboardPage() {
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
                     }}
                   />
-                  <Legend iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
+                  <Legend
+                    iconSize={8}
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
+                  />
                   <Bar dataKey="Instagram" stackId="a" fill="#062743" />
                   <Bar dataKey="TikTok" stackId="a" fill="#113a5d" />
                   <Bar dataKey="YouTube" stackId="a" fill="#c4ffdd" />
-                  <Bar dataKey="WhatsApp" stackId="a" fill="#e6eef4" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="WhatsApp"
+                    stackId="a"
+                    fill="#e6eef4"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -338,7 +904,9 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* Perangkat Terhubung Card */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
-            <h3 className="font-extrabold text-sm text-primary mb-4">Perangkat Terhubung</h3>
+            <h3 className="font-extrabold text-sm text-primary mb-4">
+              Perangkat Terhubung
+            </h3>
             <div className="space-y-3">
               {initialUserDevices.map((device) => {
                 const isAndroid = device.platform === "android_app";
@@ -349,7 +917,11 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl bg-muted-light/60 flex items-center justify-center text-primary shrink-0 border border-border/40">
-                        {isAndroid ? <Smartphone className="w-4 h-4" /> : <Laptop className="w-4 h-4" />}
+                        {isAndroid ? (
+                          <Smartphone className="w-4 h-4" />
+                        ) : (
+                          <Laptop className="w-4 h-4" />
+                        )}
                       </div>
                       <div className="space-y-0.5">
                         <span className="text-[11px] font-bold text-primary block">
@@ -379,7 +951,9 @@ export default function DashboardPage() {
 
           {/* Area Kebiasaan Hari Ini (5 Indikator Grouped) */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
-            <h3 className="font-extrabold text-sm text-primary mb-4">Kebiasaan Hari Ini</h3>
+            <h3 className="font-extrabold text-sm text-primary mb-4">
+              Kebiasaan Hari Ini
+            </h3>
             <div className="space-y-3">
               {coreBehaviors.map((item) => {
                 const IconComponent = item.icon;
@@ -392,14 +966,20 @@ export default function DashboardPage() {
                         : "border-border/60 bg-background/20"
                     }`}
                   >
-                    <div className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
-                      item.active ? item.color : "text-muted bg-muted-light/40 border-border/40"
-                    }`}>
+                    <div
+                      className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
+                        item.active
+                          ? item.color
+                          : "text-muted bg-muted-light/40 border-border/40"
+                      }`}
+                    >
                       <IconComponent className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5 flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        <h4 className="text-[11px] font-bold text-primary truncate">{item.name}</h4>
+                        <h4 className="text-[11px] font-bold text-primary truncate">
+                          {item.name}
+                        </h4>
                         {item.active ? (
                           <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 shrink-0 uppercase tracking-wider">
                             Aktif
@@ -410,7 +990,9 @@ export default function DashboardPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted font-light leading-normal">{item.desc}</p>
+                      <p className="text-[10px] text-muted font-light leading-normal">
+                        {item.desc}
+                      </p>
                     </div>
                   </div>
                 );
@@ -430,7 +1012,8 @@ export default function DashboardPage() {
                   <span>AI Insight Terbaru</span>
                 </div>
                 <p className="text-[11px] font-light leading-relaxed opacity-90 text-white/90">
-                  "{latestInsight.ai_positive_notes} Namun, {latestInsight.ai_concern_notes.toLowerCase()}"
+                  "{latestInsight.ai_positive_notes} Namun,{" "}
+                  {latestInsight.ai_concern_notes.toLowerCase()}"
                 </p>
               </div>
 

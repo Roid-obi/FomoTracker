@@ -2,11 +2,20 @@ import { z } from "zod";
 import { UserModel } from "../models/user.model";
 import { table } from "@/lib/databases/schema";
 import { db } from "@/lib/databases";
-import { supabase } from "@/lib/databases/supabase";
+import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
 import { eq } from "drizzle-orm";
 
-export async function getService(id: string, email: string) {
-  const [user] = await db
+export async function getService() {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "User not found" };
+  }
+  const id = user.id;
+
+  const [userData] = await db
     .select({
       name: table.users.name,
       avatarUrl: table.users.avatarUrl,
@@ -14,13 +23,13 @@ export async function getService(id: string, email: string) {
     .from(table.users)
     .where(eq(table.users.id, id));
 
-  if (!user) {
+  if (!userData) {
     return { success: false, error: "User not found" };
   }
 
   const parsed = UserModel.userData.safeParse({
-    ...user,
-    email,
+    ...userData,
+    email: user.email,
   });
 
   if (!parsed.success) {
@@ -30,7 +39,18 @@ export async function getService(id: string, email: string) {
   return { success: true, data: parsed.data };
 }
 
-export async function updateService(id: string, formData: FormData) {
+export async function updateService(formData: FormData) {
+  const supabase = createClient();
+  const supabaseServer = await createSupabaseServer();
+
+  const {
+    data: { user },
+  } = await supabaseServer.auth.getUser();
+  if (!user) {
+    return { success: false, error: "User not found" };
+  }
+  const id = user.id;
+  
   const raw = Object.fromEntries(formData);
   const parsed = UserModel.updateRequest.safeParse(raw);
   let avatar_url: string | null = null;
@@ -57,7 +77,7 @@ export async function updateService(id: string, formData: FormData) {
     }
     const fileName = `avatar_${Date.now()}.${avatar.name.split(".").pop()}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { data: urlData, error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(fileName, avatar);
 
@@ -65,10 +85,7 @@ export async function updateService(id: string, formData: FormData) {
       return { success: false, error: uploadError.message };
     }
 
-    const { data: urlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(fileName);
-    avatar_url = urlData.publicUrl;
+    avatar_url = urlData.path;
   }
 
   const updateData: Partial<UserModel.updateData> = {};

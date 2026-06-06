@@ -1,27 +1,46 @@
 "use client";
 
 import { Camera, Check, Key, Mail, User } from "lucide-react";
-import { useState } from "react";
-import { initialUsers } from "@/lib/data/databaseInitialData";
+import { useEffect, useState } from "react";
+import { useUser } from "@/hooks/useUser";
+import { api } from "@/lib/utils/api";
 
 export default function ProfilSettingsPage() {
-  const user = initialUsers[0];
-  const [name, setName] = useState(user?.name || "Roid Obi");
-  const [email, setEmail] = useState(user?.email || "roid@fomotracker.com");
+  const { data: user } = useUser();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+    }
+  }, [user]);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [isSaved, setIsSaved] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword && newPassword !== confirmPassword) {
       alert("Konfirmasi password baru tidak cocok!");
       return;
     }
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const response = await api.put('/api/user', formData)
+
+      if (response.data.success) {
+        setIsSaved(true);
+      }
+    } catch (error: any) {
+      console.log(error.response?.data?.error || "Gagal Menyimpan");
+    } finally {
+      setTimeout(() => setIsSaved(false), 3000);
+    }
   };
 
   return (
@@ -40,7 +59,7 @@ export default function ProfilSettingsPage() {
           <div className="flex items-center gap-4 border-b border-border/40 pb-5">
             <div className="relative group select-none">
               <div className="w-16 h-16 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary text-xl border border-border">
-                {name.substring(0, 2).toUpperCase()}
+                {name.trim().split(' ').map(kata => kata.charAt(0)).join('').substring(0, 2).toUpperCase() ?? "?"}
               </div>
               <button
                 type="button"
@@ -72,6 +91,7 @@ export default function ProfilSettingsPage() {
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                 <input
                   id="name-input"
+                  name="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -93,6 +113,7 @@ export default function ProfilSettingsPage() {
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                 <input
                   id="email-input"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

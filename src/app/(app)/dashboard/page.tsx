@@ -22,10 +22,10 @@ import {
   initialBehavioralScores,
   initialDailyStats,
   initialWeeklyInsights,
-  initialUsers,
   initialApps,
   initialUserDevices,
 } from "@/lib/data/databaseInitialData";
+import { useUser } from "@/hooks/useUser";
 import {
   Bar,
   BarChart,
@@ -37,7 +37,7 @@ import {
 } from "recharts";
 
 export default function DashboardPage() {
-  const user = initialUsers[0];
+  const { data: user } = useUser();
   const todayStr = "Rabu, 4 Juni 2026"; // Explicit date aligned with sitemap greeting
 
   // 1. Calculate stats from daily_stats
@@ -188,12 +188,12 @@ export default function DashboardPage() {
 
             <div className="space-y-4 max-w-md relative z-10 text-left">
               <h2 className="text-2xl md:text-3xl font-black tracking-tight text-primary leading-tight">
-                Halo, {user?.name || "Budi"}!
+                Halo, {user?.name || "User"}!
               </h2>
               <p className="text-xs sm:text-sm text-muted font-light leading-relaxed">
                 Selamat datang kembali. FomoTracker siap membantumu memantau
-                waktu pemakaian media sosial dan membangun kebiasaan digital yang
-                lebih produktif hari ini.
+                waktu pemakaian media sosial dan membangun kebiasaan digital
+                yang lebih produktif hari ini.
               </p>
               <Link
                 href="/statistik"
@@ -212,31 +212,102 @@ export default function DashboardPage() {
                 aria-hidden="true"
               >
                 {/* Chair / Block */}
-                <rect x="100" y="80" width="55" height="45" rx="8" fill="#e1e8ef" />
-                <rect x="105" y="85" width="45" height="40" rx="4" fill="#f9f9f9" />
-                
+                <rect
+                  x="100"
+                  y="80"
+                  width="55"
+                  height="45"
+                  rx="8"
+                  fill="#e1e8ef"
+                />
+                <rect
+                  x="105"
+                  y="85"
+                  width="45"
+                  height="40"
+                  rx="4"
+                  fill="#f9f9f9"
+                />
+
                 {/* Small Plant decoration */}
-                <path d="M45,120 Q35,90 55,80 Q65,100 50,120 Z" fill="#c4ffdd" />
-                <path d="M50,120 Q55,95 68,92 Q72,110 52,120 Z" fill="#a2f2c2" />
-                <rect x="44" y="115" width="12" height="15" rx="2" fill="#506e86" />
+                <path
+                  d="M45,120 Q35,90 55,80 Q65,100 50,120 Z"
+                  fill="#c4ffdd"
+                />
+                <path
+                  d="M50,120 Q55,95 68,92 Q72,110 52,120 Z"
+                  fill="#a2f2c2"
+                />
+                <rect
+                  x="44"
+                  y="115"
+                  width="12"
+                  height="15"
+                  rx="2"
+                  fill="#506e86"
+                />
 
                 {/* Character Sitting */}
                 {/* Legs */}
-                <path d="M125,80 L105,115 L95,115" stroke="#113a5d" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                <path
+                  d="M125,80 L105,115 L95,115"
+                  stroke="#113a5d"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
                 {/* Torso */}
-                <path d="M125,50 L128,82 L115,82" stroke="#062743" strokeWidth="16" strokeLinecap="round" fill="none" />
+                <path
+                  d="M125,50 L128,82 L115,82"
+                  stroke="#062743"
+                  strokeWidth="16"
+                  strokeLinecap="round"
+                  fill="none"
+                />
                 {/* Jacket Orange */}
-                <path d="M123,48 L126,80 L115,80" stroke="#f97316" strokeWidth="12" strokeLinecap="round" fill="none" />
+                <path
+                  d="M123,48 L126,80 L115,80"
+                  stroke="#f97316"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  fill="none"
+                />
                 {/* Head */}
                 <circle cx="123" cy="35" r="9" fill="#e5c5b5" />
                 {/* Hair */}
-                <path d="M117,32 Q122,25 129,32 C129,28 123,26 117,32 Z" fill="#062743" />
+                <path
+                  d="M117,32 Q122,25 129,32 C129,28 123,26 117,32 Z"
+                  fill="#062743"
+                />
                 {/* Arm / Hand holding device */}
-                <path d="M128,58 L115,62 L105,58" stroke="#e5c5b5" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                
+                <path
+                  d="M128,58 L115,62 L105,58"
+                  stroke="#e5c5b5"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+
                 {/* Screen / Phone Glow */}
-                <rect x="98" y="50" width="6" height="11" rx="1" transform="rotate(-15 98 50)" fill="#062743" />
-                <circle cx="95" cy="52" r="8" fill="#c4ffdd" opacity="0.45" className="animate-pulse" />
+                <rect
+                  x="98"
+                  y="50"
+                  width="6"
+                  height="11"
+                  rx="1"
+                  transform="rotate(-15 98 50)"
+                  fill="#062743"
+                />
+                <circle
+                  cx="95"
+                  cy="52"
+                  r="8"
+                  fill="#c4ffdd"
+                  opacity="0.45"
+                  className="animate-pulse"
+                />
               </svg>
             </div>
           </div>
@@ -244,7 +315,9 @@ export default function DashboardPage() {
           {/* Row of 3 Cards side-by-side */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Card 1: Status Hari Ini & Skor */}
-            <div className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}>
+            <div
+              className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
+            >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
                   Status & Skor
@@ -256,7 +329,9 @@ export default function DashboardPage() {
                   {scoreData ? `${scoreData.total_score}/100` : "—"}
                 </h3>
                 <h4 className="text-xs font-bold">{statusTitle}</h4>
-                <p className="text-[9px] font-light leading-normal opacity-85">{statusDesc}</p>
+                <p className="text-[9px] font-light leading-normal opacity-85">
+                  {statusDesc}
+                </p>
               </div>
             </div>
 
@@ -304,15 +379,33 @@ export default function DashboardPage() {
           {/* Grafik Aktivitas Hari Ini */}
           <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
             <div className="mb-6">
-              <h3 className="font-extrabold text-base text-primary">Analitis Aktivitas</h3>
-              <p className="text-xs text-muted font-light mt-0.5">Stacked bar chart durasi penggunaan gawai per jam (menit)</p>
+              <h3 className="font-extrabold text-base text-primary">
+                Analitis Aktivitas
+              </h3>
+              <p className="text-xs text-muted font-light mt-0.5">
+                Stacked bar chart durasi penggunaan gawai per jam (menit)
+              </p>
             </div>
 
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={filteredChartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="jam" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={11} tickLine={false} axisLine={false} />
+                <BarChart
+                  data={filteredChartData}
+                  margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="jam"
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
@@ -323,11 +416,20 @@ export default function DashboardPage() {
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
                     }}
                   />
-                  <Legend iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
+                  <Legend
+                    iconSize={8}
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
+                  />
                   <Bar dataKey="Instagram" stackId="a" fill="#062743" />
                   <Bar dataKey="TikTok" stackId="a" fill="#113a5d" />
                   <Bar dataKey="YouTube" stackId="a" fill="#c4ffdd" />
-                  <Bar dataKey="WhatsApp" stackId="a" fill="#e6eef4" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="WhatsApp"
+                    stackId="a"
+                    fill="#e6eef4"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -338,7 +440,9 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* Perangkat Terhubung Card */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
-            <h3 className="font-extrabold text-sm text-primary mb-4">Perangkat Terhubung</h3>
+            <h3 className="font-extrabold text-sm text-primary mb-4">
+              Perangkat Terhubung
+            </h3>
             <div className="space-y-3">
               {initialUserDevices.map((device) => {
                 const isAndroid = device.platform === "android_app";
@@ -349,7 +453,11 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl bg-muted-light/60 flex items-center justify-center text-primary shrink-0 border border-border/40">
-                        {isAndroid ? <Smartphone className="w-4 h-4" /> : <Laptop className="w-4 h-4" />}
+                        {isAndroid ? (
+                          <Smartphone className="w-4 h-4" />
+                        ) : (
+                          <Laptop className="w-4 h-4" />
+                        )}
                       </div>
                       <div className="space-y-0.5">
                         <span className="text-[11px] font-bold text-primary block">
@@ -379,7 +487,9 @@ export default function DashboardPage() {
 
           {/* Area Kebiasaan Hari Ini (5 Indikator Grouped) */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
-            <h3 className="font-extrabold text-sm text-primary mb-4">Kebiasaan Hari Ini</h3>
+            <h3 className="font-extrabold text-sm text-primary mb-4">
+              Kebiasaan Hari Ini
+            </h3>
             <div className="space-y-3">
               {coreBehaviors.map((item) => {
                 const IconComponent = item.icon;
@@ -392,14 +502,20 @@ export default function DashboardPage() {
                         : "border-border/60 bg-background/20"
                     }`}
                   >
-                    <div className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
-                      item.active ? item.color : "text-muted bg-muted-light/40 border-border/40"
-                    }`}>
+                    <div
+                      className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
+                        item.active
+                          ? item.color
+                          : "text-muted bg-muted-light/40 border-border/40"
+                      }`}
+                    >
                       <IconComponent className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5 flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        <h4 className="text-[11px] font-bold text-primary truncate">{item.name}</h4>
+                        <h4 className="text-[11px] font-bold text-primary truncate">
+                          {item.name}
+                        </h4>
                         {item.active ? (
                           <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 shrink-0 uppercase tracking-wider">
                             Aktif
@@ -410,7 +526,9 @@ export default function DashboardPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted font-light leading-normal">{item.desc}</p>
+                      <p className="text-[10px] text-muted font-light leading-normal">
+                        {item.desc}
+                      </p>
                     </div>
                   </div>
                 );
@@ -430,7 +548,8 @@ export default function DashboardPage() {
                   <span>AI Insight Terbaru</span>
                 </div>
                 <p className="text-[11px] font-light leading-relaxed opacity-90 text-white/90">
-                  "{latestInsight.ai_positive_notes} Namun, {latestInsight.ai_concern_notes.toLowerCase()}"
+                  "{latestInsight.ai_positive_notes} Namun,{" "}
+                  {latestInsight.ai_concern_notes.toLowerCase()}"
                 </p>
               </div>
 

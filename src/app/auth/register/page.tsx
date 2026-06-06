@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/utils/api";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,14 +13,27 @@ export default function Register() {
   const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setErrorMsg("Konfirmasi password tidak cocok!");
       return;
     }
     setErrorMsg("");
-    router.push("/onboarding");
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const response = await api.post('/api/auth/register', formData);
+
+      if (!response.data.success) {
+        setErrorMsg(response.data.error);
+        return;
+      }
+      
+      router.push("/onboarding");
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : String(error));
+    }
   };
 
   return (

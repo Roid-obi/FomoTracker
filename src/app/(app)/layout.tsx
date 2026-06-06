@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useUser } from "@/hooks/useUser";
+import { api } from "@/lib/utils/api";
 
 const navigationItems = [
   { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
@@ -36,6 +38,7 @@ const navigationItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: user } = useUser();
 
   const isActive = (item: (typeof navigationItems)[0]) => {
     if (item.matchPrefix) {
@@ -44,9 +47,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return pathname === item.href;
   };
 
-  const handleLogout = () => {
-    // Simulation: delete session, redirect to landing or login page
-    router.push("/auth/login");
+  const handleLogout = async () => {
+    try {
+      const response = await api.post("/api/auth/logout");
+      
+      if (response.status === 200) {
+        router.push("/");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -95,14 +105,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border pt-4 space-y-4">
           <div className="flex items-center gap-3 px-2">
             <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border">
-              R
+              {user?.name?.trim().split(' ').map(kata => kata.charAt(0)).join('').substring(0, 2).toUpperCase() ?? "?"}
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-semibold truncate font-poppins text-primary">
-                Roid Obi
+                {user?.name ?? "—"}
               </span>
               <span className="text-xs text-muted truncate font-poppins">
-                roid@fomotracker.com
+                {user?.email ?? "—"}
               </span>
             </div>
           </div>

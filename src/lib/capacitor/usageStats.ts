@@ -1,5 +1,5 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
-import { supabase } from "@/lib/databases/supabase";
+import { createClient } from "@/lib/databases/supabase";
 import { analyzeUsageEvents, fetchUsageEvents } from "./usageEvents";
 
 export interface InstalledApp {
@@ -95,6 +95,7 @@ export async function fetchInstalledApps(): Promise<InstalledApp[]> {
 }
 
 export async function getUserSettingsClient(userId: string) {
+  const supabase = createClient();
   try {
     const { data: settings, error } = await supabase
       .from("user_settings")
@@ -133,6 +134,8 @@ export async function syncUsageStatsClient(
   userId: string,
   stats: SyncUsageStatInput[],
 ) {
+  const supabase = createClient();
+  
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
   try {

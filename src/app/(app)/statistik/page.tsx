@@ -1,32 +1,17 @@
 "use client";
 
-import {
-  Activity,
-  ArrowDownRight,
-  ArrowUpRight,
-  Briefcase,
-  Clock,
-  HelpCircle,
-  Info,
-  Minus,
-  Moon,
-  Smartphone,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
 import { useState } from "react";
 import {
   Bar,
   BarChart,
   Legend,
+  Rectangle,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  initialApps,
-  initialDailyStats,
-  initialWeeklyInsights,
-} from "@/lib/data/databaseInitialData";
 
 // Helper for formatting time (seconds to hours/minutes)
 const formatSecToHoursMins = (seconds: number) => {
@@ -56,6 +41,7 @@ const dataMingguIni = {
     { name: "Instagram", sec: 17100, color: "bg-primary" },
     { name: "WhatsApp", sec: 11400, color: "bg-emerald-500" },
     { name: "YouTube", sec: 8100, color: "bg-accent" },
+    { name: "X (Twitter)", sec: 3600, color: "bg-indigo-500" },
   ],
   flags: [
     {
@@ -108,6 +94,7 @@ const dataMingguLaju = {
     { name: "Instagram", sec: 62400, color: "bg-primary" },
     { name: "YouTube", sec: 29700, color: "bg-accent" },
     { name: "WhatsApp", sec: 25200, color: "bg-emerald-500" },
+    { name: "X (Twitter)", sec: 14400, color: "bg-indigo-500" },
   ],
   flags: [
     {
@@ -173,11 +160,54 @@ const generateHeatmap = (isPrevWeek: boolean) => {
   });
 };
 
+const rankColors = ["#334155", "#475569", "#64748B", "#94A3B8", "#E2E8F0"];
+
+// biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape props are dynamic
+const CustomBar = (props: any) => {
+  const { height, payload, dataKey, rankedApps } = props;
+  if (!payload || !dataKey || !height || height <= 0) return null;
+
+  const appsOrder = rankedApps || [
+    "Instagram",
+    "TikTok",
+    "YouTube",
+    "WhatsApp",
+  ];
+  const activeApps = appsOrder.filter((app: string) => (payload[app] || 0) > 0);
+  const isTop = activeApps[activeApps.length - 1] === dataKey;
+
+  const radius = isTop ? [4, 4, 0, 0] : [0, 0, 0, 0];
+
+  return <Rectangle {...props} radius={radius} />;
+};
+
 export default function StatistikPage() {
   const [period, setPeriod] = useState<"ini" | "lalu">("ini");
 
   const currentData = period === "ini" ? dataMingguIni : dataMingguLaju;
   const isMonday = new Date().getDay() === 1; // Check if today is Monday
+
+  // Sort and rank apps based on currentData.topApps
+  const top4Apps = currentData.topApps.slice(0, 4).map((app) => app.name);
+  const allApps = ["Instagram", "TikTok", "YouTube", "WhatsApp"];
+  const otherApps = allApps.filter((app) => !top4Apps.includes(app));
+
+  const rankedDailyData = currentData.dailyData.map(
+    (dayData: Record<string, string | number>) => {
+      const newRow: Record<string, string | number> = {
+        hari: String(dayData.hari),
+      };
+      for (const app of top4Apps) {
+        newRow[app] = dayData[app] || 0;
+      }
+      let otherSum = 0;
+      for (const app of otherApps) {
+        otherSum += (dayData[app] as number) || 0;
+      }
+      newRow.Lainnya = otherSum;
+      return newRow;
+    },
+  );
 
   // Generate heatmap coordinates
   const heatmapRows = generateHeatmap(period === "lalu");
@@ -185,13 +215,13 @@ export default function StatistikPage() {
   const getHeatmapColor = (val: number) => {
     switch (val) {
       case 1:
-        return "bg-secondary/20";
+        return "#94A3B8";
       case 2:
-        return "bg-secondary/55";
+        return "#64748B";
       case 3:
-        return "bg-primary text-accent";
+        return "#334155";
       default:
-        return "bg-muted-light/40";
+        return "#E2E8F0";
     }
   };
 
@@ -334,66 +364,76 @@ export default function StatistikPage() {
             </p>
           </div>
 
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={currentData.dailyData}
-                margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
-              >
-                <XAxis
-                  dataKey="hari"
-                  stroke="#888888"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#ffffff",
-                    borderRadius: "16px",
-                    borderColor: "#e1e8ef",
-                    fontFamily: "Poppins",
-                    fontSize: "11px",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
-                  }}
-                />
-                <Legend
-                  iconSize={8}
-                  iconType="circle"
-                  wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
-                />
-                <Bar
-                  dataKey="Instagram"
-                  stackId="a"
-                  fill="#062743"
-                  radius={[0, 0, 0, 0]}
-                />
-                <Bar
-                  dataKey="TikTok"
-                  stackId="a"
-                  fill="#113a5d"
-                  radius={[0, 0, 0, 0]}
-                />
-                <Bar
-                  dataKey="YouTube"
-                  stackId="a"
-                  fill="#c4ffdd"
-                  radius={[0, 0, 0, 0]}
-                />
-                <Bar
-                  dataKey="WhatsApp"
-                  stackId="a"
-                  fill="#e6eef4"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
+            <div className="h-64 min-w-[700px] lg:min-w-0 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={rankedDailyData}
+                  margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="hari"
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "16px",
+                      borderColor: "#e1e8ef",
+                      fontFamily: "Poppins",
+                      fontSize: "11px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
+                    }}
+                    // biome-ignore lint/suspicious/noExplicitAny: Recharts Tooltip formatter types
+                    formatter={(value: any, name: any) => {
+                      if (value === 0) return null;
+                      return [`${value} menit`, name];
+                    }}
+                  />
+                  <Legend
+                    iconSize={8}
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
+                  />
+                  {top4Apps.map((appName, index) => (
+                    <Bar
+                      key={appName}
+                      dataKey={appName}
+                      stackId="a"
+                      fill={rankColors[index]}
+                      // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
+                      shape={(shapeProps: any) => (
+                        <CustomBar
+                          {...shapeProps}
+                          rankedApps={[...top4Apps, "Lainnya"]}
+                        />
+                      )}
+                    />
+                  ))}
+                  <Bar
+                    dataKey="Lainnya"
+                    stackId="a"
+                    fill={rankColors[4]}
+                    // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
+                    shape={(shapeProps: any) => (
+                      <CustomBar
+                        {...shapeProps}
+                        rankedApps={[...top4Apps, "Lainnya"]}
+                      />
+                    )}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
@@ -409,9 +449,10 @@ export default function StatistikPage() {
           </div>
 
           <div className="space-y-4 flex-1 justify-center flex flex-col">
-            {currentData.topApps.map((app) => {
+            {currentData.topApps.map((app, index) => {
               const maxSec = currentData.topApps[0].sec;
               const barWidth = Math.round((app.sec / maxSec) * 100);
+              const barColor = rankColors[index] || rankColors[4];
               return (
                 <div key={app.name} className="space-y-1.5">
                   <div className="flex justify-between text-xs font-bold">
@@ -422,8 +463,11 @@ export default function StatistikPage() {
                   </div>
                   <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${app.color}`}
-                      style={{ width: `${barWidth}%` }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${barWidth}%`,
+                        backgroundColor: barColor,
+                      }}
                     />
                   </div>
                 </div>
@@ -465,17 +509,18 @@ export default function StatistikPage() {
               style={{ gridTemplateColumns: "repeat(25, minmax(0, 1fr))" }}
             >
               <div>Hari</div>
-              {Array.from({ length: 24 }).map((_, i) => (
-                <div key={i}>{String(i).padStart(2, "0")}</div>
-              ))}
+              {Array.from({ length: 24 }).map((_, i) => {
+                const hourStr = String(i).padStart(2, "0");
+                return <div key={hourStr}>{hourStr}</div>;
+              })}
             </div>
 
             {/* Rows (Days Mon-Sun) */}
-            {heatmapRows.map((row, dayIdx) => {
+            {heatmapRows.map((row) => {
               const dayLabel = row[0].day;
               return (
                 <div
-                  key={dayIdx}
+                  key={dayLabel}
                   className="grid gap-1 items-center"
                   style={{ gridTemplateColumns: "repeat(25, minmax(0, 1fr))" }}
                 >
@@ -503,9 +548,8 @@ export default function StatistikPage() {
                     return (
                       <div
                         key={cell.hour}
-                        className={`h-5 rounded-md transition-all relative group ${getHeatmapColor(
-                          cell.val,
-                        )} ${highlightClass}`}
+                        className={`h-5 rounded-md transition-all relative group ${highlightClass}`}
+                        style={{ backgroundColor: getHeatmapColor(cell.val) }}
                       >
                         {/* Tooltip */}
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none mb-1.5 whitespace-nowrap">
@@ -531,13 +575,25 @@ export default function StatistikPage() {
         {/* Legend color index */}
         <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted uppercase mt-4">
           <span>Keterangan Warna:</span>
-          <span className="w-3 h-3 rounded bg-muted-light/40 border border-border" />
+          <span
+            className="w-3 h-3 rounded border border-border"
+            style={{ backgroundColor: "#E2E8F0" }}
+          />
           <span>Aman</span>
-          <span className="w-3 h-3 rounded bg-secondary/20" />
+          <span
+            className="w-3 h-3 rounded"
+            style={{ backgroundColor: "#94A3B8" }}
+          />
           <span>Ringan</span>
-          <span className="w-3 h-3 rounded bg-secondary/55" />
+          <span
+            className="w-3 h-3 rounded"
+            style={{ backgroundColor: "#64748B" }}
+          />
           <span>Sedang</span>
-          <span className="w-3 h-3 rounded bg-primary" />
+          <span
+            className="w-3 h-3 rounded"
+            style={{ backgroundColor: "#334155" }}
+          />
           <span>Berat</span>
         </div>
       </div>

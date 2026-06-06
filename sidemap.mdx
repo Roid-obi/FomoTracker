@@ -1,89 +1,164 @@
-# FomoTracker — Sitemap & Struktur Web App Final
+# FomoTracker — Struktur Keseluruhan Halaman
 
 ---
 
 ## 🌐 PUBLIC AREA
 
+---
+
+### `/` — Landing Page
+
 ```
 /
-Landing Page
+│
+├── Navbar
+│   ├── Logo FomoTracker
+│   ├── Panduan
+│   ├── Tentang
+│   ├── Masuk
+│   └── Daftar Gratis  ← CTA highlighted
 │
 ├── Hero Section
-│   ├── Tagline
-│   ├── Deskripsi Singkat
-│   └── CTA Daftar Gratis
+│   ├── Tagline utama
+│   ├── Deskripsi singkat (2–3 kalimat)
+│   ├── Tombol Daftar Gratis  → /auth/register
+│   └── Ilustrasi / mockup dashboard
 │
 ├── Masalah yang Sering Terjadi
-│   ├── Scroll tanpa sadar
-│   ├── Sulit fokus
-│   └── Begadang karena media sosial
+│   ├── 😵 Scroll tanpa sadar berjam-jam
+│   ├── 😤 Sulit fokus karena terus cek HP
+│   └── 😴 Begadang karena media sosial
 │
-├── Cara Kerja FomoTracker
-│   ├── Hubungkan perangkat
-│   ├── Pantau aktivitas
-│   └── Dapatkan insight
+├── Cara Kerja FomoTracker  (3 langkah)
+│   ├── 1. Hubungkan perangkat
+│   ├── 2. Pantau aktivitas otomatis
+│   └── 3. Dapatkan insight dari AI
 │
-├── Fitur Utama
-│   ├── Pantau kebiasaan digital
-│   ├── Deteksi kebiasaan bermasalah
-│   ├── Insight dari AI
-│   └── Pengingat cerdas
+├── Fitur Utama  (4 kartu)
+│   ├── 📊 Pantau kebiasaan digital
+│   ├── ⚠️ Deteksi kebiasaan bermasalah
+│   ├── 🤖 Insight dari AI
+│   └── 🔔 Pengingat cerdas
 │
-├── Hubungkan Perangkat
-│   ├── Android App
-│   │   └── Pantau semua aplikasi media sosial di HP
-│   └── Browser Extension
-│       └── Pantau media sosial yang dibuka lewat browser
+├── Hubungkan Perangkat  (2 kartu)
+│   ├── 📱 Android App
+│   │   ├── "Pantau semua aplikasi media sosial di HP"
+│   │   └── Tombol Unduh Aplikasi
+│   └── 🌐 Browser Extension
+│       ├── "Pantau media sosial yang dibuka di browser"
+│       └── Tombol Pasang Ekstensi
 │
 ├── Dampak SDGs
 │   ├── SDG 3 — Kesehatan & Kesejahteraan
 │   ├── SDG 4 — Pendidikan Berkualitas
 │   └── SDG 8 — Pekerjaan & Pertumbuhan Ekonomi
 │
-└── CTA Penutup → Daftar Gratis
+├── CTA Penutup
+│   ├── "Mulai kenali kebiasaan digitalmu hari ini."
+│   └── Tombol Daftar Gratis  → /auth/register
+│
+└── Footer
+    ├── Logo + tagline singkat
+    ├── Link: Tentang, Panduan, Privasi
+    └── Keterangan: "Platform nirlaba untuk SDGs"
+```
 
+---
 
+### `/tentang` — Tentang FomoTracker
+
+```
 /tentang
-Tentang FomoTracker
+│
+├── Navbar (sama dengan landing)
 │
 ├── Apa itu FomoTracker
+│   └── Deskripsi platform + tujuan
+│
 ├── Mengapa Dibuat
+│   └── Latar belakang masalah digital wellbeing
+│
 ├── Cara Kerja Sistem
 │   ├── Bagaimana data dikumpulkan
+│   │   ├── Via Android App (Usage Stats API)
+│   │   └── Via Browser Extension (domain tracking)
 │   ├── Bagaimana perilaku dianalisis
+│   │   └── 5 indikator + weighted scoring
 │   └── Bagaimana insight dibuat
+│       └── AI generate tiap Senin dari data seminggu
+│
 ├── Privasi Data
 │   ├── Data yang dikumpulkan
+│   │   └── Nama app, durasi, frekuensi,
+│   │       waktu aktivitas, domain website
 │   └── Data yang tidak dikumpulkan
+│       └── Isi chat, password, media pribadi,
+│           URL lengkap, konten yang dibaca
+│
+├── Kontribusi SDGs
+│   ├── SDG 3, SDG 4, SDG 8
+│   └── Penjelasan singkat per SDG
+│
 └── Tim Pengembang
+    └── Nama anggota + institusi
+```
 
+---
 
+### `/panduan` — Panduan Penggunaan
+
+```
 /panduan
-Panduan Penggunaan
+│
+├── Navbar
+│
+├── Daftar Isi  (anchor link)
+│   ├── 1. Membuat Akun
+│   ├── 2. Instalasi Android App
+│   ├── 3. Instalasi Browser Extension
+│   ├── 4. Setup Awal
+│   ├── 5. Memahami Beranda
+│   ├── 6. Memahami Statistik
+│   ├── 7. Memahami Insight
+│   └── 8. FAQ
 │
 ├── 1. Membuat Akun
+│   ├── Daftar via email
+│   └── Daftar via Google
+│
 ├── 2. Instalasi Android App
-│   ├── Cara unduh
-│   ├── Cara beri izin Usage Stats
-│   └── Cara hubungkan ke akun
+│   ├── Cara unduh aplikasi
+│   ├── Cara memberikan izin Usage Stats
+│   └── Cara menghubungkan ke akun FomoTracker
+│
 ├── 3. Instalasi Browser Extension
 │   ├── Cara pasang di Chrome
-│   ├── Cara beri izin
-│   └── Cara hubungkan ke akun
+│   ├── Cara memberikan izin
+│   └── Cara menghubungkan ke akun FomoTracker
+│
 ├── 4. Setup Awal (Onboarding)
+│   ├── Memilih aplikasi yang dipantau
+│   ├── Mengatur jam belajar/kerja
+│   └── Mengatur jam tidur
+│
 ├── 5. Memahami Beranda
-│   ├── Status hari ini
-│   ├── Aktivitas bar chart
+│   ├── Status dan skor hari ini
+│   ├── Grafik aktivitas per jam
 │   └── Kebiasaan yang terdeteksi
+│
 ├── 6. Memahami Statistik
-│   ├── Filter minggu
-│   └── Cara membaca grafik
+│   ├── Filter Minggu Ini vs Minggu Lalu
+│   ├── Cara membaca grafik
+│   └── Arti bobot kontribusi tiap kebiasaan
+│
 ├── 7. Memahami Insight
-│   ├── Kapan insight muncul
-│   └── Cara membaca insight
+│   ├── Kapan insight pertama muncul
+│   ├── Cara membaca insight
+│   └── Arti perbandingan antar minggu
+│
 └── 8. FAQ
     ├── Apakah FomoTracker membaca isi chat?
-    ├── Apa bedanya Android App dan Browser Extension?
+    ├── Apa bedanya Android App dan Extension?
     ├── Kapan insight pertama muncul?
     ├── Apakah gratis?
     └── Data saya disimpan di mana?
@@ -93,143 +168,138 @@ Panduan Penggunaan
 
 ## 🔐 AUTH
 
+---
+
+### `/auth/login` — Masuk
+
 ```
 /auth/login
 │
-├── Input Email
-├── Input Password
-├── Tombol Masuk
-├── Google Login
-└── Link → Belum punya akun? Daftar
+├── Logo FomoTracker
+├── Judul: "Masuk ke FomoTracker"
+│
+├── Form Login
+│   ├── Input Email
+│   ├── Input Password
+│   ├── Tombol Masuk
+│   └── Tombol Masuk dengan Google
+│
+└── Link "Belum punya akun? Daftar" → /auth/register
+```
 
+---
 
+### `/auth/register` — Daftar
+
+```
 /auth/register
 │
-├── Input Nama
-├── Input Email
-├── Input Password
-├── Input Konfirmasi Password
-├── Tombol Daftar
-└── Link → Sudah punya akun? Masuk
+├── Logo FomoTracker
+├── Judul: "Buat Akun FomoTracker"
+│
+├── Form Register
+│   ├── Input Nama
+│   ├── Input Email
+│   ├── Input Password
+│   ├── Input Konfirmasi Password
+│   ├── Tombol Daftar
+│   └── Tombol Daftar dengan Google
+│
+└── Link "Sudah punya akun? Masuk" → /auth/login
 ```
 
 ---
 
 ## 🚀 ONBOARDING
 
+---
+
+### `/onboarding` — Setup Awal
+
 ```
 /onboarding
-Hanya muncul sekali setelah register pertama kali.
+Muncul sekali setelah register.
 Tidak bisa diakses ulang setelah selesai.
-Pengaturan bisa diubah kapan saja di /pengaturan.
+Progress indicator di atas (Step X dari 6)
 
-─────────────────────────────────────────────────────
-
-Step 1 — Selamat Datang
 │
-├── Ilustrasi
-├── Judul: "Kenali Kebiasaan Digitalmu"
-├── Penjelasan singkat cara kerja FomoTracker
-│   (2–3 kalimat, tanpa istilah teknis)
-└── Tombol Mulai Setup
-
-─────────────────────────────────────────────────────
-
-Step 2 — Hubungkan Perangkat
+├── Step 1 — Selamat Datang
+│   ├── Ilustrasi
+│   ├── Judul: "Kenali Kebiasaan Digitalmu"
+│   ├── Penjelasan singkat FomoTracker
+│   │   (2–3 kalimat, tanpa istilah teknis)
+│   └── Tombol Mulai Setup
 │
-├── Judul: "Hubungkan HP atau Browsermu"
-├── Subjudul: "FomoTracker butuh izin untuk membaca
-│             aktivitas media sosialmu."
+├── Step 2 — Hubungkan Perangkat
+│   ├── Judul: "Hubungkan HP atau Browsermu"
+│   ├── Subjudul: "FomoTracker butuh izin untuk
+│   │             membaca aktivitas media sosialmu."
+│   │
+│   ├── Kartu Android App
+│   │   ├── Ikon + "Untuk pengguna HP Android"
+│   │   ├── Penjelasan 1 kalimat
+│   │   └── Tombol Unduh Aplikasi
+│   │
+│   ├── Kartu Browser Extension
+│   │   ├── Ikon + "Untuk pengguna laptop/komputer"
+│   │   ├── Penjelasan 1 kalimat
+│   │   └── Tombol Pasang Ekstensi
+│   │
+│   ├── Indikator status koneksi
+│   │   ├── Android App  : ✅ Terhubung / ⏳ Belum
+│   │   └── Extension    : ✅ Terhubung / ⏳ Belum
+│   │
+│   └── Tombol Lewati → bisa setup nanti di pengaturan
 │
-├── Kartu Android App
-│   ├── Ikon Android
-│   ├── "Untuk pengguna HP Android"
-│   ├── "Memantau semua aplikasi media sosial
-│   │   yang kamu pakai di HP."
-│   └── Tombol Unduh Aplikasi
+├── Step 3 — Pilih Aplikasi yang Dipantau
+│   ├── Judul: "Aplikasi mana yang ingin kamu pantau?"
+│   ├── Subjudul: "Pilih yang biasa kamu pakai sehari-hari."
+│   ├── Grid ikon aplikasi (multi-select)
+│   │   ├── Instagram
+│   │   ├── TikTok
+│   │   ├── YouTube
+│   │   ├── X (Twitter)
+│   │   ├── Facebook
+│   │   ├── Reddit
+│   │   ├── LinkedIn
+│   │   └── dll.
+│   └── Minimal pilih 1 untuk lanjut
 │
-├── Kartu Browser Extension
-│   ├── Ikon Browser
-│   ├── "Untuk pengguna laptop/komputer"
-│   ├── "Memantau media sosial yang kamu buka
-│   │   lewat browser seperti Chrome."
-│   └── Tombol Pasang Ekstensi
+├── Step 4 — Atur Jam Belajar/Kerja & Jam Tidur
+│   ├── Judul: "Kapan kamu belajar/kerja dan tidur?"
+│   ├── Subjudul: "Ini membantu mendeteksi apakah
+│   │             HP mengganggumu di waktu penting."
+│   │
+│   ├── Jam Belajar / Kerja
+│   │   ├── Time picker Jam Mulai  (default: 08.00)
+│   │   ├── Time picker Jam Selesai (default: 17.00)
+│   │   └── Contoh: "08.00 – 17.00"
+│   │
+│   └── Jam Tidur
+│       ├── Time picker Jam Mulai  (default: 22.00)
+│       ├── Time picker Jam Selesai (default: 06.00)
+│       └── Contoh: "22.00 – 06.00"
 │
-├── Bisa pilih keduanya sekaligus
+├── Step 5 — Aktifkan Pengingat
+│   ├── Judul: "Mau diingatkan kalau kebablasan?"
+│   ├── Subjudul: "Kamu bisa ubah ini kapan saja
+│   │             di Pengaturan."
+│   │
+│   ├── Toggle Ingatkan jika pakai HP terlalu lama
+│   │   └── Sub-input: Batas jam per hari (default: 3 jam)
+│   ├── Toggle Ingatkan saat jam belajar/kerja
+│   ├── Toggle Ingatkan saat main HP malam hari
+│   └── Toggle Ingatkan jika nonstop tanpa jeda
+│       └── Sub-input: Batas menit nonstop (default: 45 menit)
 │
-└── Indikator status koneksi
-    ├── Android App  : ✅ Terhubung / ⏳ Belum
-    └── Browser Ext  : ✅ Terhubung / ⏳ Belum
-    + Tombol Lewati (skip) → bisa setup nanti di pengaturan
-
-─────────────────────────────────────────────────────
-
-Step 3 — Pilih Aplikasi yang Dipantau
-│
-├── Judul: "Aplikasi mana yang ingin kamu pantau?"
-├── Subjudul: "Pilih aplikasi media sosial yang
-│             biasa kamu pakai sehari-hari."
-│
-├── Daftar aplikasi (multi-select, tampil sebagai grid ikon)
-│   ├── Instagram
-│   ├── TikTok
-│   ├── YouTube
-│   ├── X (Twitter)
-│   ├── Facebook
-│   ├── Reddit
-│   ├── LinkedIn
-│   └── dll.
-│
-└── Minimal pilih 1 untuk lanjut
-
-─────────────────────────────────────────────────────
-
-Step 4 — Atur Jam Belajar/Kerja & Jam Tidur
-│
-├── Judul: "Kapan kamu biasanya belajar/kerja
-│          dan tidur?"
-├── Subjudul: "Ini membantu FomoTracker mendeteksi
-│             apakah HP mengganggu waktu pentingmu."
-│
-├── Jam Belajar / Kerja
-│   ├── Contoh: 08.00 – 17.00
-│   ├── Time picker Jam Mulai
-│   └── Time picker Jam Selesai
-│
-└── Jam Tidur
-    ├── Contoh: 22.00 – 06.00
-    ├── Time picker Jam Mulai (mulai istirahat)
-    └── Time picker Jam Selesai (bangun tidur)
-
-─────────────────────────────────────────────────────
-
-Step 5 — Aktifkan Pengingat
-│
-├── Judul: "Mau diingatkan kalau kebablasan?"
-├── Subjudul: "FomoTracker bisa mengirim pengingat
-│             saat kamu perlu istirahat dari HP."
-│
-├── Toggle Ingatkan jika pakai HP terlalu lama
-│   └── Sub-input: Batas berapa jam per hari? (default: 3 jam)
-├── Toggle Ingatkan saat jam belajar/kerja
-├── Toggle Ingatkan saat main HP malam hari
-└── Toggle Ingatkan jika nonstop tanpa jeda
-    └── Sub-input: Batas berapa menit nonstop? (default: 45 menit)
-
-─────────────────────────────────────────────────────
-
-Step 6 — Selesai
-│
-├── Judul: "Semua siap! 🎉"
-│
-├── Ringkasan pengaturan
-│   ├── Perangkat terhubung
-│   ├── Aplikasi yang dipantau
-│   ├── Jam belajar/kerja
-│   ├── Jam tidur
-│   └── Pengingat aktif
-│
-└── Tombol Masuk ke Beranda
+└── Step 6 — Selesai
+    ├── Judul: "Semua siap! 🎉"
+    ├── Ringkasan pengaturan
+    │   ├── ✅ Perangkat terhubung
+    │   ├── ✅ Aplikasi yang dipantau
+    │   ├── ✅ Jam belajar/kerja & jam tidur
+    │   └── ✅ Pengingat aktif
+    └── Tombol Masuk ke Beranda → /dashboard
 ```
 
 ---
@@ -238,384 +308,655 @@ Step 6 — Selesai
 
 ---
 
-### 🏠 Beranda — `/dashboard`
+### `/dashboard` — Beranda
 
 ```
-Tujuan:
-Gambaran kondisi penggunaan media sosial hari ini.
-Semua data di halaman ini = HARI INI (00:00 – sekarang).
-Tidak ada angka skor, tidak ada istilah teknis.
-
 /dashboard
+Semua data = HARI INI (00:00 – sekarang)
+Tidak ada narasi AI. Update otomatis.
+
 │
 ├── Navbar Atas
 │   ├── Logo FomoTracker
 │   └── Ikon Lonceng 🔔 → /notifications
 │
-├── Sapaan & Tanggal
-│   └── "Halo, Budi! — Rabu, 4 Juni 2026"
 │
-├── Status Hari Ini  ← ELEMEN UTAMA, TAMPIL PALING BESAR
-│   Sumber : behaviour_scores hari ini
+├── ── Greeting Card ──
+│   Style berbeda: gradient, lebih menonjol
+│   Sumber: behaviour_scores + daily_stats hari ini
 │   │
-│   ├── 😊 Hari yang Baik
-│   │   └── "Penggunaan HP-mu hari ini terkontrol."
-│   ├── 😐 Perlu Diperhatikan
-│   │   └── "Ada beberapa kebiasaan yang
-│   │        terdeteksi hari ini."
-│   └── 😟 Hari yang Berat
-│       └── "Banyak kebiasaan bermasalah
-│            terdeteksi hari ini."
-│
-│   Jika belum ada data hari ini:
-│   └── "Belum ada aktivitas yang terdeteksi hari ini.
-│        Pastikan Android App atau Browser Extension
-│        sudah terhubung."
-│
-├── Ringkasan Singkat
-│   Sumber : daily_stats + activity_log hari ini
-│   Tampilan: 2–3 kalimat natural tanpa angka teknis
-│   Contoh : "Kamu sudah pakai HP selama 3 jam hari ini.
-│             TikTok paling banyak kamu buka.
-│             Belum ada kebiasaan bermasalah terdeteksi."
-│
-├── Aktivitas Hari Ini
-│   Judul  : "Penggunaan per Jam Hari Ini"
-│   Sumber : activity_log hari ini, dikelompokkan per jam
-│   Tampilan: Stacked bar chart
+│   ├── Sapaan: "Halo, [Nama]! 👋"
+│   ├── Tanggal: "Rabu, 4 Juni 2026"
 │   │
-│   ├── Sumbu X : Jam 00.00 – 23.00
-│   ├── Sumbu Y : Menit penggunaan
-│   ├── Warna   : Berbeda per aplikasi
-│   └── Legend  : Nama aplikasi + warna
-│
-├── Kebiasaan yang Terdeteksi Hari Ini
-│   Sumber : behaviour_scores flags hari ini
+│   ├── Status Hari Ini
+│   │   ├── 😊 Hari yang Baik
+│   │   ├── 😐 Perlu Diperhatikan
+│   │   └── 😟 Hari yang Berat
 │   │
-│   Jika tidak ada kebiasaan terdeteksi:
-│   └── ✅ "Tidak ada kebiasaan bermasalah hari ini!"
+│   ├── Skor Hari Ini
+│   │   └── "Skor hari ini: 54 dari 100"
+│   │       "Semakin rendah semakin baik"
+│   │
+│   ├── Screen Time Hari Ini
+│   │   └── "📱 3 jam 20 menit"
+│   │
+│   └── Aplikasi Tersering Hari Ini
+│       └── "🏆 TikTok — 1 jam 45 menit"
 │
-│   Jika ada, tampilkan hanya yang terdeteksi:
+│
+├── ── Grafik Aktivitas Hari Ini ──
+│   Sumber: activity_logs hari ini per jam
+│   │
+│   ├── Judul: "Penggunaan per Jam Hari Ini"
+│   ├── Stacked bar chart
+│   │   ├── Sumbu X: Jam 00.00 – 23.00
+│   │   └── Sumbu Y: Menit penggunaan
+│   ├── Warna berbeda per aplikasi + legend
+│   └── Highlight area:
+│       ├── 🌙 Jam tidur (background merah muda)
+│       └── 💼 Jam produktif (background kuning)
+│
+│
+├── ── Kebiasaan Hari Ini ──
+│   Sumber: behaviour_scores flags hari ini
+│   5 indikator selalu tampil semua.
+│   │
 │   ├── 📱 Terlalu lama main HP
-│   │   └── "Sudah X jam Y menit hari ini"
+│   │   ├── Terdeteksi → "Sudah X jam Y menit hari ini"
+│   │   └── Tidak → "Durasi masih terkontrol"
+│   │
 │   ├── 🔄 Sering buka-tutup aplikasi
-│   │   └── "Dibuka X kali hari ini"
+│   │   ├── Terdeteksi → "Dibuka X kali hari ini"
+│   │   └── Tidak → "Frekuensi masih wajar"
+│   │
 │   ├── 🌙 Main HP waktu harusnya tidur
-│   │   └── "X menit terdeteksi di jam tidur"
+│   │   ├── Terdeteksi → "X menit di jam tidur"
+│   │   └── Tidak → "Tidak ada aktivitas di jam tidur"
+│   │
 │   ├── ⏳ Nonstop tanpa istirahat
-│   │   └── "Sesi terpanjang X menit tanpa jeda"
+│   │   ├── Terdeteksi → "Sesi terpanjang X menit tanpa jeda"
+│   │   └── Tidak → "Selalu ada jeda antar sesi"
+│   │
 │   └── 💼 Main HP saat jam belajar/kerja
-│       └── "X menit terdeteksi di jam produktif"
+│       ├── Terdeteksi → "X menit di jam produktif"
+│       └── Tidak → "Tidak ada gangguan di jam produktif"
 │
-└── Cuplikan Insight Terakhir
-    Sumber : insight mingguan terakhir yang tersedia
-    Tampilan: Card dengan 1–2 kalimat kutipan
+│
+├── ── Perangkat Terhubung ──
+│   Sumber: user_devices milik user
+│   │
+│   ├── 📱 Android App
+│   │   ├── ✅ Terhubung
+│   │   │   "Terakhir sinkron: X menit yang lalu"
+│   │   └── ❌ Belum Terhubung
+│   │       Tombol "Hubungkan" → /pengaturan/perangkat
+│   │
+│   └── 🌐 Browser Extension
+│       ├── ✅ Terhubung
+│       │   "Terakhir sinkron: X menit yang lalu"
+│       └── ❌ Belum Terhubung
+│           Tombol "Hubungkan" → /pengaturan/perangkat
+│
+│
+└── ── Cuplikan Insight Terakhir ──
+    Sumber: weekly_insights terbaru
     │
-    ├── Periode insight (contoh: "1–7 Juni 2026")
-    ├── Kutipan singkat dari insight
+    ├── "Insight 26 Mei – 1 Juni 2026"
+    ├── 1–2 kalimat dari ai_analysis
     └── Tombol "Baca Selengkapnya" → /insight
+
+── EMPTY STATES ──
+
+Perangkat belum terhubung:
+┌──────────────────────────────────────────┐
+│ 📱 Perangkat belum terhubung             │
+│ Hubungkan Android App atau Browser       │
+│ Extension agar aktivitasmu terpantau.    │
+│ [Hubungkan Sekarang]                     │
+└──────────────────────────────────────────┘
+
+Perangkat terhubung tapi belum ada data hari ini:
+┌──────────────────────────────────────────┐
+│ 🌅 Belum ada aktivitas hari ini          │
+│ Data akan muncul setelah kamu mulai      │
+│ menggunakan media sosial.                │
+└──────────────────────────────────────────┘
 ```
 
 ---
 
-### 📊 Statistik — `/statistik`
+### `/statistik` — Statistik
 
 ```
-Tujuan:
-Melihat pola penggunaan mingguan dengan bahasa
-dan visualisasi yang mudah dipahami.
-Tidak ada narasi AI, tidak ada skor teknis.
-
 /statistik
+Tidak ada narasi AI. Fokus data dan visualisasi.
+
 │
-├── Filter Periode (2 tombol di atas halaman)
+├── Filter Periode
 │   ├── Minggu Ini   ← default
 │   │   = Senin minggu ini s/d hari ini
 │   └── Minggu Lalu
-│       = Senin s/d Minggu minggu lalu (7 hari penuh)
+│       = Senin s/d Minggu lalu (7 hari penuh)
 │
-│   Jika hari ini Senin dan memilih "Minggu Ini":
-│   └── Tampilkan keterangan:
-│       "Minggu ini baru dimulai hari ini."
+│   Jika hari ini Senin:
+│   └── "Minggu ini baru dimulai hari ini."
 │
-├── Berapa Lama Kamu Pakai HP?
-│   Sumber : SUM daily_stats.total_duration_seconds
+│
+├── ── Berapa Lama Kamu Pakai HP? ──
+│   Sumber: SUM daily_stats.total_duration_seconds
 │   │
 │   ├── Total: "X jam Y menit"
-│   ├── Rata-rata per hari: "X jam Y menit per hari"
-│   └── Perbandingan vs minggu lalu:
-│       ↑ "X menit lebih lama dari minggu lalu" (merah)
-│       ↓ "X menit lebih singkat dari minggu lalu" (hijau)
-│       → "Sama seperti minggu lalu" (abu-abu)
+│   ├── Rata-rata: "X jam Y menit per hari"
+│   └── Perbandingan vs minggu lalu
+│       (hanya tampil saat Minggu Ini dipilih)
+│       ↑ "X menit lebih lama" (merah)
+│       ↓ "X menit lebih singkat" (hijau)
+│       → "Sama seperti minggu lalu" (abu)
 │
-│   Tidak muncul jika memilih "Minggu Lalu"
-│   (tidak ada pembanding)
 │
-├── Grafik Penggunaan Harian
-│   Sumber : daily_stats per hari dalam periode
-│   Tampilan: Bar chart
+├── ── Grafik Penggunaan Harian ── ← BISA DIKLIK
+│   Sumber: daily_stats per hari dalam periode
 │   │
-│   ├── Sumbu X : Hari (Sen, Sel, Rab, dst.)
-│   ├── Sumbu Y : Jam penggunaan
-│   └── Warna berbeda per aplikasi (stacked)
+│   ├── Stacked bar chart
+│   │   ├── Sumbu X: Sen Sel Rab Kam Jum Sab Min
+│   │   └── Sumbu Y: Jam penggunaan
+│   ├── Warna berbeda per aplikasi + legend
+│   └── Klik bar hari tertentu
+│       → /statistik/[tanggal]
 │
-├── Aplikasi Apa yang Paling Banyak Kamu Buka?
-│   Sumber : SUM daily_stats per app_id dalam periode
-│   Tampilan: Bar chart horizontal
+│
+├── ── Aplikasi Paling Banyak Digunakan ──
+│   Sumber: SUM daily_stats per app_id
 │   │
-│   ├── Diurutkan dari terbanyak
-│   ├── Nama aplikasi + ikon + durasi (jam/menit)
-│   └── Tanpa angka persentase
+│   ├── Bar chart horizontal
+│   ├── Diurutkan terbanyak ke terkecil
+│   └── Nama + ikon + durasi
 │
-├── Jam Berapa Kamu Paling Sering Online?
-│   Sumber : Agregasi activity_log per jam dalam periode
-│   Tampilan: Heatmap (sumbu X = jam, sumbu Y = hari)
+│
+├── ── Jam Paling Sering Online ──
+│   Sumber: agregasi activity_logs per jam
 │   │
-│   ├── Warna makin gelap = makin lama online
-│   ├── Highlight 🌙 jam tidur (warna merah muda)
-│   ├── Highlight 💼 jam belajar/kerja (warna kuning)
-│   └── Keterangan warna di bawah heatmap
+│   ├── Heatmap
+│   │   ├── Sumbu X: Jam 00–23
+│   │   └── Sumbu Y: Hari dalam periode
+│   ├── 🌙 Jam tidur → merah muda
+│   ├── 💼 Jam produktif → kuning
+│   └── Keterangan warna
 │
-└── Kebiasaan yang Sering Muncul Minggu Ini
-    Sumber : COUNT flag = true per hari dalam periode
-    Tampilan: List dengan progress bar
+│
+└── ── Kebiasaan yang Sering Muncul ──
+    Sumber: COUNT flag = true per hari
+    │
+    ├── Header:
+    │   "Seberapa sering kebiasaan ini muncul,
+    │    dan seberapa besar pengaruhnya
+    │    terhadap skor harianmu?"
     │
     ├── 📱 Terlalu lama main HP
-    │   └── Progress bar + "Muncul X dari Y hari"
+    │   ├── ████████░░  Muncul X dari Y hari
+    │   └── "Berkontribusi 30% terhadap skor harian"
+    │
     ├── 🔄 Sering buka-tutup aplikasi
-    │   └── Progress bar + "Muncul X dari Y hari"
+    │   ├── ██████░░░░  Muncul X dari Y hari
+    │   └── "Berkontribusi 20% terhadap skor harian"
+    │
     ├── 🌙 Main HP waktu tidur
-    │   └── Progress bar + "Muncul X dari Y hari"
+    │   ├── █████░░░░░  Muncul X dari Y hari
+    │   └── "Berkontribusi 20% terhadap skor harian"
+    │
     ├── ⏳ Nonstop tanpa jeda
-    │   └── Progress bar + "Muncul X dari Y hari"
+    │   ├── ███░░░░░░░  Muncul X dari Y hari
+    │   └── "Berkontribusi 15% terhadap skor harian"
+    │
     └── 💼 Distraksi jam produktif
-        └── Progress bar + "Muncul X dari Y hari"
+        ├── ██░░░░░░░░  Muncul X dari Y hari
+        └── "Berkontribusi 15% terhadap skor harian"
+
+── EMPTY STATE ──
+┌──────────────────────────────────────────┐
+│ 📊 Belum ada data minggu ini             │
+│ Data akan muncul setelah beberapa hari   │
+│ menggunakan FomoTracker.                 │
+└──────────────────────────────────────────┘
 ```
 
 ---
 
-### 💬 Insight — `/insight`
+### `/statistik/[tanggal]` — Detail Hari
 
 ```
-Tujuan:
-Tempat AI memberikan analisis dan saran mingguan.
-Satu-satunya halaman yang berisi narasi dari AI.
-Bahasa santai seperti teman, bukan laporan teknis.
+/statistik/[tanggal]
+Contoh: /statistik/2026-06-02
 
-Sistem generate insight:
-- Dibuat otomatis setiap Senin pukul 00:00
-- Mencakup data Senin s/d Minggu minggu sebelumnya
-- Setiap user mendapat insight bersamaan (bukan rolling)
+│
+├── Tombol Kembali → /statistik
+│
+├── Judul: "Senin, 2 Juni 2026"
+│
+├── Navigasi Hari
+│   ← Hari sebelumnya  |  Hari berikutnya →
+│   (disabled jika tidak ada data)
+│
+│
+├── ── Status & Skor Hari Itu ──
+│   Sumber: behaviour_scores tanggal tersebut
+│   │
+│   ├── Status: 😊 / 😐 / 😟 + label
+│   ├── "Skor hari ini: 54 dari 100"
+│   └── "Semakin rendah semakin baik"
+│
+│
+├── ── Ringkasan Singkat ──
+│   ├── Total screen time hari itu
+│   └── Aplikasi paling banyak digunakan
+│
+│
+├── ── Grafik Penggunaan Per Jam ──
+│   Sumber: activity_logs tanggal tersebut per jam
+│   │
+│   ├── Stacked bar chart
+│   │   ├── Sumbu X: 00.00 – 23.00
+│   │   └── Sumbu Y: Menit
+│   └── Highlight jam tidur & jam produktif
+│
+│
+├── ── Kebiasaan yang Terdeteksi ──
+│   Sumber: behaviour_scores flags tanggal tersebut
+│   5 indikator selalu tampil semua.
+│   │
+│   ├── 📱 Terlalu lama main HP
+│   │   Terdeteksi / Tidak + keterangan
+│   ├── 🔄 Sering buka-tutup aplikasi
+│   │   Terdeteksi / Tidak + keterangan
+│   ├── 🌙 Main HP waktu tidur
+│   │   Terdeteksi / Tidak + keterangan
+│   ├── ⏳ Nonstop tanpa jeda
+│   │   Terdeteksi / Tidak + keterangan
+│   └── 💼 Distraksi jam produktif
+│       Terdeteksi / Tidak + keterangan
+│
+│
+└── ── Breakdown Skor Hari Itu ──
+    Sumber: behaviour_scores semua kolom skor
+    │
+    ├── Header: "Dari mana skor 54 ini berasal?"
+    │
+    ├── 📱 Durasi pemakaian
+    │   ├── Bobot: 30%
+    │   ├── Nilai: 18 dari 30 poin
+    │   └── Bar visual proporsi
+    │
+    ├── 🔄 Frekuensi buka-tutup
+    │   ├── Bobot: 20%
+    │   ├── Nilai: 8 dari 20 poin
+    │   └── Bar visual proporsi
+    │
+    ├── 🌙 Aktivitas jam tidur
+    │   ├── Bobot: 20%
+    │   ├── Nilai: 12 dari 20 poin
+    │   └── Bar visual proporsi
+    │
+    ├── ⏳ Penggunaan nonstop
+    │   ├── Bobot: 15%
+    │   ├── Nilai: 0 dari 15 poin
+    │   └── Bar visual proporsi
+    │
+    └── 💼 Distraksi jam produktif
+        ├── Bobot: 15%
+        ├── Nilai: 8 dari 15 poin
+        └── Bar visual proporsi
+```
 
+---
+
+### `/insight` — Insight AI
+
+```
 /insight
-│
-├── Jika user baru (belum punya insight sama sekali)
-│   └── Card informatif
-│       ┌──────────────────────────────────────────┐
-│       │ 🔍 Insight pertamamu sedang disiapkan!   │
-│       │                                          │
-│       │ Kami butuh data satu minggu penuh untuk  │
-│       │ bisa mengenali pola penggunaan HP-mu.    │
-│       │                                          │
-│       │ Insight pertama akan muncul pada:        │
-│       │ Senin, 9 Juni 2026                       │
-│       │                                          │
-│       │ Sementara itu, pantau aktivitas harianmu │
-│       │ di halaman Beranda dan Statistik.        │
-│       └──────────────────────────────────────────┘
-│
-└── Jika sudah ada insight
-    │
-    ├── ── Insight Minggu Ini ──
-    │   │
-    │   ├── Periode: "Senin 26 Mei – Minggu 1 Juni 2026"
-    │   │
-    │   ├── Kondisi Minggu Ini
-    │   │   ├── 😊 Minggu yang Baik!
-    │   │   ├── 😐 Minggu yang Cukup Padat
-    │   │   └── 😟 Minggu yang Cukup Berat
-    │   │   + 1 kalimat deskripsi
-    │   │
-    │   ├── Yang Sudah Kamu Lakukan dengan Baik 👍
-    │   │   └── Narasi AI 2–3 kalimat positif
-    │   │
-    │   ├── Yang Perlu Kamu Perhatikan ⚠️
-    │   │   └── Narasi AI 2–3 kalimat, tidak menghakimi
-    │   │
-    │   ├── Analisis Minggu Ini 🤖
-    │   │   └── Paragraf analisis AI, bahasa santai
-    │   │
-    │   └── Tips untuk Minggu Depan 💡
-    │       └── 3 saran konkret dan actionable
-    │           Contoh:
-    │           "Coba taruh HP di luar kamar saat tidur"
-    │           "Batasi buka TikTok maksimal 2x sehari"
-    │           "Aktifkan mode fokus saat jam belajar"
-    │
-    └── ── Insight Sebelumnya ──
-        │
-        ├── Filter Bulan
-        │
-        └── Daftar card insight lama (terbaru di atas)
-            Tiap card:
-            ├── Periode insight
-            ├── Kondisi minggu (emoji + label)
-            └── Tombol Baca → /insight/[id]
+Satu-satunya halaman berisi narasi AI.
+Insight di-generate tiap Senin 00:00.
 
+│
+├── ── Minggu Ini Sejauh Ini ──
+│   DATA SAJA, bukan narasi AI
+│   Periode: Senin minggu ini s/d kemarin
+│   Sumber: daily_stats + behavioural_scores
+│   │
+│   ├── Status rata-rata minggu ini
+│   │   😊 / 😐 / 😟 + label
+│   ├── Total screen time minggu ini
+│   ├── Kebiasaan paling sering muncul (maks. 2)
+│   └── Keterangan:
+│       "Insight lengkap tersedia Senin depan."
+│
+│
+├── ── Insight Minggu Lalu ──
+│   │
+│   ├── Jika user baru (belum ada insight)
+│   │   ┌────────────────────────────────────────┐
+│   │   │ 🔍 Insight pertamamu sedang disiapkan! │
+│   │   │                                        │
+│   │   │ Kami butuh satu minggu penuh untuk     │
+│   │   │ mengenali pola penggunaan HP-mu.        │
+│   │   │                                        │
+│   │   │ Insight pertama tersedia:              │
+│   │   │ Senin, [tanggal Senin berikutnya]      │
+│   │   │                                        │
+│   │   │ Sementara pantau aktivitasmu di        │
+│   │   │ Beranda dan Statistik.                 │
+│   │   └────────────────────────────────────────┘
+│   │
+│   └── Jika sudah ada insight
+│       │
+│       ├── Periode: "Senin 26 Mei – Minggu 1 Juni 2026"
+│       │
+│       ├── Kondisi Minggu Itu
+│       │   ├── 😊 Minggu yang Baik!
+│       │   ├── 😐 Minggu yang Cukup Padat
+│       │   └── 😟 Minggu yang Cukup Berat
+│       │   + 1 kalimat deskripsi
+│       │
+│       ├── Yang Sudah Kamu Lakukan dengan Baik 👍
+│       │   Narasi AI 2–3 kalimat positif
+│       │
+│       ├── Yang Perlu Kamu Perhatikan ⚠️
+│       │   Narasi AI 2–3 kalimat, tidak menghakimi
+│       │
+│       ├── Analisis Minggu Ini 🤖
+│       │   Paragraf AI, bahasa santai
+│       │
+│       └── Tips untuk Minggu Depan 💡
+│           3 saran konkret dan actionable
+│
+│
+└── ── Insight Sebelumnya ──
+    │
+    ├── Filter Bulan
+    │
+    └── Daftar card (terbaru di atas)
+        Tiap card:
+        ├── Periode insight
+        ├── Kondisi (emoji + label)
+        └── Tombol Baca → /insight/[id]
 
+── EMPTY STATE (insight gagal generate) ──
+┌──────────────────────────────────────────┐
+│ ⚠️ Insight minggu ini belum tersedia     │
+│ Terjadi kendala. Kami akan mencoba lagi. │
+└──────────────────────────────────────────┘
+```
+
+---
+
+### `/insight/[id]` — Detail Insight
+
+```
 /insight/[id]
-Detail Insight Minggu Tertentu
+Contoh: /insight/abc123
+
 │
-├── Periode Insight
-├── Kondisi Minggu Itu (emoji + label + deskripsi)
+├── Tombol Kembali → /insight
+│
+├── Periode: "Senin 26 Mei – Minggu 1 Juni 2026"
+│
+├── Kondisi Minggu Itu
+│   emoji + label + 1 kalimat deskripsi
+│
 ├── Yang Sudah Dilakukan dengan Baik 👍
+│   Narasi AI
+│
 ├── Yang Perlu Diperhatikan ⚠️
+│   Narasi AI
+│
 ├── Analisis Minggu Itu 🤖
+│   Narasi AI
+│
 ├── Tips yang Diberikan 💡
+│   3 saran
 │
 └── Dibanding Minggu Sebelumnya
-    ├── Durasi pakai HP : ↑ naik / ↓ turun / → sama
-    ├── Kebiasaan bermasalah : lebih banyak / lebih sedikit / sama
-    └── Kondisi keseluruhan : Membaik / Memburuk / Stabil
+    ├── Durasi pakai HP
+    │   ↑ Lebih lama / ↓ Lebih singkat / → Sama
+    ├── Kebiasaan bermasalah
+    │   Lebih banyak / Lebih sedikit / Sama
+    └── Kondisi keseluruhan
+        Membaik / Memburuk / Stabil
 ```
 
 ---
 
-### 🔔 Notifikasi — `/notifications`
+### `/notifications` — Notifikasi
 
 ```
-Tujuan:
-Riwayat semua pengingat yang pernah dikirim sistem.
-Diakses lewat ikon lonceng di navbar, bukan menu utama.
-
 /notifications
+Diakses via ikon 🔔 di navbar.
+
 │
-├── Filter
+├── Header: "Notifikasi"
+│
+├── Filter Status
 │   ├── Semua        ← default
 │   └── Belum Dibaca
 │
+├── Filter Tipe (Dropdown)
+│   ├── Semua Tipe   ← default
+│   ├── 📱 Terlalu lama main HP
+│   ├── 💼 Jam belajar/kerja
+│   ├── 🌙 Malam hari
+│   └── ⏳ Nonstop tanpa jeda
+│
 ├── Daftar Notifikasi (terbaru di atas)
 │   Tiap item:
-│   ├── Ikon jenis pengingat
-│   ├── Pesan (bahasa natural)
+│   ├── Ikon jenis
+│   ├── Pesan bahasa natural
 │   │   Contoh: "Kamu sudah pakai HP 3 jam hari ini.
-│   │            Istirahat sebentar yuk!"
+│   │            Istirahat sebentar yuk! ☕"
 │   ├── Waktu dikirim
 │   └── Titik biru jika belum dibaca
 │
 └── Tombol Tandai Semua Sudah Dibaca
+
+── EMPTY STATE ──
+┌──────────────────────────────────────────┐
+│ 🔔 Belum ada pengingat                   │
+│ Pengingat akan muncul saat FomoTracker   │
+│ mendeteksi kebiasaan yang perlu          │
+│ kamu perhatikan.                         │
+└──────────────────────────────────────────┘
 ```
 
 ---
 
-### ⚙️ Pengaturan — `/pengaturan`
+### `/pengaturan/profil` — Profil
 
 ```
-/pengaturan
-Tampil sebagai halaman dengan sub-navigasi (tab atau sidebar kecil)
+/pengaturan/profil
 
 │
-├── /pengaturan/profil
-│   Profil Saya
-│   │
-│   ├── Foto Profil (upload / ubah)
-│   ├── Nama
-│   ├── Email
-│   └── Ganti Password
+├── Sub-navigasi Pengaturan
+│   ├── Profil  ← aktif
+│   ├── Perangkat & Aplikasi
+│   ├── Pengingat
+│   └── Privasi & Data
 │
-├── /pengaturan/perangkat
-│   Perangkat & Aplikasi
-│   │
-│   ├── Perangkat Terhubung
-│   │   ├── 📱 Android App
-│   │   │   ├── Status: ✅ Terhubung / ❌ Belum Terhubung
-│   │   │   ├── Terakhir sinkron: "X menit yang lalu"
-│   │   │   └── Jika belum: Tombol Unduh Aplikasi
-│   │   └── 🌐 Browser Extension
-│   │       ├── Status: ✅ Terhubung / ❌ Belum Terhubung
-│   │       ├── Terakhir sinkron: "X menit yang lalu"
-│   │       └── Jika belum: Tombol Pasang Ekstensi
-│   │
-│   ├── Aplikasi yang Dipantau
-│   │   ├── Daftar aplikasi aktif (nama + ikon)
-│   │   ├── Tombol Tambah Aplikasi
-│   │   └── Tombol Hapus per aplikasi
-│   │
-│   ├── Jam Belajar / Kerja
-│   │   ├── Time picker Jam Mulai
-│   │   ├── Time picker Jam Selesai
-│   │   └── Keterangan: "Digunakan untuk mendeteksi
-│   │       gangguan di jam produktif"
-│   │
-│   └── Jam Tidur
-│       ├── Time picker Jam Mulai
-│       ├── Time picker Jam Selesai
-│       └── Keterangan: "Digunakan untuk mendeteksi
-│           penggunaan HP di malam hari"
+├── Foto Profil
+│   ├── Tampil foto saat ini
+│   └── Tombol Ganti Foto
 │
-├── /pengaturan/notifikasi
-│   Pengingat
-│   │
-│   ├── Toggle Ingatkan jika pakai HP terlalu lama
-│   │   └── Jika aktif → Input batas jam per hari
-│   │       (default: 3 jam)
-│   ├── Toggle Ingatkan saat jam belajar/kerja
-│   ├── Toggle Ingatkan saat main HP malam hari
-│   └── Toggle Ingatkan jika nonstop tanpa jeda
-│       └── Jika aktif → Input batas menit nonstop
-│           (default: 45 menit)
+├── Form Edit Profil
+│   ├── Input Nama
+│   ├── Input Email
+│   └── Tombol Simpan Perubahan
 │
-└── /pengaturan/privasi
-    Privasi & Data
-    │
-    ├── Data yang Kami Kumpulkan
-    │   └── Nama app, durasi, frekuensi,
-    │       waktu aktivitas, domain website
-    ├── Data yang Tidak Kami Kumpulkan
-    │   └── Isi chat, password, media pribadi,
-    │       URL lengkap, konten yang dibaca
-    ├── Ekspor Data
-    │   ├── Tombol Ekspor JSON
-    │   └── Tombol Ekspor CSV
-    └── Hapus Akun
-        └── Konfirmasi sebelum hapus
+└── Ganti Password
+    ├── Input Password Lama
+    ├── Input Password Baru
+    ├── Input Konfirmasi Password Baru
+    └── Tombol Ganti Password
 ```
 
 ---
 
-## 🗺️ Ringkasan Struktur Final
+### `/pengaturan/perangkat` — Perangkat & Aplikasi
+
+```
+/pengaturan/perangkat
+
+│
+├── Sub-navigasi Pengaturan
+│
+├── ── Perangkat Terhubung ──
+│   │
+│   ├── 📱 Android App
+│   │   ├── ✅ Terhubung
+│   │   │   ├── Nama perangkat
+│   │   │   ├── "Terakhir sinkron: X menit yang lalu"
+│   │   │   └── Tombol Putuskan Koneksi
+│   │   └── ❌ Belum Terhubung
+│   │       └── Tombol Unduh Aplikasi
+│   │
+│   └── 🌐 Browser Extension
+│       ├── ✅ Terhubung
+│       │   ├── Nama browser
+│       │   ├── "Terakhir sinkron: X menit yang lalu"
+│       │   └── Tombol Putuskan Koneksi
+│       └── ❌ Belum Terhubung
+│           └── Tombol Pasang Ekstensi
+│
+│
+├── ── Aplikasi yang Dipantau ──
+│   │
+│   ├── Daftar aplikasi aktif
+│   │   Tiap item: ikon + nama + Tombol Hapus
+│   └── Tombol Tambah Aplikasi
+│       → Modal/sheet daftar aplikasi tersedia
+│
+│
+├── ── Jam Belajar / Kerja ──
+│   ├── Time picker Jam Mulai
+│   ├── Time picker Jam Selesai
+│   ├── "Digunakan untuk mendeteksi gangguan
+│   │   di jam produktif"
+│   └── Tombol Simpan
+│
+│
+└── ── Jam Tidur ──
+    ├── Time picker Jam Mulai
+    ├── Time picker Jam Selesai
+    ├── "Digunakan untuk mendeteksi penggunaan
+    │   HP di malam hari"
+    └── Tombol Simpan
+```
+
+---
+
+### `/pengaturan/notifikasi` — Pengingat
+
+```
+/pengaturan/notifikasi
+
+│
+├── Sub-navigasi Pengaturan
+│
+├── Toggle Ingatkan jika pakai HP terlalu lama
+│   └── Jika aktif:
+│       Input batas per hari (default: 3 jam)
+│
+├── Toggle Ingatkan saat jam belajar/kerja
+│
+├── Toggle Ingatkan saat main HP malam hari
+│
+└── Toggle Ingatkan jika nonstop tanpa jeda
+    └── Jika aktif:
+        Input batas menit nonstop (default: 45 menit)
+```
+
+---
+
+### `/pengaturan/privasi` — Privasi & Data
+
+```
+/pengaturan/privasi
+
+│
+├── Sub-navigasi Pengaturan
+│
+├── ── Data yang Kami Kumpulkan ──
+│   └── Nama app, durasi, frekuensi,
+│       waktu aktivitas, domain website
+│
+├── ── Data yang Tidak Kami Kumpulkan ──
+│   └── Isi chat, password, media pribadi,
+│       URL lengkap, konten yang dibaca
+│
+├── ── Ekspor Data ──
+│   ├── Penjelasan singkat isi ekspor
+│   ├── Tombol Ekspor JSON
+│   └── Tombol Ekspor CSV
+│
+└── ── Hapus Akun ──
+    ├── Penjelasan: "Semua data akan dihapus permanen."
+    ├── Tombol Hapus Akun (warna merah)
+    └── Dialog konfirmasi:
+        ├── "Ketik HAPUS untuk konfirmasi"
+        └── Tombol Konfirmasi Hapus
+```
+
+---
+
+### Error Pages
+
+```
+/404
+├── Ilustrasi
+├── "Halaman tidak ditemukan."
+├── Tombol Kembali ke Beranda → /dashboard
+└── Tombol ke Landing Page → /
+
+
+/error  (500 / server error)
+├── Ilustrasi
+├── "Terjadi kendala pada sistem."
+├── "Coba muat ulang halaman."
+└── Tombol Coba Lagi
+```
+
+---
+
+## 🗺️ Ringkasan Struktur
 
 ```
 FomoTracker
 │
 ├── PUBLIC
-│   ├── /                  Landing Page
-│   ├── /tentang           Tentang FomoTracker
-│   ├── /panduan           Panduan Penggunaan
-│   ├── /auth/login        Masuk
-│   └── /auth/register     Daftar
+│   ├── /                        Landing Page
+│   ├── /tentang                 Tentang
+│   ├── /panduan                 Panduan
+│   ├── /auth/login              Masuk
+│   └── /auth/register           Daftar
 │
 ├── ONBOARDING
-│   └── /onboarding
-│       ├── Step 1 — Selamat Datang
-│       ├── Step 2 — Hubungkan Perangkat
-│       ├── Step 3 — Pilih Aplikasi
-│       ├── Step 4 — Atur Jam Belajar & Tidur
-│       ├── Step 5 — Aktifkan Pengingat
-│       └── Step 6 — Selesai
+│   └── /onboarding              Setup Awal (6 Step)
 │
-└── APPLICATION
-    │
-    ├── /dashboard              Beranda
-    ├── /statistik              Statistik Mingguan
-    ├── /insight                Insight AI
-    │   └── /insight/[id]       Detail Insight Lama
-    ├── /notifications          Riwayat Pengingat
-    └── /pengaturan
-        ├── /profil             Data Diri
-        ├── /perangkat          Perangkat & Aplikasi
-        ├── /notifikasi         Preferensi Pengingat
-        └── /privasi            Privasi & Data
+├── APPLICATION
+│   ├── /dashboard               Beranda
+│   │
+│   ├── /statistik               Statistik Mingguan
+│   │   └── /statistik/[tanggal] Detail Hari
+│   │
+│   ├── /insight                 Insight AI
+│   │   └── /insight/[id]        Detail Insight Lama
+│   │
+│   ├── /notifications           Notifikasi
+│   │
+│   ├── /pengaturan/profil       Profil
+│   ├── /pengaturan/perangkat    Perangkat & Aplikasi
+│   ├── /pengaturan/notifikasi   Pengingat
+│   └── /pengaturan/privasi      Privasi & Data
+│
+└── ERROR
+    ├── /404                     Halaman Tidak Ditemukan
+    └── /error                   Error Server
 ```
 
 ---
@@ -623,11 +964,10 @@ FomoTracker
 ## Navigasi Aplikasi
 
 ```
-┌────────────────────────────────────────────────────┐
-│  FomoTracker                                   🔔  │
-└────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│  FomoTracker                                 🔔  │
+└──────────────────────────────────────────────────┘
 
-Bottom Navigation (mobile) / Sidebar (desktop):
 ┌──────────┬──────────┬──────────┬──────────┐
 │    🏠    │    📊    │    💬    │    ⚙️    │
 │ Beranda  │Statistik │  Insight │Pengaturan│
@@ -638,22 +978,11 @@ Bottom Navigation (mobile) / Sidebar (desktop):
 
 ## Aturan Konten Per Halaman
 
-| Halaman    | Berisi                                               | Tidak Boleh Ada                            |
-| ---------- | ---------------------------------------------------- | ------------------------------------------ |
-| Beranda    | Status hari ini, chart per jam, kebiasaan terdeteksi | Narasi AI baru, skor teknis, istilah asing |
-| Statistik  | Grafik, durasi, frekuensi kebiasaan mingguan         | Narasi AI, skor teknis                     |
-| Insight    | Narasi AI, analisis, tips mingguan                   | Skor teknis, istilah asing                 |
-| Notifikasi | Pesan pengingat sistem                               | Narasi AI                                  |
-| Pengaturan | Form, toggle, status perangkat                       | —                                          |
-
----
-
-## Periode Data Per Halaman
-
-| Halaman                 | Periode                          | Catatan                          |
-| ----------------------- | -------------------------------- | -------------------------------- |
-| Beranda — semua data    | Hari ini                         | Reset tiap tengah malam          |
-| Statistik — Minggu Ini  | Senin minggu ini s/d hari ini    | Bertambah tiap hari              |
-| Statistik — Minggu Lalu | Senin s/d Minggu lalu            | Selalu 7 hari penuh              |
-| Insight                 | Senin s/d Minggu minggu lalu     | Di-generate tiap Senin 00:00     |
-| Insight — user baru     | Menunggu 1 minggu kalender penuh | Insight pertama Senin berikutnya |
+| Halaman | Konten | Tidak Boleh |
+|---|---|---|
+| Beranda | Status, skor, chart, kebiasaan, perangkat | Narasi AI baru |
+| Statistik | Grafik, durasi, frekuensi, bobot | Narasi AI |
+| Statistik/[tanggal] | Detail per jam, breakdown skor | Narasi AI |
+| Insight | Narasi AI, analisis, tips | Skor teknis |
+| Notifikasi | Pesan pengingat sistem | Narasi AI |
+| Pengaturan | Form, toggle, status | — |

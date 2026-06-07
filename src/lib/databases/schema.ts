@@ -2,38 +2,36 @@
 // Platform Digital Wellbeing Berbasis AI
 //
 import {
-  pgTable,
-  uuid,
-  varchar,
   boolean,
-  text,
-  integer,
-  smallint,
-  doublePrecision,
   date,
+  doublePrecision,
+  index,
+  integer,
+  pgTable,
+  smallint,
+  text,
   time,
   timestamp,
   unique,
-  index,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 // ============================================================
 // AUTH & USER MANAGEMENT
 // ============================================================
 
-export const users = pgTable(
-  "users",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    name: varchar("name", { length: 100 }).notNull(),
-    avatarUrl: varchar("avatar_url", { length: 500 }),
-    // false = arahkan ke /onboarding
-    onboardingCompleted: boolean("onboarding_completed").default(false),
-    // hari pertama activity_log masuk, untuk hitung insight pertama
-    dataStartDate: date("data_start_date"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-  });
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  avatarUrl: varchar("avatar_url", { length: 500 }),
+  // false = arahkan ke /onboarding
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  // hari pertama activity_log masuk, untuk hitung insight pertama
+  dataStartDate: date("data_start_date"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
 
 // ============================================================
 // USER SETTINGS
@@ -66,7 +64,9 @@ export const userSettings = pgTable("user_settings", {
 
   // Toggle notifikasi
   notifScreenTimeEnabled: boolean("notif_screen_time_enabled").default(true),
-  notifProductiveHourEnabled: boolean("notif_productive_hour_enabled").default(true),
+  notifProductiveHourEnabled: boolean("notif_productive_hour_enabled").default(
+    true,
+  ),
   notifMidnightEnabled: boolean("notif_midnight_enabled").default(true),
   notifContinuousEnabled: boolean("notif_continuous_enabled").default(true),
 
@@ -87,7 +87,9 @@ export const apps = pgTable(
     packageName: varchar("package_name", { length: 255 }),
     // domain browser, contoh: instagram.com
     webDomain: varchar("web_domain", { length: 255 }),
-    category: varchar("category", { length: 50 }).notNull().default("social_media"),
+    category: varchar("category", { length: 50 })
+      .notNull()
+      .default("social_media"),
     iconUrl: varchar("icon_url", { length: 500 }),
     // android | browser | both
     platform: varchar("platform", { length: 20 }).notNull(),
@@ -99,7 +101,7 @@ export const apps = pgTable(
     index("apps_package_name_idx").on(t.packageName),
     index("apps_web_domain_idx").on(t.webDomain),
     index("apps_platform_idx").on(t.platform),
-  ]
+  ],
 );
 
 // Aplikasi yang dipilih user untuk dipantau
@@ -119,7 +121,7 @@ export const userTrackedApps = pgTable(
   (t) => [
     unique("user_tracked_apps_user_app_unique").on(t.userId, t.appId),
     index("user_tracked_apps_user_id_idx").on(t.userId),
-  ]
+  ],
 );
 
 // ============================================================
@@ -148,7 +150,7 @@ export const userDevices = pgTable(
   (t) => [
     index("user_devices_user_id_idx").on(t.userId),
     index("user_devices_user_platform_idx").on(t.userId, t.platform),
-  ]
+  ],
 );
 
 // ============================================================
@@ -189,9 +191,13 @@ export const activityLogs = pgTable(
   },
   (t) => [
     index("activity_logs_user_started_idx").on(t.userId, t.startedAt),
-    index("activity_logs_user_app_started_idx").on(t.userId, t.appId, t.startedAt),
+    index("activity_logs_user_app_started_idx").on(
+      t.userId,
+      t.appId,
+      t.startedAt,
+    ),
     index("activity_logs_user_id_idx").on(t.userId),
-  ]
+  ],
 );
 
 // ============================================================
@@ -211,15 +217,23 @@ export const dailyStats = pgTable(
     statDate: date("stat_date").notNull(),
 
     // total durasi penggunaan app hari ini
-    totalDurationSeconds: integer("total_duration_seconds").notNull().default(0),
+    totalDurationSeconds: integer("total_duration_seconds")
+      .notNull()
+      .default(0),
     // berapa kali app dibuka hari ini
     openFrequency: integer("open_frequency").notNull().default(0),
     // durasi di jam tidur
-    midnightDurationSeconds: integer("midnight_duration_seconds").notNull().default(0),
+    midnightDurationSeconds: integer("midnight_duration_seconds")
+      .notNull()
+      .default(0),
     // durasi di jam belajar/kerja
-    productiveHourDurationSeconds: integer("productive_hour_duration_seconds").notNull().default(0),
+    productiveHourDurationSeconds: integer("productive_hour_duration_seconds")
+      .notNull()
+      .default(0),
     // sesi nonstop terpanjang hari ini
-    maxContinuousSeconds: integer("max_continuous_seconds").notNull().default(0),
+    maxContinuousSeconds: integer("max_continuous_seconds")
+      .notNull()
+      .default(0),
     // jam paling aktif (0-23)
     peakActiveHour: smallint("peak_active_hour"),
 
@@ -228,8 +242,12 @@ export const dailyStats = pgTable(
   },
   (t) => [
     index("daily_stats_user_date_idx").on(t.userId, t.statDate),
-    unique("daily_stats_user_app_date_unique").on(t.userId, t.appId, t.statDate),
-  ]
+    unique("daily_stats_user_app_date_unique").on(
+      t.userId,
+      t.appId,
+      t.statDate,
+    ),
+  ],
 );
 
 // ============================================================
@@ -248,22 +266,34 @@ export const behavioralScores = pgTable(
 
     // Skor per indikator (0-100 masing-masing)
     // bobot 30% — total durasi harian
-    usageDurationScore: doublePrecision("usage_duration_score").notNull().default(0),
+    usageDurationScore: doublePrecision("usage_duration_score")
+      .notNull()
+      .default(0),
     // bobot 20% — frekuensi buka app
-    openFrequencyScore: doublePrecision("open_frequency_score").notNull().default(0),
+    openFrequencyScore: doublePrecision("open_frequency_score")
+      .notNull()
+      .default(0),
     // bobot 20% — aktivitas di jam tidur
-    midnightUsageScore: doublePrecision("midnight_usage_score").notNull().default(0),
+    midnightUsageScore: doublePrecision("midnight_usage_score")
+      .notNull()
+      .default(0),
     // bobot 15% — nonstop tanpa jeda
-    continuousUsageScore: doublePrecision("continuous_usage_score").notNull().default(0),
+    continuousUsageScore: doublePrecision("continuous_usage_score")
+      .notNull()
+      .default(0),
     // bobot 15% — distraksi jam kerja/belajar
-    productiveHourScore: doublePrecision("productive_hour_score").notNull().default(0),
+    productiveHourScore: doublePrecision("productive_hour_score")
+      .notNull()
+      .default(0),
 
     // Total skor akhir (0-100, semakin rendah semakin baik)
     totalScore: doublePrecision("total_score").notNull().default(0),
 
     // Status hari ini (derived dari total_score)
     // good = 0-39 | attention = 40-69 | heavy = 70-100
-    dailyStatus: varchar("daily_status", { length: 20 }).notNull().default("good"),
+    dailyStatus: varchar("daily_status", { length: 20 })
+      .notNull()
+      .default("good"),
 
     // Flag deteksi perilaku (true = terdeteksi hari ini)
     // terlalu lama main HP
@@ -275,7 +305,9 @@ export const behavioralScores = pgTable(
     // nonstop tanpa istirahat
     flagContinuousUsage: boolean("flag_continuous_usage").default(false),
     // main HP saat jam belajar/kerja
-    flagProductiveHourDistraction: boolean("flag_productive_hour_distraction").default(false),
+    flagProductiveHourDistraction: boolean(
+      "flag_productive_hour_distraction",
+    ).default(false),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -283,7 +315,7 @@ export const behavioralScores = pgTable(
   (t) => [
     unique("behavioral_scores_user_date_unique").on(t.userId, t.scoreDate),
     index("behavioral_scores_user_id_idx").on(t.userId),
-  ]
+  ],
 );
 
 // ============================================================
@@ -307,8 +339,12 @@ export const weeklyInsights = pgTable(
     generatedAt: timestamp("generated_at", { withTimezone: true }).notNull(),
 
     // Ringkasan data minggu ini (angka, bukan narasi)
-    totalScreenTimeSeconds: integer("total_screen_time_seconds").notNull().default(0),
-    avgBehavioralScore: doublePrecision("avg_behavioral_score").notNull().default(0),
+    totalScreenTimeSeconds: integer("total_screen_time_seconds")
+      .notNull()
+      .default(0),
+    avgBehavioralScore: doublePrecision("avg_behavioral_score")
+      .notNull()
+      .default(0),
     // good | attention | heavy
     weeklyStatus: varchar("weekly_status", { length: 20 }).notNull(),
     // hari dengan skor terendah
@@ -333,7 +369,9 @@ export const weeklyInsights = pgTable(
     aiTips: text("ai_tips"),
 
     // pending = belum di-generate | generated = selesai | failed = gagal, perlu retry
-    generationStatus: varchar("generation_status", { length: 20 }).default("pending"),
+    generationStatus: varchar("generation_status", { length: 20 }).default(
+      "pending",
+    ),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -342,7 +380,7 @@ export const weeklyInsights = pgTable(
     unique("weekly_insights_user_week_unique").on(t.userId, t.weekStart),
     index("weekly_insights_user_id_idx").on(t.userId),
     index("weekly_insights_generation_status_idx").on(t.generationStatus),
-  ]
+  ],
 );
 
 // ============================================================
@@ -369,7 +407,7 @@ export const notifications = pgTable(
     index("notifications_user_id_idx").on(t.userId),
     index("notifications_user_is_read_idx").on(t.userId, t.isRead),
     index("notifications_user_created_at_idx").on(t.userId, t.createdAt),
-  ]
+  ],
 );
 
 // ============================================================
@@ -417,6 +455,6 @@ export const table = {
   behavioralScores,
   weeklyInsights,
   notifications,
-} as const
+} as const;
 
 export type Table = typeof table;

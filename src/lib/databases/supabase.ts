@@ -1,6 +1,5 @@
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
 import { CapacitorCookies } from "@capacitor/core";
-import { cookies } from "next/headers";
+import { createBrowserClient, createServerClient } from "@supabase/ssr";
 
 const isMobile =
   typeof window !== "undefined" && window.origin.startsWith("capacitor://");
@@ -16,13 +15,13 @@ export const createClient = () => {
           if (isMobile) {
             // CapacitorCookies berjalan secara sinkronus/asinkronus, untuk 'get' di client:
             const match = document.cookie.match(
-              new RegExp("(^| )" + name + "=([^;]*)"),
+              new RegExp(`(^| )${name}=([^;]*)`),
             );
             return match ? decodeURIComponent(match[2]) : null;
           }
           return typeof document !== "undefined" ? document.cookie : null;
         },
-        set: async (name, value, options) => {
+        set: async (name, value, _options) => {
           if (isMobile) {
             await CapacitorCookies.setCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,7 +30,7 @@ export const createClient = () => {
             });
           }
         },
-        remove: async (name, options) => {
+        remove: async (name, _options) => {
           if (isMobile) {
             await CapacitorCookies.deleteCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,6 +44,7 @@ export const createClient = () => {
 };
 
 export const createSupabaseServer = async () => {
+  const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

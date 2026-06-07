@@ -156,12 +156,8 @@
           "name": "activity_logs_user_id_users_id_fk",
           "tableFrom": "activity_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -169,12 +165,8 @@
           "name": "activity_logs_app_id_apps_id_fk",
           "tableFrom": "activity_logs",
           "tableTo": "apps",
-          "columnsFrom": [
-            "app_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["app_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -182,12 +174,8 @@
           "name": "activity_logs_device_id_user_devices_id_fk",
           "tableFrom": "activity_logs",
           "tableTo": "user_devices",
-          "columnsFrom": [
-            "device_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["device_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -459,12 +447,8 @@
           "name": "behavioral_scores_user_id_users_id_fk",
           "tableFrom": "behavioral_scores",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -474,10 +458,7 @@
         "behavioral_scores_user_date_unique": {
           "name": "behavioral_scores_user_date_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "score_date"
-          ]
+          "columns": ["user_id", "score_date"]
         }
       },
       "policies": {},
@@ -597,12 +578,8 @@
           "name": "daily_stats_user_id_users_id_fk",
           "tableFrom": "daily_stats",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -610,12 +587,8 @@
           "name": "daily_stats_app_id_apps_id_fk",
           "tableFrom": "daily_stats",
           "tableTo": "apps",
-          "columnsFrom": [
-            "app_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["app_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -625,11 +598,7 @@
         "daily_stats_user_app_date_unique": {
           "name": "daily_stats_user_app_date_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "app_id",
-            "stat_date"
-          ]
+          "columns": ["user_id", "app_id", "stat_date"]
         }
       },
       "policies": {},
@@ -744,12 +713,8 @@
           "name": "notifications_user_id_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -865,12 +830,8 @@
           "name": "user_devices_user_id_users_id_fk",
           "tableFrom": "user_devices",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -982,12 +943,8 @@
           "name": "user_settings_user_id_users_id_fk",
           "tableFrom": "user_settings",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -997,9 +954,7 @@
         "user_settings_user_id_unique": {
           "name": "user_settings_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -1066,12 +1021,8 @@
           "name": "user_tracked_apps_user_id_users_id_fk",
           "tableFrom": "user_tracked_apps",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1079,12 +1030,8 @@
           "name": "user_tracked_apps_app_id_apps_id_fk",
           "tableFrom": "user_tracked_apps",
           "tableTo": "apps",
-          "columnsFrom": [
-            "app_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["app_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1094,10 +1041,7 @@
         "user_tracked_apps_user_app_unique": {
           "name": "user_tracked_apps_user_app_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "app_id"
-          ]
+          "columns": ["user_id", "app_id"]
         }
       },
       "policies": {},
@@ -1331,12 +1275,8 @@
           "name": "weekly_insights_user_id_users_id_fk",
           "tableFrom": "weekly_insights",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1344,12 +1284,8 @@
           "name": "weekly_insights_top_app_id_apps_id_fk",
           "tableFrom": "weekly_insights",
           "tableTo": "apps",
-          "columnsFrom": [
-            "top_app_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["top_app_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1359,10 +1295,7 @@
         "weekly_insights_user_week_unique": {
           "name": "weekly_insights_user_week_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "week_start"
-          ]
+          "columns": ["user_id", "week_start"]
         }
       },
       "policies": {},

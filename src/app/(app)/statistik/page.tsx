@@ -335,6 +335,29 @@ export default function StatistikPage() {
     }
   };
 
+  const formatDiffSecToHoursMinsIndo = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (h === 0) return `${m} menit`;
+    if (m === 0) return `${h} jam`;
+    return `${h} jam ${m} menit`;
+  };
+
+  const diffSec = period === "ini" ? dataMingguIni.diffSec : 7200;
+  const diffDirection = period === "ini" ? dataMingguIni.diffDirection : "down";
+  const compTitle =
+    period === "ini"
+      ? "Perbandingan vs Minggu Lalu"
+      : "Perbandingan vs 2 Minggu Lalu";
+  const compSubtext =
+    period === "ini"
+      ? "Lebih singkat dari minggu lalu"
+      : "Lebih singkat dari 2 minggu lalu";
+  const compSubtextUp =
+    period === "ini"
+      ? "Lebih lama dari minggu lalu"
+      : "Lebih lama dari 2 minggu lalu";
+
   return (
     <div className="space-y-6 font-poppins">
       {/* Page Header & Filter Periode */}
@@ -389,11 +412,16 @@ export default function StatistikPage() {
       {/* Rangkuman total durasi */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Total Durasi */}
-        <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-32">
-          <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-            Total Waktu Online
-          </span>
-          <div className="mt-2">
+        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start">
+            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+              Total Waktu Online
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Clock className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-4">
             <h3 className="text-2xl sm:text-3xl font-black text-primary">
               {formatSecToHoursMins(currentData.totalSec)}
             </h3>
@@ -404,11 +432,16 @@ export default function StatistikPage() {
         </div>
 
         {/* Card 2: Rata-rata Harian */}
-        <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-32">
-          <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-            Rata-rata Harian
-          </span>
-          <div className="mt-2">
+        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start">
+            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+              Rata-rata Harian
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Activity className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-4">
             <h3 className="text-2xl sm:text-3xl font-black text-primary">
               {formatSecToHoursMins(currentData.avgSec)}
             </h3>
@@ -419,48 +452,60 @@ export default function StatistikPage() {
         </div>
 
         {/* Card 3: Perbandingan vs Minggu Lalu */}
-        {period === "ini" && (
-          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-32">
+        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start">
             <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-              Perbandingan vs Minggu Lalu
+              {compTitle}
             </span>
-            <div className="mt-2">
-              {dataMingguIni.diffDirection === "down" ? (
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-emerald-600 flex items-center gap-1">
-                    <ArrowDownRight className="w-8 h-8" />
-                    <span>-{Math.round(dataMingguIni.diffSec / 60)} Menit</span>
-                  </h3>
-                  <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
-                    {" "}
-                    Lebih singkat dari minggu lalu
-                  </p>
-                </div>
-              ) : dataMingguIni.diffDirection === "up" ? (
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-red-500 flex items-center gap-1">
-                    <ArrowUpRight className="w-8 h-8" />
-                    <span>+{Math.round(dataMingguIni.diffSec / 60)} Menit</span>
-                  </h3>
-                  <p className="text-[10px] text-red-500 font-bold mt-0.5">
-                    {" "}
-                    Lebih lama dari minggu lalu
-                  </p>
-                </div>
+            <div
+              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                diffDirection === "down"
+                  ? "bg-emerald-50 text-emerald-600"
+                  : diffDirection === "up"
+                    ? "bg-red-50 text-red-500"
+                    : "bg-slate-50 text-slate-500"
+              }`}
+            >
+              {diffDirection === "down" ? (
+                <ArrowDownRight className="w-4.5 h-4.5" />
+              ) : diffDirection === "up" ? (
+                <ArrowUpRight className="w-4.5 h-4.5" />
               ) : (
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-muted flex items-center gap-1">
-                    <Minus className="w-7 h-7" />
-                    <span>Sama</span>
-                  </h3>
-                  <p className="text-[10px] text-muted font-bold mt-0.5">
-                    Sama seperti minggu lalu
-                  </p>
-                </div>
+                <Minus className="w-4.5 h-4.5" />
               )}
             </div>
           </div>
-        )}
+          <div className="mt-4">
+            {diffDirection === "down" ? (
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-black text-emerald-600">
+                  -{formatDiffSecToHoursMinsIndo(diffSec)}
+                </h3>
+                <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                  {compSubtext}
+                </p>
+              </div>
+            ) : diffDirection === "up" ? (
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-black text-red-500">
+                  +{formatDiffSecToHoursMinsIndo(diffSec)}
+                </h3>
+                <p className="text-[10px] text-red-500 font-bold mt-0.5">
+                  {compSubtextUp}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-black text-muted">
+                  Sama
+                </h3>
+                <p className="text-[10px] text-muted font-bold mt-0.5">
+                  Sama seperti periode sebelumnya
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Analisis Harian (Drill-down) */}

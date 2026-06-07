@@ -1,42 +1,43 @@
 import { z } from "zod";
-import { supabase } from "@/lib/databases/supabase";
+import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
 import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 
 export async function registerService(formData: FormData) {
+  // Use browser client only for storage (anon key is sufficient)
+  const supabase = createClient();
   const raw = Object.fromEntries(formData);
   const parsed = RegisterModel.registerRequest.safeParse(raw);
-  let profile_url: string | null = null;
+  let avatar_url: string | null = null;
 
   if (!parsed.success) {
     return { success: false, error: z.treeifyError(parsed.error) };
   }
 
-  const { email, password, username, profile } = parsed.data;
+  const { email, password, name, avatar } = parsed.data;
 
-  if (profile instanceof File && profile.size > 0) {
-    const fileName = `profile_${Date.now()}.${profile.name.split(".").pop()}`;
+  if (avatar instanceof File && avatar.size > 0) {
+    const fileName = `avatar_${Date.now()}.${avatar.name.split(".").pop()}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("profiles")
-      .upload(fileName, profile);
+    const { data: urlData, error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(fileName, avatar);
 
     if (uploadError) {
       return { success: false, error: uploadError.message };
     }
 
-    const { data: urlData } = supabase.storage
-      .from("profiles")
-      .getPublicUrl(fileName);
-    profile_url = urlData.publicUrl;
+    avatar_url = urlData.path;
   }
 
-  const { error } = await supabase.auth.signUp({
+  // Use server client so session cookies are set in the HTTP response
+  const supabaseServer = await createSupabaseServer();
+  const { error } = await supabaseServer.auth.signUp({
     email,
     password,
     options: {
       data: {
-        username: username,
-        profile_url: profile_url,
+        name: name,
+        avatar_url: avatar_url,
       },
     },
   });
@@ -49,6 +50,8 @@ export async function registerService(formData: FormData) {
 }
 
 export async function loginService(formData: FormData) {
+  // Use server client so session cookies are written to the HTTP response
+  const supabase = await createSupabaseServer();
   const raw = Object.fromEntries(formData);
   const parsed = LoginModel.loginRequest.safeParse(raw);
 
@@ -62,6 +65,18 @@ export async function loginService(formData: FormData) {
     email,
     password,
   });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function logoutService() {
+  // Use server client so the session cookies are read and then cleared
+  const supabase = await createSupabaseServer();
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
     return { success: false, error: error.message };

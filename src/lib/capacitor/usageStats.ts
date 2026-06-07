@@ -1,5 +1,5 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
-import { supabase } from "@/lib/databases/supabase";
+import { createClient } from "@/lib/databases/supabase";
 import { analyzeUsageEvents, fetchUsageEvents } from "./usageEvents";
 
 export interface InstalledApp {
@@ -12,6 +12,13 @@ interface UsageStatRecord {
   packageName: string;
   totalTimeInForeground: number;
 }
+
+type SyncUsageStatInput = UsageStatRecord & {
+  openFrequency?: number;
+  midnightDurationSeconds?: number;
+  productiveHourDurationSeconds?: number;
+  maxContinuousSeconds?: number;
+};
 
 interface CapacitorUsageStatsManagerPluginType {
   isUsageStatsPermissionGranted(): Promise<{ granted: boolean }>;
@@ -88,6 +95,7 @@ export async function fetchInstalledApps(): Promise<InstalledApp[]> {
 }
 
 export async function getUserSettingsClient(userId: string) {
+  const supabase = createClient();
   try {
     const { data: settings, error } = await supabase
       .from("user_settings")
@@ -101,25 +109,33 @@ export async function getUserSettingsClient(userId: string) {
       ? {
           id: settings.id,
           userId: settings.user_id,
-          productivityStart: settings.productivity_start,
-          productivityEnd: settings.productivity_end,
-          midnightStart: settings.midnight_start,
-          midnightEnd: settings.midnight_end,
-          screenTimeThresholdSec: settings.screen_time_threshold_sec,
-          continuousThresholdSec: settings.continuous_threshold_sec,
-          notificationEnabled: settings.notification_enabled,
+          productiveStart: settings.productive_start,
+          productiveEnd: settings.productive_end,
+          sleepStart: settings.sleep_start,
+          sleepEnd: settings.sleep_end,
+          screenTimeLimitSeconds: settings.screen_time_limit_seconds,
+          continuousLimitSeconds: settings.continuous_limit_seconds,
+          notifScreenTimeEnabled: settings.notif_screen_time_enabled,
+          notifProductiveHourEnabled: settings.notif_productive_hour_enabled,
+          notifMidnightEnabled: settings.notif_midnight_enabled,
+          notifContinuousEnabled: settings.notif_continuous_enabled,
           updatedAt: settings.updated_at,
         }
       : null;
 
     return { success: true, settings: camelCasedSettings };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching user settings:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 
-export async function syncUsageStatsClient(userId: string, stats: any[]) {
+export async function syncUsageStatsClient(
+  userId: string,
+  stats: SyncUsageStatInput[],
+) {
+  const supabase = createClient();
+  
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
   try {
@@ -131,6 +147,7 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
 
       const durationSeconds = Math.floor(stat.totalTimeInForeground / 1000);
       if (durationSeconds <= 0) continue;
+      const source = "android_app";
 
       // 1. Find or create the app in `apps` table
       let { data: appRecord } = await supabase
@@ -144,8 +161,8 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
           .from("apps")
           .insert({
             package_name: stat.packageName,
-            app_name: stat.packageName.split(".").pop() || stat.packageName,
-            platfrom: "Android", // note the platfrom typo in database schema
+            name: stat.packageName.split(".").pop() || stat.packageName,
+            platform: "android",
             is_active: true,
             created_at: new Date().toISOString(),
           })
@@ -157,6 +174,36 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
           continue;
         }
         appRecord = newApp;
+      }
+
+      let { data: deviceRecord } = await supabase
+        .from("user_devices")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("platform", source)
+        .maybeSingle();
+
+      if (!deviceRecord) {
+        const now = new Date().toISOString();
+        const { data: newDevice, error: deviceInsertErr } = await supabase
+          .from("user_devices")
+          .insert({
+            user_id: userId,
+            platform: source,
+            device_name: "Android Device",
+            is_connected: true,
+            last_synced_at: now,
+            connected_at: now,
+            created_at: now,
+          })
+          .select()
+          .single();
+
+        if (deviceInsertErr) {
+          console.error("Failed to insert user device:", deviceInsertErr);
+          continue;
+        }
+        deviceRecord = newDevice;
       }
 
       // 2. Check if there's already a dailyStats record for today
@@ -174,15 +221,15 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
           .update({
             total_duration_seconds: durationSeconds,
             open_frequency:
-              stat.openFrequency || existingDailyStat.open_frequency,
+              stat.openFrequency ?? existingDailyStat.open_frequency,
             midnight_duration_seconds:
-              stat.midnightDurationSeconds ||
+              stat.midnightDurationSeconds ??
               existingDailyStat.midnight_duration_seconds,
             productive_hour_duration_seconds:
-              stat.productiveHourDurationSeconds ||
+              stat.productiveHourDurationSeconds ??
               existingDailyStat.productive_hour_duration_seconds,
             max_continuous_seconds:
-              stat.maxContinuousSeconds ||
+              stat.maxContinuousSeconds ??
               existingDailyStat.max_continuous_seconds,
           })
           .eq("id", existingDailyStat.id);
@@ -212,15 +259,19 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
       }
 
       // 3. Log to activityLog
-      await supabase.from("activity_log").insert({
+      const endedAt = new Date();
+      const startedAt = new Date(endedAt.getTime() - durationSeconds * 1000);
+      await supabase.from("activity_logs").insert({
         user_id: userId,
         app_id: appRecord.id,
-        started_at: new Date().toISOString(),
-        ended_at: new Date().toISOString(),
+        device_id: deviceRecord.id,
+        started_at: startedAt.toISOString(),
+        ended_at: endedAt.toISOString(),
         duration_seconds: durationSeconds,
         is_midnight: false,
         is_productive_hour: false,
         is_continuous: false,
+        source,
         created_at: new Date().toISOString(),
       });
 
@@ -228,9 +279,9 @@ export async function syncUsageStatsClient(userId: string, stats: any[]) {
     }
 
     return { success: true, count: insertedCount };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error syncing usage stats:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 
@@ -262,10 +313,10 @@ export async function fetchAndSyncUsageData(userId: string) {
       ? settingsResponse.settings
       : null;
 
-    const midnightStartStr = settings?.midnightStart || "00:00:00";
-    const midnightEndStr = settings?.midnightEnd || "05:00:00";
-    const productiveStartStr = settings?.productivityStart || "09:00:00";
-    const productiveEndStr = settings?.productivityEnd || "17:00:00";
+    const sleepStartStr = settings?.sleepStart || "22:00:00";
+    const sleepEndStr = settings?.sleepEnd || "06:00:00";
+    const productiveStartStr = settings?.productiveStart || "09:00:00";
+    const productiveEndStr = settings?.productiveEnd || "17:00:00";
 
     const statsRecord =
       await CapacitorUsageStatsManager.queryAndAggregateUsageStats({
@@ -279,8 +330,8 @@ export async function fetchAndSyncUsageData(userId: string) {
     );
     const detailedSessions = analyzeUsageEvents(
       rawEvents,
-      midnightStartStr,
-      midnightEndStr,
+      sleepStartStr,
+      sleepEndStr,
       productiveStartStr,
       productiveEndStr,
     );
@@ -323,8 +374,12 @@ export async function fetchAndSyncUsageData(userId: string) {
     }
 
     return { success: true, count: 0 };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Failed to fetch and sync usage data:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown error";
 }

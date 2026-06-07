@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/utils/api";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,11 +8,26 @@ import { useState } from "react";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push("/dashboard");
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const response = await api.post("/api/auth/login", formData);
+
+      if (response.data.success) {
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      console.log(error.response?.data?.error || "Login Gagal");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,6 +77,7 @@ export default function Login() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="nama@email.com"
                 required
@@ -89,6 +106,7 @@ export default function Login() {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 required

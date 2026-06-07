@@ -283,10 +283,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 font-poppins text-primary">
-      {/* 2 Column Main Grid Layout in style of reference image */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2/3 width) - Core Metrics, Greeting, and Charts */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* 2 Column Main Grid Layout structured using the Golden Ratio (1.618:1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.618fr_1fr] gap-6">
+        {/* Left Column (Golden Ratio: ~61.8% width) - Core Metrics, Greeting, and Charts */}
+        <div className="space-y-6">
           {/* Greeting Card with Vector SVG Art */}
           <div className="bg-gradient-to-r from-muted-light/75 to-accent/15 border border-border/80 rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs relative overflow-hidden">
             {/* Soft decorative background circles */}
@@ -910,7 +910,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right Column (1/3 width) - Connected Devices, Core Behaviors, and AI Snippet */}
+        {/* Right Column (Golden Ratio: ~38.2% width) - Connected Devices, Core Behaviors, and AI Snippet */}
         <div className="space-y-6">
           {/* Perangkat Terhubung Card */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
@@ -1022,7 +1022,8 @@ export default function DashboardPage() {
                   <span>AI Insight Terbaru</span>
                 </div>
                 <p className="text-[11px] font-light leading-relaxed opacity-90 text-white/90">
-                  "{latestInsight.ai_positive_notes} Namun, {latestInsight.ai_concern_notes.toLowerCase()}"
+                  "{latestInsight.ai_positive_notes} Namun,{" "}
+                  {latestInsight.ai_concern_notes.toLowerCase()}"
                 </p>
               </div>
 

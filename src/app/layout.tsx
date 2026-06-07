@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins, Yellowtail } from "next/font/google";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
-import QueryProvider from "@/providers/QueryProvider";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -28,16 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${poppins.variable} ${yellowtail.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${poppins.variable} ${yellowtail.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        <QueryProvider>
-          <Navbar />
-          {children}
-          <Footer />
-        </QueryProvider>
+        <Navbar />
+        {children}
+        <Footer />
       </body>
     </html>
   );

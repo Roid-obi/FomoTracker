@@ -302,8 +302,6 @@ export default function DashboardPage() {
                 Selamat datang kembali. FomoTracker siap membantumu memantau
                 waktu pemakaian media sosial dan membangun kebiasaan digital
                 yang lebih produktif hari ini.
-                waktu pemakaian media sosial dan membangun kebiasaan digital
-                yang lebih produktif hari ini.
               </p>
               <Link
                 href="/statistik"
@@ -733,9 +731,6 @@ export default function DashboardPage() {
             <div
               className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
             >
-            <div
-              className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
-            >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
                   Status & Skor hari ini
@@ -747,9 +742,6 @@ export default function DashboardPage() {
                   {scoreData ? `${scoreData.total_score}/100` : "—"}
                 </h3>
                 <h4 className="text-xs font-bold">{statusTitle}</h4>
-                <p className="text-[9px] font-light leading-normal opacity-85">
-                  {statusDesc}
-                </p>
                 <p className="text-[9px] font-light leading-normal opacity-85">
                   {statusDesc}
                 </p>
@@ -925,9 +917,6 @@ export default function DashboardPage() {
             <h3 className="font-extrabold text-sm text-primary mb-4">
               Perangkat Terhubung
             </h3>
-            <h3 className="font-extrabold text-sm text-primary mb-4">
-              Perangkat Terhubung
-            </h3>
             <div className="space-y-3">
               {initialUserDevices.map((device) => {
                 const isAndroid = device.platform === "android_app";
@@ -938,11 +927,6 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl bg-muted-light/60 flex items-center justify-center text-primary shrink-0 border border-border/40">
-                        {isAndroid ? (
-                          <Smartphone className="w-4 h-4" />
-                        ) : (
-                          <Laptop className="w-4 h-4" />
-                        )}
                         {isAndroid ? (
                           <Smartphone className="w-4 h-4" />
                         ) : (
@@ -980,9 +964,6 @@ export default function DashboardPage() {
             <h3 className="font-extrabold text-sm text-primary mb-4">
               Kebiasaan Hari Ini
             </h3>
-            <h3 className="font-extrabold text-sm text-primary mb-4">
-              Kebiasaan Hari Ini
-            </h3>
             <div className="space-y-3">
               {coreBehaviors.map((item) => {
                 const IconComponent = item.icon;
@@ -1002,20 +983,10 @@ export default function DashboardPage() {
                           : "text-muted bg-muted-light/40 border-border/40"
                       }`}
                     >
-                    <div
-                      className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
-                        item.active
-                          ? item.color
-                          : "text-muted bg-muted-light/40 border-border/40"
-                      }`}
-                    >
                       <IconComponent className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5 flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        <h4 className="text-[11px] font-bold text-primary truncate">
-                          {item.name}
-                        </h4>
                         <h4 className="text-[11px] font-bold text-primary truncate">
                           {item.name}
                         </h4>
@@ -1029,9 +1000,6 @@ export default function DashboardPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted font-light leading-normal">
-                        {item.desc}
-                      </p>
                       <p className="text-[10px] text-muted font-light leading-normal">
                         {item.desc}
                       </p>
@@ -1054,10 +1022,7 @@ export default function DashboardPage() {
                   <span>AI Insight Terbaru</span>
                 </div>
                 <p className="text-[11px] font-light leading-relaxed opacity-90 text-white/90">
-                  "{latestInsight.ai_positive_notes} Namun,{" "}
-                  {latestInsight.ai_concern_notes.toLowerCase()}"
-                  "{latestInsight.ai_positive_notes} Namun,{" "}
-                  {latestInsight.ai_concern_notes.toLowerCase()}"
+                  "{latestInsight.ai_positive_notes} Namun, {latestInsight.ai_concern_notes.toLowerCase()}"
                 </p>
               </div>
 

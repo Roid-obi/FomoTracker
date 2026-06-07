@@ -2,7 +2,6 @@
 
 import {
   AlertTriangle,
-  CheckCircle,
   Database,
   Download,
   ShieldCheck,

@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bell, Briefcase, Check, Clock, Moon } from "lucide-react";
+import { Activity, Briefcase, Check, Clock, Moon } from "lucide-react";
 import { useState } from "react";
 import { initialUserSettings } from "@/lib/data/databaseInitialData";
 

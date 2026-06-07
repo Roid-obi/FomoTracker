@@ -31,13 +31,14 @@ export default function ProfilSettingsPage() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const response = await api.put('/api/user', formData)
+      const response = await api.put("/api/user", formData);
 
       if (response.data.success) {
         setIsSaved(true);
       }
-    } catch (error: any) {
-      console.log(error.response?.data?.error || "Gagal Menyimpan");
+    } catch (error) {
+      const apiError = error as { response?: { data?: { error?: string } } };
+      console.log(apiError.response?.data?.error || "Gagal Menyimpan");
     } finally {
       setTimeout(() => setIsSaved(false), 3000);
     }
@@ -59,7 +60,13 @@ export default function ProfilSettingsPage() {
           <div className="flex items-center gap-4 border-b border-border/40 pb-5">
             <div className="relative group select-none">
               <div className="w-16 h-16 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary text-xl border border-border">
-                {name.trim().split(' ').map(kata => kata.charAt(0)).join('').substring(0, 2).toUpperCase() ?? "?"}
+                {name
+                  .trim()
+                  .split(" ")
+                  .map((kata) => kata.charAt(0))
+                  .join("")
+                  .substring(0, 2)
+                  .toUpperCase() ?? "?"}
               </div>
               <button
                 type="button"

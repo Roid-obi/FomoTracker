@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Clock,
   Info,
-  Minus,
   Moon,
   RotateCcw,
 } from "lucide-react";
@@ -383,18 +382,26 @@ export default function StatistikPage() {
         </div>
 
         {/* Filter Periode */}
-        <div className="flex gap-2 p-1.5 bg-card border border-border rounded-2xl w-fit shrink-0">
+        <div className="flex gap-1.5 p-1.5 bg-card border border-border rounded-3xl w-fit shrink-0">
           <button
             type="button"
             onClick={() => setPeriod("ini")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${period === "ini" ? "bg-primary text-white" : "text-muted hover:text-primary"}`}
+            className={`px-5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+              period === "ini"
+                ? "bg-primary text-white shadow-xs"
+                : "text-muted hover:text-primary hover:bg-muted-light/30"
+            }`}
           >
             Minggu Ini
           </button>
           <button
             type="button"
             onClick={() => setPeriod("lalu")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${period === "lalu" ? "bg-primary text-white" : "text-muted hover:text-primary"}`}
+            className={`px-5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+              period === "lalu"
+                ? "bg-primary text-white shadow-xs"
+                : "text-muted hover:text-primary hover:bg-muted-light/30"
+            }`}
           >
             Minggu Lalu
           </button>
@@ -412,242 +419,164 @@ export default function StatistikPage() {
         </div>
       )}
 
-      {/* Rangkuman total durasi */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Total Durasi */}
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-              Total Waktu Online
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Clock className="w-4.5 h-4.5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl sm:text-3xl font-black text-primary">
-              {formatSecToHoursMins(currentData.totalSec)}
-            </h3>
-            <p className="text-[10px] text-muted font-light mt-0.5">
-              Terakumulasi dalam rentang periode
-            </p>
-          </div>
-        </div>
-
-        {/* Card 2: Rata-rata Harian */}
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-              Rata-rata Harian
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-              <Activity className="w-4.5 h-4.5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl sm:text-3xl font-black text-primary">
-              {formatSecToHoursMins(currentData.avgSec)}
-            </h3>
-            <p className="text-[10px] text-muted font-light mt-0.5">
-              Rata-rata screen time per hari
-            </p>
-          </div>
-        </div>
-
-        {/* Card 3: Perbandingan vs Minggu Lalu */}
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-              {compTitle}
-            </span>
-            <div
-              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                diffDirection === "down"
-                  ? "bg-emerald-50 text-emerald-600"
-                  : diffDirection === "up"
-                    ? "bg-red-50 text-red-500"
-                    : "bg-slate-50 text-slate-500"
-              }`}
-            >
-              {diffDirection === "down" ? (
-                <ArrowDownRight className="w-4.5 h-4.5" />
-              ) : diffDirection === "up" ? (
-                <ArrowUpRight className="w-4.5 h-4.5" />
-              ) : (
-                <Minus className="w-4.5 h-4.5" />
-              )}
-            </div>
-          </div>
-          <div className="mt-4">
-            {diffDirection === "down" ? (
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-emerald-600">
-                  -{formatDiffSecToHoursMinsIndo(diffSec)}
-                </h3>
-                <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
-                  {compSubtext}
-                </p>
-              </div>
-            ) : diffDirection === "up" ? (
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-red-500">
-                  +{formatDiffSecToHoursMinsIndo(diffSec)}
-                </h3>
-                <p className="text-[10px] text-red-500 font-bold mt-0.5">
-                  {compSubtextUp}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-muted">
-                  Sama
-                </h3>
-                <p className="text-[10px] text-muted font-bold mt-0.5">
-                  Sama seperti periode sebelumnya
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Analisis Harian (Drill-down) */}
-      <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
-        <div className="mb-4">
-          <h3 className="font-extrabold text-base text-primary">
-            Analisis Harian
-          </h3>
-          <p className="text-xs text-muted font-light mt-0.5">
-            Pilih hari untuk melihat rincian aktivitas gawai per jam secara
-            detail.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-          {currentData.dailyData.map(
-            (dayData: Record<string, string | number>, index) => {
-              const { dateStr, label, dayName } = getDayDateInfo(
-                index,
-                period === "lalu",
-              );
-              const totalMinutes =
-                ((dayData.Instagram as number) || 0) +
-                ((dayData.TikTok as number) || 0) +
-                ((dayData.YouTube as number) || 0) +
-                ((dayData.WhatsApp as number) || 0);
-
-              const hasData = totalMinutes > 0;
-
-              if (hasData) {
-                return (
-                  <Link
-                    key={dateStr}
-                    href={`/statistik/${dateStr}`}
-                    className="group relative flex flex-col justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-xs transition-all duration-300 min-h-24 cursor-pointer"
-                  >
-                    <div>
-                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-                        {dayName}
-                      </span>
-                      <h4 className="text-xs font-black text-primary mt-0.5">
-                        {label}
-                      </h4>
-                    </div>
-                    <div className="flex justify-between items-end mt-4">
-                      <span className="text-xs font-extrabold text-primary">
-                        {formatMinutesToHoursMins(totalMinutes)}
-                      </span>
-                      <ChevronRight className="w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0" />
-                    </div>
-                  </Link>
-                );
-              }
-
-              return (
-                <div
-                  key={dateStr}
-                  className="flex flex-col justify-between p-4 rounded-2xl border border-border/40 bg-muted-light/10 opacity-50 min-h-24 select-none"
-                >
-                  <div>
-                    <span className="text-[10px] font-bold text-muted/60 uppercase tracking-wider">
-                      {dayName}
-                    </span>
-                    <h4 className="text-xs font-black text-muted/60 mt-0.5">
-                      {label}
-                    </h4>
-                  </div>
-                  <div className="mt-4">
-                    <span className="text-[10px] text-muted/50 font-light block leading-none">
-                      Belum ada data
-                    </span>
-                  </div>
+      {/* 2 Column Main Grid Layout structured using the Golden Ratio (1.618:1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.618fr_1fr] gap-6">
+        {/* Left Column (Golden Ratio: ~61.8% width) - Charts, summaries, heatmap */}
+        <div className="space-y-6">
+          {/* Rangkuman total durasi */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Card 1: Total Durasi */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                  Total Waktu Online
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Clock className="w-4.5 h-4.5" />
                 </div>
-              );
-            },
-          )}
-        </div>
-      </div>
+              </div>
+              <div className="mt-4">
+                <h3 className="text-2xl sm:text-3xl font-black text-primary">
+                  {formatSecToHoursMins(currentData.totalSec)}
+                </h3>
+                <p className="text-[10px] text-muted font-light mt-0.5">
+                  Terakumulasi dalam rentang periode
+                </p>
+              </div>
+            </div>
 
-      {/* Main Widgets: Daily stacked bar + Top apps */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Daily stacked bar (2 cols) */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
-          <div className="mb-6">
-            <h3 className="font-extrabold text-base text-primary">
-              Grafik Penggunaan Harian
-            </h3>
-            <p className="text-xs text-muted font-light mt-0.5">
-              Rincian durasi harian per aplikasi (dalam menit)
-            </p>
+            {/* Card 2: Rata-rata Harian */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                  Rata-rata Harian
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <Activity className="w-4.5 h-4.5" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <h3 className="text-2xl sm:text-3xl font-black text-primary">
+                  {formatSecToHoursMins(currentData.avgSec)}
+                </h3>
+                <p className="text-[10px] text-muted font-light mt-0.5">
+                  Rata-rata screen time per hari
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3: Perbandingan vs Minggu Lalu */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                  {compTitle}
+                </span>
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                    diffDirection === "down"
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "bg-red-50 text-red-500"
+                  }`}
+                >
+                  {diffDirection === "down" ? (
+                    <ArrowDownRight className="w-4.5 h-4.5" />
+                  ) : (
+                    <ArrowUpRight className="w-4.5 h-4.5" />
+                  )}
+                </div>
+              </div>
+              <div className="mt-4">
+                {diffDirection === "down" ? (
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-emerald-600">
+                      -{formatDiffSecToHoursMinsIndo(diffSec)}
+                    </h3>
+                    <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                      {compSubtext}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-red-500">
+                      +{formatDiffSecToHoursMinsIndo(diffSec)}
+                    </h3>
+                    <p className="text-[10px] text-red-500 font-bold mt-0.5">
+                      {compSubtextUp}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
-            <div className="h-64 min-w-[700px] lg:min-w-0 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={rankedDailyData}
-                  margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
-                >
-                  <XAxis
-                    dataKey="hari"
-                    stroke="#888888"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "16px",
-                      borderColor: "#e1e8ef",
-                      fontFamily: "Poppins",
-                      fontSize: "11px",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
-                    }}
-                    // biome-ignore lint/suspicious/noExplicitAny: Recharts Tooltip formatter types
-                    formatter={(value: any, name: any) => {
-                      if (value === 0) return null;
-                      return [`${value} menit`, name];
-                    }}
-                  />
-                  <Legend
-                    iconSize={8}
-                    iconType="circle"
-                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
-                  />
-                  {top4Apps.map((appName, index) => (
+          {/* Grafik Penggunaan Harian */}
+          <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
+            <div className="mb-6">
+              <h3 className="font-extrabold text-base text-primary">
+                Grafik Penggunaan Harian
+              </h3>
+              <p className="text-xs text-muted font-light mt-0.5">
+                Rincian durasi harian per aplikasi (dalam menit)
+              </p>
+            </div>
+
+            <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
+              <div className="h-64 min-w-[700px] lg:min-w-0 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={rankedDailyData}
+                    margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
+                  >
+                    <XAxis
+                      dataKey="hari"
+                      stroke="#888888"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="#888888"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#ffffff",
+                        borderRadius: "16px",
+                        borderColor: "#e1e8ef",
+                        fontFamily: "Poppins",
+                        fontSize: "11px",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
+                      }}
+                      formatter={(value: any, name: any) => {
+                        if (value === 0) return null;
+                        return [`${value} menit`, name];
+                      }}
+                    />
+                    <Legend
+                      iconSize={8}
+                      iconType="circle"
+                      wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
+                    />
+                    {top4Apps.map((appName, index) => (
+                      <Bar
+                        key={appName}
+                        dataKey={appName}
+                        stackId="a"
+                        fill={rankColors[index]}
+                        shape={(shapeProps: any) => (
+                          <CustomBar
+                            {...shapeProps}
+                            rankedApps={[...top4Apps, "Lainnya"]}
+                          />
+                        )}
+                      />
+                    ))}
                     <Bar
-                      key={appName}
-                      dataKey={appName}
+                      dataKey="Lainnya"
                       stackId="a"
-                      fill={rankColors[index]}
-                      // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
+                      fill={rankColors[4]}
                       shape={(shapeProps: any) => (
                         <CustomBar
                           {...shapeProps}
@@ -655,244 +584,314 @@ export default function StatistikPage() {
                         />
                       )}
                     />
-                  ))}
-                  <Bar
-                    dataKey="Lainnya"
-                    stackId="a"
-                    fill={rankColors[4]}
-                    // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
-                    shape={(shapeProps: any) => (
-                      <CustomBar
-                        {...shapeProps}
-                        rankedApps={[...top4Apps, "Lainnya"]}
-                      />
-                    )}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Top apps horizontal list (1 col) */}
-        <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col">
-          <div className="mb-4">
-            <h3 className="font-extrabold text-base text-primary">
-              Aplikasi Paling Sering Dibuka
-            </h3>
-            <p className="text-xs text-muted font-light mt-0.5">
-              Durasi pemakaian total tertinggi
-            </p>
-          </div>
-
-          <div className="space-y-4 flex-1 justify-center flex flex-col">
-            {currentData.topApps.map((app, index) => {
-              const maxSec = currentData.topApps[0].sec;
-              const barWidth = Math.round((app.sec / maxSec) * 100);
-              const barColor = rankColors[index] || rankColors[4];
-              return (
-                <div key={app.name} className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-primary">{app.name}</span>
-                    <span className="text-muted">
-                      {formatSecToHoursMins(app.sec)}
-                    </span>
-                  </div>
-                  <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${barWidth}%`,
-                        backgroundColor: barColor,
-                      }}
-                    />
-                  </div>
+          {/* Online Heatmap Widget */}
+          <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <div>
+                <h3 className="font-extrabold text-base text-primary">
+                  Jam Berapa Kamu Paling Sering Online?
+                </h3>
+                <p className="text-xs text-muted font-light mt-0.5">
+                  Heatmap interaktif pemakaian HP per jam per hari
+                </p>
+              </div>
+              <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border border-pink-200 block" />
+                  <span>🌙 Jam Tidur</span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Online Heatmap Widget */}
-      <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-          <div>
-            <h3 className="font-extrabold text-base text-primary">
-              Jam Berapa Kamu Paling Sering Online?
-            </h3>
-            <p className="text-xs text-muted font-light mt-0.5">
-              Heatmap interaktif pemakaian HP per jam per hari
-            </p>
-          </div>
-          <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border border-pink-200 block" />
-              <span>🌙 Jam Tidur</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-200 block" />
-              <span>💼 Jam Belajar</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Heatmap Grid */}
-        <div className="overflow-x-auto pb-2 scrollbar-thin select-none">
-          <div className="min-w-[640px] space-y-1.5">
-            {/* Headers (Hours 00-23) */}
-            <div
-              className="grid gap-1 text-center text-[9px] font-bold text-muted uppercase"
-              style={{ gridTemplateColumns: "repeat(25, minmax(0, 1fr))" }}
-            >
-              <div>Hari</div>
-              {Array.from({ length: 24 }).map((_, i) => {
-                const hourStr = String(i).padStart(2, "0");
-                return <div key={hourStr}>{hourStr}</div>;
-              })}
-            </div>
-
-            {/* Rows (Days Mon-Sun) */}
-            {heatmapRows.map((row) => {
-              const dayLabel = row[0].day;
-              return (
-                <div
-                  key={dayLabel}
-                  className="grid gap-1 items-center"
-                  style={{ gridTemplateColumns: "repeat(25, minmax(0, 1fr))" }}
-                >
-                  <div className="text-[10px] font-bold text-primary">
-                    {dayLabel}
-                  </div>
-                  {row.map((cell) => {
-                    // Check if current cell falls into productive hours (08:00 - 17:00)
-                    const isProductive = cell.hour >= 8 && cell.hour <= 17;
-                    // Check if current cell falls into sleep hours (22:00 - 06:00)
-                    const isSleep = cell.hour >= 22 || cell.hour <= 6;
-
-                    // Border style based on hours highlight
-                    let highlightClass = "";
-                    if (isSleep) {
-                      highlightClass =
-                        "border border-[2px] border-pink-300 shadow-[0_0_2px_rgba(244,63,94,0.1)] bg-[#fff0f3]/25";
-                    } else if (isProductive) {
-                      highlightClass =
-                        "border border-[2px] border-amber-300 shadow-[0_0_2px_rgba(245,158,11,0.1)] bg-[#fffbeb]/25";
-                    } else {
-                      highlightClass = "border border-transparent";
-                    }
-
-                    return (
-                      <div
-                        key={cell.hour}
-                        className={`h-5 rounded-md transition-all relative group ${highlightClass}`}
-                        style={{ backgroundColor: getHeatmapColor(cell.val) }}
-                      >
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none mb-1.5 whitespace-nowrap">
-                          {cell.day}, Jam {String(cell.hour).padStart(2, "0")}
-                          .00 —{" "}
-                          {cell.val === 0
-                            ? "Aman (0m)"
-                            : cell.val === 1
-                              ? "Ringan (1-15m)"
-                              : cell.val === 2
-                                ? "Sedang (16-30m)"
-                                : "Berat (>30m)"}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Legend color index */}
-        <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted uppercase mt-4">
-          <span>Keterangan Warna:</span>
-          <span
-            className="w-3 h-3 rounded border border-border"
-            style={{ backgroundColor: "#E2E8F0" }}
-          />
-          <span>Aman</span>
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: "#94A3B8" }}
-          />
-          <span>Ringan</span>
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: "#64748B" }}
-          />
-          <span>Sedang</span>
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: "#334155" }}
-          />
-          <span>Berat</span>
-        </div>
-      </div>
-
-      {/* Kebiasaan yang Sering Muncul */}
-      <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
-        <div className="mb-4">
-          <h3 className="font-extrabold text-base text-primary">
-            Kebiasaan yang Sering Muncul
-          </h3>
-          <p className="text-xs text-muted font-light mt-0.5 leading-relaxed">
-            Seberapa sering kebiasaan ini muncul, dan seberapa besar pengaruhnya
-            terhadap skor harianmu?
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {currentData.flags.map((flag) => {
-            const config = flagConfigs[flag.name] || {
-              icon: Clock,
-              weight: "",
-              iconBg: "bg-muted-light border-border",
-              iconColor: "text-muted",
-              barColor: "bg-primary",
-            };
-            const IconComp = config.icon;
-            const pct = Math.round((flag.count / flag.total) * 100);
-            return (
-              <div
-                key={flag.name}
-                className="flex gap-4 p-4 rounded-3xl border border-border bg-card shadow-xs items-center"
-              >
-                <div
-                  className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${config.iconBg} ${config.iconColor}`}
-                >
-                  <IconComp className="w-5 h-5" />
-                </div>
-
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <h4 className="text-xs font-bold text-primary truncate">
-                      {flag.name}
-                    </h4>
-                    <span className="text-[10px] text-muted font-medium shrink-0">
-                      {flag.label}
-                    </span>
-                  </div>
-
-                  <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${config.barColor}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-
-                  <p className="text-[9px] text-muted font-light leading-none">
-                    {config.weight}
-                  </p>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-200 block" />
+                  <span>💼 Jam Belajar</span>
                 </div>
               </div>
-            );
-          })}
+            </div>
+
+            {/* Heatmap Grid */}
+            <div className="overflow-x-auto pb-2 scrollbar-thin select-none">
+              <div className="min-w-[640px] space-y-1.5">
+                {/* Headers (Hours 00-23) */}
+                <div
+                  className="grid gap-1 text-center text-[9px] font-bold text-muted uppercase"
+                  style={{ gridTemplateColumns: "repeat(25, minmax(0, 1fr))" }}
+                >
+                  <div>Hari</div>
+                  {Array.from({ length: 24 }).map((_, i) => {
+                    const hourStr = String(i).padStart(2, "0");
+                    return <div key={hourStr}>{hourStr}</div>;
+                  })}
+                </div>
+
+                {/* Rows (Days Mon-Sun) */}
+                {heatmapRows.map((row) => {
+                  const dayLabel = row[0].day;
+                  return (
+                    <div
+                      key={dayLabel}
+                      className="grid gap-1 items-center"
+                      style={{
+                        gridTemplateColumns: "repeat(25, minmax(0, 1fr))",
+                      }}
+                    >
+                      <div className="text-[10px] font-bold text-primary">
+                        {dayLabel}
+                      </div>
+                      {row.map((cell) => {
+                        const isProductive = cell.hour >= 8 && cell.hour <= 17;
+                        const isSleep = cell.hour >= 22 || cell.hour <= 6;
+
+                        let highlightClass = "";
+                        if (isSleep) {
+                          highlightClass =
+                            "border border-[2px] border-pink-300 shadow-[0_0_2px_rgba(244,63,94,0.1)] bg-[#fff0f3]/25";
+                        } else if (isProductive) {
+                          highlightClass =
+                            "border border-[2px] border-amber-300 shadow-[0_0_2px_rgba(245,158,11,0.1)] bg-[#fffbeb]/25";
+                        } else {
+                          highlightClass = "border border-transparent";
+                        }
+
+                        return (
+                          <div
+                            key={cell.hour}
+                            className={`h-5 rounded-md transition-all relative group ${highlightClass}`}
+                            style={{
+                              backgroundColor: getHeatmapColor(cell.val),
+                            }}
+                          >
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none mb-1.5 whitespace-nowrap">
+                              {cell.day}, Jam{" "}
+                              {String(cell.hour).padStart(2, "0")}
+                              .00 —{" "}
+                              {cell.val === 0
+                                ? "Aman (0m)"
+                                : cell.val === 1
+                                  ? "Ringan (1-15m)"
+                                  : cell.val === 2
+                                    ? "Sedang (16-30m)"
+                                    : "Berat (>30m)"}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Legend color index */}
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted uppercase mt-4">
+              <span>Keterangan Warna:</span>
+              <span
+                className="w-3 h-3 rounded border border-border"
+                style={{ backgroundColor: "#E2E8F0" }}
+              />
+              <span>Aman</span>
+              <span
+                className="w-3 h-3 rounded"
+                style={{ backgroundColor: "#94A3B8" }}
+              />
+              <span>Ringan</span>
+              <span
+                className="w-3 h-3 rounded"
+                style={{ backgroundColor: "#64748B" }}
+              />
+              <span>Sedang</span>
+              <span
+                className="w-3 h-3 rounded"
+                style={{ backgroundColor: "#334155" }}
+              />
+              <span>Berat</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column (Golden Ratio: ~38.2% width) - Drill-down, top apps, habits */}
+        <div className="space-y-6">
+          {/* Analisis Harian (Drill-down) */}
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
+            <div className="mb-4">
+              <h3 className="font-extrabold text-base text-primary">
+                Analisis Harian
+              </h3>
+              <p className="text-xs text-muted font-light mt-0.5">
+                Pilih hari untuk melihat rincian aktivitas gawai per jam secara
+                detail.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+              {currentData.dailyData.map(
+                (dayData: Record<string, string | number>, index) => {
+                  const { dateStr, label, dayName } = getDayDateInfo(
+                    index,
+                    period === "lalu",
+                  );
+                  const totalMinutes =
+                    ((dayData.Instagram as number) || 0) +
+                    ((dayData.TikTok as number) || 0) +
+                    ((dayData.YouTube as number) || 0) +
+                    ((dayData.WhatsApp as number) || 0);
+
+                  const hasData = totalMinutes > 0;
+
+                  if (hasData) {
+                    return (
+                      <Link
+                        key={dateStr}
+                        href={`/statistik/${dateStr}`}
+                        className="group relative flex flex-col justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-xs transition-all duration-300 min-h-24 cursor-pointer"
+                      >
+                        <div>
+                          <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                            {dayName}
+                          </span>
+                          <h4 className="text-xs font-black text-primary mt-0.5">
+                            {label}
+                          </h4>
+                        </div>
+                        <div className="flex justify-between items-end mt-4">
+                          <span className="text-xs font-extrabold text-primary">
+                            {formatMinutesToHoursMins(totalMinutes)}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0" />
+                        </div>
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={dateStr}
+                      className="flex flex-col justify-between p-4 rounded-2xl border border-border/40 bg-muted-light/10 opacity-50 min-h-24 select-none"
+                    >
+                      <div>
+                        <span className="text-[10px] font-bold text-muted/60 uppercase tracking-wider">
+                          {dayName}
+                        </span>
+                        <h4 className="text-xs font-black text-muted/60 mt-0.5">
+                          {label}
+                        </h4>
+                      </div>
+                      <div className="mt-4">
+                        <span className="text-[10px] text-muted/50 font-light block leading-none">
+                          Belum ada data
+                        </span>
+                      </div>
+                    </div>
+                  );
+                },
+              )}
+            </div>
+          </div>
+
+          {/* Aplikasi Paling Sering Dibuka */}
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col">
+            <div className="mb-4">
+              <h3 className="font-extrabold text-base text-primary">
+                Aplikasi Paling Sering Dibuka
+              </h3>
+              <p className="text-xs text-muted font-light mt-0.5">
+                Durasi pemakaian total tertinggi
+              </p>
+            </div>
+
+            <div className="space-y-4 flex-1 justify-center flex flex-col">
+              {currentData.topApps.map((app, index) => {
+                const maxSec = currentData.topApps[0].sec;
+                const barWidth = Math.round((app.sec / maxSec) * 100);
+                const barColor = rankColors[index] || rankColors[4];
+                return (
+                  <div key={app.name} className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-primary">{app.name}</span>
+                      <span className="text-muted">
+                        {formatSecToHoursMins(app.sec)}
+                      </span>
+                    </div>
+                    <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${barWidth}%`,
+                          backgroundColor: barColor,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Kebiasaan yang Sering Muncul */}
+          <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
+            <div className="mb-4">
+              <h3 className="font-extrabold text-base text-primary">
+                Kebiasaan yang Sering Muncul
+              </h3>
+              <p className="text-xs text-muted font-light mt-0.5 leading-relaxed">
+                Seberapa sering kebiasaan ini muncul, dan seberapa besar
+                pengaruhnya terhadap skor harianmu?
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {currentData.flags.map((flag) => {
+                const config = flagConfigs[flag.name] || {
+                  icon: Clock,
+                  weight: "",
+                  iconBg: "bg-muted-light border-border",
+                  iconColor: "text-muted",
+                  barColor: "bg-primary",
+                };
+                const IconComp = config.icon;
+                const pct = Math.round((flag.count / flag.total) * 100);
+                return (
+                  <div
+                    key={flag.name}
+                    className="flex gap-4 p-4 rounded-3xl border border-border bg-card shadow-xs items-center"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${config.iconBg} ${config.iconColor}`}
+                    >
+                      <IconComp className="w-5 h-5" />
+                    </div>
+
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex justify-between items-baseline">
+                        <h4 className="text-xs font-bold text-primary truncate">
+                          {flag.name}
+                        </h4>
+                        <span className="text-[10px] text-muted font-medium shrink-0">
+                          {flag.label}
+                        </span>
+                      </div>
+
+                      <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${config.barColor}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+
+                      <p className="text-[9px] text-muted font-light leading-none">
+                        {config.weight}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

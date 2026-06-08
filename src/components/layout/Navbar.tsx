@@ -47,7 +47,7 @@ export default function Navbar() {
             >
               Beranda
             </Link>
-             <Link
+            <Link
               href="/tentang"
               className={`font-poppins transition-colors ${
                 pathname === "/tentang"

@@ -24,9 +24,7 @@ export async function GET(request: Request) {
 
     const page = Number.isNaN(pageRaw) || pageRaw < 1 ? 1 : pageRaw;
     const limit =
-      Number.isNaN(limitRaw) || limitRaw < 1
-        ? 10
-        : Math.min(limitRaw, 50);
+      Number.isNaN(limitRaw) || limitRaw < 1 ? 10 : Math.min(limitRaw, 50);
 
     const result = await getHistoryService(page, limit);
 

@@ -4,7 +4,7 @@ import { getService, updateService } from "@/lib/services/user.service";
 export async function GET() {
   try {
     const result = await getService();
-    
+
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

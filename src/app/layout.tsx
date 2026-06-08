@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 import { Providers } from "./providers";
 import "./globals.css";
+import "goey-toast/styles.css";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -28,7 +29,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} ${yellowtail.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${poppins.variable} ${yellowtail.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <Providers>
           <Navbar />

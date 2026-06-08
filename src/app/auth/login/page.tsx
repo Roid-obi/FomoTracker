@@ -1,10 +1,10 @@
 "use client";
 
-import { api } from "@/lib/utils/api";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "@/lib/utils/api";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);

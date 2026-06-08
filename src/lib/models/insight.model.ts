@@ -9,14 +9,14 @@ export namespace InsightModel {
 
   export const insightDetail = z.object({
     id: z.string().uuid(),
-    weekStart: z.string(),   // YYYY-MM-DD
-    weekEnd: z.string(),     // YYYY-MM-DD
+    weekStart: z.string(), // YYYY-MM-DD
+    weekEnd: z.string(), // YYYY-MM-DD
     generatedAt: z.coerce.date(),
     totalScreenTimeSeconds: z.number().int().nonnegative(),
     avgBehavioralScore: z.number().nonnegative(),
     weeklyStatus: z.enum(["good", "attention", "heavy"]),
-    bestDay: z.string().nullable(),   // YYYY-MM-DD
-    worstDay: z.string().nullable(),  // YYYY-MM-DD
+    bestDay: z.string().nullable(), // YYYY-MM-DD
+    worstDay: z.string().nullable(), // YYYY-MM-DD
     topApp: topApp.nullable(),
     prevWeekScreenTimeSeconds: z.number().int().nullable(),
     aiWeeklyStatusLabel: z.string().nullable(),
@@ -52,7 +52,6 @@ export namespace InsightModel {
     total: z.number().int().nonnegative(),
   });
   export type getHistoryResponse = z.infer<typeof getHistoryResponse>;
-
 
   export const generateRequest = z
     .object({

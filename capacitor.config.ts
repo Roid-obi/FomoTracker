@@ -6,9 +6,9 @@ const config: CapacitorConfig = {
   webDir: "out",
   plugins: {
     CapacitorCookies: {
-      enabled: true
-    }
-  }
+      enabled: true,
+    },
+  },
 };
 
 export default config;

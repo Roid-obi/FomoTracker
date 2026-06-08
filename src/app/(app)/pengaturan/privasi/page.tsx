@@ -1,5 +1,6 @@
 "use client";
 
+import { gooeyToast } from "goey-toast";
 import {
   AlertTriangle,
   Database,
@@ -61,10 +62,12 @@ export default function PrivasiSettingsPage() {
 
   const handleDeleteAccount = () => {
     if (confirmDeleteText.toLowerCase() === "hapus akun saya") {
-      alert("Akun Anda berhasil dihapus (simulasi).");
-      window.location.href = "/";
+      gooeyToast.success("Akun Anda berhasil dihapus (simulasi).");
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
     } else {
-      alert("Teks konfirmasi tidak cocok!");
+      gooeyToast.error("Teks konfirmasi tidak cocok!");
     }
   };
 

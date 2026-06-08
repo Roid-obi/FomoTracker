@@ -1,10 +1,10 @@
 "use client";
 
-import { api } from "@/lib/utils/api";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "@/lib/utils/api";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,13 +23,13 @@ export default function Register() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const response = await api.post('/api/auth/register', formData);
+      const response = await api.post("/api/auth/register", formData);
 
       if (!response.data.success) {
         setErrorMsg(response.data.error);
         return;
       }
-      
+
       router.push("/onboarding");
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : String(error));

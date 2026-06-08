@@ -1,5 +1,6 @@
 "use client";
 
+import { gooeyToast } from "goey-toast";
 import { Camera, Check, Key, Mail, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
@@ -25,7 +26,7 @@ export default function ProfilSettingsPage() {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword && newPassword !== confirmPassword) {
-      alert("Konfirmasi password baru tidak cocok!");
+      gooeyToast.error("Konfirmasi password baru tidak cocok!");
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -35,10 +36,14 @@ export default function ProfilSettingsPage() {
 
       if (response.data.success) {
         setIsSaved(true);
+        gooeyToast.success("Perubahan berhasil disimpan!");
       }
     } catch (error) {
       const apiError = error as { response?: { data?: { error?: string } } };
-      console.log(apiError.response?.data?.error || "Gagal Menyimpan");
+      const errorMsg =
+        apiError.response?.data?.error || "Gagal menyimpan perubahan!";
+      console.log(errorMsg);
+      gooeyToast.error(errorMsg);
     } finally {
       setTimeout(() => setIsSaved(false), 3000);
     }

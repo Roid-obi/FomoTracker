@@ -1,15 +1,13 @@
 "use client";
 
+import { gooeyToast } from "goey-toast";
 import {
-  Activity,
   ArrowRight,
-  Bell,
   Briefcase,
   Check,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Download,
   Info,
   Laptop,
@@ -54,7 +52,7 @@ export default function OnboardingPage() {
 
   const handleNext = () => {
     if (step === 3 && selectedApps.length === 0) {
-      alert("Pilih minimal 1 aplikasi untuk dipantau.");
+      gooeyToast.warning("Pilih minimal 1 aplikasi untuk dipantau.");
       return;
     }
     if (step < 6) {

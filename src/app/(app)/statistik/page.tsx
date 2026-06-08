@@ -215,7 +215,7 @@ const generateHeatmap = (isPrevWeek: boolean) => {
         // Use seed based on day and hour for deterministic randomness
         const seed = dIdx * 100 + hour;
         const rand = seededRandom(seed);
-        
+
         // High usage at late evening (20-22)
         if (hour >= 20 && hour <= 22) {
           val = rand > 0.3 ? 3 : 2;
@@ -387,22 +387,14 @@ export default function StatistikPage() {
           <button
             type="button"
             onClick={() => setPeriod("ini")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              period === "ini"
-                ? "bg-primary text-white"
-                : "text-muted hover:text-primary"
-            }`}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${period === "ini" ? "bg-primary text-white" : "text-muted hover:text-primary"}`}
           >
             Minggu Ini
           </button>
           <button
             type="button"
             onClick={() => setPeriod("lalu")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              period === "lalu"
-                ? "bg-primary text-white"
-                : "text-muted hover:text-primary"
-            }`}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${period === "lalu" ? "bg-primary text-white" : "text-muted hover:text-primary"}`}
           >
             Minggu Lalu
           </button>

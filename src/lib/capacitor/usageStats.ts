@@ -135,7 +135,7 @@ export async function syncUsageStatsClient(
   stats: SyncUsageStatInput[],
 ) {
   const supabase = createClient();
-  
+
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
   try {

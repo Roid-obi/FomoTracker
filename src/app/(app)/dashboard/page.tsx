@@ -414,8 +414,6 @@ export default function DashboardPage() {
                   opacity="0.5"
                 />
 
-
-
                 {/* 2. NATURE: Left Potted Plant (Monstera-style Wellbeing plant) */}
                 <g>
                   {/* Pot */}

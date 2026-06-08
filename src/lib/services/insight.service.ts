@@ -54,29 +54,27 @@ function resolveWeekRange(weekStart?: string): {
 }
 
 /** Ubah row DB menjadi InsightModel.insightDetail */
-function rowToDetail(
-  row: {
-    id: string;
-    weekStart: string;
-    weekEnd: string;
-    generatedAt: Date;
-    totalScreenTimeSeconds: number;
-    avgBehavioralScore: number;
-    weeklyStatus: string;
-    bestDay: string | null;
-    worstDay: string | null;
-    prevWeekScreenTimeSeconds: number | null;
-    aiWeeklyStatusLabel: string | null;
-    aiPositiveNotes: string | null;
-    aiConcernNotes: string | null;
-    aiAnalysis: string | null;
-    aiTips: string | null;
-    generationStatus: string | null;
-    topAppId: string | null;
-    topAppName: string | null;
-    topAppIconUrl: string | null;
-  },
-): InsightModel.insightDetail {
+function rowToDetail(row: {
+  id: string;
+  weekStart: string;
+  weekEnd: string;
+  generatedAt: Date;
+  totalScreenTimeSeconds: number;
+  avgBehavioralScore: number;
+  weeklyStatus: string;
+  bestDay: string | null;
+  worstDay: string | null;
+  prevWeekScreenTimeSeconds: number | null;
+  aiWeeklyStatusLabel: string | null;
+  aiPositiveNotes: string | null;
+  aiConcernNotes: string | null;
+  aiAnalysis: string | null;
+  aiTips: string | null;
+  generationStatus: string | null;
+  topAppId: string | null;
+  topAppName: string | null;
+  topAppIconUrl: string | null;
+}): InsightModel.insightDetail {
   return {
     id: row.id,
     weekStart: row.weekStart,
@@ -84,7 +82,8 @@ function rowToDetail(
     generatedAt: row.generatedAt,
     totalScreenTimeSeconds: row.totalScreenTimeSeconds,
     avgBehavioralScore: row.avgBehavioralScore,
-    weeklyStatus: row.weeklyStatus as InsightModel.insightDetail["weeklyStatus"],
+    weeklyStatus:
+      row.weeklyStatus as InsightModel.insightDetail["weeklyStatus"],
     bestDay: row.bestDay,
     worstDay: row.worstDay,
     prevWeekScreenTimeSeconds: row.prevWeekScreenTimeSeconds,
@@ -101,7 +100,8 @@ function rowToDetail(
     aiConcernNotes: row.aiConcernNotes,
     aiAnalysis: row.aiAnalysis,
     aiTips: row.aiTips,
-    generationStatus: (row.generationStatus ?? "pending") as InsightModel.insightDetail["generationStatus"],
+    generationStatus: (row.generationStatus ??
+      "pending") as InsightModel.insightDetail["generationStatus"],
   };
 }
 
@@ -152,7 +152,8 @@ export async function getLatestService(): Promise<
   }
 
   const parsed = InsightModel.getLatestResponse.safeParse(rowToDetail(row));
-  if (!parsed.success) return { success: false, error: validationError(parsed.error) };
+  if (!parsed.success)
+    return { success: false, error: validationError(parsed.error) };
   return { success: true, data: parsed.data };
 }
 
@@ -191,7 +192,8 @@ export async function getHistoryService(
   const items = rows.map((r) => ({
     ...r,
     weeklyStatus: r.weeklyStatus as InsightModel.insightSummary["weeklyStatus"],
-    generationStatus: (r.generationStatus ?? "pending") as InsightModel.insightSummary["generationStatus"],
+    generationStatus: (r.generationStatus ??
+      "pending") as InsightModel.insightSummary["generationStatus"],
     aiWeeklyStatusLabel: r.aiWeeklyStatusLabel ?? null,
   }));
 
@@ -199,7 +201,8 @@ export async function getHistoryService(
     items,
     total: countRow?.total ?? 0,
   });
-  if (!parsed.success) return { success: false, error: validationError(parsed.error) };
+  if (!parsed.success)
+    return { success: false, error: validationError(parsed.error) };
   return { success: true, data: parsed.data };
 }
 
@@ -226,7 +229,8 @@ export async function getByIdService(
   }
 
   const parsed = InsightModel.getByIdResponse.safeParse(rowToDetail(row));
-  if (!parsed.success) return { success: false, error: validationError(parsed.error) };
+  if (!parsed.success)
+    return { success: false, error: validationError(parsed.error) };
   return { success: true, data: parsed.data };
 }
 
@@ -238,13 +242,17 @@ export async function generateInsightService(
 
   // 1. Parse request body
   const reqParsed = InsightModel.generateRequest.safeParse(body);
-  if (!reqParsed.success) return { success: false, error: validationError(reqParsed.error) };
+  if (!reqParsed.success)
+    return { success: false, error: validationError(reqParsed.error) };
 
   const { weekStart, weekEnd } = resolveWeekRange(reqParsed.data?.weekStart);
 
   // 2. Cek apakah sudah ada insight untuk minggu ini
   const [existing] = await db
-    .select({ id: table.weeklyInsights.id, status: table.weeklyInsights.generationStatus })
+    .select({
+      id: table.weeklyInsights.id,
+      status: table.weeklyInsights.generationStatus,
+    })
     .from(table.weeklyInsights)
     .where(
       and(
@@ -270,7 +278,7 @@ export async function generateInsightService(
       weekEnd,
       generatedAt: new Date(),
       generationStatus: "pending",
-      weeklyStatus: "good",          // placeholder
+      weeklyStatus: "good", // placeholder
       totalScreenTimeSeconds: 0,
       avgBehavioralScore: 0,
     })
@@ -298,7 +306,8 @@ export async function generateInsightService(
         flagCompulsiveChecking: table.behavioralScores.flagCompulsiveChecking,
         flagMidnightUsage: table.behavioralScores.flagMidnightUsage,
         flagContinuousUsage: table.behavioralScores.flagContinuousUsage,
-        flagProductiveHourDistraction: table.behavioralScores.flagProductiveHourDistraction,
+        flagProductiveHourDistraction:
+          table.behavioralScores.flagProductiveHourDistraction,
       })
       .from(table.behavioralScores)
       .where(
@@ -392,8 +401,14 @@ export async function generateInsightService(
       .where(
         and(
           eq(table.dailyStats.userId, userId),
-          gte(table.dailyStats.statDate, prevWeekStart.toISOString().slice(0, 10)),
-          lte(table.dailyStats.statDate, prevWeekEnd.toISOString().slice(0, 10)),
+          gte(
+            table.dailyStats.statDate,
+            prevWeekStart.toISOString().slice(0, 10),
+          ),
+          lte(
+            table.dailyStats.statDate,
+            prevWeekEnd.toISOString().slice(0, 10),
+          ),
         ),
       );
 
@@ -462,7 +477,8 @@ export async function generateInsightService(
       generationStatus: "generated",
       message: `Insight minggu ${weekStart} berhasil di-generate`,
     });
-    if (!parsed.success) return { success: false, error: validationError(parsed.error) };
+    if (!parsed.success)
+      return { success: false, error: validationError(parsed.error) };
     return { success: true, data: parsed.data };
   } catch (err) {
     // Tandai sebagai failed agar bisa di-retry
@@ -471,6 +487,9 @@ export async function generateInsightService(
       .set({ generationStatus: "failed", updatedAt: new Date() })
       .where(eq(table.weeklyInsights.id, insightId));
 
-    return { success: false, error: err instanceof Error ? err.message : String(err) };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }

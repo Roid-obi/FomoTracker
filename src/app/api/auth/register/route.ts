@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const result = await registerService(formData);
-    
+
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { UserModel } from "../models/user.model";
-import { table } from "@/lib/databases/schema";
-import { db } from "@/lib/databases";
-import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { db } from "@/lib/databases";
+import { table } from "@/lib/databases/schema";
+import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
+import { UserModel } from "../models/user.model";
 
 export async function getService() {
   const supabase = await createSupabaseServer();
@@ -50,7 +50,7 @@ export async function updateService(formData: FormData) {
     return { success: false, error: "User not found" };
   }
   const id = user.id;
-  
+
   const raw = Object.fromEntries(formData);
   const parsed = UserModel.updateRequest.safeParse(raw);
   let avatar_url: string | null = null;

@@ -17,7 +17,7 @@ function getErrorMessage(error: unknown) {
  */
 export async function POST(request: Request) {
   try {
-    let body: unknown = undefined;
+    let body: unknown;
 
     const contentType = request.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {

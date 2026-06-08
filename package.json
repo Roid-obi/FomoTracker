@@ -31,6 +31,8 @@
     "drizzle-orm": "^0.45.2",
     "drizzle-seed": "^0.3.1",
     "drizzle-zod": "^0.8.3",
+    "framer-motion": "^12.40.0",
+    "goey-toast": "^0.4.0",
     "lucide-react": "^1.17.0",
     "next": "16.2.6",
     "postgres": "^3.4.9",

@@ -11,10 +11,10 @@ export default function Navbar() {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/analytics") ||
+    pathname.startsWith("/statistik") ||
     pathname.startsWith("/insight") ||
     pathname.startsWith("/notifications") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/pengaturan");
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -42,20 +42,10 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
             <Link
-              href={pathname === "/" ? "#features" : "/#features"}
+              href="/"
               className="text-primary/80 hover:text-primary transition-colors font-poppins"
             >
-              Home
-            </Link>
-            <Link
-              href="/panduan"
-              className={`font-poppins transition-colors ${
-                pathname === "/panduan"
-                  ? "text-secondary font-semibold"
-                  : "text-primary/80 hover:text-primary"
-              }`}
-            >
-              Panduan
+              Beranda
             </Link>
             <Link
               href="/tentang"
@@ -68,14 +58,14 @@ export default function Navbar() {
               Tentang
             </Link>
             <Link
-              href="/test-get-indicator-mobile"
+              href="/panduan"
               className={`font-poppins transition-colors ${
-                pathname === "/test-get-indicator-mobile"
+                pathname === "/panduan"
                   ? "text-secondary font-semibold"
                   : "text-primary/80 hover:text-primary"
               }`}
             >
-              Test-get-android
+              Panduan
             </Link>
           </nav>
 
@@ -126,22 +116,11 @@ export default function Navbar() {
         >
           <nav className="flex flex-col gap-3 pb-2">
             <Link
-              href={pathname === "/" ? "#features" : "/#features"}
+              href="/"
               onClick={handleLinkClick}
               className="text-sm font-medium hover:text-secondary transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins"
             >
-              Home
-            </Link>
-            <Link
-              href="/panduan"
-              onClick={handleLinkClick}
-              className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
-                pathname === "/panduan"
-                  ? "text-secondary font-semibold bg-muted-light/55"
-                  : "hover:text-secondary"
-              }`}
-            >
-              Panduan
+              Beranda
             </Link>
             <Link
               href="/tentang"
@@ -155,15 +134,15 @@ export default function Navbar() {
               Tentang
             </Link>
             <Link
-              href="/test-get-indicator-mobile"
+              href="/panduan"
               onClick={handleLinkClick}
               className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
-                pathname === "/test-get-indicator-mobile"
+                pathname === "/panduan"
                   ? "text-secondary font-semibold bg-muted-light/55"
                   : "hover:text-secondary"
               }`}
             >
-              Test-get-android
+              Panduan
             </Link>
             <Link
               href="/auth/login"

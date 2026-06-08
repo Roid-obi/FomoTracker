@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Poppins, Yellowtail } from "next/font/google";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
+import { Providers } from "./providers";
 import "./globals.css";
+import "goey-toast/styles.css";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -32,9 +34,11 @@ export default function RootLayout({
       className={`${poppins.variable} ${yellowtail.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        <Navbar />
-        {children}
-        <Footer />
+        <Providers>
+          <Navbar />
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

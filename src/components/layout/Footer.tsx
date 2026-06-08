@@ -9,10 +9,10 @@ export default function Footer() {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/analytics") ||
+    pathname.startsWith("/statistik") ||
     pathname.startsWith("/insight") ||
     pathname.startsWith("/notifications") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/pengaturan");
 
   if (isExcluded) return null;
   return (

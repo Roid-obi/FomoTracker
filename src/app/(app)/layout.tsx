@@ -4,34 +4,111 @@ import {
   BarChart2,
   Bell,
   Brain,
+  Calendar,
+  ChevronRight,
   LayoutDashboard,
   LogOut,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useUser } from "@/hooks/useUser";
+import { api } from "@/lib/utils/api";
 
 const navigationItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Analytics", href: "/analytics", icon: BarChart2 },
+  { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
   {
-    name: "AI Insight",
+    name: "Statistik",
+    href: "/statistik",
+    icon: BarChart2,
+    matchPrefix: "/statistik",
+  },
+  {
+    name: "Insight",
     href: "/insight",
     icon: Brain,
     matchPrefix: "/insight",
   },
-  { name: "Notifikasi", href: "/notifications", icon: Bell, badge: 3 },
   {
     name: "Pengaturan",
-    href: "/settings/profile",
+    href: "/pengaturan/profil",
     icon: Settings,
-    matchPrefix: "/settings",
+    matchPrefix: "/pengaturan",
   },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: user } = useUser();
+  const [todayStr, setTodayStr] = useState("");
+
+  useEffect(() => {
+    const formatIndonesianDate = () => {
+      const days = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+      ];
+      const months = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      const now = new Date();
+      const dayName = days[now.getDay()];
+      const date = now.getDate();
+      const monthName = months[now.getMonth()];
+      const year = now.getFullYear();
+      return `${dayName}, ${date} ${monthName} ${year}`;
+    };
+    setTodayStr(formatIndonesianDate());
+  }, []);
+
+  const getBreadcrumbs = () => {
+    const parts = pathname.split("/").filter(Boolean);
+    const mapping: Record<string, string> = {
+      dashboard: "Beranda",
+      statistik: "Statistik",
+      insight: "Insight",
+      notifications: "Notifikasi",
+      pengaturan: "Pengaturan",
+      profil: "Profil",
+      perangkat: "Perangkat",
+      notifikasi: "Notifikasi",
+      privasi: "Privasi",
+    };
+
+    return parts.map((part, index) => {
+      const isLast = index === parts.length - 1;
+      const label =
+        mapping[part] || part.charAt(0).toUpperCase() + part.slice(1);
+      return (
+        <div key={part} className="flex items-center gap-1">
+          {index > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted/60" />}
+          <span
+            className={`text-xs ${isLast ? "font-bold text-primary" : "text-muted font-light"}`}
+          >
+            {label}
+          </span>
+        </div>
+      );
+    });
+  };
 
   const isActive = (item: (typeof navigationItems)[0]) => {
     if (item.matchPrefix) {
@@ -40,9 +117,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return pathname === item.href;
   };
 
-  const handleLogout = () => {
-    // Simulation: delete session, redirect to landing or login page
-    router.push("/auth/login");
+  const handleLogout = async () => {
+    try {
+      const response = await api.post("/api/auth/logout");
+
+      if (response.status === 200) {
+        router.push("/");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -81,11 +165,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     />
                     <span>{item.name}</span>
                   </div>
-                  {item.badge && !active && (
-                    <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -96,14 +175,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border pt-4 space-y-4">
           <div className="flex items-center gap-3 px-2">
             <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border">
-              R
+              {user?.name
+                ?.trim()
+                .split(" ")
+                .map((kata) => kata.charAt(0))
+                .join("")
+                .substring(0, 2)
+                .toUpperCase() ?? "?"}
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-semibold truncate font-poppins text-primary">
-                Roid Obi
+                {user?.name ?? "—"}
               </span>
               <span className="text-xs text-muted truncate font-poppins">
-                roid@fomotracker.com
+                {user?.email ?? "—"}
               </span>
             </div>
           </div>
@@ -121,8 +206,47 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 md:pl-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6 pr-6 pl-6 py-6 overflow-visible md:overflow-y-auto">
-        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
-          {children}
+        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col space-y-6">
+          {/* Navbar Atas */}
+          <div className="flex items-center justify-between border-b border-border/60 pb-4 bg-background select-none">
+            {/* Left Side: Logo on Mobile, Breadcrumbs + Date on Desktop */}
+            <div className="flex items-center gap-1.5 md:gap-4">
+              {/* Mobile Logo */}
+              <div className="md:hidden flex items-baseline gap-0.5">
+                <span className="font-yellowtail text-3xl font-normal text-primary">
+                  Fomo
+                </span>
+                <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase">
+                  Tracker
+                </span>
+              </div>
+
+              {/* Desktop Breadcrumbs & Date */}
+              <div className="hidden md:flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  {getBreadcrumbs()}
+                </div>
+                {todayStr && (
+                  <>
+                    <span className="text-border h-4 w-[1px] border-r" />
+                    <div className="flex items-center gap-1.5 text-xs text-muted font-light">
+                      <Calendar className="w-3.5 h-3.5 text-secondary" />
+                      <span>{todayStr}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <Link
+              href="/notifications"
+              className="relative p-2 rounded-xl border border-border bg-card text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border border-card rounded-full" />
+            </Link>
+          </div>
+
+          <div className="flex-1 flex flex-col">{children}</div>
         </div>
       </main>
 
@@ -139,9 +263,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               aria-label={item.name}
             >
               <Icon className={`w-5 h-5 ${active ? "scale-110" : ""}`} />
-              {item.badge && !active && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary border-2 border-card rounded-full" />
-              )}
             </Link>
           );
         })}

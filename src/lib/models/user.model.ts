@@ -1,11 +1,11 @@
-import { PassThrough } from "stream";
 import { z } from "zod";
 
 export namespace UserModel {
   export const userData = z.object({
     name: z.string(),
     avatarUrl: z.string().nullable(),
-    email: z.email(),
+    email: z.string().email(),
+    onboardingCompleted: z.boolean(),
   });
   export type userData = z.infer<typeof userData>;
 
@@ -21,4 +21,21 @@ export namespace UserModel {
     updatedAt: z.date(),
   });
   export type updateData = z.infer<typeof updateData>;
+
+  export const completeOnboardingRequest = z.object({
+    isAndroidConnected: z.boolean(),
+    isBrowserConnected: z.boolean(),
+    selectedApps: z.array(z.string()),
+    productiveStart: z.string(),
+    productiveEnd: z.string(),
+    sleepStart: z.string(),
+    sleepEnd: z.string(),
+    notifScreenTimeEnabled: z.boolean(),
+    screenTimeLimitSeconds: z.number(),
+    notifProductiveHourEnabled: z.boolean(),
+    notifMidnightEnabled: z.boolean(),
+    notifContinuousEnabled: z.boolean(),
+    continuousLimitSeconds: z.number(),
+  });
+  export type completeOnboardingRequest = z.infer<typeof completeOnboardingRequest>;
 }

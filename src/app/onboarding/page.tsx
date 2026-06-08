@@ -16,12 +16,22 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { initialApps } from "@/lib/data/databaseInitialData";
+import { api } from "@/lib/utils/api";
+import { useUser } from "@/hooks/useUser";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: user } = useUser();
+
+  useEffect(() => {
+    if (user && user.onboardingCompleted) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
 
   // Form States
   const [isAndroidConnected, setIsAndroidConnected] = useState(false);
@@ -50,7 +60,7 @@ export default function OnboardingPage() {
     );
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 3 && selectedApps.length === 0) {
       gooeyToast.warning("Pilih minimal 1 aplikasi untuk dipantau.");
       return;
@@ -58,7 +68,38 @@ export default function OnboardingPage() {
     if (step < 6) {
       setStep((prev) => prev + 1);
     } else {
-      router.push("/dashboard");
+      setIsSubmitting(true);
+      try {
+        const response = await api.post("/api/onboarding", {
+          isAndroidConnected,
+          isBrowserConnected,
+          selectedApps,
+          productiveStart,
+          productiveEnd,
+          sleepStart,
+          sleepEnd,
+          notifScreenTimeEnabled: notifExcessive,
+          screenTimeLimitSeconds: excessiveHours * 3600,
+          notifProductiveHourEnabled: notifProductive,
+          notifMidnightEnabled: notifMidnight,
+          notifContinuousEnabled: notifContinuous,
+          continuousLimitSeconds: continuousMinutes * 60,
+        });
+
+        if (response.data.success) {
+          gooeyToast.success("Pengaturan onboarding berhasil disimpan!");
+          router.push("/dashboard");
+        } else {
+          gooeyToast.error(response.data.error || "Gagal menyimpan onboarding");
+        }
+      } catch (error: any) {
+        console.error(error);
+        gooeyToast.error(
+          error.response?.data?.error || "Terjadi kesalahan saat menyimpan data",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -762,9 +803,10 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-secondary transition-all cursor-pointer text-sm shadow-md shadow-primary/10"
+                disabled={isSubmitting}
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-secondary disabled:bg-primary/50 transition-all cursor-pointer text-sm shadow-md shadow-primary/10"
               >
-                <span>Masuk ke Beranda</span>
+                <span>{isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}</span>
                 <Check className="w-4 h-4" />
               </button>
             </div>

@@ -5,6 +5,10 @@ import { table } from "@/lib/databases/schema";
 import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
 import { UserModel } from "../models/user.model";
 
+type ServiceResult<T = undefined> =
+  | { success: true; data: T }
+  | { success: false; error: unknown };
+
 export async function getService() {
   const supabase = await createSupabaseServer();
   const {
@@ -19,6 +23,7 @@ export async function getService() {
     .select({
       name: table.users.name,
       avatarUrl: table.users.avatarUrl,
+      onboardingCompleted: table.users.onboardingCompleted,
     })
     .from(table.users)
     .where(eq(table.users.id, id));
@@ -30,6 +35,7 @@ export async function getService() {
   const parsed = UserModel.userData.safeParse({
     ...userData,
     email: user.email,
+    onboardingCompleted: userData.onboardingCompleted ?? false,
   });
 
   if (!parsed.success) {
@@ -104,4 +110,112 @@ export async function updateService(formData: FormData) {
   }
 
   return { success: true };
+}
+
+export async function completeOnboardingService(
+  body: unknown,
+): Promise<ServiceResult> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "User not found" };
+  }
+  const id = user.id;
+
+  const parsed = UserModel.completeOnboardingRequest.safeParse(body);
+  if (!parsed.success) {
+    return { success: false, error: z.treeifyError(parsed.error) };
+  }
+
+  const data = parsed.data;
+
+  // 1. Update user settings
+  await db
+    .insert(table.userSettings)
+    .values({
+      userId: id,
+      productiveStart: data.productiveStart,
+      productiveEnd: data.productiveEnd,
+      sleepStart: data.sleepStart,
+      sleepEnd: data.sleepEnd,
+      screenTimeLimitSeconds: data.screenTimeLimitSeconds,
+      continuousLimitSeconds: data.continuousLimitSeconds,
+      notifScreenTimeEnabled: data.notifScreenTimeEnabled,
+      notifProductiveHourEnabled: data.notifProductiveHourEnabled,
+      notifMidnightEnabled: data.notifMidnightEnabled,
+      notifContinuousEnabled: data.notifContinuousEnabled,
+    })
+    .onConflictDoUpdate({
+      target: table.userSettings.userId,
+      set: {
+        productiveStart: data.productiveStart,
+        productiveEnd: data.productiveEnd,
+        sleepStart: data.sleepStart,
+        sleepEnd: data.sleepEnd,
+        screenTimeLimitSeconds: data.screenTimeLimitSeconds,
+        continuousLimitSeconds: data.continuousLimitSeconds,
+        notifScreenTimeEnabled: data.notifScreenTimeEnabled,
+        notifProductiveHourEnabled: data.notifProductiveHourEnabled,
+        notifMidnightEnabled: data.notifMidnightEnabled,
+        notifContinuousEnabled: data.notifContinuousEnabled,
+        updatedAt: new Date(),
+      },
+    });
+
+  // 2. Add devices
+  if (data.isAndroidConnected) {
+    await db
+      .insert(table.userDevices)
+      .values({
+        userId: id,
+        platform: "android_app",
+        deviceName: "Android Phone",
+        isConnected: true,
+        connectedAt: new Date(),
+      })
+      .onConflictDoNothing();
+  }
+
+  if (data.isBrowserConnected) {
+    await db
+      .insert(table.userDevices)
+      .values({
+        userId: id,
+        platform: "browser_extension",
+        browserName: "Web Browser",
+        isConnected: true,
+        connectedAt: new Date(),
+      })
+      .onConflictDoNothing();
+  }
+
+  // 3. Add tracked apps
+  if (data.selectedApps.length > 0) {
+    const trackedAppsToInsert = data.selectedApps.map((appId) => ({
+      userId: id,
+      appId,
+      isActive: true,
+    }));
+
+    await db
+      .insert(table.userTrackedApps)
+      .values(trackedAppsToInsert)
+      .onConflictDoUpdate({
+        target: [table.userTrackedApps.userId, table.userTrackedApps.appId],
+        set: { isActive: true },
+      });
+  }
+
+  // 4. Set onboardingCompleted = true
+  await db
+    .update(table.users)
+    .set({
+      onboardingCompleted: true,
+      updatedAt: new Date(),
+    })
+    .where(eq(table.users.id, id));
+
+  return { success: true, data: undefined };
 }

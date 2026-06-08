@@ -30,7 +30,7 @@ export default function Register() {
         return;
       }
 
-      router.push("/onboarding");
+      router.push("/dashboard");
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : String(error));
     }
@@ -83,6 +83,7 @@ export default function Register() {
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="username"
+                name="name"
                 type="text"
                 placeholder="Nama Lengkap Anda"
                 required
@@ -103,6 +104,7 @@ export default function Register() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="nama@email.com"
                 required
@@ -123,6 +125,7 @@ export default function Register() {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Minimal 8 karakter"
                 value={password}

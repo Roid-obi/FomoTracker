@@ -44,6 +44,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: user } = useUser();
   const [todayStr, setTodayStr] = useState("");
 
+
   useEffect(() => {
     const formatIndonesianDate = () => {
       const days = [

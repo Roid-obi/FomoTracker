@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { createClient } from "@/lib/databases/supabase";
+import { api } from "@/lib/utils/api";
 import { analyzeUsageEvents, fetchUsageEvents } from "./usageEvents";
 
 export interface InstalledApp {
@@ -134,151 +135,84 @@ export async function syncUsageStatsClient(
   userId: string,
   stats: SyncUsageStatInput[],
 ) {
-  const supabase = createClient();
-
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
   try {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-    let insertedCount = 0;
+    const source = "android_app";
 
-    for (const stat of stats) {
-      if (!stat.packageName) continue;
+    // 1. Get or register the user device in backend database
+    const deviceRes = await api.put<{ success: boolean; data: { id: string } }>(
+      "/api/setting/device",
+      {
+        platform: source,
+        deviceName: "Android Device",
+        isConnected: true,
+      },
+    );
 
-      const durationSeconds = Math.floor(stat.totalTimeInForeground / 1000);
-      if (durationSeconds <= 0) continue;
-      const source = "android_app";
+    if (!deviceRes.data.success) {
+      throw new Error("Gagal menyinkronkan data perangkat");
+    }
+    const deviceId = deviceRes.data.data.id;
 
-      // 1. Find or create the app in `apps` table
-      let { data: appRecord } = await supabase
-        .from("apps")
-        .select("*")
-        .eq("package_name", stat.packageName)
-        .maybeSingle();
+    // 2. Prepare payload for stats sync
+    const statsPayload = stats.map((stat) => ({
+      packageName: stat.packageName,
+      totalDurationSeconds: Math.floor(stat.totalTimeInForeground / 1000),
+      openFrequency: stat.openFrequency || 1,
+      midnightDurationSeconds: stat.midnightDurationSeconds || 0,
+      productiveHourDurationSeconds: stat.productiveHourDurationSeconds || 0,
+      maxContinuousSeconds: stat.maxContinuousSeconds || 0,
+    }));
 
-      if (!appRecord) {
-        const { data: newApp, error: insertErr } = await supabase
-          .from("apps")
-          .insert({
-            package_name: stat.packageName,
-            name: stat.packageName.split(".").pop() || stat.packageName,
-            platform: "android",
-            is_active: true,
-            created_at: new Date().toISOString(),
-          })
-          .select()
-          .single();
+    // Post to `/api/tracking/sync/stats`
+    const statsRes = await api.post("/api/tracking/sync/stats", {
+      userId,
+      deviceId,
+      statDate: today,
+      stats: statsPayload,
+    });
 
-        if (insertErr) {
-          console.error("Failed to insert app:", insertErr);
-          continue;
-        }
-        appRecord = newApp;
-      }
-
-      let { data: deviceRecord } = await supabase
-        .from("user_devices")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("platform", source)
-        .maybeSingle();
-
-      if (!deviceRecord) {
-        const now = new Date().toISOString();
-        const { data: newDevice, error: deviceInsertErr } = await supabase
-          .from("user_devices")
-          .insert({
-            user_id: userId,
-            platform: source,
-            device_name: "Android Device",
-            is_connected: true,
-            last_synced_at: now,
-            connected_at: now,
-            created_at: now,
-          })
-          .select()
-          .single();
-
-        if (deviceInsertErr) {
-          console.error("Failed to insert user device:", deviceInsertErr);
-          continue;
-        }
-        deviceRecord = newDevice;
-      }
-
-      // 2. Check if there's already a dailyStats record for today
-      const { data: existingDailyStat } = await supabase
-        .from("daily_stats")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("app_id", appRecord.id)
-        .eq("stat_date", today)
-        .maybeSingle();
-
-      if (existingDailyStat) {
-        const { error: updateErr } = await supabase
-          .from("daily_stats")
-          .update({
-            total_duration_seconds: durationSeconds,
-            open_frequency:
-              stat.openFrequency ?? existingDailyStat.open_frequency,
-            midnight_duration_seconds:
-              stat.midnightDurationSeconds ??
-              existingDailyStat.midnight_duration_seconds,
-            productive_hour_duration_seconds:
-              stat.productiveHourDurationSeconds ??
-              existingDailyStat.productive_hour_duration_seconds,
-            max_continuous_seconds:
-              stat.maxContinuousSeconds ??
-              existingDailyStat.max_continuous_seconds,
-          })
-          .eq("id", existingDailyStat.id);
-
-        if (updateErr) {
-          console.error("Failed to update daily stats:", updateErr);
-          continue;
-        }
-      } else {
-        const { error: insertErr } = await supabase.from("daily_stats").insert({
-          user_id: userId,
-          app_id: appRecord.id,
-          stat_date: today,
-          total_duration_seconds: durationSeconds,
-          open_frequency: stat.openFrequency || 1,
-          midnight_duration_seconds: stat.midnightDurationSeconds || 0,
-          productive_hour_duration_seconds:
-            stat.productiveHourDurationSeconds || 0,
-          max_continuous_seconds: stat.maxContinuousSeconds || 0,
-          peak_active_hour: 0,
-        });
-
-        if (insertErr) {
-          console.error("Failed to insert daily stats:", insertErr);
-          continue;
-        }
-      }
-
-      // 3. Log to activityLog
-      const endedAt = new Date();
-      const startedAt = new Date(endedAt.getTime() - durationSeconds * 1000);
-      await supabase.from("activity_logs").insert({
-        user_id: userId,
-        app_id: appRecord.id,
-        device_id: deviceRecord.id,
-        started_at: startedAt.toISOString(),
-        ended_at: endedAt.toISOString(),
-        duration_seconds: durationSeconds,
-        is_midnight: false,
-        is_productive_hour: false,
-        is_continuous: false,
-        source,
-        created_at: new Date().toISOString(),
-      });
-
-      insertedCount++;
+    if (!statsRes.data.success) {
+      throw new Error(
+        statsRes.data.error || "Gagal menyinkronkan stats harian",
+      );
     }
 
-    return { success: true, count: insertedCount };
+    // 3. Prepare payload for activity logs sync
+    const logsPayload = stats.map((stat) => {
+      const durationSeconds = Math.floor(stat.totalTimeInForeground / 1000);
+      const endedAt = new Date().toISOString();
+      const startedAt = new Date(
+        Date.now() - durationSeconds * 1000,
+      ).toISOString();
+      return {
+        packageName: stat.packageName,
+        startedAt,
+        endedAt,
+        durationSeconds,
+        isMidnight: (stat.midnightDurationSeconds || 0) > 0,
+        isProductiveHour: (stat.productiveHourDurationSeconds || 0) > 0,
+        isContinuous: (stat.maxContinuousSeconds || 0) > 0,
+        source: "android_app" as const,
+      };
+    });
+
+    // Post to `/api/tracking/sync/activity`
+    const logsRes = await api.post("/api/tracking/sync/activity", {
+      userId,
+      deviceId,
+      logs: logsPayload,
+    });
+
+    if (!logsRes.data.success) {
+      throw new Error(
+        logsRes.data.error || "Gagal menyinkronkan log aktivitas",
+      );
+    }
+
+    return { success: true, count: stats.length };
   } catch (error) {
     console.error("Error syncing usage stats:", error);
     return { success: false, error: getErrorMessage(error) };

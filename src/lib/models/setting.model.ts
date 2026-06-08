@@ -29,6 +29,7 @@ export namespace SettingModel {
 
 export namespace DeviceModel {
   export const getResponse = z.object({
+    id: z.string(),
     platform: z.string(),
     deviceName: z.string().nullable(),
     browserName: z.string().nullable(),

@@ -29,7 +29,9 @@ const notificationSelect = {
   createdAt: table.notifications.createdAt,
 };
 
-export async function getNotificationsService(): Promise<ServiceResult<NotificationModel.getNotificationResponse[]>> {
+export async function getNotificationsService(): Promise<
+  ServiceResult<NotificationModel.getNotificationResponse[]>
+> {
   const userId = await getAuthenticatedUserId();
 
   if (!userId) {
@@ -85,7 +87,8 @@ export async function updateNotificationService(
     return { success: false, error: "User not found" };
   }
 
-  const markAllParsed = NotificationModel.updateAllNotificationRequest.safeParse(body);
+  const markAllParsed =
+    NotificationModel.updateAllNotificationRequest.safeParse(body);
 
   if (markAllParsed.success) {
     await db

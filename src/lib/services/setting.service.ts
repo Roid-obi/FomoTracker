@@ -40,6 +40,7 @@ const settingSelect = {
 };
 
 const deviceSelect = {
+  id: table.userDevices.id,
   platform: table.userDevices.platform,
   deviceName: table.userDevices.deviceName,
   browserName: table.userDevices.browserName,

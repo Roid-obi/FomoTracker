@@ -305,10 +305,7 @@ export async function syncDailyStatsService(
       flagProductiveHourDistraction,
     })
     .onConflictDoUpdate({
-      target: [
-        table.behavioralScores.userId,
-        table.behavioralScores.scoreDate,
-      ],
+      target: [table.behavioralScores.userId, table.behavioralScores.scoreDate],
       set: {
         usageDurationScore,
         openFrequencyScore,

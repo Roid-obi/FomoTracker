@@ -32,4 +32,12 @@ export namespace DashboardModel {
     flagProductiveHourDistraction: z.boolean(),
   });
   export type getBehaviorFlagResponse = z.infer<typeof getBehaviorFlagResponse>;
+
+  export const getHourlyBreakdownResponse = z.object({
+    chartData: z.array(z.record(z.string(), z.union([z.string(), z.number()]))),
+    top4Apps: z.array(z.string()),
+  });
+  export type getHourlyBreakdownResponse = z.infer<
+    typeof getHourlyBreakdownResponse
+  >;
 }

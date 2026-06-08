@@ -17,9 +17,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useUser } from "@/hooks/useUser";
 import { initialApps } from "@/lib/data/databaseInitialData";
 import { api } from "@/lib/utils/api";
-import { useUser } from "@/hooks/useUser";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -95,7 +95,8 @@ export default function OnboardingPage() {
       } catch (error: any) {
         console.error(error);
         gooeyToast.error(
-          error.response?.data?.error || "Terjadi kesalahan saat menyimpan data",
+          error.response?.data?.error ||
+            "Terjadi kesalahan saat menyimpan data",
         );
       } finally {
         setIsSubmitting(false);
@@ -806,7 +807,9 @@ export default function OnboardingPage() {
                 disabled={isSubmitting}
                 className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-secondary disabled:bg-primary/50 transition-all cursor-pointer text-sm shadow-md shadow-primary/10"
               >
-                <span>{isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}</span>
+                <span>
+                  {isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}
+                </span>
                 <Check className="w-4 h-4" />
               </button>
             </div>

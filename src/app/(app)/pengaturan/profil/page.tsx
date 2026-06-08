@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
 import { Camera, Check, Key, Mail, User } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import { api } from "@/lib/utils/api";
 
 export default function ProfilSettingsPage() {
   const { data: user } = useUser();
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
@@ -36,6 +38,10 @@ export default function ProfilSettingsPage() {
 
       if (response.data.success) {
         setIsSaved(true);
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        queryClient.invalidateQueries({ queryKey: ["user"] });
         gooeyToast.success("Perubahan berhasil disimpan!");
       }
     } catch (error) {
@@ -152,6 +158,7 @@ export default function ProfilSettingsPage() {
                 </label>
                 <input
                   id="old-pass"
+                  name="oldPassword"
                   type="password"
                   placeholder="••••••••"
                   value={oldPassword}
@@ -168,6 +175,7 @@ export default function ProfilSettingsPage() {
                 </label>
                 <input
                   id="new-pass"
+                  name="newPassword"
                   type="password"
                   placeholder="••••••••"
                   value={newPassword}
@@ -184,6 +192,7 @@ export default function ProfilSettingsPage() {
                 </label>
                 <input
                   id="confirm-pass"
+                  name="confirmPassword"
                   type="password"
                   placeholder="••••••••"
                   value={confirmPassword}

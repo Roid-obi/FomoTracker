@@ -193,8 +193,15 @@ const dataMingguLaju = {
   ],
 };
 
+// Seeded random generator for deterministic values
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
 // Generate Mock Heatmap Data for visual quality
 // 7 days (rows Mon-Sun) x 24 hours (cols 0-23)
+// Uses deterministic seeding based on day and hour to ensure consistency between server and client
 const generateHeatmap = (isPrevWeek: boolean) => {
   const days = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
   return days.map((day, dIdx) => {
@@ -205,17 +212,21 @@ const generateHeatmap = (isPrevWeek: boolean) => {
       if (!isPrevWeek && dIdx > 2) {
         val = 0;
       } else {
+        // Use seed based on day and hour for deterministic randomness
+        const seed = dIdx * 100 + hour;
+        const rand = seededRandom(seed);
+        
         // High usage at late evening (20-22)
         if (hour >= 20 && hour <= 22) {
-          val = Math.random() > 0.3 ? 3 : 2;
+          val = rand > 0.3 ? 3 : 2;
         }
         // Moderate usage at morning (8-10) and noon (12-13)
         else if ((hour >= 8 && hour <= 10) || (hour >= 12 && hour <= 13)) {
-          val = Math.random() > 0.4 ? 2 : 1;
+          val = rand > 0.4 ? 2 : 1;
         }
         // Small usage during sleep/work hours sometimes
         else if (hour >= 23 || hour <= 1 || (hour >= 14 && hour <= 16)) {
-          val = Math.random() > 0.6 ? 1 : 0;
+          val = rand > 0.6 ? 1 : 0;
         }
       }
       return { day, hour, val };

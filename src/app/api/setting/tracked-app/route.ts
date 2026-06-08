@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  getAvailableAppsService,
   getTrackedAppService,
   updateTrackedAppService,
 } from "@/lib/services/setting.service";
@@ -8,9 +9,14 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Internal server error";
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const result = await getTrackedAppService();
+    const { searchParams } = new URL(request.url);
+    const available = searchParams.get("available") === "true";
+
+    const result = available
+      ? await getAvailableAppsService()
+      : await getTrackedAppService();
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });

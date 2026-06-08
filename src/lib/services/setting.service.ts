@@ -218,11 +218,45 @@ export async function getTrackedAppService(): Promise<
   }
 
   const trackedApps = await db
-    .select(trackedAppSelect)
+    .select({
+      appId: table.userTrackedApps.appId,
+      isActive: table.userTrackedApps.isActive,
+      addedAt: table.userTrackedApps.addedAt,
+      name: table.apps.name,
+      packageName: table.apps.packageName,
+      iconUrl: table.apps.iconUrl,
+      platform: table.apps.platform,
+    })
     .from(table.userTrackedApps)
+    .innerJoin(table.apps, eq(table.userTrackedApps.appId, table.apps.id))
     .where(eq(table.userTrackedApps.userId, userId));
 
   const parsed = TrackedAppModel.getResponse.array().safeParse(trackedApps);
+
+  if (!parsed.success) {
+    return { success: false, error: validationError(parsed.error) };
+  }
+
+  return { success: true, data: parsed.data };
+}
+
+export async function getAvailableAppsService(): Promise<
+  ServiceResult<TrackedAppModel.appResponse[]>
+> {
+  const apps = await db
+    .select({
+      id: table.apps.id,
+      name: table.apps.name,
+      packageName: table.apps.packageName,
+      webDomain: table.apps.webDomain,
+      category: table.apps.category,
+      iconUrl: table.apps.iconUrl,
+      platform: table.apps.platform,
+    })
+    .from(table.apps)
+    .where(eq(table.apps.isActive, true));
+
+  const parsed = TrackedAppModel.appResponse.array().safeParse(apps);
 
   if (!parsed.success) {
     return { success: false, error: validationError(parsed.error) };

@@ -4,12 +4,15 @@ import {
   BarChart2,
   Bell,
   Brain,
+  Calendar,
+  ChevronRight,
   LayoutDashboard,
   LogOut,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { api } from "@/lib/utils/api";
 
@@ -39,6 +42,73 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: user } = useUser();
+  const [todayStr, setTodayStr] = useState("");
+
+  useEffect(() => {
+    const formatIndonesianDate = () => {
+      const days = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+      ];
+      const months = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      const now = new Date();
+      const dayName = days[now.getDay()];
+      const date = now.getDate();
+      const monthName = months[now.getMonth()];
+      const year = now.getFullYear();
+      return `${dayName}, ${date} ${monthName} ${year}`;
+    };
+    setTodayStr(formatIndonesianDate());
+  }, []);
+
+  const getBreadcrumbs = () => {
+    const parts = pathname.split("/").filter(Boolean);
+    const mapping: Record<string, string> = {
+      dashboard: "Beranda",
+      statistik: "Statistik",
+      insight: "Insight",
+      notifications: "Notifikasi",
+      pengaturan: "Pengaturan",
+      profil: "Profil",
+      perangkat: "Perangkat",
+      notifikasi: "Notifikasi",
+      privasi: "Privasi",
+    };
+
+    return parts.map((part, index) => {
+      const isLast = index === parts.length - 1;
+      const label =
+        mapping[part] || part.charAt(0).toUpperCase() + part.slice(1);
+      return (
+        <div key={part} className="flex items-center gap-1">
+          {index > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted/60" />}
+          <span
+            className={`text-xs ${isLast ? "font-bold text-primary" : "text-muted font-light"}`}
+          >
+            {label}
+          </span>
+        </div>
+      );
+    });
+  };
 
   const isActive = (item: (typeof navigationItems)[0]) => {
     if (item.matchPrefix) {
@@ -138,14 +208,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col min-w-0 md:pl-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6 pr-6 pl-6 py-6 overflow-visible md:overflow-y-auto">
         <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col space-y-6">
           {/* Navbar Atas */}
-          <div className="flex items-center justify-between border-b border-border/60 pb-4 bg-background">
-            <div className="flex items-baseline gap-0.5">
-              <span className="font-yellowtail text-3xl font-normal text-primary">
-                Fomo
-              </span>
-              <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase">
-                Tracker
-              </span>
+          <div className="flex items-center justify-between border-b border-border/60 pb-4 bg-background select-none">
+            {/* Left Side: Logo on Mobile, Breadcrumbs + Date on Desktop */}
+            <div className="flex items-center gap-1.5 md:gap-4">
+              {/* Mobile Logo */}
+              <div className="md:hidden flex items-baseline gap-0.5">
+                <span className="font-yellowtail text-3xl font-normal text-primary">
+                  Fomo
+                </span>
+                <span className="font-poppins text-[10px] font-bold tracking-widest text-primary uppercase">
+                  Tracker
+                </span>
+              </div>
+
+              {/* Desktop Breadcrumbs & Date */}
+              <div className="hidden md:flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  {getBreadcrumbs()}
+                </div>
+                {todayStr && (
+                  <>
+                    <span className="text-border h-4 w-[1px] border-r" />
+                    <div className="flex items-center gap-1.5 text-xs text-muted font-light">
+                      <Calendar className="w-3.5 h-3.5 text-secondary" />
+                      <span>{todayStr}</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             <Link
               href="/notifications"

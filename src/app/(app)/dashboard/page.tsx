@@ -301,7 +301,7 @@ export default function DashboardPage() {
               <p className="text-xs sm:text-sm text-muted font-light leading-relaxed">
                 Selamat datang kembali. FomoTracker siap membantumu memantau
                 waktu pemakaian media sosial dan membangun kebiasaan digital
-                yang lebih produktif hari ini.
+                yang lebih sehat hari ini.
               </p>
               <Link
                 href="/statistik"
@@ -313,7 +313,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Premium Flat Vector SVG Illustration of Digital Wellbeing & Gadgets */}
-            <div className="w-56 h-40 shrink-0 relative z-10 hidden sm:block">
+            <div className="w-72 h-48 shrink-0 relative z-10 hidden sm:block">
               <svg
                 viewBox="0 0 220 150"
                 className="w-full h-full"
@@ -379,9 +379,9 @@ export default function DashboardPage() {
                 {/* Desk/Surface Line */}
                 <line
                   x1="15"
-                  y1="130"
+                  y1="123"
                   x2="205"
-                  y2="130"
+                  y2="123"
                   stroke="#cbd5e1"
                   strokeWidth="2.5"
                   strokeLinecap="round"
@@ -414,29 +414,7 @@ export default function DashboardPage() {
                   opacity="0.5"
                 />
 
-                {/* 1. OFF-LINE READING: Open Book (Center-Left Base) */}
-                <g>
-                  {/* Book Pages */}
-                  <path
-                    d="M58,122 C70,119 86,123 86,123 L86,127 C86,127 70,123 58,126 Z"
-                    fill="#ffffff"
-                    stroke="#cbd5e1"
-                    strokeWidth="0.5"
-                  />
-                  <path
-                    d="M114,122 C102,119 86,123 86,123 L86,127 C86,127 102,123 114,126 Z"
-                    fill="#ffffff"
-                    stroke="#cbd5e1"
-                    strokeWidth="0.5"
-                  />
-                  {/* Book Cover */}
-                  <path
-                    d="M56,123 Q86,120 116,123"
-                    stroke="#475569"
-                    strokeWidth="1.5"
-                    fill="none"
-                  />
-                </g>
+
 
                 {/* 2. NATURE: Left Potted Plant (Monstera-style Wellbeing plant) */}
                 <g>
@@ -563,6 +541,30 @@ export default function DashboardPage() {
                     rx="0.5"
                     fill="#94a3b8"
                     opacity="0.6"
+                  />
+                </g>
+
+                {/* 1. OFF-LINE READING: Open Book (Center-Left Base) */}
+                <g>
+                  {/* Book Pages */}
+                  <path
+                    d="M34,122 C46,119 62,123 62,123 L62,127 C62,127 46,123 34,126 Z"
+                    fill="#ffffff"
+                    stroke="#cbd5e1"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M90,122 C78,119 62,123 62,123 L62,127 C62,127 78,123 90,126 Z"
+                    fill="#ffffff"
+                    stroke="#cbd5e1"
+                    strokeWidth="0.5"
+                  />
+                  {/* Book Cover */}
+                  <path
+                    d="M32,123 Q62,120 92,123"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    fill="none"
                   />
                 </g>
 

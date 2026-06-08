@@ -454,7 +454,7 @@ export default function InsightPage() {
               <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
                 <h3 className="font-extrabold text-sm text-primary flex items-center gap-2 border-b border-border/40 pb-2">
                   <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
-                  <span>Yang Sudah Kamu Lakukan dengan Baik 👍</span>
+                  <span>Yang Sudah Kamu Lakukan dengan Baik</span>
                 </h3>
                 <p className="text-xs text-muted leading-relaxed font-light">
                   {currentInsight.ai_positive_notes}
@@ -465,7 +465,7 @@ export default function InsightPage() {
               <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
                 <h3 className="font-extrabold text-sm text-primary flex items-center gap-2 border-b border-border/40 pb-2">
                   <Compass className="w-4.5 h-4.5 text-amber-500 shrink-0" />
-                  <span>Yang Perlu Kamu Perhatikan ⚠️</span>
+                  <span>Yang Perlu Kamu Perhatikan</span>
                 </h3>
                 <p className="text-xs text-muted leading-relaxed font-light">
                   {currentInsight.ai_concern_notes}
@@ -478,7 +478,7 @@ export default function InsightPage() {
               <div className="flex items-center gap-2 border-b border-border/40 pb-2">
                 <Brain className="w-5 h-5 text-primary shrink-0" />
                 <h3 className="font-extrabold text-sm sm:text-base text-primary">
-                  Analisis Minggu Ini 🤖
+                  Analisis Minggu Ini
                 </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted leading-relaxed font-light whitespace-pre-line">
@@ -491,7 +491,7 @@ export default function InsightPage() {
               <div className="flex items-center gap-2 border-b border-border/40 pb-2">
                 <Lightbulb className="w-5 h-5 text-primary shrink-0" />
                 <h3 className="font-extrabold text-sm sm:text-base text-primary">
-                  Tips untuk Minggu Depan 💡
+                  Tips untuk Minggu Depan
                 </h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

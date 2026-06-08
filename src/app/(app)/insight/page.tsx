@@ -136,19 +136,19 @@ export default function InsightPage() {
         return {
           emoji: "😊",
           label: "Minggu yang Baik!",
-          colorClass: "text-emerald-700 bg-emerald-50 border-emerald-200",
+          colorClass: "text-emerald-800 bg-emerald-50 border-emerald-200",
         };
       case "attention":
         return {
           emoji: "😐",
           label: "Minggu yang Cukup Padat",
-          colorClass: "text-amber-700 bg-amber-50 border-amber-200",
+          colorClass: "text-amber-800 bg-amber-50 border-amber-200",
         };
       case "heavy":
         return {
           emoji: "😟",
           label: "Minggu yang Cukup Berat",
-          colorClass: "text-red-700 bg-red-50 border-red-200",
+          colorClass: "text-red-800 bg-red-50 border-red-200",
         };
       default:
         return {
@@ -252,26 +252,33 @@ export default function InsightPage() {
 
         <div className="space-y-4">
           {/* Status Rata-rata */}
-          <div className="p-6 rounded-3xl border flex items-center gap-4 text-amber-700 bg-amber-50 border-amber-200 shadow-xs hover:border-amber-300 hover:shadow-md transition-all duration-300">
-            <span
-              className="text-4xl select-none shrink-0"
-              role="img"
-              aria-label="Status Emoji"
-            >
-              😐
-            </span>
-            <div>
-              <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wider block mb-0.5">
-                Status Rata-rata
-              </span>
-              <h3 className="text-base sm:text-lg font-black text-amber-800 leading-tight">
-                Perlu Diperhatikan
-              </h3>
-              <p className="text-xs font-light mt-1 leading-relaxed opacity-90 text-amber-700">
-                Rata-rata skor perilakumu berada pada 69/100.
-              </p>
-            </div>
-          </div>
+          {(() => {
+            const cond = getStatusDetails("attention");
+            return (
+              <div
+                className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass} shadow-xs hover:border-amber-300 hover:shadow-md transition-all duration-300`}
+              >
+                <span
+                  className="text-4xl select-none shrink-0"
+                  role="img"
+                  aria-label="Status Emoji"
+                >
+                  {cond.emoji}
+                </span>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
+                    Status Rata-rata
+                  </span>
+                  <h3 className="text-base sm:text-lg font-black leading-tight">
+                    {cond.label}
+                  </h3>
+                  <p className="text-xs font-light mt-1 leading-relaxed opacity-90">
+                    Rata-rata skor perilakumu berada pada 69/100.
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Grid for Total Screen Time & Kebiasaan Teraktif */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -426,6 +433,9 @@ export default function InsightPage() {
                     {cond.emoji}
                   </span>
                   <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
+                      Status Rata-rata
+                    </span>
                     <h3 className="text-base sm:text-lg font-black">
                       {cond.label}
                     </h3>

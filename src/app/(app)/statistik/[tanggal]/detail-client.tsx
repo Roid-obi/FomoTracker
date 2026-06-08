@@ -208,14 +208,12 @@ const getBehaviourScoresForDate = (dateStr: string) => {
       scores.statusEmoji = "😊";
       scores.statusTitle = "Hari yang Baik";
       scores.statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
-      scores.statusCardBg =
-        "bg-emerald-50 border border-emerald-200 text-emerald-800";
+      scores.statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
     } else if (total <= 69) {
       scores.statusEmoji = "😐";
       scores.statusTitle = "Perlu Diperhatikan";
       scores.statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
-      scores.statusCardBg =
-        "bg-amber-50 border border-amber-200 text-amber-800";
+      scores.statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
     } else {
       scores.statusEmoji = "😟";
       scores.statusTitle = "Hari yang Berat";
@@ -283,8 +281,7 @@ const getBehaviourScoresForDate = (dateStr: string) => {
       scores.statusEmoji = "😐";
       scores.statusTitle = "Perlu Diperhatikan";
       scores.statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
-      scores.statusCardBg =
-        "bg-amber-50 border border-amber-200 text-amber-800";
+      scores.statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
 
       scores.durasiNilai = 20;
       scores.frekuensiNilai = 12;
@@ -303,8 +300,7 @@ const getBehaviourScoresForDate = (dateStr: string) => {
       scores.statusEmoji = "😊";
       scores.statusTitle = "Hari yang Sempurna";
       scores.statusDesc = "Belum ada penggunaan gawai terdeteksi.";
-      scores.statusCardBg =
-        "bg-emerald-50 border border-emerald-200 text-emerald-800";
+      scores.statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
 
       scores.durasiNilai = 0;
       scores.frekuensiNilai = 0;
@@ -580,11 +576,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
           </div>
           <div className="mt-4 space-y-1">
             <h3 className="text-2xl font-black leading-none">
-              Skor hari ini: {scores.totalScore} dari 100
+              {scores.totalScore}/100
             </h3>
-            <h4 className="text-xs font-bold mt-1.5">{scores.statusTitle}</h4>
-            <p className="text-[9px] font-light leading-normal opacity-85 mt-0.5">
-              Semakin rendah semakin baik. {scores.statusDesc}
+            <h4 className="text-xs font-bold">{scores.statusTitle}</h4>
+            <p className="text-[9px] font-light leading-normal opacity-85">
+              {scores.statusDesc}
             </p>
           </div>
         </div>

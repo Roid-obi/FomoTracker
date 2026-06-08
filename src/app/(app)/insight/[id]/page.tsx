@@ -135,16 +135,33 @@ export default async function DetailInsightPage({
 
   const detail = pastInsightsDetails[id] || pastInsightsDetails["w-prev-1"];
 
-  const getStatusColor = (status: string) => {
+  const getStatusDetails = (status: string) => {
     switch (status) {
       case "good":
-        return "text-emerald-700 bg-emerald-50 border-emerald-200 shadow-xs";
+        return {
+          emoji: "😊",
+          label: "Minggu yang Baik!",
+          colorClass:
+            "text-emerald-800 bg-emerald-50 border-emerald-200 shadow-xs",
+        };
       case "attention":
-        return "text-amber-700 bg-amber-50 border-amber-200 shadow-xs";
+        return {
+          emoji: "😐",
+          label: "Minggu yang Cukup Padat",
+          colorClass: "text-amber-800 bg-amber-50 border-amber-200 shadow-xs",
+        };
       case "heavy":
-        return "text-red-700 bg-red-50 border-red-200 shadow-xs";
+        return {
+          emoji: "😟",
+          label: "Minggu yang Cukup Berat",
+          colorClass: "text-red-800 bg-red-50 border-red-200 shadow-xs",
+        };
       default:
-        return "text-muted bg-muted-light/60 border-border shadow-xs";
+        return {
+          emoji: "😐",
+          label: "Minggu yang Cukup Padat",
+          colorClass: "text-muted bg-muted-light/60 border-border shadow-xs",
+        };
     }
   };
 
@@ -238,25 +255,32 @@ export default async function DetailInsightPage({
       </div>
 
       {/* Kondisi Minggu Itu */}
-      <div
-        className={`p-6 rounded-3xl border flex items-center gap-4 ${getStatusColor(detail.weekly_status)}`}
-      >
-        <span
-          className="text-4xl select-none"
-          role="img"
-          aria-label="Status Emoji"
-        >
-          {detail.emoji}
-        </span>
-        <div>
-          <h3 className="text-base sm:text-lg font-black">
-            {detail.ai_weekly_status_label}
-          </h3>
-          <p className="text-xs font-light mt-0.5 leading-relaxed opacity-95">
-            {detail.ai_weekly_desc} (Skor Rata-rata: {detail.avg_score}/100)
-          </p>
-        </div>
-      </div>
+      {(() => {
+        const cond = getStatusDetails(detail.weekly_status);
+        return (
+          <div
+            className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass}`}
+          >
+            <span
+              className="text-4xl select-none"
+              role="img"
+              aria-label="Status Emoji"
+            >
+              {cond.emoji}
+            </span>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
+                Status Rata-rata
+              </span>
+              <h3 className="text-base sm:text-lg font-black">{cond.label}</h3>
+              <p className="text-xs font-light mt-0.5 leading-relaxed opacity-95">
+                Rata-rata skor perilakumu berada pada {detail.avg_score}/100.{" "}
+                {detail.ai_weekly_status_label}.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Comparison section */}
       <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-4">

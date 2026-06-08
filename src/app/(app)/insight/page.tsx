@@ -181,7 +181,7 @@ export default function InsightPage() {
   });
 
   return (
-    <div className="space-y-6 font-poppins">
+    <div className="space-y-8 font-poppins">
       {/* Simulation Controller Panel */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-2xl bg-muted-light/40 border border-border/60 gap-3 backdrop-blur-xs">
         <div className="flex items-center gap-2">
@@ -238,359 +238,345 @@ export default function InsightPage() {
         </p>
       </div>
 
-      {/* 2 Column Main Grid Layout structured using the Golden Ratio (1.618:1) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.618fr_1fr] gap-6">
-        {/* Left Column (Golden Ratio: ~61.8% width) - Weekly summaries & main AI report */}
-        <div className="space-y-6">
-          {/* ── MINGGU INI SEJAUH INI (Data Only, No AI) ── */}
-          <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/60 pb-2 gap-2">
-              <h2 className="text-sm sm:text-base font-extrabold text-primary flex items-center gap-1.5">
-                <Clock className="w-4.5 h-4.5 text-secondary" />
-                <span>Minggu Ini Sejauh Ini</span>
-              </h2>
-              <span className="text-[10px] font-bold text-muted bg-muted-light/45 border border-border/50 px-2.5 py-0.5 rounded-full self-start sm:self-center">
-                {getPeriodThisWeekStr()}
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {/* Status Rata-rata */}
-              <div className="p-6 rounded-3xl border flex items-center gap-4 text-amber-700 bg-amber-50 border-amber-200 shadow-xs hover:border-amber-300 hover:shadow-md transition-all duration-300">
-                <span
-                  className="text-4xl select-none shrink-0"
-                  role="img"
-                  aria-label="Status Emoji"
-                >
-                  😐
-                </span>
-                <div>
-                  <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wider block mb-0.5">
-                    Status Rata-rata
-                  </span>
-                  <h3 className="text-base sm:text-lg font-black text-amber-800 leading-tight">
-                    Perlu Diperhatikan
-                  </h3>
-                  <p className="text-xs font-light mt-1 leading-relaxed opacity-90 text-amber-700">
-                    Rata-rata skor perilakumu berada pada 69/100.
-                  </p>
-                </div>
-              </div>
-
-              {/* Grid for Total Screen Time & Kebiasaan Teraktif */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Total Screen Time */}
-                <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-                  <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
-                    Total Screen Time
-                  </span>
-                  <div className="flex items-center gap-3.5 mt-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-muted-light/50 flex items-center justify-center text-primary shrink-0">
-                      <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-base sm:text-lg font-black text-primary leading-none">
-                        20 jam
-                      </h4>
-                      <p className="text-[10px] text-muted font-light mt-1">
-                        Rata-rata 6j 40m/hari
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Kebiasaan Teraktif */}
-                <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-                  <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
-                    Kebiasaan Teraktif
-                  </span>
-                  <div className="space-y-2.5 mt-3">
-                    <div className="flex items-center justify-between text-xs gap-2">
-                      <span className="font-semibold text-primary leading-tight">
-                        Sering buka-tutup aplikasi
-                      </span>
-                      <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
-                        3/3 hari
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs gap-2">
-                      <span className="font-semibold text-primary leading-tight">
-                        Distraksi jam produktif
-                      </span>
-                      <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
-                        2/3 hari
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Info Notice */}
-            <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-muted-light/20 border border-border/40 text-muted">
-              <Info className="w-4 h-4 shrink-0 text-muted" />
-              <p className="text-[11px] font-medium">
-                Insight lengkap berupa narasi AI dan tips terarah akan tersedia
-                pada{" "}
-                <strong className="text-primary">
-                  Senin depan pukul 00:00
-                </strong>
-                .
-              </p>
-            </div>
-          </section>
-
-          {/* ── INSIGHT MINGGU LALU (AI Narrative / States) ── */}
-          <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/60 pb-2 gap-2">
-              <h2 className="text-sm sm:text-base font-extrabold text-primary flex items-center gap-1.5">
-                <Sparkles className="w-4.5 h-4.5 text-secondary animate-pulse" />
-                <span>Insight Minggu Lalu</span>
-              </h2>
-              {simMode === "normal" && (
-                <span className="text-[10px] font-bold text-muted bg-muted-light/45 border border-border/50 px-2.5 py-0.5 rounded-full self-start sm:self-center">
-                  Senin, 26 Mei – Minggu, 1 Juni 2026
-                </span>
-              )}
-            </div>
-
-            {/* 1. New User Fallback Card */}
-            {simMode === "new_user" && (
-              <div className="bg-card border border-border rounded-3xl p-8 max-w-xl mx-auto text-center space-y-6 shadow-xs my-4">
-                <div className="mx-auto w-16 h-16 rounded-2xl bg-muted-light/60 flex items-center justify-center text-primary">
-                  <Brain className="w-8 h-8 text-primary animate-pulse" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-base sm:text-lg font-black text-primary">
-                    🔍 Insight pertamamu sedang disiapkan!
-                  </h3>
-                  <p className="text-xs text-muted leading-relaxed font-light px-4">
-                    Kami butuh waktu satu minggu penuh untuk merekam dan
-                    mengenali pola penggunaan HP harianmu sebelum dapat menyusun
-                    laporan.
-                  </p>
-                </div>
-                <div className="bg-muted-light/30 border border-border/80 p-4 rounded-2xl max-w-sm mx-auto">
-                  <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
-                    Insight pertama tersedia:
-                  </span>
-                  <span className="text-primary font-black text-sm mt-1 block">
-                    {getNextMondayStr()}
-                  </span>
-                </div>
-                <p className="text-[10px] text-muted font-light">
-                  Sementara waktu, pantau aktivitas harianmu secara interaktif
-                  di menu{" "}
-                  <Link
-                    href="/dashboard"
-                    className="text-secondary font-semibold hover:underline"
-                  >
-                    Beranda
-                  </Link>{" "}
-                  dan{" "}
-                  <Link
-                    href="/statistik"
-                    className="text-secondary font-semibold hover:underline"
-                  >
-                    Statistik
-                  </Link>
-                  .
-                </p>
-              </div>
-            )}
-
-            {/* 2. Error Fallback State */}
-            {simMode === "error" && (
-              <div className="bg-card border border-red-100 rounded-3xl p-8 max-w-md mx-auto text-center space-y-4 shadow-xs my-4">
-                <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
-                  <AlertTriangle className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-black text-red-800">
-                    ⚠️ Insight minggu ini belum tersedia
-                  </h3>
-                  <p className="text-xs text-red-600 font-light">
-                    Terjadi kendala teknis saat memproses narasi AI. Kami akan
-                    mencoba menyusun kembali dalam beberapa saat.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* 3. Normal State (Loaded AI Insight) */}
-            {simMode === "normal" && currentInsight && (
-              <div className="space-y-6">
-                {/* Kondisi Minggu Itu */}
-                {(() => {
-                  const cond = getStatusDetails(currentInsight.weekly_status);
-                  return (
-                    <div
-                      className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass} shadow-xs`}
-                    >
-                      <span
-                        className="text-4xl select-none"
-                        role="img"
-                        aria-label="Kondisi Emoji"
-                      >
-                        {cond.emoji}
-                      </span>
-                      <div>
-                        <h3 className="text-base sm:text-lg font-black">
-                          {cond.label}
-                        </h3>
-                        <p className="text-xs font-light mt-0.5 leading-relaxed opacity-90">
-                          Rata-rata skor perilakumu berada pada{" "}
-                          {currentInsight.avg_behavioral_score}/100.{" "}
-                          {currentInsight.ai_weekly_status_label}.
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Yang Sudah Kamu Lakukan dengan Baik */}
-                  <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
-                    <h3 className="font-extrabold text-sm text-primary flex items-center gap-2 border-b border-border/40 pb-2">
-                      <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
-                      <span>Yang Sudah Kamu Lakukan dengan Baik 👍</span>
-                    </h3>
-                    <p className="text-xs text-muted leading-relaxed font-light">
-                      {currentInsight.ai_positive_notes}
-                    </p>
-                  </div>
-
-                  {/* Yang Perlu Kamu Perhatikan */}
-                  <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
-                    <h3 className="font-extrabold text-sm text-primary flex items-center gap-2 border-b border-border/40 pb-2">
-                      <Compass className="w-4.5 h-4.5 text-amber-500 shrink-0" />
-                      <span>Yang Perlu Kamu Perhatikan ⚠️</span>
-                    </h3>
-                    <p className="text-xs text-muted leading-relaxed font-light">
-                      {currentInsight.ai_concern_notes}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Analisis Minggu Ini */}
-                <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
-                  <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                    <Brain className="w-5 h-5 text-primary shrink-0" />
-                    <h3 className="font-extrabold text-sm sm:text-base text-primary">
-                      Analisis Minggu Ini 🤖
-                    </h3>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted leading-relaxed font-light whitespace-pre-line">
-                    {currentInsight.ai_analysis}
-                  </p>
-                </div>
-
-                {/* Tips untuk Minggu Depan */}
-                <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
-                  <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                    <Lightbulb className="w-5 h-5 text-primary shrink-0" />
-                    <h3 className="font-extrabold text-sm sm:text-base text-primary">
-                      Tips untuk Minggu Depan 💡
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {tips.map((tip, idx) => (
-                      <div
-                        key={tip}
-                        className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
-                      >
-                        <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
-                          Tips 0{idx + 1}
-                        </span>
-                        <p className="text-xs text-primary font-semibold leading-relaxed">
-                          {tip}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
+      {/* ── MINGGU INI SEJAUH INI (Data Only, No AI) ── */}
+      <section className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/60 pb-2 gap-2">
+          <h2 className="text-sm sm:text-base font-extrabold text-primary flex items-center gap-1.5">
+            <Clock className="w-4.5 h-4.5 text-secondary" />
+            <span>Minggu Ini Sejauh Ini</span>
+          </h2>
+          <span className="text-[10px] font-bold text-muted bg-muted-light/45 border border-border/50 px-2.5 py-0.5 rounded-full self-start sm:self-center">
+            {getPeriodThisWeekStr()}
+          </span>
         </div>
 
-        {/* Right Column (Golden Ratio: ~38.2% width) - Past insights history */}
-        <div className="space-y-6">
-          {/* ── INSIGHT SEBELUMNYA ── */}
-          <section className="space-y-6">
-            <div className="flex flex-col gap-3 border-b border-border/60 pb-2.5">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4.5 h-4.5 text-muted shrink-0" />
-                <h2 className="text-sm font-extrabold text-primary">
-                  Insight Sebelumnya
-                </h2>
+        <div className="space-y-4">
+          {/* Status Rata-rata */}
+          <div className="p-6 rounded-3xl border flex items-center gap-4 text-amber-700 bg-amber-50 border-amber-200 shadow-xs hover:border-amber-300 hover:shadow-md transition-all duration-300">
+            <span
+              className="text-4xl select-none shrink-0"
+              role="img"
+              aria-label="Status Emoji"
+            >
+              😐
+            </span>
+            <div>
+              <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wider block mb-0.5">
+                Status Rata-rata
+              </span>
+              <h3 className="text-base sm:text-lg font-black text-amber-800 leading-tight">
+                Perlu Diperhatikan
+              </h3>
+              <p className="text-xs font-light mt-1 leading-relaxed opacity-90 text-amber-700">
+                Rata-rata skor perilakumu berada pada 69/100.
+              </p>
+            </div>
+          </div>
+
+          {/* Grid for Total Screen Time & Kebiasaan Teraktif */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Total Screen Time */}
+            <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
+                Total Screen Time
+              </span>
+              <div className="flex items-center gap-3.5 mt-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-muted-light/50 flex items-center justify-center text-primary shrink-0">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div>
+                  <h4 className="text-base sm:text-lg font-black text-primary leading-none">
+                    20 jam
+                  </h4>
+                  <p className="text-[10px] text-muted font-light mt-1">
+                    Rata-rata 6j 40m/hari
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Kebiasaan Teraktif */}
+            <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
+                Kebiasaan Teraktif
+              </span>
+              <div className="space-y-2.5 mt-3">
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <span className="font-semibold text-primary leading-tight">
+                    Sering buka-tutup aplikasi
+                  </span>
+                  <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
+                    3/3 hari
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <span className="font-semibold text-primary leading-tight">
+                    Distraksi jam produktif
+                  </span>
+                  <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
+                    2/3 hari
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Notice */}
+        <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-muted-light/20 border border-border/40 text-muted">
+          <Info className="w-4 h-4 shrink-0 text-muted" />
+          <p className="text-[11px] font-medium">
+            Insight lengkap berupa narasi AI dan tips terarah akan tersedia pada{" "}
+            <strong className="text-primary">Senin depan pukul 00:00</strong>.
+          </p>
+        </div>
+      </section>
+
+      {/* ── INSIGHT MINGGU LALU (AI Narrative / States) ── */}
+      <section className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/60 pb-2 gap-2">
+          <h2 className="text-sm sm:text-base font-extrabold text-primary flex items-center gap-1.5">
+            <Sparkles className="w-4.5 h-4.5 text-secondary animate-pulse" />
+            <span>Insight Minggu Lalu</span>
+          </h2>
+          {simMode === "normal" && (
+            <span className="text-[10px] font-bold text-muted bg-muted-light/45 border border-border/50 px-2.5 py-0.5 rounded-full self-start sm:self-center">
+              Senin, 26 Mei – Minggu, 1 Juni 2026
+            </span>
+          )}
+        </div>
+
+        {/* 1. New User Fallback Card */}
+        {simMode === "new_user" && (
+          <div className="bg-card border border-border rounded-3xl p-8 max-w-xl mx-auto text-center space-y-6 shadow-xs my-4">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-muted-light/60 flex items-center justify-center text-primary">
+              <Brain className="w-8 h-8 text-primary animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-base sm:text-lg font-black text-primary">
+                🔍 Insight pertamamu sedang disiapkan!
+              </h3>
+              <p className="text-xs text-muted leading-relaxed font-light px-4">
+                Kami butuh waktu satu minggu penuh untuk merekam dan mengenali
+                pola penggunaan HP harianmu sebelum dapat menyusun laporan.
+              </p>
+            </div>
+            <div className="bg-muted-light/30 border border-border/80 p-4 rounded-2xl max-w-sm mx-auto">
+              <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
+                Insight pertama tersedia:
+              </span>
+              <span className="text-primary font-black text-sm mt-1 block">
+                {getNextMondayStr()}
+              </span>
+            </div>
+            <p className="text-[10px] text-muted font-light">
+              Sementara waktu, pantau aktivitas harianmu secara interaktif di
+              menu{" "}
+              <Link
+                href="/dashboard"
+                className="text-secondary font-semibold hover:underline"
+              >
+                Beranda
+              </Link>{" "}
+              dan{" "}
+              <Link
+                href="/statistik"
+                className="text-secondary font-semibold hover:underline"
+              >
+                Statistik
+              </Link>
+              .
+            </p>
+          </div>
+        )}
+
+        {/* 2. Error Fallback State */}
+        {simMode === "error" && (
+          <div className="bg-card border border-red-100 rounded-3xl p-8 max-w-md mx-auto text-center space-y-4 shadow-xs my-4">
+            <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-black text-red-800">
+                ⚠️ Insight minggu ini belum tersedia
+              </h3>
+              <p className="text-xs text-red-600 font-light">
+                Terjadi kendala teknis saat memproses narasi AI. Kami akan
+                mencoba menyusun kembali dalam beberapa saat.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* 3. Normal State (Loaded AI Insight) */}
+        {simMode === "normal" && currentInsight && (
+          <div className="space-y-6">
+            {/* Kondisi Minggu Itu */}
+            {(() => {
+              const cond = getStatusDetails(currentInsight.weekly_status);
+              return (
+                <div
+                  className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass} shadow-xs`}
+                >
+                  <span
+                    className="text-4xl select-none"
+                    role="img"
+                    aria-label="Kondisi Emoji"
+                  >
+                    {cond.emoji}
+                  </span>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black">
+                      {cond.label}
+                    </h3>
+                    <p className="text-xs font-light mt-0.5 leading-relaxed opacity-90">
+                      Rata-rata skor perilakumu berada pada{" "}
+                      {currentInsight.avg_behavioral_score}/100.{" "}
+                      {currentInsight.ai_weekly_status_label}.
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Yang Sudah Kamu Lakukan dengan Baik */}
+              <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
+                <h3 className="font-extrabold text-sm text-primary flex items-center gap-2 border-b border-border/40 pb-2">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+                  <span>Yang Sudah Kamu Lakukan dengan Baik 👍</span>
+                </h3>
+                <p className="text-xs text-muted leading-relaxed font-light">
+                  {currentInsight.ai_positive_notes}
+                </p>
               </div>
 
-              {/* Filter Bulan */}
-              <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
-                {months.map((m) => (
-                  <button
-                    type="button"
-                    key={m}
-                    onClick={() => setSelectedMonth(m)}
-                    className={`text-[10px] font-bold py-1 px-3 rounded-full border transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMonth === m
-                        ? "bg-primary text-white border-primary"
-                        : "bg-card text-muted border-border hover:bg-muted-light/60"
-                    }`}
+              {/* Yang Perlu Kamu Perhatikan */}
+              <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
+                <h3 className="font-extrabold text-sm text-primary flex items-center gap-2 border-b border-border/40 pb-2">
+                  <Compass className="w-4.5 h-4.5 text-amber-500 shrink-0" />
+                  <span>Yang Perlu Kamu Perhatikan ⚠️</span>
+                </h3>
+                <p className="text-xs text-muted leading-relaxed font-light">
+                  {currentInsight.ai_concern_notes}
+                </p>
+              </div>
+            </div>
+
+            {/* Analisis Minggu Ini */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 border-b border-border/40 pb-2">
+                <Brain className="w-5 h-5 text-primary shrink-0" />
+                <h3 className="font-extrabold text-sm sm:text-base text-primary">
+                  Analisis Minggu Ini 🤖
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-muted leading-relaxed font-light whitespace-pre-line">
+                {currentInsight.ai_analysis}
+              </p>
+            </div>
+
+            {/* Tips untuk Minggu Depan */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 border-b border-border/40 pb-2">
+                <Lightbulb className="w-5 h-5 text-primary shrink-0" />
+                <h3 className="font-extrabold text-sm sm:text-base text-primary">
+                  Tips untuk Minggu Depan 💡
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {tips.map((tip, idx) => (
+                  <div
+                    key={tip}
+                    className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
                   >
-                    {m}
-                  </button>
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
+                      Tips 0{idx + 1}
+                    </span>
+                    <p className="text-xs text-primary font-semibold leading-relaxed">
+                      {tip}
+                    </p>
+                  </div>
                 ))}
               </div>
             </div>
+          </div>
+        )}
+      </section>
 
-            {/* Daftar Cards */}
-            {filteredPastInsights.length === 0 ? (
-              <div className="text-center p-8 border border-border rounded-3xl bg-muted-light/10 text-xs text-muted">
-                Tidak ada insight lama untuk filter terpilih.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                {filteredPastInsights.map((past) => {
-                  const cond = getStatusDetails(past.weekly_status);
-                  return (
-                    <div
-                      key={past.id}
-                      className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-primary/20 hover:shadow-md transition-all h-40"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <span className="text-[10px] text-muted font-bold">
-                            {past.week_start} – {past.week_end}
-                          </span>
-                          <span
-                            className="text-lg select-none"
-                            role="img"
-                            aria-label="Status Emoji"
-                          >
-                            {cond.emoji}
-                          </span>
-                        </div>
-                        <h4 className="text-xs font-black text-primary leading-snug line-clamp-2">
-                          {past.ai_weekly_status_label}
-                        </h4>
-                      </div>
-                      <Link
-                        href={`/insight/${past.id}`}
-                        className="text-xs font-bold text-secondary flex items-center gap-1 hover:underline mt-2 self-start"
-                      >
-                        <span>Baca Selengkapnya</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+      {/* ── INSIGHT SEBELUMNYA ── */}
+      <section className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/60 pb-2.5 gap-2">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4.5 h-4.5 text-muted shrink-0" />
+            <h2 className="text-sm sm:text-base font-extrabold text-primary">
+              Insight Sebelumnya
+            </h2>
+          </div>
+
+          {/* Filter Bulan */}
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
+            {months.map((m) => (
+              <button
+                type="button"
+                key={m}
+                onClick={() => setSelectedMonth(m)}
+                className={`text-[10px] font-bold py-1 px-3 rounded-full border transition-all cursor-pointer whitespace-nowrap ${
+                  selectedMonth === m
+                    ? "bg-primary text-white border-primary"
+                    : "bg-card text-muted border-border hover:bg-muted-light/60"
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+
+        {/* Daftar Cards */}
+        {filteredPastInsights.length === 0 ? (
+          <div className="text-center p-8 border border-border rounded-3xl bg-muted-light/10 text-xs text-muted">
+            Tidak ada insight lama untuk filter terpilih.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredPastInsights.map((past) => {
+              const cond = getStatusDetails(past.weekly_status);
+              return (
+                <div
+                  key={past.id}
+                  className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-primary/20 hover:shadow-md transition-all h-40"
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] text-muted font-bold">
+                        {past.week_start} – {past.week_end}
+                      </span>
+                      <span
+                        className="text-lg select-none"
+                        role="img"
+                        aria-label="Status Emoji"
+                      >
+                        {cond.emoji}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-black text-primary leading-snug line-clamp-2">
+                      {past.ai_weekly_status_label}
+                    </h4>
+                  </div>
+                  <Link
+                    href={`/insight/${past.id}`}
+                    className="text-xs font-bold text-secondary flex items-center gap-1 hover:underline mt-2 self-start"
+                  >
+                    <span>Baca Selengkapnya</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

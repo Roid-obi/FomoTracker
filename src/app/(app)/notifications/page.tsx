@@ -1,44 +1,78 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { gooeyToast } from "goey-toast";
 import {
   Activity,
+  ArrowLeft,
   Bell,
   Briefcase,
   CheckCircle2,
   Clock,
   Moon,
-  Smartphone,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
-import { initialNotifications } from "@/lib/data/databaseInitialData";
+import type { NotificationModel } from "@/lib/models/notification.model";
+import { api } from "@/lib/utils/api";
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(
-    initialNotifications.map((n) => ({
-      id: n.id,
-      type: n.type,
-      message: n.message,
-      isRead: n.is_read,
-      createdAt: n.created_at,
-    })),
-  );
-
+  const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<"semua" | "belum-dibaca">(
     "semua",
   );
 
-  const toggleReadStatus = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === id ? { ...notif, isRead: !notif.isRead } : notif,
-      ),
-    );
+  // Fetch notifications from backend
+  const {
+    data: notifications = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: NotificationModel.getNotificationResponse[];
+      }>("/api/notification");
+      return res.data.data;
+    },
+  });
+
+  // Mutation to toggle read/unread status
+  const toggleReadMutation = useMutation({
+    mutationFn: async ({ id, isRead }: { id: string; isRead: boolean }) => {
+      const res = await api.put("/api/notification", { id, isRead });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: () => {
+      gooeyToast.error("Gagal memperbarui status baca.");
+    },
+  });
+
+  // Mutation to mark all notifications as read
+  const markAllReadMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.put("/api/notification", { markAllRead: true });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      gooeyToast.success("Semua notifikasi ditandai sudah dibaca.");
+    },
+    onError: () => {
+      gooeyToast.error("Gagal memperbarui semua status baca.");
+    },
+  });
+
+  const toggleReadStatus = (id: string, currentReadStatus: boolean | null) => {
+    toggleReadMutation.mutate({ id, isRead: !currentReadStatus });
   };
 
   const handleMarkAllRead = () => {
-    setNotifications((prev) =>
-      prev.map((notif) => ({ ...notif, isRead: true })),
-    );
+    markAllReadMutation.mutate();
   };
 
   const filteredNotifications = notifications.filter((notif) => {
@@ -84,7 +118,8 @@ export default function NotificationsPage() {
   };
 
   // Helper to format date
-  const formatTimeAgo = (dateStr: string) => {
+  const formatTimeAgo = (dateStr: string | Date | null) => {
+    if (!dateStr) return "Baru saja";
     const date = new Date(dateStr);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -99,23 +134,54 @@ export default function NotificationsPage() {
     return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-3 font-poppins">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-xs font-bold text-muted animate-pulse">
+          Memuat pesan masuk...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-card border border-red-200 rounded-3xl p-12 text-center text-red-800 shadow-xs font-poppins">
+        <p className="text-xs font-bold">Gagal memuat notifikasi.</p>
+        <p className="text-[10px] opacity-75 mt-1">
+          Silakan periksa koneksi Anda dan coba beberapa saat lagi.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 font-poppins">
+      {/* Tombol Kembali */}
+      <div>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted hover:text-primary transition-all rounded-xl bg-card border border-border hover:border-primary/20 shadow-2xs font-bold cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Kembali ke Beranda</span>
+        </Link>
+      </div>
+
       {/* Top Title Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
-            Riwayat Pengingat
+            Pesan Masuk
           </h1>
-          <p className="text-xs text-muted font-light mt-0.5">
-            Daftar peringatan dan catatan kebiasaan digital yang dikirim sistem.
-          </p>
         </div>
         {unreadCount > 0 && (
           <button
             type="button"
             onClick={handleMarkAllRead}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card text-xs font-bold text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs self-start sm:self-auto"
+            disabled={markAllReadMutation.isPending}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card text-xs font-bold text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs self-start sm:self-auto disabled:opacity-50"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>Tandai Semua Sudah Dibaca</span>
@@ -164,8 +230,9 @@ export default function NotificationsPage() {
               <button
                 type="button"
                 key={notif.id}
-                onClick={() => toggleReadStatus(notif.id)}
-                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 select-none relative group bg-transparent focus:outline-none ${
+                onClick={() => toggleReadStatus(notif.id, notif.isRead)}
+                disabled={toggleReadMutation.isPending}
+                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 select-none relative group bg-transparent focus:outline-none disabled:opacity-80 ${
                   notif.isRead
                     ? "bg-card border-border opacity-70 hover:opacity-100"
                     : "bg-primary/[0.01] border-primary/20 shadow-xs hover:bg-primary/[0.03]"
@@ -173,7 +240,7 @@ export default function NotificationsPage() {
               >
                 {/* Titik biru jika belum dibaca */}
                 {!notif.isRead && (
-                  <span className="absolute top-5 right-5 w-2 h-2 bg-secondary rounded-full" />
+                  <span className="absolute top-5 right-5 w-2 h-2 bg-secondary rounded-full animate-pulse" />
                 )}
 
                 {/* Left Side Icon */}

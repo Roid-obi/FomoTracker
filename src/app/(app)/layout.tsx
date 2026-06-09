@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   BarChart2,
   Bell,
@@ -14,6 +15,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
+import type { NotificationModel } from "@/lib/models/notification.model";
 import { api } from "@/lib/utils/api";
 
 const navigationItems = [
@@ -43,6 +45,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: user } = useUser();
   const [todayStr, setTodayStr] = useState("");
+
+  // Fetch notifications to get real-time unread count
+  const { data: notifications = [] } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: NotificationModel.getNotificationResponse[];
+      }>("/api/notification");
+      return res.data.data;
+    },
+    staleTime: 30000,
+  });
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   useEffect(() => {
     const formatIndonesianDate = () => {
@@ -239,10 +256,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <Link
               href="/notifications"
-              className="relative p-2 rounded-xl border border-border bg-card text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs"
+              className={`relative p-2 rounded-xl border transition-all cursor-pointer shadow-xs ${
+                pathname.startsWith("/notifications")
+                  ? "bg-primary border-primary text-white"
+                  : "border-border bg-card text-primary hover:bg-muted-light"
+              }`}
             >
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border border-card rounded-full" />
+              {unreadCount > 0 && (
+                <span
+                  className={`absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border rounded-full animate-pulse ${
+                    pathname.startsWith("/notifications")
+                      ? "border-primary"
+                      : "border-card"
+                  }`}
+                />
+              )}
             </Link>
           </div>
 

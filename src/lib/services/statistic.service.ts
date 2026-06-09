@@ -534,3 +534,30 @@ export async function getFlagsService(
 
   return { success: true, data };
 }
+
+export async function getScoreAverageService(
+  startDate: string,
+  endDate: string,
+): Promise<ServiceResult<{ averageScore: number; totalDays: number }>> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  const rows = await db
+    .select({
+      totalScore: table.behavioralScores.totalScore,
+    })
+    .from(table.behavioralScores)
+    .where(
+      and(
+        eq(table.behavioralScores.userId, userId),
+        gte(table.behavioralScores.scoreDate, startDate),
+        lte(table.behavioralScores.scoreDate, endDate),
+      ),
+    );
+
+  const totalDays = rows.length;
+  const sum = rows.reduce((s, r) => s + (r.totalScore ?? 0), 0);
+  const averageScore = totalDays > 0 ? Math.round(sum / totalDays) : 0;
+
+  return { success: true, data: { averageScore, totalDays } };
+}

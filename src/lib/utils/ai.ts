@@ -127,30 +127,75 @@ export async function generateWeeklyInsightAI(
   const ai = new GoogleGenAI({ apiKey });
   const prompt = buildPrompt(input);
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
-  });
+  const runGeneration = async (modelName: string) => {
+    return await ai.models.generateContent({
+      model: modelName,
+      contents: prompt,
+      config: {
+        temperature: 0.7,
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            weeklyStatusLabel: { type: "string" },
+            positiveNotes: { type: "string" },
+            concernNotes: { type: "string" },
+            analysis: { type: "string" },
+            tips: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+          required: [
+            "weeklyStatusLabel",
+            "positiveNotes",
+            "concernNotes",
+            "analysis",
+            "tips",
+          ],
+        },
+      },
+    });
+  };
 
-  const rawText = response.text ?? "";
+  let response: Awaited<ReturnType<typeof runGeneration>> | null = null;
+  let lastError: unknown = null;
 
-  // Ambil JSON dari respons (toleran terhadap markdown code block)
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
+  // Coba gemini-2.5-flash dengan 4 kali retry progresif (2s, 4s, 6s)
+  const maxAttempts = 4;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      response = await runGeneration("gemini-2.5-flash");
+      lastError = null;
+      break;
+    } catch (err: unknown) {
+      lastError = err;
+      if (attempt < maxAttempts) {
+        // Progressive backoff delay: 2s, 4s, 6s
+        const delay = attempt * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  if (lastError || !response) {
+    const errMsg =
+      lastError instanceof Error ? lastError.message : String(lastError);
     throw new Error(
-      `AI tidak mengembalikan JSON valid. Raw response: ${rawText.slice(0, 300)}`,
+      `AI generation failed after ${maxAttempts} attempts: ${errMsg}`,
     );
   }
 
+  const rawText = response.text ?? "";
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(jsonMatch[0]);
+    parsed = JSON.parse(rawText);
   } catch {
-    throw new Error(`Gagal parse JSON dari AI: ${jsonMatch[0].slice(0, 300)}`);
+    throw new Error(
+      `Gagal parse JSON dari respons AI. Raw response: ${rawText.slice(0, 300)}`,
+    );
   }
 
   // Validasi dengan Zod schema

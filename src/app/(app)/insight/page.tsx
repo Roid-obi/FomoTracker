@@ -1,7 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
-  AlertTriangle,
   ArrowRight,
   Brain,
   Calendar,
@@ -9,67 +9,53 @@ import {
   Clock,
   Compass,
   Info,
-  Layers,
   Lightbulb,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { initialWeeklyInsights } from "@/lib/data/databaseInitialData";
+import { useState } from "react";
+import { api } from "@/lib/utils/api";
 
-// Mock past reports for history
-const pastInsightsData = [
-  {
-    id: "w-prev-1",
-    week_start: "19 Mei 2026",
-    week_end: "25 Mei 2026",
-    total_screen_time_seconds: 172800,
-    avg_behavioral_score: 72,
-    weekly_status: "heavy",
-    ai_weekly_status_label: "Minggu yang Cukup Berat Secara Digital",
-    month: "Mei 2026",
-    emoji: "😟",
-  },
-  {
-    id: "w-prev-2",
-    week_start: "12 Mei 2026",
-    week_end: "18 Mei 2026",
-    total_screen_time_seconds: 151200,
-    avg_behavioral_score: 58,
-    weekly_status: "attention",
-    ai_weekly_status_label: "Minggu yang Cukup Padat",
-    month: "Mei 2026",
-    emoji: "😐",
-  },
-  {
-    id: "w-prev-3",
-    week_start: "5 Mei 2026",
-    week_end: "11 Mei 2026",
-    total_screen_time_seconds: 135000,
-    avg_behavioral_score: 35,
-    weekly_status: "good",
-    ai_weekly_status_label: "Minggu yang Sangat Baik!",
-    month: "Mei 2026",
-    emoji: "😊",
-  },
-];
+const _formatMinutesToHoursMins = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  return `${h}j ${m}m`;
+};
 
-export default function InsightPage() {
-  const [selectedMonth, setSelectedMonth] = useState<string>("Semua");
-  const [simMode, setSimMode] = useState<"normal" | "new_user" | "error">(
-    "normal",
-  );
-  const [currentDate, setCurrentDate] = useState<Date | null>(null);
+const formatSecToHoursMins = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0) return `${m}m`;
+  return `${h}j ${m}m`;
+};
 
-  useEffect(() => {
-    setCurrentDate(new Date());
-  }, []);
+const formatPeriodRange = (startStr: string, endStr: string) => {
+  try {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    return `${start.getDate()} ${months[start.getMonth()]} – ${end.getDate()} ${months[end.getMonth()]} ${end.getFullYear()}`;
+  } catch {
+    return `${startStr} – ${endStr}`;
+  }
+};
 
-  const currentInsight = initialWeeklyInsights[0];
-
-  // Helper to compute dates dynamically
-  const getPeriodThisWeekStr = () => {
-    if (!currentDate) return "Senin, 1 Juni – Jumat, 5 Juni 2026";
+const _formatIndonesianDateStr = (dateStr: string) => {
+  try {
     const days = [
       "Minggu",
       "Senin",
@@ -93,40 +79,133 @@ export default function InsightPage() {
       "November",
       "Desember",
     ];
+    const date = new Date(dateStr);
+    const dayName = days[date.getDay()];
+    const dateNum = date.getDate();
+    const monthName = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${dayName}, ${dateNum} ${monthName} ${year}`;
+  } catch {
+    return dateStr;
+  }
+};
 
-    const monday = new Date(currentDate);
-    const day = currentDate.getDay();
-    const diff = currentDate.getDate() - day + (day === 0 ? -6 : 1);
-    monday.setDate(diff);
+export default function InsightPage() {
+  const [selectedMonth, setSelectedMonth] = useState<string>("Semua");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
 
-    const yesterday = new Date(currentDate);
-    yesterday.setDate(currentDate.getDate() - 1);
+  // Calculate this week's start (Monday) and end (Sunday/Today) range for stats
+  const getThisWeekRange = () => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
 
-    return `${days[1]}, ${monday.getDate()} ${months[monday.getMonth()]} – ${days[yesterday.getDay()]}, ${yesterday.getDate()} ${months[yesterday.getMonth()]} ${yesterday.getFullYear()}`;
+    const formatDate = (d: Date) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    return {
+      startDate: formatDate(monday),
+      endDate: formatDate(now < sunday ? now : sunday),
+      sundayDate: formatDate(sunday),
+    };
   };
 
-  const getNextMondayStr = () => {
-    if (!currentDate) return "Senin, 8 Juni 2026";
-    const months = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ];
-    const nextMonday = new Date(currentDate);
-    const day = currentDate.getDay();
-    const daysToNextMonday = day === 0 ? 1 : 8 - day;
-    nextMonday.setDate(currentDate.getDate() + daysToNextMonday);
+  const weekRange = getThisWeekRange();
 
-    return `Senin, ${nextMonday.getDate()} ${months[nextMonday.getMonth()]} ${nextMonday.getFullYear()}`;
+  // Queries
+  const {
+    data: latestInsight,
+    isLoading: isLatestLoading,
+    refetch: refetchLatest,
+  } = useQuery({
+    queryKey: ["insight-latest"],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          "/api/insight/latest",
+        );
+        return res.data.data;
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  const { data: historyData, isLoading: isHistoryLoading } = useQuery({
+    queryKey: ["insight-history"],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        "/api/insight/history?limit=50",
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: screenTimeData, isLoading: isScreenTimeLoading } = useQuery({
+    queryKey: ["thisWeekScreenTime", weekRange.startDate, weekRange.endDate],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/screen-time?startDate=${weekRange.startDate}&endDate=${weekRange.endDate}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: flagsData, isLoading: isFlagsLoading } = useQuery({
+    queryKey: ["thisWeekFlags", weekRange.startDate, weekRange.endDate],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any[] }>(
+        `/api/statistic/flags?startDate=${weekRange.startDate}&endDate=${weekRange.endDate}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: scoreAverageData, isLoading: isScoreAverageLoading } = useQuery(
+    {
+      queryKey: [
+        "thisWeekScoreAverage",
+        weekRange.startDate,
+        weekRange.endDate,
+      ],
+      queryFn: async () => {
+        const res = await api.get<{ success: boolean; data: any }>(
+          `/api/statistic/score-average?startDate=${weekRange.startDate}&endDate=${weekRange.endDate}`,
+        );
+        return res.data.data;
+      },
+    },
+  );
+
+  const handleGenerateInsight = async () => {
+    setIsGenerating(true);
+    setGenError(null);
+    try {
+      const res = await api.post<{ success: boolean; message: string }>(
+        "/api/insight/generate",
+        {},
+      );
+      if (res.data.success) {
+        refetchLatest();
+      } else {
+        setGenError("Gagal memproses data laporan AI.");
+      }
+    } catch (err: any) {
+      setGenError(
+        err.response?.data?.error || err.message || "Terjadi kesalahan.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // Status mapping helper
@@ -159,74 +238,101 @@ export default function InsightPage() {
     }
   };
 
+  const getStatusFromScore = (score: number) => {
+    if (score < 40) return "good";
+    if (score < 70) return "attention";
+    return "heavy";
+  };
+
+  if (
+    isLatestLoading ||
+    isHistoryLoading ||
+    isScreenTimeLoading ||
+    isFlagsLoading ||
+    isScoreAverageLoading
+  ) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-xs font-bold text-muted animate-pulse">
+          Membuat narasi insight AI...
+        </div>
+      </div>
+    );
+  }
+
+  // Parse this week's data
+  const thisWeekScore = scoreAverageData?.averageScore ?? 0;
+  const thisWeekStatus = getStatusFromScore(thisWeekScore);
+  const condThisWeek = getStatusDetails(thisWeekStatus);
+
+  const activeFlags = (flagsData ?? [])
+    .filter((f: any) => f.count > 0)
+    .sort((a: any, b: any) => b.count - a.count);
+
   // Parse tips
   let tips: string[] = [];
-  if (currentInsight?.ai_tips) {
+  if (latestInsight?.aiTips) {
     try {
-      tips = JSON.parse(currentInsight.ai_tips);
+      tips = JSON.parse(latestInsight.aiTips);
     } catch (_e) {
-      tips = [
-        "Coba taruh HP di luar kamar saat tidur untuk mengurangi midnight usage",
-        "Batasi buka TikTok maksimal 2x sehari dengan durasi maksimal 30 menit",
-        "Aktifkan mode fokus saat jam belajar/kerja untuk mengurangi distraksi",
-      ];
+      tips = [];
     }
   }
 
-  const months = ["Semua", "Juni 2026", "Mei 2026"];
+  // Generate dynamic month list from history data
+  const monthsList = ["Semua"];
+  if (historyData?.items) {
+    const monthsSet = new Set<string>();
+    for (const item of historyData.items) {
+      if (item.weekStart) {
+        const date = new Date(item.weekStart);
+        const mNames = [
+          "Januari",
+          "Februari",
+          "Maret",
+          "April",
+          "Mei",
+          "Juni",
+          "Juli",
+          "Agustus",
+          "September",
+          "Oktober",
+          "November",
+          "Desember",
+        ];
+        const label = `${mNames[date.getMonth()]} ${date.getFullYear()}`;
+        monthsSet.add(label);
+      }
+    }
+    monthsList.push(...Array.from(monthsSet));
+  }
 
-  const filteredPastInsights = pastInsightsData.filter((insight) => {
-    if (selectedMonth === "Semua") return true;
-    return insight.month === selectedMonth;
-  });
+  const filteredPastInsights = (historyData?.items ?? []).filter(
+    (insight: any) => {
+      if (selectedMonth === "Semua") return true;
+      const date = new Date(insight.weekStart);
+      const mNames = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      const label = `${mNames[date.getMonth()]} ${date.getFullYear()}`;
+      return label === selectedMonth;
+    },
+  );
 
   return (
     <div className="space-y-8 font-poppins">
-      {/* Simulation Controller Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-2xl bg-muted-light/40 border border-border/60 gap-3 backdrop-blur-xs">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-primary" />
-          <span className="text-xs font-bold text-primary">
-            Simulasi Status Insight:
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setSimMode("normal")}
-            className={`text-[10px] font-bold py-1 px-3 rounded-xl border transition-all cursor-pointer ${
-              simMode === "normal"
-                ? "bg-primary text-white border-primary shadow-xs"
-                : "bg-white text-muted border-border hover:bg-muted-light/40"
-            }`}
-          >
-            Normal (Ada Insight)
-          </button>
-          <button
-            type="button"
-            onClick={() => setSimMode("new_user")}
-            className={`text-[10px] font-bold py-1 px-3 rounded-xl border transition-all cursor-pointer ${
-              simMode === "new_user"
-                ? "bg-primary text-white border-primary shadow-xs"
-                : "bg-white text-muted border-border hover:bg-muted-light/40"
-            }`}
-          >
-            User Baru
-          </button>
-          <button
-            type="button"
-            onClick={() => setSimMode("error")}
-            className={`text-[10px] font-bold py-1 px-3 rounded-xl border transition-all cursor-pointer ${
-              simMode === "error"
-                ? "bg-primary text-white border-primary shadow-xs"
-                : "bg-white text-muted border-border hover:bg-muted-light/40"
-            }`}
-          >
-            Error / Gagal
-          </button>
-        </div>
-      </div>
-
       {/* Header */}
       <div>
         <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
@@ -246,39 +352,34 @@ export default function InsightPage() {
             <span>Minggu Ini Sejauh Ini</span>
           </h2>
           <span className="text-[10px] font-bold text-muted bg-muted-light/45 border border-border/50 px-2.5 py-0.5 rounded-full self-start sm:self-center">
-            {getPeriodThisWeekStr()}
+            {formatPeriodRange(weekRange.startDate, weekRange.endDate)}
           </span>
         </div>
 
         <div className="space-y-4">
           {/* Status Rata-rata */}
-          {(() => {
-            const cond = getStatusDetails("attention");
-            return (
-              <div
-                className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass} shadow-xs hover:border-amber-300 hover:shadow-md transition-all duration-300`}
-              >
-                <span
-                  className="text-4xl select-none shrink-0"
-                  role="img"
-                  aria-label="Status Emoji"
-                >
-                  {cond.emoji}
-                </span>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
-                    Status Rata-rata
-                  </span>
-                  <h3 className="text-base sm:text-lg font-black leading-tight">
-                    {cond.label}
-                  </h3>
-                  <p className="text-xs font-light mt-1 leading-relaxed opacity-90">
-                    Rata-rata skor perilakumu berada pada 69/100.
-                  </p>
-                </div>
-              </div>
-            );
-          })()}
+          <div
+            className={`p-6 rounded-3xl border flex items-center gap-4 ${condThisWeek.colorClass} shadow-xs hover:shadow-md transition-all duration-300`}
+          >
+            <span
+              className="text-4xl select-none shrink-0"
+              role="img"
+              aria-label="Status Emoji"
+            >
+              {condThisWeek.emoji}
+            </span>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
+                Status Rata-rata
+              </span>
+              <h3 className="text-base sm:text-lg font-black leading-tight">
+                {condThisWeek.label}
+              </h3>
+              <p className="text-xs font-light mt-1 leading-relaxed opacity-90">
+                Rata-rata skor perilakumu berada pada {thisWeekScore}/100.
+              </p>
+            </div>
+          </div>
 
           {/* Grid for Total Screen Time & Kebiasaan Teraktif */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -293,10 +394,12 @@ export default function InsightPage() {
                 </div>
                 <div>
                   <h4 className="text-base sm:text-lg font-black text-primary leading-none">
-                    20 jam
+                    {formatSecToHoursMins(screenTimeData?.totalSeconds ?? 0)}
                   </h4>
                   <p className="text-[10px] text-muted font-light mt-1">
-                    Rata-rata 6j 40m/hari
+                    Rata-rata{" "}
+                    {formatSecToHoursMins(screenTimeData?.avgDailySeconds ?? 0)}
+                    /hari
                   </p>
                 </div>
               </div>
@@ -308,22 +411,25 @@ export default function InsightPage() {
                 Kebiasaan Teraktif
               </span>
               <div className="space-y-2.5 mt-3">
-                <div className="flex items-center justify-between text-xs gap-2">
-                  <span className="font-semibold text-primary leading-tight">
-                    Sering buka-tutup aplikasi
-                  </span>
-                  <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
-                    3/3 hari
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs gap-2">
-                  <span className="font-semibold text-primary leading-tight">
-                    Distraksi jam produktif
-                  </span>
-                  <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
-                    2/3 hari
-                  </span>
-                </div>
+                {activeFlags.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-xs text-muted font-light opacity-65">
+                    Tidak ada kebiasaan buruk terdeteksi minggu ini 😊
+                  </div>
+                ) : (
+                  activeFlags.slice(0, 2).map((flag: any) => (
+                    <div
+                      key={flag.name}
+                      className="flex items-center justify-between text-xs gap-2"
+                    >
+                      <span className="font-semibold text-primary leading-tight">
+                        {flag.name}
+                      </span>
+                      <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
+                        {flag.count}/{flag.total} hari
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -332,9 +438,10 @@ export default function InsightPage() {
         {/* Info Notice */}
         <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-muted-light/20 border border-border/40 text-muted">
           <Info className="w-4 h-4 shrink-0 text-muted" />
-          <p className="text-[11px] font-medium">
+          <p className="text-[11px] font-medium leading-relaxed">
             Insight lengkap berupa narasi AI dan tips terarah akan tersedia pada{" "}
-            <strong className="text-primary">Senin depan pukul 00:00</strong>.
+            <strong className="text-primary">Senin depan pukul 00:00</strong>{" "}
+            (setelah data terkumpul lengkap dari Senin sampai Minggu).
           </p>
         </div>
       </section>
@@ -346,35 +453,56 @@ export default function InsightPage() {
             <Sparkles className="w-4.5 h-4.5 text-secondary animate-pulse" />
             <span>Insight Minggu Lalu</span>
           </h2>
-          {simMode === "normal" && (
+          {latestInsight && (
             <span className="text-[10px] font-bold text-muted bg-muted-light/45 border border-border/50 px-2.5 py-0.5 rounded-full self-start sm:self-center">
-              Senin, 26 Mei – Minggu, 1 Juni 2026
+              {formatPeriodRange(
+                latestInsight.weekStart,
+                latestInsight.weekEnd,
+              )}
             </span>
           )}
         </div>
 
         {/* 1. New User Fallback Card */}
-        {simMode === "new_user" && (
+        {!latestInsight && (
           <div className="bg-card border border-border rounded-3xl p-8 max-w-xl mx-auto text-center space-y-6 shadow-xs my-4">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-muted-light/60 flex items-center justify-center text-primary">
               <Brain className="w-8 h-8 text-primary animate-pulse" />
             </div>
             <div className="space-y-2">
               <h3 className="text-base sm:text-lg font-black text-primary">
-                🔍 Insight pertamamu sedang disiapkan!
+                🔍 Laporan insight mingguanmu sedang disiapkan!
               </h3>
               <p className="text-xs text-muted leading-relaxed font-light px-4">
-                Kami butuh waktu satu minggu penuh untuk merekam dan mengenali
-                pola penggunaan HP harianmu sebelum dapat menyusun laporan.
+                Kami merekam pola penggunaan HP harianmu. Setiap hari Senin
+                pukul 00:00, platform akan menyusun laporan komprehensif 7 hari.
               </p>
             </div>
-            <div className="bg-muted-light/30 border border-border/80 p-4 rounded-2xl max-w-sm mx-auto">
-              <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
-                Insight pertama tersedia:
-              </span>
-              <span className="text-primary font-black text-sm mt-1 block">
-                {getNextMondayStr()}
-              </span>
+            <div className="bg-muted-light/30 border border-border/80 p-5 rounded-2xl max-w-sm mx-auto space-y-3">
+              <div>
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
+                  Insight berikutnya tersedia:
+                </span>
+                <span className="text-primary font-black text-sm mt-1 block">
+                  Senin depan, pukul 00:00
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerateInsight}
+                disabled={isGenerating}
+                className="w-full bg-primary hover:bg-primary-dark text-white text-xs font-bold py-2.5 px-4 rounded-xl cursor-pointer disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                {isGenerating
+                  ? "Sedang Menyusun..."
+                  : "Susun Laporan AI Sekarang"}
+              </button>
+              {genError && (
+                <p className="text-[10px] text-red-500 font-medium">
+                  {genError}
+                </p>
+              )}
             </div>
             <p className="text-[10px] text-muted font-light">
               Sementara waktu, pantau aktivitas harianmu secara interaktif di
@@ -397,30 +525,12 @@ export default function InsightPage() {
           </div>
         )}
 
-        {/* 2. Error Fallback State */}
-        {simMode === "error" && (
-          <div className="bg-card border border-red-100 rounded-3xl p-8 max-w-md mx-auto text-center space-y-4 shadow-xs my-4">
-            <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-black text-red-800">
-                ⚠️ Insight minggu ini belum tersedia
-              </h3>
-              <p className="text-xs text-red-600 font-light">
-                Terjadi kendala teknis saat memproses narasi AI. Kami akan
-                mencoba menyusun kembali dalam beberapa saat.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* 3. Normal State (Loaded AI Insight) */}
-        {simMode === "normal" && currentInsight && (
+        {/* 2. Normal State (Loaded AI Insight) */}
+        {latestInsight && (
           <div className="space-y-6">
             {/* Kondisi Minggu Itu */}
             {(() => {
-              const cond = getStatusDetails(currentInsight.weekly_status);
+              const cond = getStatusDetails(latestInsight.weeklyStatus);
               return (
                 <div
                   className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass} shadow-xs`}
@@ -441,8 +551,8 @@ export default function InsightPage() {
                     </h3>
                     <p className="text-xs font-light mt-0.5 leading-relaxed opacity-90">
                       Rata-rata skor perilakumu berada pada{" "}
-                      {currentInsight.avg_behavioral_score}/100.{" "}
-                      {currentInsight.ai_weekly_status_label}.
+                      {latestInsight.avgBehavioralScore}/100.{" "}
+                      {latestInsight.aiWeeklyStatusLabel}.
                     </p>
                   </div>
                 </div>
@@ -457,7 +567,7 @@ export default function InsightPage() {
                   <span>Yang Sudah Kamu Lakukan dengan Baik</span>
                 </h3>
                 <p className="text-xs text-muted leading-relaxed font-light">
-                  {currentInsight.ai_positive_notes}
+                  {latestInsight.aiPositiveNotes}
                 </p>
               </div>
 
@@ -468,7 +578,7 @@ export default function InsightPage() {
                   <span>Yang Perlu Kamu Perhatikan</span>
                 </h3>
                 <p className="text-xs text-muted leading-relaxed font-light">
-                  {currentInsight.ai_concern_notes}
+                  {latestInsight.aiConcernNotes}
                 </p>
               </div>
             </div>
@@ -482,7 +592,7 @@ export default function InsightPage() {
                 </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted leading-relaxed font-light whitespace-pre-line">
-                {currentInsight.ai_analysis}
+                {latestInsight.aiAnalysis}
               </p>
             </div>
 
@@ -494,21 +604,27 @@ export default function InsightPage() {
                   Tips untuk Minggu Depan
                 </h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {tips.map((tip, idx) => (
-                  <div
-                    key={tip}
-                    className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
-                  >
-                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
-                      Tips 0{idx + 1}
-                    </span>
-                    <p className="text-xs text-primary font-semibold leading-relaxed">
-                      {tip}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              {tips.length === 0 ? (
+                <p className="text-xs text-muted font-light">
+                  Tidak ada saran khusus.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {tips.map((tip, idx) => (
+                    <div
+                      key={tip}
+                      className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
+                    >
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
+                        Tips 0{idx + 1}
+                      </span>
+                      <p className="text-xs text-primary font-semibold leading-relaxed">
+                        {tip}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -526,7 +642,7 @@ export default function InsightPage() {
 
           {/* Filter Bulan */}
           <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
-            {months.map((m) => (
+            {monthsList.map((m) => (
               <button
                 type="button"
                 key={m}
@@ -550,8 +666,8 @@ export default function InsightPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPastInsights.map((past) => {
-              const cond = getStatusDetails(past.weekly_status);
+            {filteredPastInsights.map((past: any) => {
+              const cond = getStatusDetails(past.weeklyStatus);
               return (
                 <div
                   key={past.id}
@@ -560,7 +676,7 @@ export default function InsightPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-start">
                       <span className="text-[10px] text-muted font-bold">
-                        {past.week_start} – {past.week_end}
+                        {formatPeriodRange(past.weekStart, past.weekEnd)}
                       </span>
                       <span
                         className="text-lg select-none"
@@ -571,7 +687,7 @@ export default function InsightPage() {
                       </span>
                     </div>
                     <h4 className="text-xs font-black text-primary leading-snug line-clamp-2">
-                      {past.ai_weekly_status_label}
+                      {past.aiWeeklyStatusLabel || "Laporan Mingguan"}
                     </h4>
                   </div>
                   <Link

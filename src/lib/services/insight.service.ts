@@ -134,6 +134,47 @@ export async function getLatestService(): Promise<
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
 
+  // 1. Cek apakah report minggu lalu (completed week) sudah dibuat atau butuh dibuat
+  const { weekStart, weekEnd } = resolveWeekRange();
+
+  const [existingInsight] = await db
+    .select({
+      id: table.weeklyInsights.id,
+      generationStatus: table.weeklyInsights.generationStatus,
+    })
+    .from(table.weeklyInsights)
+    .where(
+      and(
+        eq(table.weeklyInsights.userId, userId),
+        eq(table.weeklyInsights.weekStart, weekStart),
+      ),
+    )
+    .limit(1);
+
+  if (
+    !existingInsight ||
+    existingInsight.generationStatus === "failed" ||
+    existingInsight.generationStatus === "pending"
+  ) {
+    // Cek apakah ada data di behavioralScores untuk minggu tersebut sebelum generate
+    const [scoreCountRow] = await db
+      .select({ count: sql<number>`cast(count(*) as integer)` })
+      .from(table.behavioralScores)
+      .where(
+        and(
+          eq(table.behavioralScores.userId, userId),
+          gte(table.behavioralScores.scoreDate, weekStart),
+          lte(table.behavioralScores.scoreDate, weekEnd),
+        ),
+      );
+
+    if (scoreCountRow && scoreCountRow.count > 0) {
+      // Auto-generate weekly insight
+      await generateInsightService({ weekStart });
+    }
+  }
+
+  // 2. Ambil weekly insight terbaru yang sudah sukses di-generate
   const [row] = await db
     .select(insightDetailSelect)
     .from(table.weeklyInsights)

@@ -57,7 +57,17 @@ export async function getDailyStatusService(
     );
 
   if (!row) {
-    return { success: false, error: "No data found for the given date" };
+    const fallback = {
+      scoreDate: new Date(targetDate),
+      dailyStatus: "Hari yang Sempurna",
+      usageDurationScore: 0,
+      openFrequencyScore: 0,
+      midnightUsageScore: 0,
+      continuousUsageScore: 0,
+      productiveHourScore: 0,
+      totalScore: 0,
+    };
+    return { success: true, data: fallback };
   }
 
   const parsed = DashboardModel.getDailyStatusResponse.safeParse({
@@ -164,7 +174,14 @@ export async function getBehaviorFlagService(
     );
 
   if (!row) {
-    return { success: false, error: "No data found for the given date" };
+    const fallback = {
+      flagExcessiveUsage: false,
+      flagCompulsiveChecking: false,
+      flagMidnightUsage: false,
+      flagContinuousUsage: false,
+      flagProductiveHourDistraction: false,
+    };
+    return { success: true, data: fallback };
   }
 
   const parsed = DashboardModel.getBehaviorFlagResponse.safeParse(row);

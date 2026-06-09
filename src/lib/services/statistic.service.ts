@@ -345,7 +345,192 @@ export async function getWeeklyHabitService(
     lightestDay,
   });
 
-  if (!parsed.success)
+  if (!parsed.success) {
     return { success: false, error: validationError(parsed.error) };
+  }
   return { success: true, data: parsed.data };
+}
+
+export async function getDailyBreakdownService(
+  startDate: string,
+  endDate: string,
+): Promise<ServiceResult<any[]>> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  const rows = await db
+    .select({
+      statDate: table.dailyStats.statDate,
+      appName: table.apps.name,
+      totalDurationSeconds: table.dailyStats.totalDurationSeconds,
+    })
+    .from(table.dailyStats)
+    .innerJoin(table.apps, eq(table.dailyStats.appId, table.apps.id))
+    .where(
+      and(
+        eq(table.dailyStats.userId, userId),
+        gte(table.dailyStats.statDate, startDate),
+        lte(table.dailyStats.statDate, endDate),
+      ),
+    );
+
+  const grouped: Record<string, Record<string, number>> = {};
+  for (const row of rows) {
+    const dateStr = row.statDate;
+    if (!grouped[dateStr]) {
+      grouped[dateStr] = {};
+    }
+    const mins = Math.round((row.totalDurationSeconds ?? 0) / 60);
+    grouped[dateStr][row.appName] = (grouped[dateStr][row.appName] || 0) + mins;
+  }
+
+  const data = Object.entries(grouped).map(([date, apps]) => ({
+    date,
+    ...apps,
+  }));
+
+  return { success: true, data };
+}
+
+export async function getHeatmapService(
+  startDate: string,
+  endDate: string,
+): Promise<ServiceResult<any[]>> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  const startTs = new Date(`${startDate}T00:00:00Z`);
+  const endTs = new Date(`${endDate}T23:59:59Z`);
+
+  const rows = await db
+    .select({
+      statDate: sql<string>`to_char(${table.activityLogs.startedAt} at time zone 'UTC', 'YYYY-MM-DD')`,
+      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC') as integer)`,
+      totalDurationSeconds: sql<number>`cast(sum(${table.activityLogs.durationSeconds}) as integer)`,
+    })
+    .from(table.activityLogs)
+    .where(
+      and(
+        eq(table.activityLogs.userId, userId),
+        gte(table.activityLogs.startedAt, startTs),
+        lte(table.activityLogs.startedAt, endTs),
+      ),
+    )
+    .groupBy(
+      sql`to_char(${table.activityLogs.startedAt} at time zone 'UTC', 'YYYY-MM-DD')`,
+      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+    );
+
+  const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+  const orderedDays = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+
+  const cellMap: Record<string, Record<number, number>> = {};
+  for (const d of orderedDays) {
+    cellMap[d] = {};
+    for (let h = 0; h < 24; h++) {
+      cellMap[d][h] = 0;
+    }
+  }
+
+  for (const row of rows) {
+    const d = new Date(`${row.statDate}T00:00:00Z`);
+    const dayLabel = dayNames[d.getUTCDay()];
+    if (cellMap[dayLabel] !== undefined) {
+      const mins = Math.round((row.totalDurationSeconds ?? 0) / 60);
+      let val = 0;
+      if (mins > 30) val = 3;
+      else if (mins > 15) val = 2;
+      else if (mins > 0) val = 1;
+      cellMap[dayLabel][row.hour] = val;
+    }
+  }
+
+  const data = orderedDays.map((day) => {
+    return Array.from({ length: 24 }, (_, hour) => ({
+      day,
+      hour,
+      val: cellMap[day][hour],
+    }));
+  });
+
+  return { success: true, data };
+}
+
+export async function getFlagsService(
+  startDate: string,
+  endDate: string,
+): Promise<ServiceResult<any[]>> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  const rows = await db
+    .select({
+      flagExcessiveUsage: table.behavioralScores.flagExcessiveUsage,
+      flagCompulsiveChecking: table.behavioralScores.flagCompulsiveChecking,
+      flagMidnightUsage: table.behavioralScores.flagMidnightUsage,
+      flagContinuousUsage: table.behavioralScores.flagContinuousUsage,
+      flagProductiveHourDistraction:
+        table.behavioralScores.flagProductiveHourDistraction,
+    })
+    .from(table.behavioralScores)
+    .where(
+      and(
+        eq(table.behavioralScores.userId, userId),
+        gte(table.behavioralScores.scoreDate, startDate),
+        lte(table.behavioralScores.scoreDate, endDate),
+      ),
+    );
+
+  const total = rows.length;
+
+  const counts = {
+    excessive: 0,
+    compulsive: 0,
+    midnight: 0,
+    continuous: 0,
+    distraction: 0,
+  };
+
+  for (const row of rows) {
+    if (row.flagExcessiveUsage) counts.excessive++;
+    if (row.flagCompulsiveChecking) counts.compulsive++;
+    if (row.flagMidnightUsage) counts.midnight++;
+    if (row.flagContinuousUsage) counts.continuous++;
+    if (row.flagProductiveHourDistraction) counts.distraction++;
+  }
+
+  const data = [
+    {
+      name: "Terlalu lama main HP",
+      count: counts.excessive,
+      total,
+      label: `Muncul ${counts.excessive} dari ${total} hari`,
+    },
+    {
+      name: "Sering buka-tutup aplikasi",
+      count: counts.compulsive,
+      total,
+      label: `Muncul ${counts.compulsive} dari ${total} hari`,
+    },
+    {
+      name: "Main HP waktu tidur",
+      count: counts.midnight,
+      total,
+      label: `Muncul ${counts.midnight} dari ${total} hari`,
+    },
+    {
+      name: "Nonstop tanpa jeda",
+      count: counts.continuous,
+      total,
+      label: `Muncul ${counts.continuous} dari ${total} hari`,
+    },
+    {
+      name: "Distraksi jam produktif",
+      count: counts.distraction,
+      total,
+      label: `Muncul ${counts.distraction} dari ${total} hari`,
+    },
+  ];
+
+  return { success: true, data };
 }

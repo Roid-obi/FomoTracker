@@ -3,8 +3,8 @@ import { loginService } from "@/lib/services/auth.service";
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const result = await loginService(formData);
+    const body = await request.json();
+    const result = await loginService(body);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });

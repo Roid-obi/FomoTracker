@@ -159,6 +159,16 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
     },
   });
 
+  const { data: screenTimeData, isLoading: isScreenTimeLoading } = useQuery({
+    queryKey: ["dayScreenTime", tanggal],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/screen-time?startDate=${tanggal}&endDate=${tanggal}`,
+      );
+      return res.data.data;
+    },
+  });
+
   const { data: settingData, isLoading: isSettingLoading } = useQuery({
     queryKey: ["userSettings"],
     queryFn: async () => {
@@ -187,6 +197,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
     isFlagLoading ||
     isHourlyLoading ||
     isBreakdownLoading ||
+    isScreenTimeLoading ||
     isSettingLoading
   ) {
     return (
@@ -205,15 +216,15 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
 
   let statusEmoji = "😊";
   const statusTitle = dailyStatus;
-  let statusDesc = "Penggunaan HP-mu terkontrol dengan baik.";
+  let statusDesc = "Penggunaan HP-mu harian terkontrol.";
   let statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
 
   if (totalScore > 0) {
-    if (totalScore <= 39) {
+    if (totalScore <= 30) {
       statusEmoji = "😊";
-      statusDesc = "Penggunaan HP-mu terkontrol.";
+      statusDesc = "Penggunaan HP-mu harian terkontrol.";
       statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
-    } else if (totalScore <= 69) {
+    } else if (totalScore <= 60) {
       statusEmoji = "😐";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
       statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
@@ -227,6 +238,17 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
   // Screen time & Top app details
   const grandTotalSeconds = breakdownData?.grandTotalSeconds ?? 0;
   const topApp = breakdownData?.items?.[0];
+
+  const screenTimeToday = screenTimeData?.items?.[0];
+  const totalHours = Math.floor(
+    (screenTimeToday?.totalDurationSeconds ?? grandTotalSeconds) / 3600,
+  );
+  const totalMinutes = Math.floor(
+    ((screenTimeToday?.totalDurationSeconds ?? grandTotalSeconds) % 3600) / 60,
+  );
+  const midnightSec = screenTimeToday?.midnightDurationSeconds ?? 0;
+  const maxCont = screenTimeToday?.maxContinuousSeconds ?? 0;
+  const prodSec = screenTimeToday?.productiveHourDurationSeconds ?? 0;
 
   // Hourly breakdown data
   const chartData =
@@ -247,36 +269,36 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
       name: "Terlalu lama main HP",
       active: flagData?.flagExcessiveUsage ?? false,
       icon: Clock,
-      descActive: "Pemakaian total melebihi batas 4 jam.",
-      descInactive: "Pemakaian gawai harian terkontrol dengan baik.",
+      descActive: `Sudah ${totalHours} jam ${totalMinutes} menit hari ini`,
+      descInactive: `Sudah ${totalHours} jam ${totalMinutes} menit hari ini`,
     },
     {
       name: "Sering buka-tutup aplikasi",
       active: flagData?.flagCompulsiveChecking ?? false,
       icon: RotateCcw,
-      descActive: "Frekuensi buka-tutup aplikasi sangat tinggi.",
-      descInactive: "Frekuensi buka-tutup dalam batas normal.",
+      descActive: `Dibuka ${flagData?.openFrequencyLastHour ?? 0} kali dalam 1 jam terakhir`,
+      descInactive: `Dibuka ${flagData?.openFrequencyLastHour ?? 0} kali dalam 1 jam terakhir`,
     },
     {
       name: "Main HP waktu tidur",
       active: flagData?.flagMidnightUsage ?? false,
       icon: Moon,
-      descActive: "Terdeteksi aktivitas pada jam tidur utama.",
-      descInactive: "Fokus tidur malam terjaga dengan baik.",
+      descActive: `${Math.round(midnightSec / 60)} menit terdeteksi di jam tidur`,
+      descInactive: `${Math.round(midnightSec / 60)} menit terdeteksi di jam tidur`,
     },
     {
       name: "Nonstop tanpa jeda",
       active: flagData?.flagContinuousUsage ?? false,
       icon: Activity,
-      descActive: "Sering menggunakan HP tanpa jeda istirahat.",
-      descInactive: "Rutin mengambil jeda untuk istirahat mata.",
+      descActive: `Sesi terpanjang ${Math.round(maxCont / 60)} menit`,
+      descInactive: `Sesi terpanjang ${Math.round(maxCont / 60)} menit`,
     },
     {
       name: "Distraksi jam produktif",
       active: flagData?.flagProductiveHourDistraction ?? false,
       icon: Briefcase,
-      descActive: "Banyak membuka media sosial di jam kerja/belajar.",
-      descInactive: "Konsentrasi terjaga selama jam produktif.",
+      descActive: `${Math.round(prodSec / 60)} menit terdeteksi di jam produktif`,
+      descInactive: `${Math.round(prodSec / 60)} menit terdeteksi di jam produktif`,
     },
   ];
 
@@ -299,16 +321,16 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
     {
       name: "Aktivitas jam tidur",
       icon: Moon,
-      bobot: "20%",
+      bobot: "15%",
       nilai: statusData?.midnightUsageScore ?? 0,
-      max: 20,
+      max: 15,
     },
     {
       name: "Penggunaan nonstop",
       icon: Activity,
-      bobot: "15%",
+      bobot: "20%",
       nilai: statusData?.continuousUsageScore ?? 0,
-      max: 15,
+      max: 20,
     },
     {
       name: "Distraksi jam produktif",
@@ -621,11 +643,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
                         <span
                           className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
                             flag.active
-                              ? "bg-red-100 text-red-700"
-                              : "bg-emerald-100 text-emerald-700"
+                              ? "bg-red-105 text-red-800 border border-red-200"
+                              : "bg-emerald-105 text-emerald-800 border border-emerald-200"
                           }`}
                         >
-                          {flag.active ? "Terdeteksi" : "Aman"}
+                          {flag.active ? "⚠️ Terdeteksi" : "✅ Aman"}
                         </span>
                       </div>
                       <p className="text-[9px] font-light opacity-85 mt-0.5 leading-snug">

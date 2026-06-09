@@ -265,13 +265,19 @@ export default function DashboardPage() {
 
   if (scoreData) {
     const totalScore = scoreData.totalScore;
-    if (totalScore >= 40 && totalScore <= 69) {
+    if (totalScore <= 30) {
+      statusEmoji = "😊";
+      statusTitle = "Hari yang Baik";
+      statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
+      statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
+      _statusTextColor = "text-emerald-700";
+    } else if (totalScore <= 60) {
       statusEmoji = "😐";
       statusTitle = "Perlu Diperhatikan";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
       statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
       _statusTextColor = "text-amber-700";
-    } else if (totalScore >= 70) {
+    } else {
       statusEmoji = "😟";
       statusTitle = "Hari yang Berat";
       statusDesc = "Banyak kebiasaan bermasalah terdeteksi hari ini.";
@@ -298,6 +304,7 @@ export default function DashboardPage() {
     flagMidnightUsage: false,
     flagContinuousUsage: false,
     flagProductiveHourDistraction: false,
+    openFrequencyLastHour: 0,
   };
 
   // Group of 5 indicators (always visible)
@@ -313,7 +320,7 @@ export default function DashboardPage() {
     {
       id: "compulsive",
       name: "Sering buka-tutup aplikasi",
-      desc: `Dibuka ${totalChecks} kali hari ini`,
+      desc: `Dibuka ${flags.openFrequencyLastHour ?? 0} kali dalam 1 jam terakhir`,
       active: flags.flagCompulsiveChecking,
       icon: RotateCcw,
       color: "text-amber-600 bg-amber-50 border-amber-100",
@@ -329,7 +336,7 @@ export default function DashboardPage() {
     {
       id: "continuous",
       name: "Nonstop tanpa istirahat",
-      desc: `Sesi terpanjang ${Math.round(maxCont / 60)} menit tanpa jeda`,
+      desc: `Sesi terpanjang ${Math.round(maxCont / 60)} menit`,
       active: flags.flagContinuousUsage,
       icon: Activity,
       color: "text-orange-600 bg-orange-50 border-orange-100",
@@ -1081,12 +1088,12 @@ export default function DashboardPage() {
                           {item.name}
                         </h4>
                         {item.active ? (
-                          <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 shrink-0 uppercase tracking-wider">
-                            Aktif
+                          <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-850 border border-red-200 shrink-0 uppercase tracking-wider">
+                            ⚠️ Terdeteksi
                           </span>
                         ) : (
-                          <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 shrink-0 uppercase tracking-wider">
-                            Aman
+                          <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-850 border border-emerald-250 shrink-0 uppercase tracking-wider">
+                            ✅ Aman
                           </span>
                         )}
                       </div>

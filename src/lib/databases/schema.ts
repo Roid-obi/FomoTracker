@@ -53,14 +53,14 @@ export const userSettings = pgTable("user_settings", {
   sleepEnd: time("sleep_end").notNull().default("06:00"),
 
   // Threshold notifikasi
-  // default 3 jam = 10800 detik
+  // default 4 jam = 14400 detik
   screenTimeLimitSeconds: integer("screen_time_limit_seconds")
     .notNull()
-    .default(10800),
-  // default 45 menit = 2700 detik
+    .default(14400),
+  // default 60 menit = 3600 detik
   continuousLimitSeconds: integer("continuous_limit_seconds")
     .notNull()
-    .default(2700),
+    .default(3600),
 
   // Toggle notifikasi
   notifScreenTimeEnabled: boolean("notif_screen_time_enabled").default(true),

@@ -173,18 +173,57 @@ export async function getBehaviorFlagService(
       ),
     );
 
-  if (!row) {
-    const fallback = {
-      flagExcessiveUsage: false,
-      flagCompulsiveChecking: false,
-      flagMidnightUsage: false,
-      flagContinuousUsage: false,
-      flagProductiveHourDistraction: false,
-    };
-    return { success: true, data: fallback };
+  let openFrequencyLastHour = 0;
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  if (targetDate === todayStr) {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const [cntRow] = await db
+      .select({
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(table.activityLogs)
+      .where(
+        and(
+          eq(table.activityLogs.userId, userId),
+          gte(table.activityLogs.startedAt, oneHourAgo),
+        ),
+      );
+    openFrequencyLastHour = cntRow?.count ?? 0;
+  } else {
+    const startTs = new Date(`${targetDate}T00:00:00Z`);
+    const endTs = new Date(`${targetDate}T23:59:59Z`);
+    const hourlyCounts = await db
+      .select({
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(table.activityLogs)
+      .where(
+        and(
+          eq(table.activityLogs.userId, userId),
+          gte(table.activityLogs.startedAt, startTs),
+          lte(table.activityLogs.startedAt, endTs),
+        ),
+      )
+      .groupBy(
+        sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+      );
+
+    if (hourlyCounts.length > 0) {
+      openFrequencyLastHour = Math.max(...hourlyCounts.map((c) => c.count));
+    }
   }
 
-  const parsed = DashboardModel.getBehaviorFlagResponse.safeParse(row);
+  const resultData = {
+    flagExcessiveUsage: row?.flagExcessiveUsage ?? false,
+    flagCompulsiveChecking: row?.flagCompulsiveChecking ?? false,
+    flagMidnightUsage: row?.flagMidnightUsage ?? false,
+    flagContinuousUsage: row?.flagContinuousUsage ?? false,
+    flagProductiveHourDistraction: row?.flagProductiveHourDistraction ?? false,
+    openFrequencyLastHour,
+  };
+
+  const parsed = DashboardModel.getBehaviorFlagResponse.safeParse(resultData);
 
   if (!parsed.success) {
     return { success: false, error: validationError(parsed.error) };

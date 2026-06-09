@@ -19,8 +19,8 @@ function clamp(value: number, lo = 0, hi = 100): number {
 
 /** Tentukan status harian dari total skor */
 function calcDailyStatus(score: number): "good" | "attention" | "heavy" {
-  if (score < 40) return "good";
-  if (score < 70) return "attention";
+  if (score <= 30) return "good";
+  if (score <= 60) return "attention";
   return "heavy";
 }
 
@@ -179,8 +179,8 @@ export async function syncDailyStatsService(
     .from(table.userSettings)
     .where(eq(table.userSettings.userId, userId));
 
-  const screenTimeLimit = settings?.screenTimeLimitSeconds ?? 10800; // default 3 jam
-  const continuousLimit = settings?.continuousLimitSeconds ?? 2700; // default 45 menit
+  const screenTimeLimit = settings?.screenTimeLimitSeconds ?? 14400; // default 4 jam
+  const continuousLimit = settings?.continuousLimitSeconds ?? 3600; // default 60 menit
   const notifScreenTime = settings?.notifScreenTimeEnabled ?? true;
   const notifMidnight = settings?.notifMidnightEnabled ?? true;
   const notifContinuous = settings?.notifContinuousEnabled ?? true;
@@ -254,38 +254,83 @@ export async function syncDailyStatsService(
   const totalProductiveHour = Number(agg?.totalProductiveHour ?? 0);
   const maxContinuous = Number(agg?.maxContinuous ?? 0);
 
-  // ── 5. Hitung skor per dimensi (0–100, makin tinggi = makin buruk) ─────────
-  //   Normalisasi referensi:
-  //   • usageDuration   → threshold user (screenTimeLimitSeconds)
-  //   • openFrequency   → 50 buka/hari lintas semua app = skor penuh
-  //   • midnightUsage   → 1 jam (3600 s) di jam tidur = skor penuh
-  //   • continuousUsage → threshold user (continuousLimitSeconds)
-  //   • productiveHour  → 50% dari screenTimeLimitSeconds = skor penuh
-  const usageDurationScore = clamp((totalScreenTime / screenTimeLimit) * 100);
-  const openFrequencyScore = clamp((totalOpenFrequency / 50) * 100);
-  const midnightUsageScore = clamp((totalMidnight / 3600) * 100);
-  const continuousUsageScore = clamp((maxContinuous / continuousLimit) * 100);
-  const productiveHourScore = clamp(
-    (totalProductiveHour / (screenTimeLimit * 0.5)) * 100,
-  );
+  // ── 5. Deteksi flag perilaku ────────────────────────────────────────────────
+  // Usage Duration: > 4 jam/hari (atau sesuai batas pengguna)
+  const flagExcessiveUsage = totalScreenTime > screenTimeLimit;
+
+  // Open Frequency: 40 kali buka per jam (check peak openings in any hour of the day)
+  const startTs = new Date(`${statDate}T00:00:00Z`);
+  const endTs = new Date(`${statDate}T23:59:59Z`);
+  const hourlyCounts = await db
+    .select({
+      count: sql<number>`cast(count(*) as integer)`,
+    })
+    .from(table.activityLogs)
+    .where(
+      and(
+        eq(table.activityLogs.userId, userId),
+        gte(table.activityLogs.startedAt, startTs),
+        lte(table.activityLogs.startedAt, endTs),
+      ),
+    )
+    .groupBy(
+      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+    );
+
+  const peakHourlyOpens =
+    hourlyCounts.length > 0 ? Math.max(...hourlyCounts.map((c) => c.count)) : 0;
+  const flagCompulsiveChecking = peakHourlyOpens >= 40;
+
+  // Continuous Usage: > 60 menit nonstop (atau sesuai batas pengguna)
+  const flagContinuousUsage = maxContinuous > continuousLimit;
+
+  // Midnight Usage: > 15 menit selama jam tidur
+  const flagMidnightUsage = totalMidnight > 900;
+
+  // Productivity Usage: > 30 menit selama jam produktif
+  const flagProductiveHourDistraction = totalProductiveHour > 1800;
+
+  // ── 6. Hitung skor per dimensi (Sistem Poin Baru) ───────────────────────────
+  const usageDurationScore = flagExcessiveUsage ? 30 : 0;
+  const openFrequencyScore = flagCompulsiveChecking ? 20 : 0;
+  const continuousUsageScore = flagContinuousUsage ? 20 : 0;
+  const midnightUsageScore = flagMidnightUsage ? 15 : 0;
+  const productiveHourScore = flagProductiveHourDistraction ? 15 : 0;
 
   const totalScore =
-    0.3 * usageDurationScore +
-    0.2 * openFrequencyScore +
-    0.2 * midnightUsageScore +
-    0.15 * continuousUsageScore +
-    0.15 * productiveHourScore;
+    usageDurationScore +
+    openFrequencyScore +
+    continuousUsageScore +
+    midnightUsageScore +
+    productiveHourScore;
 
   const dailyStatus = calcDailyStatus(totalScore);
 
-  // ── 6. Deteksi flag perilaku ────────────────────────────────────────────────
-  const flagExcessiveUsage = totalScreenTime > screenTimeLimit;
-  const flagCompulsiveChecking = totalOpenFrequency > 30; // > 30 buka/hari
-  const flagMidnightUsage = totalMidnight > 0;
-  const flagContinuousUsage = maxContinuous > continuousLimit;
-  const flagProductiveHourDistraction = totalProductiveHour > 0;
+  // ── 7. Ambil status score sebelumnya untuk cegah spam notifikasi ────────────
+  const [existingScore] = await db
+    .select({
+      flagExcessiveUsage: table.behavioralScores.flagExcessiveUsage,
+      flagCompulsiveChecking: table.behavioralScores.flagCompulsiveChecking,
+      flagMidnightUsage: table.behavioralScores.flagMidnightUsage,
+      flagContinuousUsage: table.behavioralScores.flagContinuousUsage,
+      flagProductiveHourDistraction:
+        table.behavioralScores.flagProductiveHourDistraction,
+    })
+    .from(table.behavioralScores)
+    .where(
+      and(
+        eq(table.behavioralScores.userId, userId),
+        eq(table.behavioralScores.scoreDate, statDate),
+      ),
+    );
 
-  // ── 7. UPSERT behavioral_scores ────────────────────────────────────────────
+  const prevExcessive = existingScore?.flagExcessiveUsage ?? false;
+  const prevCompulsive = existingScore?.flagCompulsiveChecking ?? false;
+  const prevMidnight = existingScore?.flagMidnightUsage ?? false;
+  const prevContinuous = existingScore?.flagContinuousUsage ?? false;
+  const prevProductive = existingScore?.flagProductiveHourDistraction ?? false;
+
+  // ── 8. UPSERT behavioral_scores ────────────────────────────────────────────
   await db
     .insert(table.behavioralScores)
     .values({
@@ -323,43 +368,49 @@ export async function syncDailyStatsService(
       },
     });
 
-  // ── 8. Buat notifikasi untuk setiap pelanggaran threshold ──────────────────
+  // ── 9. Buat notifikasi hanya saat indikator berubah menjadi "Terdeteksi" ────
   const notificationsToCreate: (typeof table.notifications.$inferInsert)[] = [];
 
-  if (notifScreenTime && flagExcessiveUsage) {
-    const hours = (totalScreenTime / 3600).toFixed(1);
-    const limitHours = (screenTimeLimit / 3600).toFixed(1);
+  if (notifScreenTime && flagExcessiveUsage && !prevExcessive) {
     notificationsToCreate.push({
       userId,
       type: "screen_time",
-      message: `Waktu layar kamu hari ini sudah ${hours} jam, melebihi batas ${limitHours} jam. Yuk istirahat sejenak! 📵`,
+      message: "Anda telah menggunakan media sosial lebih dari 4 jam hari ini.",
     });
   }
 
-  if (notifMidnight && flagMidnightUsage) {
-    const minutes = Math.round(totalMidnight / 60);
+  if (flagCompulsiveChecking && !prevCompulsive) {
     notificationsToCreate.push({
       userId,
-      type: "midnight",
-      message: `Kamu menggunakan HP selama ${minutes} menit di jam tidur. Kurangi layar di malam hari agar tidurmu lebih berkualitas. 🌙`,
+      type: "open_frequency",
+      message:
+        "Anda membuka media sosial sangat sering dalam satu jam terakhir.",
     });
   }
 
-  if (notifContinuous && flagContinuousUsage) {
-    const minutes = Math.round(maxContinuous / 60);
+  if (notifContinuous && flagContinuousUsage && !prevContinuous) {
     notificationsToCreate.push({
       userId,
       type: "continuous",
-      message: `Kamu menatap layar nonstop selama ${minutes} menit. Istirahatkan mata dan gerakkan badanmu sejenak! 👀`,
+      message:
+        "Anda telah menggunakan media sosial selama lebih dari 60 menit tanpa jeda.",
     });
   }
 
-  if (notifProductiveHour && flagProductiveHourDistraction) {
-    const minutes = Math.round(totalProductiveHour / 60);
+  if (notifMidnight && flagMidnightUsage && !prevMidnight) {
+    notificationsToCreate.push({
+      userId,
+      type: "midnight",
+      message:
+        "Aktivitas media sosial terdeteksi pada jam tidur yang telah Anda tetapkan.",
+    });
+  }
+
+  if (notifProductiveHour && flagProductiveHourDistraction && !prevProductive) {
     notificationsToCreate.push({
       userId,
       type: "productive_hour",
-      message: `Kamu menggunakan HP ${minutes} menit saat jam belajar/kerja. Fokus dulu, HP-nya belakangan! 💪`,
+      message: "Penggunaan media sosial terdeteksi selama jam produktif Anda.",
     });
   }
 

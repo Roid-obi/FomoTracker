@@ -89,14 +89,14 @@ const flagConfigs: Record<
   },
   "Main HP waktu tidur": {
     icon: Moon,
-    weight: "Berkontribusi 20% terhadap skor harian",
+    weight: "Berkontribusi 15% terhadap skor harian",
     iconBg: "bg-indigo-50 border-indigo-100",
     iconColor: "text-indigo-600",
     barColor: "bg-indigo-500",
   },
   "Nonstop tanpa jeda": {
     icon: Activity,
-    weight: "Berkontribusi 15% terhadap skor harian",
+    weight: "Berkontribusi 20% terhadap skor harian",
     iconBg: "bg-orange-50 border-orange-100",
     iconColor: "text-orange-600",
     barColor: "bg-orange-500",

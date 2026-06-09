@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   ArrowRight,
@@ -24,15 +25,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  initialActivityLogs,
-  initialApps,
-  initialBehavioralScores,
-  initialDailyStats,
-  initialUserDevices,
-  initialUsers,
-  initialWeeklyInsights,
-} from "@/lib/data/databaseInitialData";
+import { useUser } from "@/hooks/useUser";
+import { api } from "@/lib/utils/api";
 
 const rankColors = ["#334155", "#475569", "#64748B", "#94A3B8", "#E2E8F0"];
 
@@ -55,9 +49,147 @@ const CustomBar = (props: any) => {
   return <Rectangle {...props} radius={radius} />;
 };
 
+const getTodayStr = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${date}`;
+};
+
 export default function DashboardPage() {
-  const user = initialUsers[0];
+  const { data: user, isLoading: userLoading } = useUser();
   const [_todayStr, setTodayStr] = useState("");
+
+  const today = getTodayStr();
+
+  // Queries for real backend data
+  const statusQuery = useQuery({
+    queryKey: ["dashboard-status", today],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          `/api/dashboard/status?date=${today}`,
+        );
+        return res.data.data;
+      } catch (err) {
+        return null;
+      }
+    },
+  });
+
+  const flagQuery = useQuery({
+    queryKey: ["dashboard-flag", today],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          `/api/dashboard/flag?date=${today}`,
+        );
+        return res.data.data;
+      } catch (err) {
+        return null;
+      }
+    },
+  });
+
+  const hourlyQuery = useQuery({
+    queryKey: ["dashboard-hourly", today],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          `/api/dashboard/hourly-breakdown?date=${today}`,
+        );
+        return res.data.data;
+      } catch (err) {
+        return {
+          chartData: Array.from({ length: 24 }, (_, i) => ({
+            jam: `${String(i).padStart(2, "0")}.00`,
+            Lainnya: 0,
+          })),
+          top4Apps: [],
+        };
+      }
+    },
+  });
+
+  const devicesQuery = useQuery({
+    queryKey: ["dashboard-devices"],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any[] }>(
+        "/api/setting/device",
+      );
+      return res.data.data;
+    },
+  });
+
+  const insightQuery = useQuery({
+    queryKey: ["dashboard-insight"],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          "/api/insight/latest",
+        );
+        return res.data.data;
+      } catch (err) {
+        return null;
+      }
+    },
+  });
+
+  const breakdownQuery = useQuery({
+    queryKey: ["dashboard-breakdown", today],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          `/api/breakdown?startDate=${today}&endDate=${today}`,
+        );
+        return res.data.data;
+      } catch (err) {
+        return { items: [], grandTotalSeconds: 0 };
+      }
+    },
+  });
+
+  const screenTimeQuery = useQuery({
+    queryKey: ["dashboard-screentime", today],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          `/api/screen-time?startDate=${today}&endDate=${today}`,
+        );
+        return res.data.data;
+      } catch (err) {
+        return { items: [], avgDailySeconds: 0, totalSeconds: 0 };
+      }
+    },
+  });
+
+  const { data: settingData, isLoading: isSettingLoading } = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: async () => {
+      try {
+        const res = await api.get<{ success: boolean; data: any }>(
+          "/api/setting/user",
+        );
+        return res.data.data;
+      } catch (err) {
+        return null;
+      }
+    },
+  });
+
+  const prodStartHour = settingData
+    ? parseInt(settingData.productiveStart.split(":")[0])
+    : 8;
+  const prodEndHour = settingData
+    ? parseInt(settingData.productiveEnd.split(":")[0])
+    : 17;
+  const sleepStartHour = settingData
+    ? parseInt(settingData.sleepStart.split(":")[0])
+    : 22;
+  const sleepEndHour = settingData
+    ? parseInt(settingData.sleepEnd.split(":")[0])
+    : 6;
 
   useEffect(() => {
     const formatIndonesianDate = () => {
@@ -94,25 +226,37 @@ export default function DashboardPage() {
     setTodayStr(formatIndonesianDate());
   }, []);
 
-  // 1. Calculate stats from daily_stats
-  const totalDurationSeconds = initialDailyStats.reduce(
-    (acc, curr) => acc + curr.total_duration_seconds,
-    0,
-  );
+  // Show a premium loading state
+  if (
+    userLoading ||
+    statusQuery.isLoading ||
+    flagQuery.isLoading ||
+    hourlyQuery.isLoading ||
+    devicesQuery.isLoading ||
+    breakdownQuery.isLoading ||
+    screenTimeQuery.isLoading ||
+    isSettingLoading
+  ) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // 1. Calculate stats from backend queries
+  const totalDurationSeconds = breakdownQuery.data?.grandTotalSeconds ?? 0;
   const totalHours = Math.floor(totalDurationSeconds / 3600);
   const totalMinutes = Math.floor((totalDurationSeconds % 3600) / 60);
 
   // Find most used app
-  let topApp = { name: "Tidak ada", duration: 0 };
-  for (const stat of initialDailyStats) {
-    const app = initialApps.find((a) => a.id === stat.app_id);
-    if (app && stat.total_duration_seconds > topApp.duration) {
-      topApp = { name: app.name, duration: stat.total_duration_seconds };
-    }
-  }
+  const topAppItem = breakdownQuery.data?.items?.[0];
+  const topApp = topAppItem
+    ? { name: topAppItem.appName, duration: topAppItem.totalDurationSeconds }
+    : { name: "Tidak ada", duration: 0 };
 
   // 2. Behavioral score status configuration
-  const scoreData = initialBehavioralScores[0];
+  const scoreData = statusQuery.data;
   let statusEmoji = "😊";
   let statusTitle = "Hari yang Baik";
   let statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
@@ -120,13 +264,20 @@ export default function DashboardPage() {
   let _statusTextColor = "text-emerald-700";
 
   if (scoreData) {
-    if (scoreData.total_score >= 40 && scoreData.total_score <= 69) {
+    const totalScore = scoreData.totalScore;
+    if (totalScore <= 30) {
+      statusEmoji = "😊";
+      statusTitle = "Hari yang Baik";
+      statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
+      statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
+      _statusTextColor = "text-emerald-700";
+    } else if (totalScore <= 60) {
       statusEmoji = "😐";
       statusTitle = "Perlu Diperhatikan";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
       statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
       _statusTextColor = "text-amber-700";
-    } else if (scoreData.total_score >= 70) {
+    } else {
       statusEmoji = "😟";
       statusTitle = "Hari yang Berat";
       statusDesc = "Banyak kebiasaan bermasalah terdeteksi hari ini.";
@@ -135,104 +286,26 @@ export default function DashboardPage() {
     }
   }
 
-  // 3. Hourly Activity logs mapping
-  const hourlyChartData = Array.from({ length: 24 }, (_, i) => {
-    const hourLabel = `${String(i).padStart(2, "0")}.00`;
-    const dataObj: Record<string, string | number> = { jam: hourLabel };
-    for (const app of initialApps) {
-      dataObj[app.name] = 0;
-    }
-    return dataObj;
-  });
-
-  for (const log of initialActivityLogs) {
-    const timePart = log.started_at.split("T")[1];
-    if (timePart) {
-      const startHour = parseInt(timePart.split(":")[0], 10);
-      const app = initialApps.find((a) => a.id === log.app_id);
-      if (app && startHour >= 0 && startHour < 24) {
-        const currentVal =
-          (hourlyChartData[startHour][app.name] as number) || 0;
-        hourlyChartData[startHour][app.name] =
-          currentVal + Math.round(log.duration_seconds / 60);
-      }
-    }
-  }
-
-  // Inject dummy data to show bars with 2 or more applications in the same hour
-  if (hourlyChartData[8]) {
-    hourlyChartData[8].WhatsApp =
-      ((hourlyChartData[8].WhatsApp as number) || 0) + 10;
-    hourlyChartData[8].TikTok =
-      ((hourlyChartData[8].TikTok as number) || 0) + 5;
-  }
-  if (hourlyChartData[14]) {
-    hourlyChartData[14].Instagram =
-      ((hourlyChartData[14].Instagram as number) || 0) + 20;
-    hourlyChartData[14].TikTok =
-      ((hourlyChartData[14].TikTok as number) || 0) + 15;
-    hourlyChartData[14].YouTube =
-      ((hourlyChartData[14].YouTube as number) || 0) + 10;
-  }
-  if (hourlyChartData[20]) {
-    hourlyChartData[20].TikTok =
-      ((hourlyChartData[20].TikTok as number) || 0) + 25;
-    hourlyChartData[20].YouTube =
-      ((hourlyChartData[20].YouTube as number) || 0) + 20;
-    hourlyChartData[20].WhatsApp =
-      ((hourlyChartData[20].WhatsApp as number) || 0) + 15;
-  }
-
-  // 3b. Calculate top used apps dynamically today
-  const appTotals: Record<string, number> = {};
-  for (const app of initialApps) {
-    appTotals[app.name] = 0;
-  }
-  for (const hourData of hourlyChartData) {
-    for (const app of initialApps) {
-      appTotals[app.name] += (hourData[app.name] as number) || 0;
-    }
-  }
-
-  const sortedApps = Object.entries(appTotals).sort((a, b) => b[1] - a[1]);
-
-  const top4Apps = sortedApps.slice(0, 4).map((entry) => entry[0]);
-  const otherApps = sortedApps.slice(4).map((entry) => entry[0]);
-
-  const rankedChartData = hourlyChartData.map((hourData) => {
-    const newRow: Record<string, string | number> = { jam: hourData.jam };
-
-    // Copy Top 4 apps
-    for (const app of top4Apps) {
-      newRow[app] = hourData[app] || 0;
-    }
-
-    // Sum other apps into "Lainnya"
-    let otherSum = 0;
-    for (const app of otherApps) {
-      otherSum += (hourData[app] as number) || 0;
-    }
-    newRow.Lainnya = otherSum;
-
-    return newRow;
-  });
+  // 3. Hourly Activity logs mapping from API response
+  const hourlyData = hourlyQuery.data || { chartData: [], top4Apps: [] };
+  const rankedChartData = hourlyData.chartData;
+  const top4Apps: string[] = hourlyData.top4Apps || [];
 
   // Calculate parameters for 5 indicators
-  const totalChecks = initialDailyStats.reduce(
-    (acc, curr) => acc + curr.open_frequency,
-    0,
-  );
-  const midnightSec = initialDailyStats.reduce(
-    (acc, curr) => acc + curr.midnight_duration_seconds,
-    0,
-  );
-  const maxCont = Math.max(
-    ...initialDailyStats.map((d) => d.max_continuous_seconds),
-  );
-  const prodSec = initialDailyStats.reduce(
-    (acc, curr) => acc + curr.productive_hour_duration_seconds,
-    0,
-  );
+  const screenTimeToday = screenTimeQuery.data?.items?.[0];
+  const totalChecks = screenTimeToday?.openFrequency ?? 0;
+  const midnightSec = screenTimeToday?.midnightDurationSeconds ?? 0;
+  const maxCont = screenTimeToday?.maxContinuousSeconds ?? 0;
+  const prodSec = screenTimeToday?.productiveHourDurationSeconds ?? 0;
+
+  const flags = flagQuery.data || {
+    flagExcessiveUsage: false,
+    flagCompulsiveChecking: false,
+    flagMidnightUsage: false,
+    flagContinuousUsage: false,
+    flagProductiveHourDistraction: false,
+    openFrequencyLastHour: 0,
+  };
 
   // Group of 5 indicators (always visible)
   const coreBehaviors = [
@@ -240,15 +313,15 @@ export default function DashboardPage() {
       id: "excessive",
       name: "Terlalu lama main HP",
       desc: `Sudah ${totalHours} jam ${totalMinutes} menit hari ini`,
-      active: scoreData ? scoreData.flag_excessive_usage : false,
+      active: flags.flagExcessiveUsage,
       icon: Clock,
       color: "text-red-600 bg-red-50 border-red-100",
     },
     {
       id: "compulsive",
       name: "Sering buka-tutup aplikasi",
-      desc: `Dibuka ${totalChecks} kali hari ini`,
-      active: scoreData ? scoreData.flag_compulsive_checking : false,
+      desc: `Dibuka ${flags.openFrequencyLastHour ?? 0} kali dalam 1 jam terakhir`,
+      active: flags.flagCompulsiveChecking,
       icon: RotateCcw,
       color: "text-amber-600 bg-amber-50 border-amber-100",
     },
@@ -256,15 +329,15 @@ export default function DashboardPage() {
       id: "midnight",
       name: "Main HP waktu harusnya tidur",
       desc: `${Math.round(midnightSec / 60)} menit terdeteksi di jam tidur`,
-      active: scoreData ? scoreData.flag_midnight_usage : false,
+      active: flags.flagMidnightUsage,
       icon: Moon,
       color: "text-indigo-600 bg-indigo-50 border-indigo-100",
     },
     {
       id: "continuous",
       name: "Nonstop tanpa istirahat",
-      desc: `Sesi terpanjang ${Math.round(maxCont / 60)} menit tanpa jeda`,
-      active: scoreData ? scoreData.flag_continuous_usage : false,
+      desc: `Sesi terpanjang ${Math.round(maxCont / 60)} menit`,
+      active: flags.flagContinuousUsage,
       icon: Activity,
       color: "text-orange-600 bg-orange-50 border-orange-100",
     },
@@ -272,14 +345,14 @@ export default function DashboardPage() {
       id: "productive",
       name: "Main HP saat jam belajar/kerja",
       desc: `${Math.round(prodSec / 60)} menit terdeteksi di jam produktif`,
-      active: scoreData ? scoreData.flag_productive_hour_distraction : false,
+      active: flags.flagProductiveHourDistraction,
       icon: Briefcase,
       color: "text-pink-600 bg-pink-50 border-pink-100",
     },
   ];
 
   // 5. Weekly AI insight snippet
-  const latestInsight = initialWeeklyInsights[0];
+  const latestInsight = insightQuery.data;
 
   return (
     <div className="space-y-6 font-poppins text-primary">
@@ -804,11 +877,23 @@ export default function DashboardPage() {
               <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border  border-pink-300 block" />
-                  <span>🌙 Jam Tidur</span>
+                  <span>
+                    🌙 Jam Tidur (
+                    {settingData
+                      ? `${settingData.sleepStart.slice(0, 5)} - ${settingData.sleepEnd.slice(0, 5)}`
+                      : "22:00 - 06:00"}
+                    )
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-300 block" />
-                  <span>💼 Jam Produktif</span>
+                  <span>
+                    💼 Jam Belajar (
+                    {settingData
+                      ? `${settingData.productiveStart.slice(0, 5)} - ${settingData.productiveEnd.slice(0, 5)}`
+                      : "08:00 - 17:00"}
+                    )
+                  </span>
                 </div>
               </div>
             </div>
@@ -835,23 +920,35 @@ export default function DashboardPage() {
                       domain={[0, 120]}
                     />
                     {/* Highlight areas behind the bars */}
+                    {sleepStartHour > sleepEndHour ? (
+                      <>
+                        <ReferenceArea
+                          x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
+                          x2="23.00"
+                          fill="#fff0f3"
+                          fillOpacity={0.75}
+                          stroke="none"
+                        />
+                        <ReferenceArea
+                          x1="00.00"
+                          x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
+                          fill="#fff0f3"
+                          fillOpacity={0.75}
+                          stroke="none"
+                        />
+                      </>
+                    ) : (
+                      <ReferenceArea
+                        x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
+                        x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
+                        fill="#fff0f3"
+                        fillOpacity={0.75}
+                        stroke="none"
+                      />
+                    )}
                     <ReferenceArea
-                      x1="22.00"
-                      x2="23.00"
-                      fill="#fff0f3"
-                      fillOpacity={0.75}
-                      stroke="none"
-                    />
-                    <ReferenceArea
-                      x1="00.00"
-                      x2="06.00"
-                      fill="#fff0f3"
-                      fillOpacity={0.75}
-                      stroke="none"
-                    />
-                    <ReferenceArea
-                      x1="08.00"
-                      x2="17.00"
+                      x1={`${String(prodStartHour).padStart(2, "0")}.00`}
+                      x2={`${String(prodEndHour).padStart(2, "0")}.00`}
                       fill="#fffbeb"
                       fillOpacity={0.75}
                       stroke="none"
@@ -918,7 +1015,7 @@ export default function DashboardPage() {
               Perangkat Terhubung
             </h3>
             <div className="space-y-3">
-              {initialUserDevices.map((device) => {
+              {(devicesQuery.data || []).map((device) => {
                 const isAndroid = device.platform === "android_app";
                 return (
                   <div
@@ -938,12 +1035,12 @@ export default function DashboardPage() {
                           {isAndroid ? "Android App" : "Browser Extension"}
                         </span>
                         <p className="text-[9px] text-muted font-light">
-                          {isAndroid ? device.device_name : device.browser_name}
+                          {isAndroid ? device.deviceName : device.browserName}
                         </p>
                       </div>
                     </div>
                     <div>
-                      {device.is_connected ? (
+                      {device.isConnected ? (
                         <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
                           Aktif
                         </span>
@@ -991,12 +1088,12 @@ export default function DashboardPage() {
                           {item.name}
                         </h4>
                         {item.active ? (
-                          <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 shrink-0 uppercase tracking-wider">
-                            Aktif
+                          <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-850 border border-red-200 shrink-0 uppercase tracking-wider">
+                            ⚠️ Terdeteksi
                           </span>
                         ) : (
-                          <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 shrink-0 uppercase tracking-wider">
-                            Aman
+                          <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-850 border border-emerald-250 shrink-0 uppercase tracking-wider">
+                            ✅ Aman
                           </span>
                         )}
                       </div>
@@ -1022,8 +1119,8 @@ export default function DashboardPage() {
                   <span>AI Insight Terbaru</span>
                 </div>
                 <p className="text-[11px] font-light leading-relaxed opacity-90 text-white/90">
-                  "{latestInsight.ai_positive_notes} Namun,{" "}
-                  {latestInsight.ai_concern_notes.toLowerCase()}"
+                  "{latestInsight.aiPositiveNotes} Namun,{" "}
+                  {latestInsight.aiConcernNotes?.toLowerCase()}"
                 </p>
               </div>
 

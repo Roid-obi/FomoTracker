@@ -1,40 +1,104 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { gooeyToast } from "goey-toast";
 import { Activity, Briefcase, Check, Clock, Moon } from "lucide-react";
-import { useState } from "react";
-import { initialUserSettings } from "@/lib/data/databaseInitialData";
+import { useEffect, useState } from "react";
+import type { SettingModel } from "@/lib/models/setting.model";
+import { api } from "@/lib/utils/api";
 
 export default function NotifikasiSettingsPage() {
-  const settings = initialUserSettings[0];
+  const queryClient = useQueryClient();
 
-  const [notifExcessive, setNotifExcessive] = useState(
-    settings?.notif_screen_time_enabled ?? true,
-  );
-  const [excessiveHours, setExcessiveHours] = useState(
-    Math.round((settings?.screen_time_limit_seconds || 10800) / 3600),
-  );
+  // Time settings local state
+  const [notifExcessive, setNotifExcessive] = useState(true);
+  const [excessiveHours, setExcessiveHours] = useState(4);
+  const [notifProductive, setNotifProductive] = useState(true);
+  const [notifMidnight, setNotifMidnight] = useState(true);
+  const [notifContinuous, setNotifContinuous] = useState(true);
+  const [continuousMinutes, setContinuousMinutes] = useState(60);
 
-  const [notifProductive, setNotifProductive] = useState(
-    settings?.notif_productive_hour_enabled ?? true,
-  );
-  const [notifMidnight, setNotifMidnight] = useState(
-    settings?.notif_midnight_enabled ?? true,
-  );
+  // 1. Fetch User Settings
+  const { data: settingsData, isLoading: isSettingsLoading } = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: SettingModel.getResponse;
+      }>("/api/setting/user");
+      return res.data.data;
+    },
+  });
 
-  const [notifContinuous, setNotifContinuous] = useState(
-    settings?.notif_continuous_enabled ?? true,
-  );
-  const [continuousMinutes, setContinuousMinutes] = useState(
-    Math.round((settings?.continuous_limit_seconds || 2700) / 60),
-  );
+  // Initialize form values once data is fetched
+  useEffect(() => {
+    if (settingsData) {
+      setNotifExcessive(settingsData.notifScreenTimeEnabled ?? true);
+      setExcessiveHours(
+        Math.round((settingsData.screenTimeLimitSeconds || 14400) / 3600),
+      );
+      setNotifProductive(settingsData.notifProductiveHourEnabled ?? true);
+      setNotifMidnight(settingsData.notifMidnightEnabled ?? true);
+      setNotifContinuous(settingsData.notifContinuousEnabled ?? true);
+      setContinuousMinutes(
+        Math.round((settingsData.continuousLimitSeconds || 3600) / 60),
+      );
+    }
+  }, [settingsData]);
 
-  const [isSaved, setIsSaved] = useState(false);
+  // 2. Mutation to update notification settings
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (payload: {
+      notifScreenTimeEnabled: boolean;
+      screenTimeLimitSeconds: number;
+      notifProductiveHourEnabled: boolean;
+      notifMidnightEnabled: boolean;
+      notifContinuousEnabled: boolean;
+      continuousLimitSeconds: number;
+    }) => {
+      const res = await api.put<{
+        success: boolean;
+        data: SettingModel.getResponse;
+      }>("/api/setting/user", payload);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["userSettings"] });
+        gooeyToast.success("Preferensi pengingat berhasil disimpan!");
+      }
+    },
+    onError: (error: unknown) => {
+      const apiError = error as { response?: { data?: { error?: string } } };
+      const errorMsg =
+        apiError.response?.data?.error ||
+        "Gagal menyimpan preferensi pengingat.";
+      gooeyToast.error(errorMsg);
+    },
+  });
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+    updateSettingsMutation.mutate({
+      notifScreenTimeEnabled: notifExcessive,
+      screenTimeLimitSeconds: excessiveHours * 3600,
+      notifProductiveHourEnabled: notifProductive,
+      notifMidnightEnabled: notifMidnight,
+      notifContinuousEnabled: notifContinuous,
+      continuousLimitSeconds: continuousMinutes * 60,
+    });
   };
+
+  if (isSettingsLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-xs font-bold text-muted animate-pulse">
+          Memuat preferensi pengingat...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 font-poppins flex-1 flex flex-col justify-between">
@@ -69,7 +133,7 @@ export default function NotifikasiSettingsPage() {
               <button
                 type="button"
                 onClick={() => setNotifExcessive(!notifExcessive)}
-                className={`w-10 h-6 rounded-full transition-all relative shrink-0 ${
+                className={`w-10 h-6 rounded-full transition-all relative shrink-0 cursor-pointer ${
                   notifExcessive ? "bg-primary" : "bg-border"
                 }`}
               >
@@ -117,7 +181,7 @@ export default function NotifikasiSettingsPage() {
             <button
               type="button"
               onClick={() => setNotifProductive(!notifProductive)}
-              className={`w-10 h-6 rounded-full transition-all relative shrink-0 ${
+              className={`w-10 h-6 rounded-full transition-all relative shrink-0 cursor-pointer ${
                 notifProductive ? "bg-primary" : "bg-border"
               }`}
             >
@@ -148,7 +212,7 @@ export default function NotifikasiSettingsPage() {
             <button
               type="button"
               onClick={() => setNotifMidnight(!notifMidnight)}
-              className={`w-10 h-6 rounded-full transition-all relative shrink-0 ${
+              className={`w-10 h-6 rounded-full transition-all relative shrink-0 cursor-pointer ${
                 notifMidnight ? "bg-primary" : "bg-border"
               }`}
             >
@@ -179,7 +243,7 @@ export default function NotifikasiSettingsPage() {
               <button
                 type="button"
                 onClick={() => setNotifContinuous(!notifContinuous)}
-                className={`w-10 h-6 rounded-full transition-all relative shrink-0 ${
+                className={`w-10 h-6 rounded-full transition-all relative shrink-0 cursor-pointer ${
                   notifContinuous ? "bg-primary" : "bg-border"
                 }`}
               >
@@ -209,7 +273,12 @@ export default function NotifikasiSettingsPage() {
           </div>
 
           <div className="flex items-center gap-3 pt-4 border-t border-border/40 justify-end">
-            {isSaved && (
+            {updateSettingsMutation.isPending && (
+              <span className="text-[10px] text-muted font-light animate-pulse">
+                Menyimpan...
+              </span>
+            )}
+            {updateSettingsMutation.isSuccess && (
               <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" />
                 <span>Preferensi berhasil disimpan!</span>
@@ -217,7 +286,8 @@ export default function NotifikasiSettingsPage() {
             )}
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-secondary transition-all text-xs cursor-pointer shadow-xs"
+              disabled={updateSettingsMutation.isPending}
+              className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-secondary transition-all text-xs cursor-pointer shadow-xs disabled:opacity-50"
             >
               Simpan Pengaturan
             </button>

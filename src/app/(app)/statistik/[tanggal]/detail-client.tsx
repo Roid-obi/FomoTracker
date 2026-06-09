@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   ArrowLeft,
@@ -20,45 +21,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-// Mock data matches statistik page totals
-const dataMingguIni = {
-  dailyData: [
-    { hari: "Sen", Instagram: 130, TikTok: 180, YouTube: 45, WhatsApp: 60 },
-    { hari: "Sel", Instagram: 90, TikTok: 210, YouTube: 60, WhatsApp: 80 },
-    { hari: "Rab", Instagram: 65, TikTok: 82, YouTube: 30, WhatsApp: 50 },
-    { hari: "Kam", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-    { hari: "Jum", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-    { hari: "Sab", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-    { hari: "Min", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-  ],
-  topApps: [
-    { name: "TikTok", sec: 28320 },
-    { name: "Instagram", sec: 17100 },
-    { name: "WhatsApp", sec: 11400 },
-    { name: "YouTube", sec: 8100 },
-    { name: "X (Twitter)", sec: 3600 },
-  ],
-};
-
-const dataMingguLaju = {
-  dailyData: [
-    { hari: "Sen", Instagram: 120, TikTok: 150, YouTube: 60, WhatsApp: 45 },
-    { hari: "Sel", Instagram: 110, TikTok: 180, YouTube: 40, WhatsApp: 50 },
-    { hari: "Rab", Instagram: 130, TikTok: 190, YouTube: 55, WhatsApp: 55 },
-    { hari: "Kam", Instagram: 140, TikTok: 220, YouTube: 80, WhatsApp: 60 },
-    { hari: "Jum", Instagram: 150, TikTok: 210, YouTube: 70, WhatsApp: 70 },
-    { hari: "Sab", Instagram: 180, TikTok: 240, YouTube: 90, WhatsApp: 80 },
-    { hari: "Min", Instagram: 210, TikTok: 280, YouTube: 100, WhatsApp: 95 },
-  ],
-  topApps: [
-    { name: "TikTok", sec: 89400 },
-    { name: "Instagram", sec: 62400 },
-    { name: "YouTube", sec: 29700 },
-    { name: "WhatsApp", sec: 25200 },
-    { name: "X (Twitter)", sec: 14400 },
-  ],
-};
+import { api } from "@/lib/utils/api";
 
 const rankColors = ["#334155", "#475569", "#64748B", "#94A3B8", "#E2E8F0"];
 
@@ -82,241 +45,11 @@ const CustomBar = (props: any) => {
   return <Rectangle {...props} radius={radius} />;
 };
 
-const getDailyDataForDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const dayName = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"][
-    date.getDay()
-  ];
-
-  const time = date.getTime();
-  const weekStartIni = new Date(2026, 5, 1).getTime();
-  const weekStartLalu = new Date(2026, 4, 25).getTime();
-
-  let dataset = dataMingguIni.dailyData;
-  let topApps = dataMingguIni.topApps;
-  let isCurrent = true;
-
-  if (time >= weekStartLalu && time < weekStartIni) {
-    dataset = dataMingguLaju.dailyData;
-    topApps = dataMingguLaju.topApps;
-    isCurrent = false;
-  }
-
-  const dayData = dataset.find((d) => d.hari === dayName) || {
-    Instagram: 0,
-    TikTok: 0,
-    YouTube: 0,
-    WhatsApp: 0,
-  };
-
-  return { dayData, topApps, isCurrent };
-};
-
-const generateHourlyDataForDate = (dateStr: string) => {
-  const { dayData } = getDailyDataForDate(dateStr);
-  const apps = ["Instagram", "TikTok", "YouTube", "WhatsApp"];
-
-  const hourlyData = Array.from({ length: 24 }, (_, i) => {
-    const hourLabel = `${String(i).padStart(2, "0")}.00`;
-    const row: Record<string, string | number> = { jam: hourLabel };
-    for (const app of apps) {
-      row[app] = 0;
-    }
-    return row;
-  });
-
-  const distribution: Record<number, number> = {
-    8: 0.15,
-    10: 0.1,
-    12: 0.2,
-    14: 0.15,
-    16: 0.1,
-    20: 0.2,
-    22: 0.1,
-  };
-
-  for (const app of apps) {
-    const totalMinutes = (dayData as Record<string, number>)[app] || 0;
-    if (totalMinutes > 0) {
-      let remaining = totalMinutes;
-      const hours = Object.keys(distribution).map(Number);
-      for (let idx = 0; idx < hours.length; idx++) {
-        const hr = hours[idx];
-        const share = distribution[hr];
-        const amount =
-          idx === hours.length - 1
-            ? remaining
-            : Math.round(totalMinutes * share);
-        hourlyData[hr][app] = amount;
-        remaining -= amount;
-      }
-    }
-  }
-
-  return hourlyData;
-};
-
-const formatMinutesToHoursMins = (minutes: number) => {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+const formatSecToHoursMins = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
   if (h === 0) return `${m}m`;
   return `${h}j ${m}m`;
-};
-
-// Calculate behaviour_scores data dynamically for the given date
-const getBehaviourScoresForDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const dayName = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"][
-    date.getDay()
-  ];
-  const time = date.getTime();
-  const weekStartIni = new Date(2026, 5, 1).getTime();
-
-  // Default Rabu/Wednesday (54 score breakdown)
-  const scores = {
-    totalScore: 54,
-    statusEmoji: "😐",
-    statusTitle: "Perlu Diperhatikan",
-    statusDesc: "Ada beberapa kebiasaan yang terdeteksi hari ini.",
-    statusCardBg: "bg-amber-50 border-amber-200 text-amber-800",
-
-    durasiNilai: 20,
-    durasiMax: 30,
-    frekuensiNilai: 12,
-    frekuensiMax: 20,
-    tidurNilai: 14,
-    tidurMax: 20,
-    nonstopNilai: 0,
-    nonstopMax: 15,
-    distraksiNilai: 8,
-    distraksiMax: 15,
-
-    flagExcessive: false,
-    flagCompulsive: true,
-    flagMidnight: true,
-    flagNonstop: false,
-    flagDistraction: true,
-  };
-
-  if (time < weekStartIni) {
-    // Previous week
-    const dayIdx = date.getDay();
-    const total = 35 + ((dayIdx * 7) % 45); // ranges 35 to 80
-
-    scores.totalScore = total;
-    if (total <= 39) {
-      scores.statusEmoji = "😊";
-      scores.statusTitle = "Hari yang Baik";
-      scores.statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
-      scores.statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
-    } else if (total <= 69) {
-      scores.statusEmoji = "😐";
-      scores.statusTitle = "Perlu Diperhatikan";
-      scores.statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
-      scores.statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
-    } else {
-      scores.statusEmoji = "😟";
-      scores.statusTitle = "Hari yang Berat";
-      scores.statusDesc = "Banyak kebiasaan bermasalah terdeteksi hari ini.";
-      scores.statusCardBg = "bg-red-50 border border-red-200 text-red-800";
-    }
-
-    scores.durasiNilai = Math.round(total * 0.3);
-    scores.frekuensiNilai = Math.round(total * 0.2);
-    scores.tidurNilai = Math.round(total * 0.2);
-    scores.nonstopNilai = Math.round(total * 0.15);
-    scores.distraksiNilai =
-      total -
-      (scores.durasiNilai +
-        scores.frekuensiNilai +
-        scores.tidurNilai +
-        scores.nonstopNilai);
-
-    scores.flagExcessive = scores.durasiNilai > 15;
-    scores.flagCompulsive = scores.frekuensiNilai > 10;
-    scores.flagMidnight = scores.tidurNilai > 10;
-    scores.flagNonstop = scores.nonstopNilai > 7;
-    scores.flagDistraction = scores.distraksiNilai > 7;
-  } else {
-    // Current week
-    if (dayName === "Sen") {
-      scores.totalScore = 76;
-      scores.statusEmoji = "😟";
-      scores.statusTitle = "Hari yang Berat";
-      scores.statusDesc = "Banyak kebiasaan bermasalah terdeteksi hari ini.";
-      scores.statusCardBg = "bg-red-50 border border-red-200 text-red-800";
-
-      scores.durasiNilai = 28;
-      scores.frekuensiNilai = 14;
-      scores.tidurNilai = 10;
-      scores.nonstopNilai = 12;
-      scores.distraksiNilai = 12;
-
-      scores.flagExcessive = true;
-      scores.flagCompulsive = true;
-      scores.flagMidnight = true;
-      scores.flagNonstop = true;
-      scores.flagDistraction = true;
-    } else if (dayName === "Sel") {
-      scores.totalScore = 78;
-      scores.statusEmoji = "😟";
-      scores.statusTitle = "Hari yang Berat";
-      scores.statusDesc = "Banyak kebiasaan bermasalah terdeteksi hari ini.";
-      scores.statusCardBg = "bg-red-50 border border-red-200 text-red-800";
-
-      scores.durasiNilai = 30;
-      scores.frekuensiNilai = 16;
-      scores.tidurNilai = 8;
-      scores.nonstopNilai = 10;
-      scores.distraksiNilai = 14;
-
-      scores.flagExcessive = true;
-      scores.flagCompulsive = true;
-      scores.flagMidnight = false;
-      scores.flagNonstop = true;
-      scores.flagDistraction = true;
-    } else if (dayName === "Rab") {
-      // Wed is 54
-      scores.totalScore = 54;
-      scores.statusEmoji = "😐";
-      scores.statusTitle = "Perlu Diperhatikan";
-      scores.statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
-      scores.statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
-
-      scores.durasiNilai = 20;
-      scores.frekuensiNilai = 12;
-      scores.tidurNilai = 14;
-      scores.nonstopNilai = 0;
-      scores.distraksiNilai = 8;
-
-      scores.flagExcessive = false;
-      scores.flagCompulsive = true;
-      scores.flagMidnight = true;
-      scores.flagNonstop = false;
-      scores.flagDistraction = true;
-    } else {
-      // Future days (no data)
-      scores.totalScore = 0;
-      scores.statusEmoji = "😊";
-      scores.statusTitle = "Hari yang Sempurna";
-      scores.statusDesc = "Belum ada penggunaan gawai terdeteksi.";
-      scores.statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
-
-      scores.durasiNilai = 0;
-      scores.frekuensiNilai = 0;
-      scores.tidurNilai = 0;
-      scores.nonstopNilai = 0;
-      scores.distraksiNilai = 0;
-
-      scores.flagExcessive = false;
-      scores.flagCompulsive = false;
-      scores.flagMidnight = false;
-      scores.flagNonstop = false;
-      scores.flagDistraction = false;
-    }
-  }
-
-  return scores;
 };
 
 // Calculate previous and next date info
@@ -337,21 +70,9 @@ const getPrevNextDates = (currentDateStr: string) => {
     "0",
   )}-${String(next.getDate()).padStart(2, "0")}`;
 
-  const validDates = [
-    "2026-05-25",
-    "2026-05-26",
-    "2026-05-27",
-    "2026-05-28",
-    "2026-05-29",
-    "2026-05-30",
-    "2026-05-31",
-    "2026-06-01",
-    "2026-06-02",
-    "2026-06-03",
-  ];
-
-  const hasPrev = validDates.includes(prevStr);
-  const hasNext = validDates.includes(nextStr);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const hasPrev = true; // Always allow looking back
+  const hasNext = nextStr <= todayStr; // Do not allow looking into the future
 
   return { prevStr, nextStr, hasPrev, hasNext };
 };
@@ -395,78 +116,189 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
   };
 
   const formattedDate = formatIndonesianDateStr(tanggal);
-  const { dayData, topApps } = getDailyDataForDate(tanggal);
-  const scores = getBehaviourScoresForDate(tanggal);
   const { prevStr, nextStr, hasPrev, hasNext } = getPrevNextDates(tanggal);
 
-  // Remap data
-  const sortedPeriodApps = topApps.map((a) => a.name);
-  const top4Apps = sortedPeriodApps.slice(0, 4);
-  const otherApps = ["Instagram", "TikTok", "YouTube", "WhatsApp"].filter(
-    (app) => !top4Apps.includes(app),
-  );
-
-  const hourlyChartData = generateHourlyDataForDate(tanggal);
-
-  const rankedHourlyData = hourlyChartData.map((hourData) => {
-    const newRow: Record<string, string | number> = { jam: hourData.jam };
-    for (const app of top4Apps) {
-      newRow[app] = hourData[app] || 0;
-    }
-    let otherSum = 0;
-    for (const app of otherApps) {
-      otherSum += (hourData[app] as number) || 0;
-    }
-    newRow.Lainnya = otherSum;
-    return newRow;
+  // React Queries
+  const { data: statusData, isLoading: isStatusLoading } = useQuery({
+    queryKey: ["dayStatus", tanggal],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/dashboard/status?date=${tanggal}`,
+      );
+      return res.data.data;
+    },
   });
 
-  const appMinutes = [
-    { name: "Instagram", min: dayData.Instagram || 0 },
-    { name: "TikTok", min: dayData.TikTok || 0 },
-    { name: "YouTube", min: dayData.YouTube || 0 },
-    { name: "WhatsApp", min: dayData.WhatsApp || 0 },
-  ].sort((a, b) => b.min - a.min);
+  const { data: flagData, isLoading: isFlagLoading } = useQuery({
+    queryKey: ["dayFlag", tanggal],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/dashboard/flag?date=${tanggal}`,
+      );
+      return res.data.data;
+    },
+  });
 
-  const totalMin = appMinutes.reduce((acc, curr) => acc + curr.min, 0);
-  const topApp = appMinutes[0]?.min > 0 ? appMinutes[0] : null;
+  const { data: hourlyData, isLoading: isHourlyLoading } = useQuery({
+    queryKey: ["dayHourly", tanggal],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/dashboard/hourly-breakdown?date=${tanggal}`,
+      );
+      return res.data.data;
+    },
+  });
 
-  // Behavioral flags indicators (always visible)
+  const { data: breakdownData, isLoading: isBreakdownLoading } = useQuery({
+    queryKey: ["dayBreakdown", tanggal],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/breakdown?startDate=${tanggal}&endDate=${tanggal}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: screenTimeData, isLoading: isScreenTimeLoading } = useQuery({
+    queryKey: ["dayScreenTime", tanggal],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/screen-time?startDate=${tanggal}&endDate=${tanggal}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: settingData, isLoading: isSettingLoading } = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        "/api/setting/user",
+      );
+      return res.data.data;
+    },
+  });
+
+  const prodStartHour = settingData
+    ? parseInt(settingData.productiveStart.split(":")[0])
+    : 8;
+  const prodEndHour = settingData
+    ? parseInt(settingData.productiveEnd.split(":")[0])
+    : 17;
+  const sleepStartHour = settingData
+    ? parseInt(settingData.sleepStart.split(":")[0])
+    : 22;
+  const sleepEndHour = settingData
+    ? parseInt(settingData.sleepEnd.split(":")[0])
+    : 6;
+
+  if (
+    isStatusLoading ||
+    isFlagLoading ||
+    isHourlyLoading ||
+    isBreakdownLoading ||
+    isScreenTimeLoading ||
+    isSettingLoading
+  ) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-xs font-bold text-muted animate-pulse">
+          Memuat rincian statistik harian...
+        </div>
+      </div>
+    );
+  }
+
+  // Process behavioral scores status
+  const totalScore = statusData?.totalScore ?? 0;
+  const dailyStatus = statusData?.dailyStatus || "Hari yang Sempurna";
+
+  let statusEmoji = "😊";
+  const statusTitle = dailyStatus;
+  let statusDesc = "Penggunaan HP-mu harian terkontrol.";
+  let statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
+
+  if (totalScore > 0) {
+    if (totalScore <= 30) {
+      statusEmoji = "😊";
+      statusDesc = "Penggunaan HP-mu harian terkontrol.";
+      statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
+    } else if (totalScore <= 60) {
+      statusEmoji = "😐";
+      statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
+      statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";
+    } else {
+      statusEmoji = "😟";
+      statusDesc = "Banyak kebiasaan bermasalah terdeteksi hari ini.";
+      statusCardBg = "bg-red-50 border border-red-200 text-red-800";
+    }
+  }
+
+  // Screen time & Top app details
+  const grandTotalSeconds = breakdownData?.grandTotalSeconds ?? 0;
+  const topApp = breakdownData?.items?.[0];
+
+  const screenTimeToday = screenTimeData?.items?.[0];
+  const totalHours = Math.floor(
+    (screenTimeToday?.totalDurationSeconds ?? grandTotalSeconds) / 3600,
+  );
+  const totalMinutes = Math.floor(
+    ((screenTimeToday?.totalDurationSeconds ?? grandTotalSeconds) % 3600) / 60,
+  );
+  const midnightSec = screenTimeToday?.midnightDurationSeconds ?? 0;
+  const maxCont = screenTimeToday?.maxContinuousSeconds ?? 0;
+  const prodSec = screenTimeToday?.productiveHourDurationSeconds ?? 0;
+
+  // Hourly breakdown data
+  const chartData =
+    hourlyData?.chartData ||
+    Array.from({ length: 24 }, (_, i) => ({
+      jam: `${String(i).padStart(2, "0")}.00`,
+      Lainnya: 0,
+    }));
+  const top4Apps: string[] = hourlyData?.top4Apps || [];
+  const top4AppsForRender: string[] =
+    top4Apps.length > 0
+      ? top4Apps
+      : ["Instagram", "TikTok", "YouTube", "WhatsApp"];
+
+  // Behavioral flags indicators
   const flagsList = [
     {
       name: "Terlalu lama main HP",
-      active: scores.flagExcessive,
+      active: flagData?.flagExcessiveUsage ?? false,
       icon: Clock,
-      descActive: "Pemakaian total melebihi batas 4 jam.",
-      descInactive: "Pemakaian gawai harian terkontrol dengan baik.",
+      descActive: `Sudah ${totalHours} jam ${totalMinutes} menit hari ini`,
+      descInactive: `Sudah ${totalHours} jam ${totalMinutes} menit hari ini`,
     },
     {
       name: "Sering buka-tutup aplikasi",
-      active: scores.flagCompulsive,
+      active: flagData?.flagCompulsiveChecking ?? false,
       icon: RotateCcw,
-      descActive: "Frekuensi buka-tutup aplikasi sangat tinggi.",
-      descInactive: "Frekuensi buka-tutup dalam batas normal.",
+      descActive: `Dibuka ${flagData?.openFrequencyLastHour ?? 0} kali dalam 1 jam terakhir`,
+      descInactive: `Dibuka ${flagData?.openFrequencyLastHour ?? 0} kali dalam 1 jam terakhir`,
     },
     {
       name: "Main HP waktu tidur",
-      active: scores.flagMidnight,
+      active: flagData?.flagMidnightUsage ?? false,
       icon: Moon,
-      descActive: "Terdeteksi aktivitas pada jam tidur utama.",
-      descInactive: "Fokus tidur malam terjaga dengan baik.",
+      descActive: `${Math.round(midnightSec / 60)} menit terdeteksi di jam tidur`,
+      descInactive: `${Math.round(midnightSec / 60)} menit terdeteksi di jam tidur`,
     },
     {
       name: "Nonstop tanpa jeda",
-      active: scores.flagNonstop,
+      active: flagData?.flagContinuousUsage ?? false,
       icon: Activity,
-      descActive: "Sering menggunakan HP tanpa jeda istirahat.",
-      descInactive: "Rutin mengambil jeda untuk istirahat mata.",
+      descActive: `Sesi terpanjang ${Math.round(maxCont / 60)} menit`,
+      descInactive: `Sesi terpanjang ${Math.round(maxCont / 60)} menit`,
     },
     {
       name: "Distraksi jam produktif",
-      active: scores.flagDistraction,
+      active: flagData?.flagProductiveHourDistraction ?? false,
       icon: Briefcase,
-      descActive: "Banyak membuka media sosial di jam kerja/belajar.",
-      descInactive: "Konsentrasi terjaga selama jam produktif.",
+      descActive: `${Math.round(prodSec / 60)} menit terdeteksi di jam produktif`,
+      descInactive: `${Math.round(prodSec / 60)} menit terdeteksi di jam produktif`,
     },
   ];
 
@@ -476,36 +308,36 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
       name: "Durasi pemakaian",
       icon: Clock,
       bobot: "30%",
-      nilai: scores.durasiNilai,
-      max: scores.durasiMax,
+      nilai: statusData?.usageDurationScore ?? 0,
+      max: 30,
     },
     {
       name: "Frekuensi buka-tutup",
       icon: RotateCcw,
       bobot: "20%",
-      nilai: scores.frekuensiNilai,
-      max: scores.frekuensiMax,
+      nilai: statusData?.openFrequencyScore ?? 0,
+      max: 20,
     },
     {
       name: "Aktivitas jam tidur",
       icon: Moon,
-      bobot: "20%",
-      nilai: scores.tidurNilai,
-      max: scores.tidurMax,
+      bobot: "15%",
+      nilai: statusData?.midnightUsageScore ?? 0,
+      max: 15,
     },
     {
       name: "Penggunaan nonstop",
       icon: Activity,
-      bobot: "15%",
-      nilai: scores.nonstopNilai,
-      max: scores.nonstopMax,
+      bobot: "20%",
+      nilai: statusData?.continuousUsageScore ?? 0,
+      max: 20,
     },
     {
       name: "Distraksi jam produktif",
       icon: Briefcase,
       bobot: "15%",
-      nilai: scores.distraksiNilai,
-      max: scores.distraksiMax,
+      nilai: statusData?.productiveHourScore ?? 0,
+      max: 15,
     },
   ];
 
@@ -522,7 +354,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
         </Link>
       </div>
 
-      {/* Date Header with Calendar Navigation (Plain structure, no card wrapper) */}
+      {/* Date Header with Calendar Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
@@ -562,25 +394,25 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
         </div>
       </div>
 
-      {/* Rangkuman 3 Cards (Dashboard Style) */}
+      {/* Rangkuman 3 Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Status & Skor Hari Itu */}
         <div
-          className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${scores.statusCardBg}`}
+          className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
               Status & Skor Hari Itu
             </span>
-            <span className="text-xl">{scores.statusEmoji}</span>
+            <span className="text-xl">{statusEmoji}</span>
           </div>
           <div className="mt-4 space-y-1">
             <h3 className="text-2xl font-black leading-none">
-              {scores.totalScore}/100
+              {totalScore}/100
             </h3>
-            <h4 className="text-xs font-bold">{scores.statusTitle}</h4>
+            <h4 className="text-xs font-bold">{statusTitle}</h4>
             <p className="text-[9px] font-light leading-normal opacity-85">
-              {scores.statusDesc}
+              {statusDesc}
             </p>
           </div>
         </div>
@@ -597,7 +429,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
           </div>
           <div className="mt-4 space-y-1">
             <h3 className="text-2xl font-black text-primary leading-none">
-              {formatMinutesToHoursMins(totalMin)}
+              {formatSecToHoursMins(grandTotalSeconds)}
             </h3>
             <p className="text-[9px] text-muted font-light leading-normal">
               Total durasi penggunaan gawai hari itu.
@@ -617,11 +449,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
           </div>
           <div className="mt-4 space-y-1">
             <h3 className="text-2xl font-black text-primary leading-none truncate max-w-full">
-              {topApp ? topApp.name : "Tidak ada"}
+              {topApp ? topApp.appName : "Tidak ada"}
             </h3>
             <p className="text-[9px] text-muted font-light leading-normal">
               {topApp
-                ? `Digunakan selama ${formatMinutesToHoursMins(topApp.min)}.`
+                ? `Digunakan selama ${formatSecToHoursMins(topApp.totalDurationSeconds)}.`
                 : "Tidak ada pemakaian gawai."}
             </p>
           </div>
@@ -645,11 +477,23 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
             <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border border-pink-300 block" />
-                <span>🌙 Jam Tidur</span>
+                <span>
+                  🌙 Jam Tidur (
+                  {settingData
+                    ? `${settingData.sleepStart.slice(0, 5)} - ${settingData.sleepEnd.slice(0, 5)}`
+                    : "22:00 - 06:00"}
+                  )
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-300 block" />
-                <span>💼 Jam Produktif</span>
+                <span>
+                  💼 Jam Produktif (
+                  {settingData
+                    ? `${settingData.productiveStart.slice(0, 5)} - ${settingData.productiveEnd.slice(0, 5)}`
+                    : "08:00 - 17:00"}
+                  )
+                </span>
               </div>
             </div>
           </div>
@@ -658,7 +502,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
             <div className="h-64 min-w-[700px] lg:min-w-0 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={rankedHourlyData}
+                  data={chartData}
                   margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
                 >
                   <XAxis
@@ -673,26 +517,37 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    domain={[0, 120]}
                   />
-                  {/* Highlight areas matching dashboard */}
+                  {/* Reference Areas */}
+                  {sleepStartHour > sleepEndHour ? (
+                    <>
+                      <ReferenceArea
+                        x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
+                        x2="23.00"
+                        fill="#fff0f3"
+                        fillOpacity={0.75}
+                        stroke="none"
+                      />
+                      <ReferenceArea
+                        x1="00.00"
+                        x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
+                        fill="#fff0f3"
+                        fillOpacity={0.75}
+                        stroke="none"
+                      />
+                    </>
+                  ) : (
+                    <ReferenceArea
+                      x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
+                      x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
+                      fill="#fff0f3"
+                      fillOpacity={0.75}
+                      stroke="none"
+                    />
+                  )}
                   <ReferenceArea
-                    x1="22.00"
-                    x2="23.00"
-                    fill="#fff0f3"
-                    fillOpacity={0.75}
-                    stroke="none"
-                  />
-                  <ReferenceArea
-                    x1="00.00"
-                    x2="06.00"
-                    fill="#fff0f3"
-                    fillOpacity={0.75}
-                    stroke="none"
-                  />
-                  <ReferenceArea
-                    x1="08.00"
-                    x2="17.00"
+                    x1={`${String(prodStartHour).padStart(2, "0")}.00`}
+                    x2={`${String(prodEndHour).padStart(2, "0")}.00`}
                     fill="#fffbeb"
                     fillOpacity={0.75}
                     stroke="none"
@@ -717,17 +572,17 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
                     iconType="circle"
                     wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
                   />
-                  {top4Apps.map((appName, index) => (
+                  {top4AppsForRender.map((appName, index) => (
                     <Bar
                       key={appName}
                       dataKey={appName}
                       stackId="a"
                       fill={rankColors[index]}
-                      // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
+                      // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape props
                       shape={(shapeProps: any) => (
                         <CustomBar
                           {...shapeProps}
-                          rankedApps={[...top4Apps, "Lainnya"]}
+                          rankedApps={[...top4AppsForRender, "Lainnya"]}
                         />
                       )}
                     />
@@ -736,11 +591,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
                     dataKey="Lainnya"
                     stackId="a"
                     fill={rankColors[4]}
-                    // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
+                    // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape props
                     shape={(shapeProps: any) => (
                       <CustomBar
                         {...shapeProps}
-                        rankedApps={[...top4Apps, "Lainnya"]}
+                        rankedApps={[...top4AppsForRender, "Lainnya"]}
                       />
                     )}
                   />
@@ -750,9 +605,8 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
           </div>
         </div>
 
-        {/* Detailed Apps breakdown & Flags (1 col) */}
+        {/* Detailed Apps breakdown & Flags */}
         <div className="space-y-6">
-          {/* Kebiasaan Terdeteksi (5 indicators always visible, no emojis) */}
           <div className="bg-card border border-border rounded-3xl p-5 shadow-xs">
             <h3 className="font-extrabold text-base text-primary mb-1">
               Kebiasaan yang Terdeteksi
@@ -789,11 +643,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
                         <span
                           className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
                             flag.active
-                              ? "bg-red-100 text-red-700"
-                              : "bg-emerald-100 text-emerald-700"
+                              ? "bg-red-105 text-red-800 border border-red-200"
+                              : "bg-emerald-105 text-emerald-800 border border-emerald-200"
                           }`}
                         >
-                          {flag.active ? "Terdeteksi" : "Aman"}
+                          {flag.active ? "⚠️ Terdeteksi" : "✅ Aman"}
                         </span>
                       </div>
                       <p className="text-[9px] font-light opacity-85 mt-0.5 leading-snug">
@@ -808,14 +662,14 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
         </div>
       </div>
 
-      {/* Breakdown Skor Perilaku (styled like Kebiasaan yang Sering Muncul grid cards, no emojis) */}
+      {/* Breakdown Skor Perilaku */}
       <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs">
         <div className="mb-4">
           <h3 className="font-extrabold text-base text-primary">
             Breakdown Skor Perilaku
           </h3>
           <p className="text-xs text-muted font-light mt-0.5 leading-relaxed">
-            Dari mana skor {scores.totalScore} ini berasal?
+            Dari mana skor {totalScore} ini berasal?
           </p>
         </div>
 
@@ -824,7 +678,6 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
             const Icon = item.icon;
             const percent = Math.round((item.nilai / item.max) * 100);
 
-            // Icon background and colors matching flags style
             let iconBg = "bg-emerald-50 border-emerald-100";
             let iconColor = "text-emerald-600";
             let barColor = "bg-emerald-500";

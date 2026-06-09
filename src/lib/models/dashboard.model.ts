@@ -30,6 +30,15 @@ export namespace DashboardModel {
     flagMidnightUsage: z.boolean(),
     flagContinuousUsage: z.boolean(),
     flagProductiveHourDistraction: z.boolean(),
+    openFrequencyLastHour: z.number().optional().default(0),
   });
   export type getBehaviorFlagResponse = z.infer<typeof getBehaviorFlagResponse>;
+
+  export const getHourlyBreakdownResponse = z.object({
+    chartData: z.array(z.record(z.string(), z.union([z.string(), z.number()]))),
+    top4Apps: z.array(z.string()),
+  });
+  export type getHourlyBreakdownResponse = z.infer<
+    typeof getHourlyBreakdownResponse
+  >;
 }

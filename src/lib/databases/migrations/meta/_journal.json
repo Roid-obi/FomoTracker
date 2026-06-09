@@ -15,6 +15,13 @@
       "when": 1780649945230,
       "tag": "0001_old_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780989146717,
+      "tag": "0002_dazzling_viper",
+      "breakpoints": true
     }
   ]
 }

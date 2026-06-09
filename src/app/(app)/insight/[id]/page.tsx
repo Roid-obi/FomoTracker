@@ -1,3 +1,4 @@
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import {
   ArrowLeft,
   Brain,
@@ -10,120 +11,44 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { db } from "@/lib/databases";
+import { table } from "@/lib/databases/schema";
+import { createSupabaseServer } from "@/lib/databases/supabase";
+import { getByIdService } from "@/lib/services/insight.service";
 
-interface Comparison {
-  duration: string;
-  durationText: string;
-  flags: string;
-  flagsText: string;
-  overall: string;
-}
+export const dynamic = "force-dynamic";
 
-interface InsightDetail {
-  week_start: string;
-  week_end: string;
-  weekly_status: string;
-  ai_weekly_status_label: string;
-  ai_weekly_desc: string;
-  emoji: string;
-  avg_score: number;
-  positive: string;
-  concern: string;
-  analysis: string;
-  tips: string[];
-  comparison: Comparison;
-}
-
-// Mock database details for older weeks
-const pastInsightsDetails: Record<string, InsightDetail> = {
-  "w-prev-1": {
-    week_start: "19 Mei",
-    week_end: "25 Mei 2026",
-    weekly_status: "heavy",
-    ai_weekly_status_label: "Minggu yang Cukup Berat Secara Digital",
-    ai_weekly_desc:
-      "Tingkat screen time meningkat tajam di akhir pekan terutama pada aplikasi TikTok.",
-    emoji: "😟",
-    avg_score: 72,
-    positive:
-      "Kamu berupaya mematikan HP pada hari Kamis malam untuk tidur tepat waktu.",
-    concern:
-      "Terdeteksi 4 sesi bermain HP nonstop lebih dari 1 jam di hari Sabtu dan Minggu.",
-    analysis:
-      "Pola akhir pekan menunjukkan penurunan kontrol diri yang cukup signifikan. Peningkatan aktivitas TikTok didorong oleh scroll video larut malam di atas jam 23:00.",
-    tips: [
-      "Letakkan HP minimal 2 meter dari kasur saat tidur untuk meminimalkan midnight usage",
-      "Pasang batas pemakaian TikTok maksimal 45 menit per hari",
-      "Sisipkan jeda berdiri 5 menit setiap bermain HP selama 30 menit",
-    ],
-    comparison: {
-      duration: "up", // up | down | same
-      durationText: "Naik 1j 45m dibanding minggu sebelumnya",
-      flags: "lebih banyak",
-      flagsText: "Lebih banyak 2 flag dibanding minggu sebelumnya",
-      overall: "Memburuk",
-    },
-  },
-  "w-prev-2": {
-    week_start: "12 Mei",
-    week_end: "18 Mei 2026",
-    weekly_status: "attention",
-    ai_weekly_status_label: "Minggu yang Cukup Padat",
-    ai_weekly_desc:
-      "Ada beberapa kecenderungan scroll berlebihan di jam produktif siang hari.",
-    emoji: "😐",
-    avg_score: 58,
-    positive: "Tidur malam terjaga dengan baik hampir setiap hari kerja.",
-    concern:
-      "Membuka Instagram secara berulang-ulang saat jam kerja kantor (09:00 - 12:00).",
-    analysis:
-      "Kebiasaan memeriksa Instagram setiap beberapa menit (compulsive checking) masih sering muncul di jam produktif. Disarankan untuk menggunakan pemblokir situs sementara.",
-    tips: [
-      "Aktifkan mode fokus saat jam kerja 08:00 - 17:00",
-      "Batasi membuka Instagram hanya setelah makan siang",
-      "Matikan notifikasi Instagram yang tidak mendesak",
-    ],
-    comparison: {
-      duration: "down",
-      durationText: "Turun 45m dibanding minggu sebelumnya",
-      flags: "lebih sedikit",
-      flagsText: "Lebih sedikit 1 flag dibanding minggu sebelumnya",
-      overall: "Membaik",
-    },
-  },
-  "w-prev-3": {
-    week_start: "5 Mei",
-    week_end: "11 Mei 2026",
-    weekly_status: "good",
-    ai_weekly_status_label: "Minggu yang Sangat Baik!",
-    ai_weekly_desc:
-      "Penggunaan HP-mu terkontrol dengan sangat baik di semua rentang waktu.",
-    emoji: "😊",
-    avg_score: 35,
-    positive:
-      "Sangat jarang membuka medsos di jam produktif. Kontrol luar biasa!",
-    concern:
-      "Hanya sedikit scroll Instagram di hari Minggu malam sebelum tidur.",
-    analysis:
-      "Minggu ini menjadi performa terbaikmu. Kamu berhasil membagi waktu antara HP dan porsi istirahat secara berimbang.",
-    tips: [
-      "Pertahankan rutinitas membatasi HP jam 22:00 malam",
-      "Jaga konsistensi menolak godaan scrolling siang hari",
-      "Rayakan pencapaian ini dengan hobi fisik di luar layar!",
-    ],
-    comparison: {
-      duration: "down",
-      durationText: "Turun 2j 15m dibanding minggu sebelumnya",
-      flags: "lebih sedikit",
-      flagsText: "Lebih sedikit 3 flag dibanding minggu sebelumnya",
-      overall: "Stabil Membaik",
-    },
-  },
+const formatSecToHoursMins = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0) return `${m}m`;
+  return `${h}j ${m}m`;
 };
 
-export async function generateStaticParams() {
-  return [{ id: "w-prev-1" }, { id: "w-prev-2" }, { id: "w-prev-3" }];
-}
+const formatPeriodRange = (startStr: string, endStr: string) => {
+  try {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    return `${start.getDate()} ${months[start.getMonth()]} – ${end.getDate()} ${months[end.getMonth()]} ${end.getFullYear()}`;
+  } catch {
+    return `${startStr} – ${endStr}`;
+  }
+};
 
 export default async function DetailInsightPage({
   params,
@@ -133,7 +58,138 @@ export default async function DetailInsightPage({
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
-  const detail = pastInsightsDetails[id] || pastInsightsDetails["w-prev-1"];
+  // 1. Authenticate user
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth/login");
+  }
+
+  // 2. Fetch insight details
+  const result = await getByIdService(id);
+  if (!result.success) {
+    notFound();
+  }
+  const insight = result.data;
+
+  // 3. Find previous week's details for comparison
+  const prevWeekStart = new Date(`${insight.weekStart}T00:00:00Z`);
+  prevWeekStart.setUTCDate(prevWeekStart.getUTCDate() - 7);
+  const prevWeekStartStr = prevWeekStart.toISOString().slice(0, 10);
+
+  const prevWeekEnd = new Date(prevWeekStart);
+  prevWeekEnd.setUTCDate(prevWeekStart.getUTCDate() + 6);
+  const prevWeekEndStr = prevWeekEnd.toISOString().slice(0, 10);
+
+  const [prevInsight] = await db
+    .select({
+      totalScreenTimeSeconds: table.weeklyInsights.totalScreenTimeSeconds,
+      avgBehavioralScore: table.weeklyInsights.avgBehavioralScore,
+    })
+    .from(table.weeklyInsights)
+    .where(
+      and(
+        eq(table.weeklyInsights.userId, user.id),
+        eq(table.weeklyInsights.weekStart, prevWeekStartStr),
+        eq(table.weeklyInsights.generationStatus, "generated"),
+      ),
+    )
+    .limit(1);
+
+  // 4. Calculate comparisons
+  let comparisonDuration = "same";
+  let comparisonDurationText = "Tidak ada data pembanding minggu sebelumnya";
+  let comparisonFlags = "sama";
+  let comparisonFlagsText = "Tidak ada data pembanding minggu sebelumnya";
+  let comparisonOverall = "Stabil";
+
+  if (prevInsight) {
+    // Screen time comparison
+    const timeDiff =
+      insight.totalScreenTimeSeconds - prevInsight.totalScreenTimeSeconds;
+    if (timeDiff > 0) {
+      comparisonDuration = "up";
+      comparisonDurationText = `Naik ${formatSecToHoursMins(timeDiff)} dibanding minggu sebelumnya`;
+    } else if (timeDiff < 0) {
+      comparisonDuration = "down";
+      comparisonDurationText = `Turun ${formatSecToHoursMins(Math.abs(timeDiff))} dibanding minggu sebelumnya`;
+    } else {
+      comparisonDuration = "same";
+      comparisonDurationText = "Sama dengan minggu sebelumnya";
+    }
+
+    // Score comparison (lower score is better)
+    const scoreDiff =
+      insight.avgBehavioralScore - prevInsight.avgBehavioralScore;
+    if (scoreDiff < 0) {
+      comparisonOverall = "Membaik";
+    } else if (scoreDiff > 0) {
+      comparisonOverall = "Memburuk";
+    } else {
+      comparisonOverall = "Stabil";
+    }
+
+    // Query flag count for both weeks to compare flags
+    const queryFlagsCount = async (start: string, end: string) => {
+      const [row] = await db
+        .select({
+          excessive: sql<number>`sum(case when ${table.behavioralScores.flagExcessiveUsage} = true then 1 else 0 end)`,
+          compulsive: sql<number>`sum(case when ${table.behavioralScores.flagCompulsiveChecking} = true then 1 else 0 end)`,
+          midnight: sql<number>`sum(case when ${table.behavioralScores.flagMidnightUsage} = true then 1 else 0 end)`,
+          continuous: sql<number>`sum(case when ${table.behavioralScores.flagContinuousUsage} = true then 1 else 0 end)`,
+          distraction: sql<number>`sum(case when ${table.behavioralScores.flagProductiveHourDistraction} = true then 1 else 0 end)`,
+        })
+        .from(table.behavioralScores)
+        .where(
+          and(
+            eq(table.behavioralScores.userId, user.id),
+            gte(table.behavioralScores.scoreDate, start),
+            lte(table.behavioralScores.scoreDate, end),
+          ),
+        );
+      return (
+        Number(row?.excessive ?? 0) +
+        Number(row?.compulsive ?? 0) +
+        Number(row?.midnight ?? 0) +
+        Number(row?.continuous ?? 0) +
+        Number(row?.distraction ?? 0)
+      );
+    };
+
+    const currentFlagsSum = await queryFlagsCount(
+      insight.weekStart,
+      insight.weekEnd,
+    );
+    const prevFlagsSum = await queryFlagsCount(
+      prevWeekStartStr,
+      prevWeekEndStr,
+    );
+
+    const flagDiff = currentFlagsSum - prevFlagsSum;
+    if (flagDiff > 0) {
+      comparisonFlags = "lebih banyak";
+      comparisonFlagsText = `Lebih banyak ${flagDiff} flag dibanding minggu sebelumnya`;
+    } else if (flagDiff < 0) {
+      comparisonFlags = "lebih sedikit";
+      comparisonFlagsText = `Lebih sedikit ${Math.abs(flagDiff)} flag dibanding minggu sebelumnya`;
+    } else {
+      comparisonFlags = "sama";
+      comparisonFlagsText = "Jumlah flag sama dengan minggu sebelumnya";
+    }
+  }
+
+  // Parse tips
+  let tips: string[] = [];
+  if (insight.aiTips) {
+    try {
+      tips = JSON.parse(insight.aiTips);
+    } catch {
+      tips = [];
+    }
+  }
 
   const getStatusDetails = (status: string) => {
     switch (status) {
@@ -230,9 +286,10 @@ export default async function DetailInsightPage({
     };
   };
 
-  const durComp = getDurationComparison(detail.comparison.duration);
-  const flagComp = getFlagsComparison(detail.comparison.flags);
-  const overallComp = getOverallComparison(detail.comparison.overall);
+  const cond = getStatusDetails(insight.weeklyStatus);
+  const durComp = getDurationComparison(comparisonDuration);
+  const flagComp = getFlagsComparison(comparisonFlags);
+  const overallComp = getOverallComparison(comparisonOverall);
 
   return (
     <div className="space-y-6 font-poppins">
@@ -250,37 +307,33 @@ export default async function DetailInsightPage({
           Detail Laporan Mingguan
         </span>
         <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight mt-2.5">
-          Insight Minggu: {detail.week_start} – {detail.week_end}
+          Insight Minggu:{" "}
+          {formatPeriodRange(insight.weekStart, insight.weekEnd)}
         </h1>
       </div>
 
       {/* Kondisi Minggu Itu */}
-      {(() => {
-        const cond = getStatusDetails(detail.weekly_status);
-        return (
-          <div
-            className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass}`}
-          >
-            <span
-              className="text-4xl select-none"
-              role="img"
-              aria-label="Status Emoji"
-            >
-              {cond.emoji}
-            </span>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
-                Status Rata-rata
-              </span>
-              <h3 className="text-base sm:text-lg font-black">{cond.label}</h3>
-              <p className="text-xs font-light mt-0.5 leading-relaxed opacity-95">
-                Rata-rata skor perilakumu berada pada {detail.avg_score}/100.{" "}
-                {detail.ai_weekly_status_label}.
-              </p>
-            </div>
-          </div>
-        );
-      })()}
+      <div
+        className={`p-6 rounded-3xl border flex items-center gap-4 ${cond.colorClass}`}
+      >
+        <span
+          className="text-4xl select-none"
+          role="img"
+          aria-label="Status Emoji"
+        >
+          {cond.emoji}
+        </span>
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
+            Status Rata-rata
+          </span>
+          <h3 className="text-base sm:text-lg font-black">{cond.label}</h3>
+          <p className="text-xs font-light mt-0.5 leading-relaxed opacity-95">
+            Rata-rata skor perilakumu berada pada {insight.avgBehavioralScore}
+            /100. {insight.aiWeeklyStatusLabel}.
+          </p>
+        </div>
+      </div>
 
       {/* Comparison section */}
       <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-4">
@@ -303,7 +356,7 @@ export default async function DetailInsightPage({
                 <span>{durComp.label}</span>
               </div>
               <p className="text-[10px] text-muted font-light mt-1.5 leading-snug">
-                {detail.comparison.durationText}
+                {comparisonDurationText}
               </p>
             </div>
           </div>
@@ -320,7 +373,7 @@ export default async function DetailInsightPage({
                 {flagComp.label}
               </div>
               <p className="text-[10px] text-muted font-light mt-1.5 leading-snug">
-                {detail.comparison.flagsText}
+                {comparisonFlagsText}
               </p>
             </div>
           </div>
@@ -337,7 +390,13 @@ export default async function DetailInsightPage({
                 {overallComp.label}
               </div>
               <p className="text-[10px] text-muted font-light mt-1.5 leading-snug">
-                Pola perilaku secara umum menunjukkan tanda stabilisasi.
+                Pola perilaku secara umum menunjukkan tanda{" "}
+                {comparisonOverall.toLowerCase() === "membaik"
+                  ? "peningkatan kontrol diri"
+                  : comparisonOverall.toLowerCase() === "memburuk"
+                    ? "penurunan kontrol diri"
+                    : "stabilisasi"}
+                .
               </p>
             </div>
           </div>
@@ -353,7 +412,7 @@ export default async function DetailInsightPage({
             <span>Yang Sudah Dilakukan dengan Baik</span>
           </h3>
           <p className="text-xs text-muted leading-relaxed font-light">
-            {detail.positive}
+            {insight.aiPositiveNotes || "Tidak ada catatan khusus."}
           </p>
         </div>
 
@@ -364,7 +423,7 @@ export default async function DetailInsightPage({
             <span>Yang Perlu Diperhatikan</span>
           </h3>
           <p className="text-xs text-muted leading-relaxed font-light">
-            {detail.concern}
+            {insight.aiConcernNotes || "Tidak ada catatan khusus."}
           </p>
         </div>
       </div>
@@ -377,8 +436,8 @@ export default async function DetailInsightPage({
             Analisis Minggu Itu
           </h3>
         </div>
-        <p className="text-xs sm:text-sm text-muted leading-relaxed font-light">
-          {detail.analysis}
+        <p className="text-xs sm:text-sm text-muted leading-relaxed font-light whitespace-pre-line">
+          {insight.aiAnalysis}
         </p>
       </div>
 
@@ -391,19 +450,25 @@ export default async function DetailInsightPage({
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {detail.tips.map((tip: string, idx: number) => (
-            <div
-              key={tip}
-              className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
-            >
-              <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
-                Saran 0{idx + 1}
-              </span>
-              <p className="text-xs text-primary font-semibold leading-relaxed">
-                {tip}
-              </p>
-            </div>
-          ))}
+          {tips.length === 0 ? (
+            <p className="text-xs text-muted font-light">
+              Tidak ada saran khusus.
+            </p>
+          ) : (
+            tips.map((tip: string, idx: number) => (
+              <div
+                key={tip}
+                className="p-4 rounded-2xl border border-border/60 bg-muted-light/10 space-y-2 flex flex-col justify-between"
+              >
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
+                  Saran 0{idx + 1}
+                </span>
+                <p className="text-xs text-primary font-semibold leading-relaxed">
+                  {tip}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

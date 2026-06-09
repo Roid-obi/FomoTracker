@@ -65,7 +65,33 @@ export async function updateService(formData: FormData) {
     return { success: false, error: z.treeifyError(parsed.error) };
   }
 
-  const { name, avatar } = parsed.data;
+  const { name, email, newPassword, avatar } = parsed.data;
+
+  // Update email di Supabase Auth jika berubah
+  if (email && email !== user.email) {
+    const { error: emailError } = await supabaseServer.auth.updateUser({
+      email,
+    });
+    if (emailError) {
+      return {
+        success: false,
+        error: `Gagal memperbarui email: ${emailError.message}`,
+      };
+    }
+  }
+
+  // Update password di Supabase Auth jika diisi
+  if (newPassword) {
+    const { error: passError } = await supabaseServer.auth.updateUser({
+      password: newPassword,
+    });
+    if (passError) {
+      return {
+        success: false,
+        error: `Gagal memperbarui password: ${passError.message}`,
+      };
+    }
+  }
 
   const [get_avatar_url] = await db
     .select({ url: table.users.avatarUrl })

@@ -11,6 +11,8 @@ export namespace UserModel {
 
   export const updateRequest = z.object({
     name: z.string().optional(),
+    email: z.string().email().optional(),
+    newPassword: z.string().min(6).optional().or(z.literal("")),
     avatar: z.instanceof(File).optional(),
   });
   export type updateRequest = z.infer<typeof updateRequest>;
@@ -37,5 +39,7 @@ export namespace UserModel {
     notifContinuousEnabled: z.boolean(),
     continuousLimitSeconds: z.number(),
   });
-  export type completeOnboardingRequest = z.infer<typeof completeOnboardingRequest>;
+  export type completeOnboardingRequest = z.infer<
+    typeof completeOnboardingRequest
+  >;
 }

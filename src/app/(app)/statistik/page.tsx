@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   ArrowDownRight,
@@ -23,6 +24,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { api } from "@/lib/utils/api";
 
 // Helper for formatting time (seconds to hours/minutes)
 const formatSecToHoursMins = (seconds: number) => {
@@ -38,199 +40,6 @@ const formatMinutesToHoursMins = (minutes: number) => {
   const m = minutes % 60;
   if (h === 0) return `${m}m`;
   return `${h}j ${m}m`;
-};
-
-// Helper to generate date strings and names
-const getDayDateInfo = (dayIdx: number, isPrevWeek: boolean) => {
-  // Monday of current week is 2026-06-01
-  // Monday of previous week is 2026-05-25
-  const baseDate = isPrevWeek ? new Date(2026, 4, 25) : new Date(2026, 5, 1);
-  const targetDate = new Date(baseDate);
-  targetDate.setDate(baseDate.getDate() + dayIdx);
-
-  const yyyy = targetDate.getFullYear();
-  const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
-  const dd = String(targetDate.getDate()).padStart(2, "0");
-  const dateStr = `${yyyy}-${mm}-${dd}`;
-
-  const dayNames = [
-    "Senin",
-    "Selasa",
-    "Rabu",
-    "Kamis",
-    "Jumat",
-    "Sabtu",
-    "Minggu",
-  ];
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mei",
-    "Jun",
-    "Jul",
-    "Agu",
-    "Sep",
-    "Okt",
-    "Nov",
-    "Des",
-  ];
-
-  const label = `${targetDate.getDate()} ${monthNames[targetDate.getMonth()]}`;
-  const dayName = dayNames[dayIdx];
-
-  return { dateStr, label, dayName };
-};
-
-// Mock data for high fidelity charts matching the database metrics
-const dataMingguIni = {
-  totalSec: 72000, // 20 hours for Mon-Wed
-  avgSec: 24000, // ~6j 40m per day
-  diffSec: 7200, // 2 hours shorter than same period last week
-  diffDirection: "down", // 'up' | 'down' | 'same'
-  dailyData: [
-    { hari: "Sen", Instagram: 130, TikTok: 180, YouTube: 45, WhatsApp: 60 },
-    { hari: "Sel", Instagram: 90, TikTok: 210, YouTube: 60, WhatsApp: 80 },
-    { hari: "Rab", Instagram: 65, TikTok: 82, YouTube: 30, WhatsApp: 50 }, // Wednesday is today
-    { hari: "Kam", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-    { hari: "Jum", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-    { hari: "Sab", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-    { hari: "Min", Instagram: 0, TikTok: 0, YouTube: 0, WhatsApp: 0 },
-  ],
-  topApps: [
-    { name: "TikTok", sec: 28320, color: "bg-secondary" },
-    { name: "Instagram", sec: 17100, color: "bg-primary" },
-    { name: "WhatsApp", sec: 11400, color: "bg-emerald-500" },
-    { name: "YouTube", sec: 8100, color: "bg-accent" },
-    { name: "X (Twitter)", sec: 3600, color: "bg-indigo-500" },
-  ],
-  flags: [
-    {
-      name: "Terlalu lama main HP",
-      count: 2,
-      total: 3,
-      label: "Muncul 2 dari 3 hari",
-    },
-    {
-      name: "Sering buka-tutup aplikasi",
-      count: 3,
-      total: 3,
-      label: "Muncul 3 dari 3 hari",
-    },
-    {
-      name: "Main HP waktu tidur",
-      count: 1,
-      total: 3,
-      label: "Muncul 1 dari 3 hari",
-    },
-    {
-      name: "Nonstop tanpa jeda",
-      count: 2,
-      total: 3,
-      label: "Muncul 2 dari 3 hari",
-    },
-    {
-      name: "Distraksi jam produktif",
-      count: 2,
-      total: 3,
-      label: "Muncul 2 dari 3 hari",
-    },
-  ],
-};
-
-const dataMingguLaju = {
-  totalSec: 165600, // ~46 hours (matches database)
-  avgSec: 23657, // ~6.5 hours per day
-  dailyData: [
-    { hari: "Sen", Instagram: 120, TikTok: 150, YouTube: 60, WhatsApp: 45 },
-    { hari: "Sel", Instagram: 110, TikTok: 180, YouTube: 40, WhatsApp: 50 },
-    { hari: "Rab", Instagram: 130, TikTok: 190, YouTube: 55, WhatsApp: 55 },
-    { hari: "Kam", Instagram: 140, TikTok: 220, YouTube: 80, WhatsApp: 60 },
-    { hari: "Jum", Instagram: 150, TikTok: 210, YouTube: 70, WhatsApp: 70 },
-    { hari: "Sab", Instagram: 180, TikTok: 240, YouTube: 90, WhatsApp: 80 },
-    { hari: "Min", Instagram: 210, TikTok: 280, YouTube: 100, WhatsApp: 95 },
-  ],
-  topApps: [
-    { name: "TikTok", sec: 89400, color: "bg-secondary" },
-    { name: "Instagram", sec: 62400, color: "bg-primary" },
-    { name: "YouTube", sec: 29700, color: "bg-accent" },
-    { name: "WhatsApp", sec: 25200, color: "bg-emerald-500" },
-    { name: "X (Twitter)", sec: 14400, color: "bg-indigo-500" },
-  ],
-  flags: [
-    {
-      name: "Terlalu lama main HP",
-      count: 5,
-      total: 7,
-      label: "Muncul 5 dari 7 hari",
-    },
-    {
-      name: "Sering buka-tutup aplikasi",
-      count: 6,
-      total: 7,
-      label: "Muncul 6 dari 7 hari",
-    },
-    {
-      name: "Main HP waktu tidur",
-      count: 3,
-      total: 7,
-      label: "Muncul 3 dari 7 hari",
-    },
-    {
-      name: "Nonstop tanpa jeda",
-      count: 4,
-      total: 7,
-      label: "Muncul 4 dari 7 hari",
-    },
-    {
-      name: "Distraksi jam produktif",
-      count: 4,
-      total: 7,
-      label: "Muncul 4 dari 7 hari",
-    },
-  ],
-};
-
-// Seeded random generator for deterministic values
-const seededRandom = (seed: number) => {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-};
-
-// Generate Mock Heatmap Data for visual quality
-// 7 days (rows Mon-Sun) x 24 hours (cols 0-23)
-// Uses deterministic seeding based on day and hour to ensure consistency between server and client
-const generateHeatmap = (isPrevWeek: boolean) => {
-  const days = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
-  return days.map((day, dIdx) => {
-    return Array.from({ length: 24 }, (_, hour) => {
-      // Simulate level of usage (0 = none, 1 = low, 2 = medium, 3 = high)
-      let val = 0;
-      // Wednesday is index 2. If current week and index > 2, it is future (no data)
-      if (!isPrevWeek && dIdx > 2) {
-        val = 0;
-      } else {
-        // Use seed based on day and hour for deterministic randomness
-        const seed = dIdx * 100 + hour;
-        const rand = seededRandom(seed);
-
-        // High usage at late evening (20-22)
-        if (hour >= 20 && hour <= 22) {
-          val = rand > 0.3 ? 3 : 2;
-        }
-        // Moderate usage at morning (8-10) and noon (12-13)
-        else if ((hour >= 8 && hour <= 10) || (hour >= 12 && hour <= 13)) {
-          val = rand > 0.4 ? 2 : 1;
-        }
-        // Small usage during sleep/work hours sometimes
-        else if (hour >= 23 || hour <= 1 || (hour >= 14 && hour <= 16)) {
-          val = rand > 0.6 ? 1 : 0;
-        }
-      }
-      return { day, hour, val };
-    });
-  });
 };
 
 const rankColors = ["#334155", "#475569", "#64748B", "#94A3B8", "#E2E8F0"];
@@ -280,14 +89,14 @@ const flagConfigs: Record<
   },
   "Main HP waktu tidur": {
     icon: Moon,
-    weight: "Berkontribusi 20% terhadap skor harian",
+    weight: "Berkontribusi 15% terhadap skor harian",
     iconBg: "bg-indigo-50 border-indigo-100",
     iconColor: "text-indigo-600",
     barColor: "bg-indigo-500",
   },
   "Nonstop tanpa jeda": {
     icon: Activity,
-    weight: "Berkontribusi 15% terhadap skor harian",
+    weight: "Berkontribusi 20% terhadap skor harian",
     iconBg: "bg-orange-50 border-orange-100",
     iconColor: "text-orange-600",
     barColor: "bg-orange-500",
@@ -303,34 +112,134 @@ const flagConfigs: Record<
 
 export default function StatistikPage() {
   const [period, setPeriod] = useState<"ini" | "lalu">("ini");
-
-  const currentData = period === "ini" ? dataMingguIni : dataMingguLaju;
   const isMonday = new Date().getDay() === 1; // Check if today is Monday
 
-  // Sort and rank apps based on currentData.topApps
-  const top4Apps = currentData.topApps.slice(0, 4).map((app) => app.name);
-  const allApps = ["Instagram", "TikTok", "YouTube", "WhatsApp"];
-  const otherApps = allApps.filter((app) => !top4Apps.includes(app));
+  // Function to calculate week start (Monday) and end (Sunday) dates
+  const getWeekRange = (p: "ini" | "lalu" | "dua-lalu") => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
 
-  const rankedDailyData = currentData.dailyData.map(
-    (dayData: Record<string, string | number>) => {
-      const newRow: Record<string, string | number> = {
-        hari: String(dayData.hari),
-      };
-      for (const app of top4Apps) {
-        newRow[app] = dayData[app] || 0;
-      }
-      let otherSum = 0;
-      for (const app of otherApps) {
-        otherSum += (dayData[app] as number) || 0;
-      }
-      newRow.Lainnya = otherSum;
-      return newRow;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday);
+
+    if (p === "lalu") {
+      monday.setDate(monday.getDate() - 7);
+    } else if (p === "dua-lalu") {
+      monday.setDate(monday.getDate() - 14);
+    }
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    const formatDate = (d: Date) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    return {
+      startDate: formatDate(monday),
+      endDate: formatDate(sunday),
+    };
+  };
+
+  const currentRange = getWeekRange(period);
+  const comparisonRange = getWeekRange(period === "ini" ? "lalu" : "dua-lalu");
+
+  // Queries
+  const { data: screenTimeData, isLoading: isScreenTimeLoading } = useQuery({
+    queryKey: ["screenTime", currentRange.startDate, currentRange.endDate],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/screen-time?startDate=${currentRange.startDate}&endDate=${currentRange.endDate}`,
+      );
+      return res.data.data;
     },
-  );
+  });
 
-  // Generate heatmap coordinates
-  const heatmapRows = generateHeatmap(period === "lalu");
+  const { data: compScreenTimeData } = useQuery({
+    queryKey: [
+      "screenTime",
+      comparisonRange.startDate,
+      comparisonRange.endDate,
+    ],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/screen-time?startDate=${comparisonRange.startDate}&endDate=${comparisonRange.endDate}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: dailyBreakdownData, isLoading: isDailyBreakdownLoading } =
+    useQuery({
+      queryKey: [
+        "dailyBreakdown",
+        currentRange.startDate,
+        currentRange.endDate,
+      ],
+      queryFn: async () => {
+        const res = await api.get<{ success: boolean; data: any[] }>(
+          `/api/statistic/daily-breakdown?startDate=${currentRange.startDate}&endDate=${currentRange.endDate}`,
+        );
+        return res.data.data;
+      },
+    });
+
+  const { data: heatmapData, isLoading: isHeatmapLoading } = useQuery({
+    queryKey: ["heatmap", currentRange.startDate, currentRange.endDate],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any[] }>(
+        `/api/statistic/heatmap?startDate=${currentRange.startDate}&endDate=${currentRange.endDate}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: breakdownData, isLoading: isBreakdownLoading } = useQuery({
+    queryKey: ["breakdown", currentRange.startDate, currentRange.endDate],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/breakdown?startDate=${currentRange.startDate}&endDate=${currentRange.endDate}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: flagsData, isLoading: isFlagsLoading } = useQuery({
+    queryKey: ["flags", currentRange.startDate, currentRange.endDate],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any[] }>(
+        `/api/statistic/flags?startDate=${currentRange.startDate}&endDate=${currentRange.endDate}`,
+      );
+      return res.data.data;
+    },
+  });
+
+  const { data: settingData, isLoading: isSettingLoading } = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        "/api/setting/user",
+      );
+      return res.data.data;
+    },
+  });
+
+  const prodStartHour = settingData
+    ? parseInt(settingData.productiveStart.split(":")[0])
+    : 8;
+  const prodEndHour = settingData
+    ? parseInt(settingData.productiveEnd.split(":")[0])
+    : 17;
+  const sleepStartHour = settingData
+    ? parseInt(settingData.sleepStart.split(":")[0])
+    : 22;
+  const sleepEndHour = settingData
+    ? parseInt(settingData.sleepEnd.split(":")[0])
+    : 6;
 
   const getHeatmapColor = (val: number) => {
     switch (val) {
@@ -353,8 +262,150 @@ export default function StatistikPage() {
     return `${h} jam ${m} menit`;
   };
 
-  const diffSec = period === "ini" ? dataMingguIni.diffSec : 7200;
-  const diffDirection = period === "ini" ? dataMingguIni.diffDirection : "down";
+  // Process Stacked Chart Data
+  const top4Apps: string[] = (breakdownData?.items ?? [])
+    .slice(0, 4)
+    .map((app: any) => app.appName as string);
+  const top4AppsForRender: string[] =
+    top4Apps.length > 0
+      ? top4Apps
+      : ["Instagram", "TikTok", "YouTube", "WhatsApp"];
+  const dayNamesShort = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+
+  const rankedDailyData = Array.from({ length: 7 }, (_, index) => {
+    const start = new Date(`${currentRange.startDate}T00:00:00Z`);
+    const target = new Date(start);
+    target.setUTCDate(start.getUTCDate() + index);
+
+    const yyyy = target.getUTCFullYear();
+    const mm = String(target.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(target.getUTCDate()).padStart(2, "0");
+    const targetDateStr = `${yyyy}-${mm}-${dd}`;
+
+    const match =
+      dailyBreakdownData?.find((d) => d.date === targetDateStr) || {};
+
+    const row: Record<string, string | number> = {
+      hari: dayNamesShort[index],
+    };
+
+    for (const app of top4AppsForRender) {
+      row[app] = match[app] || 0;
+    }
+
+    let otherSum = 0;
+    for (const [key, val] of Object.entries(match)) {
+      if (key !== "date" && !top4AppsForRender.includes(key)) {
+        otherSum += (val as number) || 0;
+      }
+    }
+    row.Lainnya = otherSum;
+
+    return row;
+  });
+
+  // Heatmap rows data fallback
+  const heatmapRows =
+    heatmapData ||
+    Array.from({ length: 7 }, (_, dIdx) => {
+      const days = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+      return Array.from({ length: 24 }, (_, hour) => ({
+        day: days[dIdx],
+        hour,
+        val: 0,
+      }));
+    });
+
+  // Top Apps
+  const topAppsForDisplay = (breakdownData?.items ?? [])
+    .slice(0, 5)
+    .map((app: any) => ({
+      name: app.appName,
+      sec: app.totalDurationSeconds,
+    }));
+  const maxSec = topAppsForDisplay[0]?.sec || 1;
+
+  // Behavioral Flags
+  const flagsList = flagsData || [
+    {
+      name: "Terlalu lama main HP",
+      count: 0,
+      total: 7,
+      label: "Muncul 0 dari 7 hari",
+    },
+    {
+      name: "Sering buka-tutup aplikasi",
+      count: 0,
+      total: 7,
+      label: "Muncul 0 dari 7 hari",
+    },
+    {
+      name: "Main HP waktu tidur",
+      count: 0,
+      total: 7,
+      label: "Muncul 0 dari 7 hari",
+    },
+    {
+      name: "Nonstop tanpa jeda",
+      count: 0,
+      total: 7,
+      label: "Muncul 0 dari 7 hari",
+    },
+    {
+      name: "Distraksi jam produktif",
+      count: 0,
+      total: 7,
+      label: "Muncul 0 dari 7 hari",
+    },
+  ];
+
+  // Daily drill-down days metadata
+  const getDayDateInfo = (dayIdx: number) => {
+    const start = new Date(`${currentRange.startDate}T00:00:00Z`);
+    const targetDate = new Date(start);
+    targetDate.setUTCDate(start.getUTCDate() + dayIdx);
+
+    const yyyy = targetDate.getUTCFullYear();
+    const mm = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(targetDate.getUTCDate()).padStart(2, "0");
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+
+    const dayNames = [
+      "Senin",
+      "Selasa",
+      "Rabu",
+      "Kamis",
+      "Jumat",
+      "Sabtu",
+      "Minggu",
+    ];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
+
+    const label = `${targetDate.getUTCDate()} ${monthNames[targetDate.getUTCMonth()]}`;
+    const dayName = dayNames[dayIdx];
+
+    return { dateStr, label, dayName };
+  };
+
+  // Compare diff
+  const currentTotal = screenTimeData?.totalSeconds ?? 0;
+  const comparisonTotal = compScreenTimeData?.totalSeconds ?? 0;
+  const diffSec = Math.abs(currentTotal - comparisonTotal);
+  const diffDirection = currentTotal >= comparisonTotal ? "up" : "down";
+
   const compTitle =
     period === "ini"
       ? "Perbandingan vs Minggu Lalu"
@@ -367,6 +418,24 @@ export default function StatistikPage() {
     period === "ini"
       ? "Lebih lama dari minggu lalu"
       : "Lebih lama dari 2 minggu lalu";
+
+  if (
+    isScreenTimeLoading ||
+    isDailyBreakdownLoading ||
+    isHeatmapLoading ||
+    isBreakdownLoading ||
+    isFlagsLoading ||
+    isSettingLoading
+  ) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-xs font-bold text-muted animate-pulse">
+          Memuat data statistik...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 font-poppins">
@@ -437,7 +506,7 @@ export default function StatistikPage() {
               </div>
               <div className="mt-4">
                 <h3 className="text-2xl sm:text-3xl font-black text-primary">
-                  {formatSecToHoursMins(currentData.totalSec)}
+                  {formatSecToHoursMins(screenTimeData?.totalSeconds ?? 0)}
                 </h3>
                 <p className="text-[10px] text-muted font-light mt-0.5">
                   Terakumulasi dalam rentang periode
@@ -457,7 +526,7 @@ export default function StatistikPage() {
               </div>
               <div className="mt-4">
                 <h3 className="text-2xl sm:text-3xl font-black text-primary">
-                  {formatSecToHoursMins(currentData.avgSec)}
+                  {formatSecToHoursMins(screenTimeData?.avgDailySeconds ?? 0)}
                 </h3>
                 <p className="text-[10px] text-muted font-light mt-0.5">
                   Rata-rata screen time per hari
@@ -559,7 +628,7 @@ export default function StatistikPage() {
                       iconType="circle"
                       wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
                     />
-                    {top4Apps.map((appName, index) => (
+                    {top4AppsForRender.map((appName, index) => (
                       <Bar
                         key={appName}
                         dataKey={appName}
@@ -568,7 +637,7 @@ export default function StatistikPage() {
                         shape={(shapeProps: any) => (
                           <CustomBar
                             {...shapeProps}
-                            rankedApps={[...top4Apps, "Lainnya"]}
+                            rankedApps={[...top4AppsForRender, "Lainnya"]}
                           />
                         )}
                       />
@@ -580,7 +649,7 @@ export default function StatistikPage() {
                       shape={(shapeProps: any) => (
                         <CustomBar
                           {...shapeProps}
-                          rankedApps={[...top4Apps, "Lainnya"]}
+                          rankedApps={[...top4AppsForRender, "Lainnya"]}
                         />
                       )}
                     />
@@ -604,11 +673,23 @@ export default function StatistikPage() {
               <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border border-pink-200 block" />
-                  <span>🌙 Jam Tidur</span>
+                  <span>
+                    🌙 Jam Tidur (
+                    {settingData
+                      ? `${settingData.sleepStart.slice(0, 5)} - ${settingData.sleepEnd.slice(0, 5)}`
+                      : "22:00 - 06:00"}
+                    )
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-200 block" />
-                  <span>💼 Jam Belajar</span>
+                  <span>
+                    💼 Jam Belajar (
+                    {settingData
+                      ? `${settingData.productiveStart.slice(0, 5)} - ${settingData.productiveEnd.slice(0, 5)}`
+                      : "08:00 - 17:00"}
+                    )
+                  </span>
                 </div>
               </div>
             </div>
@@ -629,7 +710,7 @@ export default function StatistikPage() {
                 </div>
 
                 {/* Rows (Days Mon-Sun) */}
-                {heatmapRows.map((row) => {
+                {heatmapRows.map((row: any) => {
                   const dayLabel = row[0].day;
                   return (
                     <div
@@ -642,9 +723,28 @@ export default function StatistikPage() {
                       <div className="text-[10px] font-bold text-primary">
                         {dayLabel}
                       </div>
-                      {row.map((cell) => {
-                        const isProductive = cell.hour >= 8 && cell.hour <= 17;
-                        const isSleep = cell.hour >= 22 || cell.hour <= 6;
+                      {row.map((cell: any) => {
+                        const isHourInRange = (
+                          h: number,
+                          start: number,
+                          end: number,
+                        ) => {
+                          if (start <= end) {
+                            return h >= start && h <= end;
+                          } else {
+                            return h >= start || h <= end;
+                          }
+                        };
+                        const isProductive = isHourInRange(
+                          cell.hour,
+                          prodStartHour,
+                          prodEndHour,
+                        );
+                        const isSleep = isHourInRange(
+                          cell.hour,
+                          sleepStartHour,
+                          sleepEndHour,
+                        );
 
                         let highlightClass = "";
                         if (isSleep) {
@@ -729,67 +829,62 @@ export default function StatistikPage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-              {currentData.dailyData.map(
-                (dayData: Record<string, string | number>, index) => {
-                  const { dateStr, label, dayName } = getDayDateInfo(
-                    index,
-                    period === "lalu",
-                  );
-                  const totalMinutes =
-                    ((dayData.Instagram as number) || 0) +
-                    ((dayData.TikTok as number) || 0) +
-                    ((dayData.YouTube as number) || 0) +
-                    ((dayData.WhatsApp as number) || 0);
+              {Array.from({ length: 7 }).map((_, index) => {
+                const { dateStr, label, dayName } = getDayDateInfo(index);
+                const dayMatch = screenTimeData?.items?.find(
+                  (item: any) => item.statDate === dateStr,
+                );
+                const totalMinutes = dayMatch
+                  ? Math.round(dayMatch.totalDurationSeconds / 60)
+                  : 0;
+                const hasData = totalMinutes > 0;
 
-                  const hasData = totalMinutes > 0;
-
-                  if (hasData) {
-                    return (
-                      <Link
-                        key={dateStr}
-                        href={`/statistik/${dateStr}`}
-                        className="group relative flex flex-col justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-xs transition-all duration-300 min-h-24 cursor-pointer"
-                      >
-                        <div>
-                          <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-                            {dayName}
-                          </span>
-                          <h4 className="text-xs font-black text-primary mt-0.5">
-                            {label}
-                          </h4>
-                        </div>
-                        <div className="flex justify-between items-end mt-4">
-                          <span className="text-xs font-extrabold text-primary">
-                            {formatMinutesToHoursMins(totalMinutes)}
-                          </span>
-                          <ChevronRight className="w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0" />
-                        </div>
-                      </Link>
-                    );
-                  }
-
+                if (hasData) {
                   return (
-                    <div
+                    <Link
                       key={dateStr}
-                      className="flex flex-col justify-between p-4 rounded-2xl border border-border/40 bg-muted-light/10 opacity-50 min-h-24 select-none"
+                      href={`/statistik/${dateStr}`}
+                      className="group relative flex flex-col justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-xs transition-all duration-300 min-h-24 cursor-pointer"
                     >
                       <div>
-                        <span className="text-[10px] font-bold text-muted/60 uppercase tracking-wider">
-                          {dayName}
+                        <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                          {dayName.slice(0, 3)}
                         </span>
-                        <h4 className="text-xs font-black text-muted/60 mt-0.5">
+                        <h4 className="text-xs font-black text-primary mt-0.5">
                           {label}
                         </h4>
                       </div>
-                      <div className="mt-4">
-                        <span className="text-[10px] text-muted/50 font-light block leading-none">
-                          Belum ada data
+                      <div className="flex justify-between items-end mt-4">
+                        <span className="text-xs font-extrabold text-primary">
+                          {formatMinutesToHoursMins(totalMinutes)}
                         </span>
+                        <ChevronRight className="w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0" />
                       </div>
-                    </div>
+                    </Link>
                   );
-                },
-              )}
+                }
+
+                return (
+                  <div
+                    key={dateStr}
+                    className="flex flex-col justify-between p-4 rounded-2xl border border-border/40 bg-muted-light/10 opacity-50 min-h-24 select-none"
+                  >
+                    <div>
+                      <span className="text-[10px] font-bold text-muted/60 uppercase tracking-wider">
+                        {dayName.slice(0, 3)}
+                      </span>
+                      <h4 className="text-xs font-black text-muted/60 mt-0.5">
+                        {label}
+                      </h4>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-[10px] text-muted/50 font-light block leading-none">
+                        Belum ada data
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -805,30 +900,35 @@ export default function StatistikPage() {
             </div>
 
             <div className="space-y-4 flex-1 justify-center flex flex-col">
-              {currentData.topApps.map((app, index) => {
-                const maxSec = currentData.topApps[0].sec;
-                const barWidth = Math.round((app.sec / maxSec) * 100);
-                const barColor = rankColors[index] || rankColors[4];
-                return (
-                  <div key={app.name} className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-primary">{app.name}</span>
-                      <span className="text-muted">
-                        {formatSecToHoursMins(app.sec)}
-                      </span>
+              {topAppsForDisplay.length === 0 ? (
+                <div className="text-center py-6 text-xs text-muted font-light">
+                  Belum ada data aplikasi.
+                </div>
+              ) : (
+                topAppsForDisplay.map((app: any, index: number) => {
+                  const barWidth = Math.round((app.sec / maxSec) * 100);
+                  const barColor = rankColors[index] || rankColors[4];
+                  return (
+                    <div key={app.name} className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-primary">{app.name}</span>
+                        <span className="text-muted">
+                          {formatSecToHoursMins(app.sec)}
+                        </span>
+                      </div>
+                      <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${barWidth}%`,
+                            backgroundColor: barColor,
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${barWidth}%`,
-                          backgroundColor: barColor,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -845,7 +945,7 @@ export default function StatistikPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {currentData.flags.map((flag) => {
+              {flagsList.map((flag: any) => {
                 const config = flagConfigs[flag.name] || {
                   icon: Clock,
                   weight: "",
@@ -854,7 +954,10 @@ export default function StatistikPage() {
                   barColor: "bg-primary",
                 };
                 const IconComp = config.icon;
-                const pct = Math.round((flag.count / flag.total) * 100);
+                const pct =
+                  flag.total > 0
+                    ? Math.round((flag.count / flag.total) * 100)
+                    : 0;
                 return (
                   <div
                     key={flag.name}

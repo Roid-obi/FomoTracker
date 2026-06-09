@@ -29,6 +29,7 @@ export namespace SettingModel {
 
 export namespace DeviceModel {
   export const getResponse = z.object({
+    id: z.string(),
     platform: z.string(),
     deviceName: z.string().nullable(),
     browserName: z.string().nullable(),
@@ -55,9 +56,24 @@ export namespace TrackedAppModel {
   export const getResponse = z.object({
     appId: z.string(),
     isActive: z.boolean().nullable(),
-    addedAt: z.date().nullable(),
+    addedAt: z.coerce.date().nullable(),
+    name: z.string(),
+    packageName: z.string().nullable(),
+    iconUrl: z.string().nullable(),
+    platform: z.string(),
   });
   export type getResponse = z.infer<typeof getResponse>;
+
+  export const appResponse = z.object({
+    id: z.string(),
+    name: z.string(),
+    packageName: z.string().nullable(),
+    webDomain: z.string().nullable(),
+    category: z.string(),
+    iconUrl: z.string().nullable(),
+    platform: z.string(),
+  });
+  export type appResponse = z.infer<typeof appResponse>;
 
   const baseInsertRequest = createInsertSchema(table.userTrackedApps).omit({
     id: true,

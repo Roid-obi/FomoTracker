@@ -75,8 +75,8 @@ export const initialUserSettings = [
     productive_end: "17:00",
     sleep_start: "22:00",
     sleep_end: "06:00",
-    screen_time_limit_seconds: 10800, // 3 hours
-    continuous_limit_seconds: 2700, // 45 minutes
+    screen_time_limit_seconds: 14400, // 4 hours
+    continuous_limit_seconds: 3600, // 60 minutes
     notif_screen_time_enabled: true,
     notif_productive_hour_enabled: true,
     notif_midnight_enabled: true,
@@ -383,13 +383,13 @@ export const initialBehavioralScores = [
     id: "550e8400-e29b-41d4-a716-446655440060",
     user_id: "550e8400-e29b-41d4-a716-446655440000",
     score_date: formatDate(today),
-    usage_duration_score: 82, // Bobot 30%
-    open_frequency_score: 78, // Bobot 20%
-    midnight_usage_score: 60, // Bobot 20%
-    continuous_usage_score: 70, // Bobot 15%
-    productive_hour_score: 55, // Bobot 15%
-    total_score: 68,
-    daily_status: "attention", // good (0-39) | attention (40-69) | heavy (70-100)
+    usage_duration_score: 30, // Bobot 30%
+    open_frequency_score: 20, // Bobot 20%
+    midnight_usage_score: 15, // Bobot 15%
+    continuous_usage_score: 20, // Bobot 20%
+    productive_hour_score: 15, // Bobot 15%
+    total_score: 100,
+    daily_status: "heavy", // good (0-39) | attention (40-69) | heavy (70-100)
     flag_excessive_usage: true,
     flag_compulsive_checking: true,
     flag_midnight_usage: true,

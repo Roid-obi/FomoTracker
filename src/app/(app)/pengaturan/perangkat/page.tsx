@@ -1,5 +1,8 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { gooeyToast } from "goey-toast";
 import {
   Briefcase,
   Globe,
@@ -13,68 +16,38 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  initialUserDevices,
-  initialUserSettings,
-} from "@/lib/data/databaseInitialData";
-
-// Static mock list representing all apps installed on the Android device
-const ALL_INSTALLED_ANDROID_APPS = [
-  { id: "app-ig", name: "Instagram", packageName: "com.instagram.android" },
-  { id: "app-tt", name: "TikTok", packageName: "com.zhiliaoapp.musically" },
-  { id: "app-yt", name: "YouTube", packageName: "com.google.android.youtube" },
-  { id: "app-wa", name: "WhatsApp", packageName: "com.whatsapp" },
-  { id: "app-fb", name: "Facebook", packageName: "com.facebook.katana" },
-  { id: "app-tw", name: "X (Twitter)", packageName: "com.twitter.android" },
-  { id: "app-rd", name: "Reddit", packageName: "com.reddit.frontpage" },
-  { id: "app-dc", name: "Discord", packageName: "com.discord" },
-  { id: "app-sp", name: "Spotify", packageName: "com.spotify.music" },
-  { id: "app-nf", name: "Netflix", packageName: "com.netflix.mediaclient" },
-  {
-    id: "app-sl",
-    name: "Slack",
-    packageName: "com.tinyspeck.slacksoftmobilesapk",
-  },
-  { id: "app-ch", name: "Chrome", packageName: "com.android.chrome" },
-];
+  checkAndRequestUsagePermission,
+  fetchInstalledApps,
+  type InstalledApp,
+} from "@/lib/capacitor/usageStats";
+import type {
+  DeviceModel,
+  SettingModel,
+  TrackedAppModel,
+} from "@/lib/models/setting.model";
+import { api } from "@/lib/utils/api";
 
 export default function PerangkatSettingsPage() {
-  const settings = initialUserSettings[0];
-
-  // Device connection states
-  const [androidConnected, setAndroidConnected] = useState(
-    initialUserDevices.find((d) => d.platform === "android_app")
-      ?.is_connected ?? true,
-  );
-  const [browserConnected, setBrowserConnected] = useState(
-    initialUserDevices.find((d) => d.platform === "browser_extension")
-      ?.is_connected ?? true,
-  );
-
-  // Time settings
-  const [prodStart, setProdStart] = useState(
-    settings?.productive_start || "08:00",
-  );
-  const [prodEnd, setProdEnd] = useState(settings?.productive_end || "17:00");
-  const [sleepStart, setSleepStart] = useState(
-    settings?.sleep_start || "22:00",
-  );
-  const [sleepEnd, setSleepEnd] = useState(settings?.sleep_end || "06:00");
-
-  // Monitored Android App IDs (state of IDs selected for tracking)
-  const [monitoredAppIds, setMonitoredAppIds] = useState<string[]>([
-    "app-ig",
-    "app-tt",
-    "app-yt",
-    "app-wa",
-  ]);
+  const queryClient = useQueryClient();
 
   // Search and selector panel states
   const [isAddingAndroidApp, setIsAddingAndroidApp] = useState(false);
   const [androidSearch, setAndroidSearch] = useState("");
 
-  // Browser Extension URL Rules state
+  // Platform detection & permission states
+  const [isAndroidDevice, setIsAndroidDevice] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
+
+  // Time settings local state
+  const [prodStart, setProdStart] = useState("08:00");
+  const [prodEnd, setProdEnd] = useState("17:00");
+  const [sleepStart, setSleepStart] = useState("22:00");
+  const [sleepEnd, setSleepEnd] = useState("06:00");
+
+  // Browser Extension URL Rules state (Mock local state as extension is not built yet)
   const [webUrls, setWebUrls] = useState([
     { id: "web-yt", name: "YouTube", url: "youtube.com" },
     { id: "web-ig", name: "Instagram", url: "instagram.com" },
@@ -85,21 +58,232 @@ export default function PerangkatSettingsPage() {
   const [newWebName, setNewWebName] = useState("");
   const [newWebUrl, setNewWebUrl] = useState("");
 
-  const handleAddAndroidApp = (id: string) => {
-    if (!monitoredAppIds.includes(id)) {
-      setMonitoredAppIds((prev) => [...prev, id]);
+  // 1. Fetch User Settings
+  const { data: settingsData, isLoading: isSettingsLoading } = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: SettingModel.getResponse;
+      }>("/api/setting/user");
+      return res.data.data;
+    },
+  });
+
+  // Initialize time picker values once data is fetched
+  useEffect(() => {
+    if (settingsData) {
+      setProdStart(settingsData.productiveStart || "08:00");
+      setProdEnd(settingsData.productiveEnd || "17:00");
+      setSleepStart(settingsData.sleepStart || "22:00");
+      setSleepEnd(settingsData.sleepEnd || "06:00");
+    }
+  }, [settingsData]);
+
+  // 2. Fetch User Devices
+  const { data: devicesData, isLoading: isDevicesLoading } = useQuery({
+    queryKey: ["userDevices"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: DeviceModel.getResponse[];
+      }>("/api/setting/device");
+      return res.data.data;
+    },
+  });
+
+  // 3. Fetch User Tracked Apps
+  const { data: trackedAppsData, isLoading: isTrackedAppsLoading } = useQuery({
+    queryKey: ["trackedApps"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: TrackedAppModel.getResponse[];
+      }>("/api/setting/tracked-app");
+      return res.data.data;
+    },
+  });
+
+  // 4. Fetch Available Master Apps
+  const { data: availableAppsData } = useQuery({
+    queryKey: ["availableApps"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: TrackedAppModel.appResponse[];
+      }>("/api/setting/tracked-app?available=true");
+      return res.data.data;
+    },
+  });
+
+  // Detect platform and fetch installed apps
+  useEffect(() => {
+    const platform = Capacitor.getPlatform();
+    const isAndroid = platform === "android";
+    setIsAndroidDevice(isAndroid);
+
+    if (isAndroid) {
+      checkAndRequestUsagePermission().then((granted) => {
+        setHasPermission(granted);
+        if (granted) {
+          fetchInstalledApps().then((apps) => {
+            setInstalledApps(apps);
+          });
+        }
+      });
+    } else {
+      // For browser/development environments, mock installed apps
+      fetchInstalledApps().then((apps) => {
+        setInstalledApps(apps);
+      });
+    }
+  }, []);
+
+  // Request Android usage stats permission explicitly
+  const handleRequestPermission = async () => {
+    const granted = await checkAndRequestUsagePermission();
+    setHasPermission(granted);
+    if (granted) {
+      const apps = await fetchInstalledApps();
+      setInstalledApps(apps);
+      gooeyToast.success("Akses data penggunaan berhasil diaktifkan!");
+    } else {
+      gooeyToast.error(
+        "Izin data penggunaan ditolak. Silakan aktifkan di Pengaturan Android Anda.",
+      );
     }
   };
 
-  const handleRemoveAndroidApp = (id: string) => {
-    setMonitoredAppIds((prev) => prev.filter((appId) => appId !== id));
+  // Device Mutation (Connect / Disconnect)
+  const deviceMutation = useMutation({
+    mutationFn: async ({
+      platform,
+      isConnected,
+      deviceName,
+      browserName,
+    }: {
+      platform: string;
+      isConnected: boolean;
+      deviceName?: string;
+      browserName?: string;
+    }) => {
+      const res = await api.put<{
+        success: boolean;
+        data: DeviceModel.getResponse;
+      }>("/api/setting/device", {
+        platform,
+        isConnected,
+        deviceName,
+        browserName,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["userDevices"] });
+        gooeyToast.success("Status koneksi perangkat berhasil diubah!");
+      }
+    },
+    onError: (error: unknown) => {
+      const apiError = error as { response?: { data?: { error?: string } } };
+      const errorMsg =
+        apiError.response?.data?.error || "Gagal mengubah status koneksi.";
+      gooeyToast.error(errorMsg);
+    },
+  });
+
+  // Tracked App Mutation (Add / Remove)
+  const trackAppMutation = useMutation({
+    mutationFn: async ({
+      appId,
+      isActive,
+    }: {
+      appId: string;
+      isActive: boolean;
+    }) => {
+      const res = await api.post<{
+        success: boolean;
+        data: TrackedAppModel.getResponse;
+      }>("/api/setting/tracked-app", {
+        appId,
+        isActive,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["trackedApps"] });
+        gooeyToast.success("Daftar aplikasi dipantau diperbarui!");
+      }
+    },
+    onError: (error: unknown) => {
+      const apiError = error as { response?: { data?: { error?: string } } };
+      const errorMsg =
+        apiError.response?.data?.error ||
+        "Gagal memperbarui aplikasi dipantau.";
+      gooeyToast.error(errorMsg);
+    },
+  });
+
+  // User Settings Mutation (Hours settings)
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (payload: {
+      productiveStart: string;
+      productiveEnd: string;
+      sleepStart: string;
+      sleepEnd: string;
+    }) => {
+      const res = await api.put<{
+        success: boolean;
+        data: SettingModel.getResponse;
+      }>("/api/setting/user", payload);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["userSettings"] });
+        gooeyToast.success("Target jam pemakaian berhasil disimpan!");
+      }
+    },
+    onError: (error: unknown) => {
+      const apiError = error as { response?: { data?: { error?: string } } };
+      const errorMsg =
+        apiError.response?.data?.error || "Gagal menyimpan jam pemakaian.";
+      gooeyToast.error(errorMsg);
+    },
+  });
+
+  // Extract connection states
+  const androidDevice = devicesData?.find((d) => d.platform === "android_app");
+  const browserDevice = devicesData?.find(
+    (d) => d.platform === "browser_extension",
+  );
+
+  const androidConnected = androidDevice?.isConnected ?? false;
+  const browserConnected = browserDevice?.isConnected ?? false;
+
+  // Handlers
+  const handleAddAndroidApp = (id: string) => {
+    trackAppMutation.mutate({ appId: id, isActive: true });
+  };
+
+  const handleRemoveAndroidApp = (appId: string) => {
+    trackAppMutation.mutate({ appId, isActive: false });
+  };
+
+  const handleSaveUserSettings = () => {
+    updateSettingsMutation.mutate({
+      productiveStart: prodStart,
+      productiveEnd: prodEnd,
+      sleepStart: sleepStart,
+      sleepEnd: sleepEnd,
+    });
   };
 
   const handleAddWebUrl = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWebName.trim() || !newWebUrl.trim()) return;
 
-    // Normalize URL
     let url = newWebUrl.trim().toLowerCase();
     url = url.replace(/^(https?:\/\/)?(www\.)?/, "");
 
@@ -112,10 +296,12 @@ export default function PerangkatSettingsPage() {
     setWebUrls((prev) => [...prev, newRule]);
     setNewWebName("");
     setNewWebUrl("");
+    gooeyToast.success("Domain pemantauan berhasil ditambahkan!");
   };
 
   const handleDeleteWebUrl = (id: string) => {
     setWebUrls((prev) => prev.filter((item) => item.id !== id));
+    gooeyToast.success("Domain pemantauan dihapus.");
   };
 
   const getAppGradient = (name: string) => {
@@ -131,6 +317,8 @@ export default function PerangkatSettingsPage() {
       case "facebook":
         return "from-blue-600 to-blue-800";
       case "x (twitter)":
+      case "x":
+      case "twitter":
         return "from-neutral-700 to-black";
       case "reddit":
         return "from-orange-500 to-red-600";
@@ -150,16 +338,37 @@ export default function PerangkatSettingsPage() {
   };
 
   // Get currently monitored apps objects
-  const monitoredApps = ALL_INSTALLED_ANDROID_APPS.filter((app) =>
-    monitoredAppIds.includes(app.id),
-  );
+  const monitoredApps = (trackedAppsData ?? []).filter((app) => app.isActive);
 
   // Filter available apps from the full list for selection
-  const availableAppsToSelect = ALL_INSTALLED_ANDROID_APPS.filter(
-    (app) =>
-      !monitoredAppIds.includes(app.id) &&
-      app.name.toLowerCase().includes(androidSearch.toLowerCase()),
+  const availableAppsToSelect = (availableAppsData ?? []).filter((app) => {
+    // 1. Must be installed on the device (packageName match)
+    const isInstalled = installedApps.some(
+      (installed) => installed.packageName === app.packageName,
+    );
+    if (!isInstalled) return false;
+
+    // 2. Must not be currently monitored
+    const isMonitored = monitoredApps.some(
+      (monitored) => monitored.appId === app.id,
+    );
+    return !isMonitored;
+  });
+
+  const filteredAvailableAppsToSelect = availableAppsToSelect.filter((app) =>
+    app.name.toLowerCase().includes(androidSearch.toLowerCase()),
   );
+
+  if (isSettingsLoading || isDevicesLoading || isTrackedAppsLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-xs font-bold text-muted animate-pulse">
+          Memuat data pengaturan...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 font-poppins">
@@ -193,7 +402,9 @@ export default function PerangkatSettingsPage() {
                     Android Application
                   </h4>
                   <p className="text-[10px] text-muted font-light leading-normal">
-                    Samsung Galaxy S23
+                    {androidConnected
+                      ? androidDevice?.deviceName || "Perangkat Android"
+                      : "Belum ditautkan"}
                   </p>
                 </div>
               </div>
@@ -213,12 +424,20 @@ export default function PerangkatSettingsPage() {
             <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
               <span className="text-[10px] text-muted font-light">
                 {androidConnected
-                  ? "Terakhir sinkron: 20 menit lalu"
+                  ? androidDevice?.lastSyncedAt
+                    ? `Terakhir sinkron: ${new Date(androidDevice.lastSyncedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                    : "Terakhir sinkron: Baru saja"
                   : "Belum tersinkron"}
               </span>
               <button
                 type="button"
-                onClick={() => setAndroidConnected(!androidConnected)}
+                onClick={() =>
+                  deviceMutation.mutate({
+                    platform: "android_app",
+                    isConnected: !androidConnected,
+                    deviceName: "Perangkat Android",
+                  })
+                }
                 className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
                   androidConnected
                     ? "text-red-600 bg-red-50 hover:bg-red-100"
@@ -242,7 +461,9 @@ export default function PerangkatSettingsPage() {
                     Browser Extension
                   </h4>
                   <p className="text-[10px] text-muted font-light leading-normal">
-                    Google Chrome
+                    {browserConnected
+                      ? browserDevice?.browserName || "Google Chrome"
+                      : "Belum ditautkan"}
                   </p>
                 </div>
               </div>
@@ -262,12 +483,20 @@ export default function PerangkatSettingsPage() {
             <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
               <span className="text-[10px] text-muted font-light">
                 {browserConnected
-                  ? "Terakhir sinkron: 15 menit lalu"
+                  ? browserDevice?.lastSyncedAt
+                    ? `Terakhir sinkron: ${new Date(browserDevice.lastSyncedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                    : "Terakhir sinkron: Baru saja"
                   : "Belum tersinkron"}
               </span>
               <button
                 type="button"
-                onClick={() => setBrowserConnected(!browserConnected)}
+                onClick={() =>
+                  deviceMutation.mutate({
+                    platform: "browser_extension",
+                    isConnected: !browserConnected,
+                    browserName: "Google Chrome",
+                  })
+                }
                 className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
                   browserConnected
                     ? "text-red-600 bg-red-50 hover:bg-red-100"
@@ -295,6 +524,22 @@ export default function PerangkatSettingsPage() {
         </div>
       )}
 
+      {/* Warning Notice if not running inside Android App */}
+      {!isAndroidDevice && (
+        <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 text-amber-800 flex items-start gap-3 shadow-2xs">
+          <Info className="w-5 h-5 shrink-0 text-amber-600 mt-0.5 animate-pulse" />
+          <div className="space-y-0.5">
+            <h4 className="text-xs font-bold">API Android Tidak Terdeteksi</h4>
+            <p className="text-[10px] text-amber-700 font-light leading-relaxed">
+              Sistem mendeteksi Anda mengakses halaman ini dari browser/web.
+              Pastikan aplikasi FomoTracker terinstal di perangkat Android Anda,
+              dan izin statistik penggunaan (Usage Stats) telah diaktifkan agar
+              pelacakan berjalan otomatis.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── ANDROID SETTINGS SECTION (Conditional) ── */}
       <section className="space-y-4 p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/40 pb-3 gap-2">
@@ -305,14 +550,14 @@ export default function PerangkatSettingsPage() {
                 Aplikasi Android yang Dipantau
               </h3>
               <div className="flex items-center gap-1.5 mt-0.5">
-                {androidConnected ? (
+                {isAndroidDevice ? (
                   <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.2 rounded-md flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     API Android Terdeteksi
                   </span>
                 ) : (
-                  <span className="text-[9px] font-extrabold text-red-600 bg-red-50 border border-red-100 px-2 py-0.2 rounded-md flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  <span className="text-[9px] font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.2 rounded-md flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                     API Android Tidak Terdeteksi
                   </span>
                 )}
@@ -335,12 +580,26 @@ export default function PerangkatSettingsPage() {
         {/* 1. Android Not Connected Warning */}
         {!androidConnected && (
           <div className="text-center p-8 border border-dashed border-border rounded-2xl bg-background/30 text-xs text-muted">
-            Status API Android terputus. Silakan hubungkan perangkat Samsung
-            Galaxy S23 Anda untuk mengimpor dan memilih aplikasi pemantauan.
+            Status API Android terputus. Silakan hubungkan perangkat Android
+            Anda untuk mengimpor dan memilih aplikasi pemantauan.
           </div>
         )}
 
-        {/* 2. Android Connected & Adding App Selector Panel */}
+        {/* 2. Android Connected but usage permission missing */}
+        {androidConnected && isAndroidDevice && hasPermission === false && (
+          <div className="text-center p-8 border border-dashed border-border rounded-2xl bg-background/30 text-xs text-muted space-y-3">
+            <p>Izin data penggunaan Android (Usage Stats) belum diaktifkan.</p>
+            <button
+              type="button"
+              onClick={handleRequestPermission}
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition-colors cursor-pointer shadow-xs"
+            >
+              Aktifkan Akses Data Penggunaan
+            </button>
+          </div>
+        )}
+
+        {/* 3. Android Connected & Adding App Selector Panel */}
         {androidConnected && isAddingAndroidApp && (
           <div className="p-4 sm:p-5 border border-primary/20 bg-primary/[0.01] rounded-2xl space-y-4 animate-page-enter">
             <div className="flex justify-between items-center">
@@ -373,14 +632,14 @@ export default function PerangkatSettingsPage() {
 
             {/* Selection Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-              {availableAppsToSelect.length === 0 ? (
+              {filteredAvailableAppsToSelect.length === 0 ? (
                 <div className="col-span-full text-center py-6 text-xs text-muted font-light">
                   {androidSearch
                     ? "Aplikasi tidak ditemukan"
                     : "Semua aplikasi terpasang sudah ditambahkan ke daftar pantau."}
                 </div>
               ) : (
-                availableAppsToSelect.map((app) => (
+                filteredAvailableAppsToSelect.map((app) => (
                   <button
                     type="button"
                     key={app.id}
@@ -409,7 +668,7 @@ export default function PerangkatSettingsPage() {
           </div>
         )}
 
-        {/* 3. Currently Monitored Android Apps Grid */}
+        {/* 4. Currently Monitored Android Apps Grid */}
         {androidConnected && (
           <div className="space-y-2">
             {monitoredApps.length === 0 ? (
@@ -421,7 +680,7 @@ export default function PerangkatSettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                 {monitoredApps.map((app) => (
                   <div
-                    key={app.id}
+                    key={app.appId}
                     className="p-3 border border-border bg-background/50 rounded-2xl flex items-center justify-between gap-3 shadow-3xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -443,7 +702,7 @@ export default function PerangkatSettingsPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleRemoveAndroidApp(app.id)}
+                      onClick={() => handleRemoveAndroidApp(app.appId)}
                       className="p-2 rounded-lg hover:bg-red-50 text-muted hover:text-red-600 transition-colors shrink-0 cursor-pointer"
                       aria-label="Remove application"
                     >
@@ -661,6 +920,17 @@ export default function PerangkatSettingsPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Save button for Target Jam Pemakaian */}
+        <div className="flex justify-end pt-2">
+          <button
+            type="button"
+            onClick={handleSaveUserSettings}
+            className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-secondary transition-all text-xs cursor-pointer shadow-xs"
+          >
+            Simpan Jam Waktu
+          </button>
         </div>
       </section>
     </div>

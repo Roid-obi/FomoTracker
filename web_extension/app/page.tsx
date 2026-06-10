@@ -120,14 +120,14 @@ function RuleCard({
       className="group relative rounded-2xl p-4 transition-all duration-200 cursor-pointer"
       style={{
         background: limitReached
-          ? "linear-gradient(135deg, rgba(248,113,113,0.06) 0%, rgba(248,113,113,0.02) 100%)"
+          ? "linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 100%)"
           : onBreak
-          ? "linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(52,211,153,0.02) 100%)"
+          ? "linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0.02) 100%)"
           : "var(--bg-surface)",
         border: limitReached
-          ? "1px solid rgba(248,113,113,0.2)"
+          ? "1px solid rgba(239,68,68,0.2)"
           : onBreak
-          ? "1px solid rgba(52,211,153,0.2)"
+          ? "1px solid rgba(16,185,129,0.2)"
           : "1px solid var(--border-subtle)",
       }}
     >
@@ -319,7 +319,7 @@ function RuleModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in"
-      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
+      style={{ background: "rgba(6,39,67,0.6)", backdropFilter: "blur(6px)" }}
     >
       <div
         className="w-full max-w-sm mx-4 rounded-2xl p-6 animate-scale-in"
@@ -327,7 +327,7 @@ function RuleModal({
           background: "var(--bg-surface)",
           border: "1px solid var(--border-accent)",
           boxShadow:
-            "0 0 0 1px var(--border-accent), 0 32px 64px rgba(0,0,0,0.5)",
+            "0 0 0 1px var(--border-accent), 0 32px 64px rgba(6,39,67,0.5)",
         }}
       >
         <div className="flex items-center justify-between mb-6">
@@ -335,10 +335,7 @@ function RuleModal({
             className="text-lg font-bold"
             style={{
               fontFamily: "var(--font-display)",
-              background:
-                "linear-gradient(135deg, var(--accent-secondary), var(--accent-primary))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              color: "var(--text-primary)",
             }}
           >
             {initial ? "Edit Rule" : "New Rule"}
@@ -377,7 +374,7 @@ function RuleModal({
                   ? "var(--border-accent)"
                   : "var(--border-subtle)",
                 boxShadow: url
-                  ? "0 0 0 3px rgba(99,102,241,0.1)"
+                  ? "0 0 0 3px rgba(6,39,67,0.1)"
                   : "none",
               }}
               autoFocus
@@ -457,8 +454,8 @@ function RuleModal({
           <div
             className="rounded-xl p-3 text-xs leading-relaxed"
             style={{
-              background: "rgba(99,102,241,0.06)",
-              border: "1px solid rgba(99,102,241,0.12)",
+              background: "rgba(6,39,67,0.06)",
+              border: "1px solid rgba(6,39,67,0.12)",
               color: "var(--text-secondary)",
             }}
           >
@@ -493,10 +490,9 @@ function RuleModal({
             <button
               type="submit"
               id="save-rule-btn"
-              className="flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-150"
+              className="flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-150 hover:opacity-90"
               style={{
-                background:
-                  "linear-gradient(135deg, var(--accent-primary), #4f46e5)",
+                background: "var(--accent-primary)",
                 color: "white",
                 boxShadow: "0 4px 16px var(--accent-glow)",
               }}
@@ -627,32 +623,25 @@ export default function Home() {
           className="flex items-center justify-between px-5 pt-5 pb-3"
           style={{ borderBottom: "1px solid var(--border-subtle)" }}
         >
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
+          <div className="flex items-baseline gap-0.5 select-none">
+            <span
+              className="text-3xl font-normal leading-none"
               style={{
-                background: "linear-gradient(135deg, var(--accent-primary), #4f46e5)",
-                boxShadow: "0 0 16px var(--accent-glow)",
+                fontFamily: "var(--font-yellowtail), cursive",
+                color: "var(--text-primary)",
               }}
             >
-              ⏱
-            </div>
-            <div>
-              <div
-                className="text-base font-extrabold leading-none tracking-tight"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  background: "linear-gradient(135deg, #a5b4fc 0%, var(--accent-primary) 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                FomoTracker
-              </div>
-              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                Time limit manager
-              </div>
-            </div>
+              Fomo
+            </span>
+            <span
+              className="text-[10px] font-bold tracking-widest uppercase leading-none"
+              style={{
+                fontFamily: "var(--font-display)",
+                color: "var(--text-primary)",
+              }}
+            >
+              Tracker
+            </span>
           </div>
 
           <button
@@ -661,9 +650,9 @@ export default function Home() {
               setEditingRule(null);
               setShowModal(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 hover:scale-[1.02]"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 hover:opacity-90"
             style={{
-              background: "linear-gradient(135deg, var(--accent-primary), #4f46e5)",
+              background: "var(--accent-primary)",
               color: "white",
               boxShadow: "0 2px 12px var(--accent-glow)",
             }}
@@ -829,9 +818,9 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
       <button
         id="empty-add-btn"
         onClick={onAdd}
-        className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 hover:scale-[1.02]"
+        className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 hover:opacity-90"
         style={{
-          background: "linear-gradient(135deg, var(--accent-primary), #4f46e5)",
+          background: "var(--accent-primary)",
           color: "white",
           boxShadow: "0 4px 16px var(--accent-glow)",
         }}

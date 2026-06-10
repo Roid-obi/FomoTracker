@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Syne, DM_Sans } from "next/font/google";
+import { Poppins, Yellowtail } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-display",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-body",
+const yellowtail = Yellowtail({
+  variable: "--font-yellowtail",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${dmSans.variable}`}
+      className={`${poppins.variable} ${yellowtail.variable}`}
     >
       <body>{children}</body>
     </html>

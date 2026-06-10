@@ -1,24 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base: #09090f;
-  --bg-surface: #111118;
-  --bg-elevated: #18181f;
-  --bg-hover: #1f1f28;
-  --border-subtle: rgba(148, 163, 184, 0.08);
-  --border-accent: rgba(99, 102, 241, 0.3);
-  --accent-primary: #6366f1;
-  --accent-secondary: #818cf8;
-  --accent-glow: rgba(99, 102, 241, 0.25);
-  --text-primary: #f1f5f9;
-  --text-secondary: rgba(148, 163, 184, 0.85);
-  --text-muted: rgba(148, 163, 184, 0.45);
-  --success: #34d399;
-  --success-bg: rgba(52, 211, 153, 0.1);
-  --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.1);
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
+  color-scheme: light;
+  --bg-base: #f9f9f9;
+  --bg-surface: #ffffff;
+  --bg-elevated: #e6eef4;
+  --bg-hover: #f0f4f8;
+  --border-subtle: #e1e8ef;
+  --border-accent: rgba(6, 39, 67, 0.2);
+  --accent-primary: #062743;
+  --accent-secondary: #113a5d;
+  --accent-glow: rgba(196, 255, 221, 0.5);
+  --text-primary: #062743;
+  --text-secondary: #113a5d;
+  --text-muted: #506e86;
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --font-display: var(--font-poppins);
+  --font-body: var(--font-poppins);
+  --font-yellowtail: var(--font-yellowtail);
+}
+
+@theme {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-hover: var(--bg-hover);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-accent: var(--border-accent);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-glow: var(--accent-glow);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --font-display: var(--font-poppins);
+  --font-body: var(--font-poppins);
+  --font-yellowtail: var(--font-yellowtail);
 }
 
 * {
@@ -31,16 +55,16 @@ html,
 body {
   width: 400px;
   min-height: 580px;
-  background: var(--bg-base);
-  color: var(--text-primary);
-  font-family: var(--font-body), "DM Sans", system-ui, sans-serif;
+  background-color: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 /* Typography */
 .font-display {
-  font-family: var(--font-display), "Syne", sans-serif;
+  font-family: var(--font-display), sans-serif;
 }
 
 /* Scrollbar */
@@ -51,20 +75,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.3);
+  background: var(--accent-primary);
   border-radius: 2px;
 }
 
-/* Noise texture overlay */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.5;
-}
+/* Noise texture overlay removed for clean look */
 
 /* Input reset */
 input,
@@ -124,7 +139,7 @@ button {
     box-shadow: 0 0 20px var(--accent-glow);
   }
   50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 40px var(--accent-glow);
   }
 }
 

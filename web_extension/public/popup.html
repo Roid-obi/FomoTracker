@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FomoTracker — Time Limit Manager</title>
+    <meta name="description" content="Track and limit your browsing time on distracting websites." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      /* ── Design System ─────────────────────────────────── */
+      :root {
+        --bg-base: #09090f;
+        --bg-surface: #111118;
+        --bg-elevated: #18181f;
+        --bg-hover: #1f1f28;
+        --border-subtle: rgba(148,163,184,.08);
+        --border-accent: rgba(99,102,241,.3);
+        --accent: #6366f1;
+        --accent2: #818cf8;
+        --glow: rgba(99,102,241,.25);
+        --text-primary: #f1f5f9;
+        --text-secondary: rgba(148,163,184,.85);
+        --text-muted: rgba(148,163,184,.45);
+        --success: #34d399;
+        --success-bg: rgba(52,211,153,.1);
+        --danger: #f87171;
+        --danger-bg: rgba(248,113,113,.1);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        width: 400px;
+        min-height: 560px;
+        background: var(--bg-base);
+        color: var(--text-primary);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* ── Animations ──────────────────────────────────────── */
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+      @keyframes scaleIn { from { opacity:0; transform:scale(.93); } to { opacity:1; transform:scale(1); } }
+      @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+      /* ── Layout ──────────────────────────────────────────── */
+      #app { display: flex; flex-direction: column; min-height: 560px; }
+
+      /* ── Header ──────────────────────────────────────────── */
+      #header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .logo { display:flex; align-items:center; gap:10px; }
+      .logo-icon {
+        width:32px; height:32px; border-radius:12px;
+        background: linear-gradient(135deg,var(--accent),#4f46e5);
+        display:flex; align-items:center; justify-content:center;
+        font-size:15px;
+        box-shadow: 0 0 16px var(--glow);
+      }
+      .logo-title {
+        font-size:15px; font-weight:800; letter-spacing:-0.3px;
+        background: linear-gradient(135deg,#a5b4fc,var(--accent));
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      }
+      .logo-sub { font-size:11px; color:var(--text-muted); margin-top:1px; }
+
+      #add-btn {
+        display:flex; align-items:center; gap:5px;
+        padding:8px 14px; border-radius:12px;
+        background: linear-gradient(135deg,var(--accent),#4f46e5);
+        color:white; border:none; cursor:pointer;
+        font-size:12px; font-weight:700; letter-spacing:0.2px;
+        box-shadow: 0 2px 12px var(--glow);
+        transition: transform .15s, box-shadow .15s;
+      }
+      #add-btn:hover { transform:scale(1.03); box-shadow:0 4px 18px var(--glow); }
+
+      /* ── Tabs ────────────────────────────────────────────── */
+      #tabs { display:flex; gap:4px; padding:14px 20px 0; }
+      .tab {
+        flex:1; padding:8px; border-radius:12px; border:1px solid transparent;
+        background:transparent; color:var(--text-muted);
+        font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px;
+        cursor:pointer; transition: all .15s;
+      }
+      .tab.active {
+        background:var(--bg-elevated); color:var(--accent2);
+        border-color:var(--border-accent);
+      }
+      .badge {
+        display:inline-flex; align-items:center; justify-content:center;
+        width:16px; height:16px; border-radius:50%;
+        background:var(--danger); color:white; font-size:9px; font-weight:800;
+        margin-left:4px;
+      }
+
+      /* ── Content ─────────────────────────────────────────── */
+      #content { flex:1; padding:14px 20px; overflow-y:auto; }
+
+      /* ── Loading ─────────────────────────────────────────── */
+      .spinner {
+        width:24px; height:24px; border-radius:50%;
+        border:2px solid var(--bg-hover);
+        border-top-color:var(--accent);
+        animation: spin .7s linear infinite;
+        margin:60px auto;
+      }
+
+      /* ── Empty State ─────────────────────────────────────── */
+      #empty {
+        display:flex; flex-direction:column; align-items:center;
+        padding:40px 0; text-align:center; animation:fadeIn .3s ease;
+      }
+      .empty-icon {
+        width:56px; height:56px; border-radius:18px;
+        background:var(--bg-elevated); border:1px solid var(--border-subtle);
+        display:flex; align-items:center; justify-content:center;
+        font-size:22px; margin-bottom:14px;
+      }
+      .empty-title { font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+      .empty-sub { font-size:12px; color:var(--text-muted); margin-bottom:18px; line-height:1.6; max-width:180px; }
+      .empty-btn {
+        padding:10px 20px; border-radius:12px;
+        background:linear-gradient(135deg,var(--accent),#4f46e5);
+        color:white; border:none; cursor:pointer;
+        font-size:13px; font-weight:700;
+        box-shadow:0 4px 16px var(--glow);
+        transition:transform .15s;
+      }
+      .empty-btn:hover { transform:scale(1.03); }
+
+      /* ── Rule Card ───────────────────────────────────────── */
+      .rule-card {
+        border-radius:16px; padding:14px;
+        border:1px solid var(--border-subtle);
+        background:var(--bg-surface);
+        margin-bottom:8px;
+        animation:fadeIn .3s ease;
+        transition: border-color .2s, background .2s;
+        position:relative;
+      }
+      .rule-card.limit-reached {
+        background:linear-gradient(135deg,rgba(248,113,113,.06),rgba(248,113,113,.02));
+        border-color:rgba(248,113,113,.2);
+      }
+      .rule-card.on-break {
+        background:linear-gradient(135deg,rgba(52,211,153,.06),rgba(52,211,153,.02));
+        border-color:rgba(52,211,153,.2);
+      }
+      .rule-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+      .rule-info { min-width:0; display:flex; align-items:center; gap:8px; }
+      .status-dot {
+        width:8px; height:8px; border-radius:50%; flex-shrink:0;
+        background:var(--text-muted);
+        transition:background .2s, box-shadow .2s;
+      }
+      .status-dot.active { background:var(--success); box-shadow:0 0 6px var(--success); }
+      .rule-domain { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .rule-url { font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+      .rule-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+      .icon-btn {
+        width:28px; height:28px; border-radius:8px; border:none; cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        font-size:13px; transition:all .15s;
+        opacity:0;
+      }
+      .rule-card:hover .icon-btn { opacity:1; }
+      .edit-btn { background:var(--bg-hover); color:var(--text-muted); }
+      .edit-btn:hover { color:var(--text-primary); }
+      .del-btn { background:var(--danger-bg); color:var(--danger); }
+
+      /* Toggle */
+      .toggle {
+        width:36px; height:20px; border-radius:50px; border:none; cursor:pointer;
+        background:var(--bg-hover); position:relative; transition:all .2s;
+        flex-shrink:0;
+      }
+      .toggle.on { background:var(--accent); box-shadow:0 0 10px var(--glow); }
+      .toggle-thumb {
+        position:absolute; top:2px; left:2px;
+        width:16px; height:16px; border-radius:50%;
+        background:white; box-shadow:0 1px 3px rgba(0,0,0,.3);
+        transition:left .2s;
+      }
+      .toggle.on .toggle-thumb { left:18px; }
+
+      /* Stats */
+      .rule-stats { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+      .stat-chip {
+        display:flex; align-items:center; gap:4px;
+        padding:4px 10px; border-radius:8px;
+        background:var(--bg-elevated); color:var(--text-secondary);
+        font-size:11px;
+      }
+      .live-chip {
+        padding:4px 10px; border-radius:8px; font-size:11px; font-weight:600;
+        display:flex; align-items:center; gap:4px; margin-left:auto;
+      }
+      .live-chip.danger { background:var(--danger-bg); color:var(--danger); }
+      .live-chip.success { background:var(--success-bg); color:var(--success); }
+      .live-chip.muted { background:var(--bg-elevated); color:var(--text-muted); }
+      .live-dot { width:6px; height:6px; border-radius:50%; background:currentColor; animation:blink 1s infinite; }
+
+      /* ── Active Session Card ─────────────────────────────── */
+      .session-card {
+        border-radius:16px; padding:14px;
+        border:1px solid var(--border-subtle); background:var(--bg-surface);
+        margin-bottom:8px; animation:fadeIn .3s ease;
+      }
+      .session-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+      .session-domain { font-size:14px; font-weight:700; color:var(--text-primary); }
+      .session-sub { font-size:11px; margin-top:2px; }
+      .session-timer { font-size:26px; font-weight:800; letter-spacing:-1px; font-variant-numeric:tabular-nums; }
+      .progress-track { width:100%; height:5px; background:var(--bg-elevated); border-radius:3px; overflow:hidden; }
+      .progress-bar { height:100%; border-radius:3px; transition:width 1s linear; }
+
+      /* ── No Active ───────────────────────────────────────── */
+      .no-active { text-align:center; padding:50px 0; color:var(--text-muted); animation:fadeIn .3s ease; }
+      .no-active-icon { font-size:30px; margin-bottom:10px; }
+      .no-active-text { font-size:13px; font-weight:500; color:var(--text-muted); }
+      .no-active-sub { font-size:11px; margin-top:4px; opacity:.6; }
+
+      /* ── Footer ──────────────────────────────────────────── */
+      #footer {
+        display:flex; justify-content:space-between; align-items:center;
+        padding:10px 20px; border-top:1px solid var(--border-subtle);
+      }
+      #footer span { font-size:11px; color:var(--text-muted); }
+
+      /* ── Modal ───────────────────────────────────────────── */
+      #modal-overlay {
+        position:fixed; inset:0; z-index:999;
+        background:rgba(0,0,0,.75); backdrop-filter:blur(6px);
+        display:none; align-items:center; justify-content:center;
+      }
+      #modal-overlay.open { display:flex; animation:fadeIn .2s ease; }
+      #modal {
+        background:var(--bg-surface);
+        border:1px solid var(--border-accent);
+        border-radius:20px; padding:24px; width:340px;
+        box-shadow:0 0 0 1px var(--border-accent), 0 24px 60px rgba(0,0,0,.5);
+        animation:scaleIn .25s ease;
+      }
+      .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+      .modal-title {
+        font-size:17px; font-weight:800;
+        background:linear-gradient(135deg,var(--accent2),var(--accent));
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      }
+      .modal-close {
+        width:30px; height:30px; border-radius:8px;
+        background:var(--bg-hover); border:none; cursor:pointer;
+        color:var(--text-muted); font-size:14px; display:flex;
+        align-items:center; justify-content:center;
+        transition:color .15s;
+      }
+      .modal-close:hover { color:var(--text-primary); }
+
+      .field { margin-bottom:16px; }
+      .field-label {
+        display:block; font-size:10px; font-weight:700;
+        text-transform:uppercase; letter-spacing:.8px;
+        color:var(--text-muted); margin-bottom:8px;
+      }
+      .field-input {
+        width:100%; padding:11px 14px; border-radius:12px;
+        background:var(--bg-elevated); color:var(--text-primary);
+        border:1px solid var(--border-subtle); font-size:13px;
+        font-family:inherit; outline:none;
+        transition:border-color .15s, box-shadow .15s;
+      }
+      .field-input:focus {
+        border-color:var(--border-accent);
+        box-shadow:0 0 0 3px rgba(99,102,241,.1);
+      }
+      .field-input.error { border-color:var(--danger); }
+      .field-error { font-size:11px; color:var(--danger); margin-top:4px; }
+
+      .slider-row { display:flex; align-items:center; gap:10px; }
+      input[type=range] { flex:1; height:4px; accent-color:var(--accent); cursor:pointer; }
+      .slider-val {
+        min-width:44px; text-align:center; padding:6px 0;
+        border-radius:10px; background:var(--bg-elevated);
+        font-size:12px; font-weight:700; color:var(--accent2);
+        font-variant-numeric:tabular-nums;
+      }
+
+      .summary-box {
+        padding:10px 14px; border-radius:12px; margin-bottom:16px;
+        background:rgba(99,102,241,.06); border:1px solid rgba(99,102,241,.12);
+        font-size:11px; line-height:1.7; color:var(--text-secondary);
+      }
+      .summary-box .hl-accent { color:var(--accent2); font-weight:600; }
+      .summary-box .hl-domain { color:var(--text-primary); font-weight:600; }
+      .summary-box .hl-success { color:var(--success); font-weight:600; }
+
+      .btn-row { display:flex; gap:10px; }
+      .btn-cancel {
+        flex:1; padding:11px; border-radius:12px;
+        background:var(--bg-hover); color:var(--text-secondary);
+        border:none; cursor:pointer; font-size:13px; font-weight:500;
+        font-family:inherit; transition:background .15s;
+      }
+      .btn-cancel:hover { background:var(--bg-elevated); }
+      .btn-save {
+        flex:1; padding:11px; border-radius:12px;
+        background:linear-gradient(135deg,var(--accent),#4f46e5);
+        color:white; border:none; cursor:pointer;
+        font-size:13px; font-weight:700; font-family:inherit;
+        box-shadow:0 3px 14px var(--glow);
+        transition:transform .15s;
+      }
+      .btn-save:hover { transform:scale(1.02); }
+
+      /* scrollbar */
+      ::-webkit-scrollbar { width:3px; }
+      ::-webkit-scrollbar-thumb { background:rgba(99,102,241,.3); border-radius:2px; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header id="header">
+        <div class="logo">
+          <div class="logo-icon">⏱</div>
+          <div>
+            <div class="logo-title">FomoTracker</div>
+            <div class="logo-sub">Time limit manager</div>
+          </div>
+        </div>
+        <button id="add-btn">
+          <span style="font-size:16px;line-height:1">+</span>
+          Add Rule
+        </button>
+      </header>
+
+      <div id="tabs">
+        <button class="tab active" data-tab="rules" id="tab-rules">All Rules</button>
+        <button class="tab" data-tab="active" id="tab-active">
+          Active <span class="badge" id="active-badge" style="display:none">0</span>
+        </button>
+      </div>
+
+      <div id="content">
+        <div class="spinner"></div>
+      </div>
+
+      <footer id="footer">
+        <span id="footer-total">0 rules</span>
+        <span id="footer-enabled">0 active</span>
+      </footer>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal-overlay">
+      <div id="modal">
+        <div class="modal-header">
+          <span class="modal-title" id="modal-title">New Rule</span>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+
+        <form id="rule-form">
+          <input type="hidden" id="edit-id" value="" />
+
+          <div class="field">
+            <label class="field-label" for="url-input">Website URL</label>
+            <input type="text" id="url-input" class="field-input"
+              placeholder="e.g. youtube.com or twitter.com" autocomplete="off" />
+            <div class="field-error" id="url-error"></div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Time Limit (minutes)</label>
+            <div class="slider-row">
+              <input type="range" id="duration-slider" min="1" max="120" value="30" />
+              <div class="slider-val" id="duration-val">30m</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Break Duration (minutes)</label>
+            <div class="slider-row">
+              <input type="range" id="break-slider" min="1" max="60" value="5"
+                style="accent-color:var(--success)" />
+              <div class="slider-val" id="break-val"
+                style="color:var(--success)">5m</div>
+            </div>
+          </div>
+
+          <div class="summary-box" id="summary-box">
+            After <span class="hl-accent" id="sum-dur">30 minutes</span>
+            on <span class="hl-domain" id="sum-domain">this site</span>,
+            an overlay will appear. You can then take a
+            <span class="hl-success" id="sum-break">5-minute break</span>
+            before the timer resets.
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn-cancel" id="modal-cancel">Cancel</button>
+            <button type="submit" class="btn-save" id="modal-save">Add Rule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

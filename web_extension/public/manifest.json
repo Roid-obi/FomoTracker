@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Track and limit your time on distracting websites. Set custom durations and break times with overlay alerts.",
   "action": {
-    "default_popup": "index.html",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",

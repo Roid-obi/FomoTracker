@@ -15,10 +15,14 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const body = {
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      password: (form.elements.namedItem("password") as HTMLInputElement).value,
+    };
 
     try {
-      const response = await api.post("/api/auth/login", formData);
+      const response = await api.post("/api/auth/login", body);
 
       if (response.data.success) {
         router.push("/dashboard");
@@ -64,7 +68,7 @@ export default function Login() {
         </div>
 
         {/* Form */}
-        <form className="space-y-5" onSubmit={handleLoginSubmit}>
+        <form className="space-y-5" method="post" onSubmit={handleLoginSubmit}>
           {/* Email */}
           <div className="space-y-1.5">
             <label

@@ -20,18 +20,22 @@ export default function Register() {
       return;
     }
     setErrorMsg("");
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const form = e.currentTarget;
+    const body = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      password,
+    };
 
     try {
-      const response = await api.post("/api/auth/register", formData);
+      const response = await api.post("/api/auth/register", body);
 
       if (!response.data.success) {
         setErrorMsg(response.data.error);
         return;
       }
 
-      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(`/auth/verify-email?email=${encodeURIComponent(body.email)}`);
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : String(error));
     }

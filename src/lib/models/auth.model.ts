@@ -13,7 +13,6 @@ export namespace RegisterModel {
   export const registerRequest = baseUserInsert.extend({
     email: z.email(),
     password: z.string(),
-    avatar: z.instanceof(File).optional(),
   });
   export type registerRequest = z.infer<typeof registerRequest>;
 }

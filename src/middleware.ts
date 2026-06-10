@@ -53,7 +53,11 @@ export async function middleware(request: NextRequest) {
           request,
         });
         for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options);
+          const isProd = process.env.NODE_ENV === "production";
+          const cookieOptions = isProd
+            ? { ...options, sameSite: "none" as const, secure: true }
+            : options;
+          response.cookies.set(name, value, cookieOptions);
         }
       },
     },

@@ -2,6 +2,35 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  const origin = request.headers.get("origin") || "";
+  const isApi = request.nextUrl.pathname.startsWith("/api");
+
+  // Allowed CORS origins
+  const allowedOrigins = [
+    "http://localhost",
+    "https://localhost",
+    "https://fomotracker.vercel.app",
+  ];
+
+  const isAllowedOrigin = origin && (
+    allowedOrigins.includes(origin) ||
+    origin.endsWith(".vercel.app") ||
+    /^http:\/\/localhost:\d+$/.test(origin)
+  );
+
+  // Handle preflight OPTIONS requests for APIs
+  if (request.method === "OPTIONS" && isApi) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Origin": isAllowedOrigin ? origin : "",
+        "Access-Control-Allow-Methods": "GET,DELETE,PATCH,POST,PUT,OPTIONS",
+        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+      },
+    });
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -48,6 +77,14 @@ export async function middleware(request: NextRequest) {
 
   if (user && isAuthPage) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // Append CORS headers to dynamic API responses
+  if (isApi && isAllowedOrigin) {
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Methods", "GET,DELETE,PATCH,POST,PUT,OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Content-Type");
   }
 
   return response;

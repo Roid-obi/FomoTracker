@@ -2,8 +2,8 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
-import { Camera, Check, Key, Mail, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Camera, Check, Key, Loader2, Mail, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { api } from "@/lib/utils/api";
 
@@ -12,11 +12,15 @@ export default function ProfilSettingsPage() {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
       setName(user.name);
       setEmail(user.email);
+      setAvatarUrl(user.avatarUrl ?? null);
     }
   }, [user]);
   const [oldPassword, setOldPassword] = useState("");
@@ -25,16 +29,57 @@ export default function ProfilSettingsPage() {
 
   const [isSaved, setIsSaved] = useState(false);
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validasi ukuran (max 2MB) dan tipe
+    if (file.size > 2 * 1024 * 1024) {
+      gooeyToast.error("Ukuran file maksimal 2MB!");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      gooeyToast.error("File harus berupa gambar (JPG atau PNG)!");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      const response = await api.put("/api/user/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        setAvatarUrl(response.data.avatarUrl);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+        gooeyToast.success("Avatar berhasil diperbarui!");
+      }
+    } catch (error) {
+      const apiError = error as { response?: { data?: { error?: string } } };
+      gooeyToast.error(apiError.response?.data?.error || "Gagal mengupload avatar!");
+    } finally {
+      setIsUploadingAvatar(false);
+      // Reset input agar file yang sama bisa dipilih lagi
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword && newPassword !== confirmPassword) {
       gooeyToast.error("Konfirmasi password baru tidak cocok!");
       return;
     }
-    const formData = new FormData(e.currentTarget);
+
+    const body: Record<string, string> = { name, email };
+    if (oldPassword) body.oldPassword = oldPassword;
+    if (newPassword) body.newPassword = newPassword;
 
     try {
-      const response = await api.put("/api/user", formData);
+      const response = await api.put("/api/user", body);
 
       if (response.data.success) {
         setIsSaved(true);
@@ -67,24 +112,50 @@ export default function ProfilSettingsPage() {
 
         {/* Form */}
         <form onSubmit={handleSave} className="space-y-5">
-          {/* Foto Profil Simulation */}
+          {/* Foto Profil */}
           <div className="flex items-center gap-4 border-b border-border/40 pb-5">
             <div className="relative group select-none">
-              <div className="w-16 h-16 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary text-xl border border-border">
-                {name
-                  .trim()
-                  .split(" ")
-                  .map((kata) => kata.charAt(0))
-                  .join("")
-                  .substring(0, 2)
-                  .toUpperCase() ?? "?"}
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+
+              {/* Avatar preview atau inisial */}
+              <div className="w-16 h-16 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary text-xl border border-border overflow-hidden">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  name
+                    .trim()
+                    .split(" ")
+                    .map((kata) => kata.charAt(0))
+                    .join("")
+                    .substring(0, 2)
+                    .toUpperCase() ?? "?"
+                )}
               </div>
+
+              {/* Tombol kamera overlay */}
               <button
                 type="button"
-                className="absolute inset-0 bg-primary/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                disabled={isUploadingAvatar}
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 bg-primary/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
                 aria-label="Upload photo"
               >
-                <Camera className="w-4 h-4" />
+                {isUploadingAvatar ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
               </button>
             </div>
             <div className="space-y-0.5">

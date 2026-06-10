@@ -43,7 +43,11 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
             <Link
               href="/"
-              className="text-primary/80 hover:text-primary transition-colors font-poppins"
+              className={`font-poppins transition-colors ${
+                pathname === "/"
+                  ? "text-secondary font-semibold"
+                  : "text-primary/80 hover:text-primary"
+              }`}
             >
               Beranda
             </Link>
@@ -118,7 +122,11 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={handleLinkClick}
-              className="text-sm font-medium hover:text-secondary transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins"
+              className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
+                pathname === "/"
+                  ? "text-secondary font-semibold bg-muted-light/55"
+                  : "hover:text-secondary"
+              }`}
             >
               Beranda
             </Link>

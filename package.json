@@ -10,7 +10,7 @@
     "dev:ext": "cd web_extension && next dev",
     "build": "next build",
     "build:ext": "cd web_extension && next build",
-    "build:android": "next build && bunx cap sync android",
+    "build:android": "bun run scripts/build-mobile.ts",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",

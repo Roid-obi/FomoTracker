@@ -1,43 +1,25 @@
 import { z } from "zod";
-import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
+import { createSupabaseServer } from "@/lib/databases/supabase";
 import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 
-export async function registerService(formData: FormData) {
-  // Use browser client only for storage (anon key is sufficient)
-  const supabase = createClient();
-  const raw = Object.fromEntries(formData);
-  const parsed = RegisterModel.registerRequest.safeParse(raw);
-  let avatar_url: string | null = null;
+export async function registerService(body: unknown) {
+  const parsed = RegisterModel.registerRequest.safeParse(body);
 
   if (!parsed.success) {
     return { success: false, error: z.treeifyError(parsed.error) };
   }
 
-  const { email, password, name, avatar } = parsed.data;
-
-  if (avatar instanceof File && avatar.size > 0) {
-    const fileName = `avatar_${Date.now()}.${avatar.name.split(".").pop()}`;
-
-    const { data: urlData, error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, avatar);
-
-    if (uploadError) {
-      return { success: false, error: uploadError.message };
-    }
-
-    avatar_url = urlData.path;
-  }
+  const { email, password, name } = parsed.data;
 
   // Use server client so session cookies are set in the HTTP response
-  const supabaseServer = await createSupabaseServer();
-  const { error } = await supabaseServer.auth.signUp({
+  const supabase = await createSupabaseServer();
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: origin ? `${origin}/auth/confirm` : undefined,
       data: {
         name: name,
-        avatar_url: avatar_url,
       },
     },
   });
@@ -49,11 +31,10 @@ export async function registerService(formData: FormData) {
   return { success: true };
 }
 
-export async function loginService(formData: FormData) {
+export async function loginService(body: unknown) {
   // Use server client so session cookies are written to the HTTP response
   const supabase = await createSupabaseServer();
-  const raw = Object.fromEntries(formData);
-  const parsed = LoginModel.loginRequest.safeParse(raw);
+  const parsed = LoginModel.loginRequest.safeParse(body);
 
   if (!parsed.success) {
     return { success: false, error: z.treeifyError(parsed.error) };

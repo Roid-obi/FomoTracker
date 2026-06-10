@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -20,17 +20,22 @@ export default function Register() {
       return;
     }
     setErrorMsg("");
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const body = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      password,
+    };
 
     try {
-      const response = await api.post("/api/auth/register", formData);
+      const response = await api.post("/api/auth/register", body);
 
       if (!response.data.success) {
         setErrorMsg(response.data.error);
         return;
       }
 
-      router.push("/dashboard");
+      router.push(`/auth/verify-email?email=${encodeURIComponent(body.email)}`);
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : String(error));
     }
@@ -42,15 +47,15 @@ export default function Register() {
       <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-accent/20 rounded-full blur-[100px] -z-10" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-secondary/15 rounded-full blur-[100px] -z-10" />
 
-      {/* Back Button */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors font-semibold"
-      >
-        <ArrowLeft className="w-4 h-4" /> Kembali
-      </Link>
-
-      <div className="w-full max-w-md bg-card rounded-3xl border border-border p-8 shadow-lg shadow-primary/5">
+      <div className="w-full max-w-md bg-card rounded-3xl border border-border p-8 shadow-lg shadow-primary/5 relative">
+        {/* Close Button */}
+        <Link
+          href="/"
+          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted hover:text-primary hover:bg-muted-light/10 transition-colors"
+          aria-label="Kembali ke Beranda"
+        >
+          <X className="w-4 h-4" />
+        </Link>
         {/* Header Logo */}
         <div className="text-center mb-6">
           <div className="flex items-baseline justify-center gap-0.5 select-none mb-3">

@@ -1089,11 +1089,11 @@ export default function DashboardPage() {
                         </h4>
                         {item.active ? (
                           <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-850 border border-red-200 shrink-0 uppercase tracking-wider">
-                            ⚠️ Terdeteksi
+                            Terdeteksi
                           </span>
                         ) : (
                           <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-850 border border-emerald-250 shrink-0 uppercase tracking-wider">
-                            ✅ Aman
+                            Aman
                           </span>
                         )}
                       </div>

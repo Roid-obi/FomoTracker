@@ -61,7 +61,9 @@ try {
 
   // 1. Rename route handlers
   if (fs.existsSync(srcDir)) {
-    console.log(`Scanning and disabling route handlers in ${srcDir} for mobile build...`);
+    console.log(
+      `Scanning and disabling route handlers in ${srcDir} for mobile build...`,
+    );
     processFiles(srcDir);
   }
 
@@ -89,7 +91,9 @@ try {
   });
 
   if (buildResult.status !== 0) {
-    throw new Error(`Next.js build failed with exit code ${buildResult.status}`);
+    throw new Error(
+      `Next.js build failed with exit code ${buildResult.status}`,
+    );
   }
 
   console.log("Running Capacitor sync...");
@@ -116,7 +120,10 @@ try {
           fs.renameSync(file.temp, file.original);
           console.log(`Restored: ${file.original}`);
         } catch (restoreError) {
-          console.error(`Failed to restore route: ${file.original}`, restoreError);
+          console.error(
+            `Failed to restore route: ${file.original}`,
+            restoreError,
+          );
         }
       }
     }
@@ -130,7 +137,10 @@ try {
         fs.writeFileSync(file.path, file.originalContent, "utf-8");
         console.log(`Restored content of: ${file.path}`);
       } catch (restoreError) {
-        console.error(`Failed to restore content of: ${file.path}`, restoreError);
+        console.error(
+          `Failed to restore content of: ${file.path}`,
+          restoreError,
+        );
       }
     }
   }

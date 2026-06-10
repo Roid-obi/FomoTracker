@@ -132,10 +132,8 @@ export default function PerangkatSettingsPage() {
         }
       });
     } else {
-      // For browser/development environments, mock installed apps
-      fetchInstalledApps().then((apps) => {
-        setInstalledApps(apps);
-      });
+      // For browser/development environments, do not load any apps since API is not detected
+      setInstalledApps([]);
     }
   }, []);
 

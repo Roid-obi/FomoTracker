@@ -9,6 +9,8 @@ import android.os.Build;
 import android.provider.Settings;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -52,18 +54,26 @@ public class UsageStatsManagerPlugin extends Plugin {
     @PluginMethod
     public void getInstalledApps(PluginCall call) {
         PackageManager pm = getContext().getPackageManager();
-        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        Intent intent = new Intent(Intent.ACTION_MAIN, null);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> launchables = pm.queryIntentActivities(intent, 0);
         JSArray appsArray = new JSArray();
+        java.util.Set<String> packageNames = new java.util.HashSet<>();
 
-        for (ApplicationInfo appInfo : apps) {
-            boolean isSystem = (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            if (pm.getLaunchIntentForPackage(appInfo.packageName) != null) {
-                JSObject appObj = new JSObject();
-                appObj.put("packageName", appInfo.packageName);
-                CharSequence label = pm.getApplicationLabel(appInfo);
-                appObj.put("appName", label != null ? label.toString() : appInfo.packageName);
-                appObj.put("isSystem", isSystem);
-                appsArray.put(appObj);
+        for (ResolveInfo launchable : launchables) {
+            ActivityInfo activityInfo = launchable.activityInfo;
+            if (activityInfo != null && activityInfo.applicationInfo != null) {
+                String packageName = activityInfo.packageName;
+                if (!packageNames.contains(packageName)) {
+                    packageNames.add(packageName);
+                    boolean isSystem = (activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    JSObject appObj = new JSObject();
+                    appObj.put("packageName", packageName);
+                    CharSequence label = launchable.loadLabel(pm);
+                    appObj.put("appName", label != null ? label.toString() : activityInfo.applicationInfo.loadLabel(pm).toString());
+                    appObj.put("isSystem", isSystem);
+                    appsArray.put(appObj);
+                }
             }
         }
 

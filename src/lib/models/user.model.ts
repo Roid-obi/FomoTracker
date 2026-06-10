@@ -13,7 +13,7 @@ export namespace UserModel {
     name: z.string().optional(),
     email: z.string().email().optional(),
     newPassword: z.string().min(6).optional().or(z.literal("")),
-    avatar: z.instanceof(File).optional(),
+    avatarUrl: z.string().url().optional(),
   });
   export type updateRequest = z.infer<typeof updateRequest>;
 

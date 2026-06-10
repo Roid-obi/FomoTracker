@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
-import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
+import { createSupabaseServer } from "@/lib/databases/supabase";
 import { UserModel } from "../models/user.model";
 
 type ServiceResult<T = undefined> =
@@ -32,8 +32,14 @@ export async function getService() {
     return { success: false, error: "User not found" };
   }
 
+  const avatarPath = userData.avatarUrl;
+  const avatarUrl = avatarPath
+    ? supabase.storage.from("avatars").getPublicUrl(avatarPath).data.publicUrl
+    : null;
+
   const parsed = UserModel.userData.safeParse({
     ...userData,
+    avatarUrl,
     email: user.email,
     onboardingCompleted: userData.onboardingCompleted ?? false,
   });
@@ -45,8 +51,7 @@ export async function getService() {
   return { success: true, data: parsed.data };
 }
 
-export async function updateService(formData: FormData) {
-  const supabase = createClient();
+export async function updateService(body: unknown) {
   const supabaseServer = await createSupabaseServer();
 
   const {
@@ -57,15 +62,13 @@ export async function updateService(formData: FormData) {
   }
   const id = user.id;
 
-  const raw = Object.fromEntries(formData);
-  const parsed = UserModel.updateRequest.safeParse(raw);
-  let avatar_url: string | null = null;
+  const parsed = UserModel.updateRequest.safeParse(body);
 
   if (!parsed.success) {
     return { success: false, error: z.treeifyError(parsed.error) };
   }
 
-  const { name, email, newPassword, avatar } = parsed.data;
+  const { name, email, newPassword, avatarUrl } = parsed.data;
 
   // Update email di Supabase Auth jika berubah
   if (email && email !== user.email) {
@@ -93,41 +96,14 @@ export async function updateService(formData: FormData) {
     }
   }
 
-  const [get_avatar_url] = await db
-    .select({ url: table.users.avatarUrl })
-    .from(table.users)
-    .where(eq(table.users.id, id));
-
-  if (avatar instanceof File && avatar.size > 0) {
-    if (get_avatar_url?.url) {
-      const { error } = await supabase.storage
-        .from("avatars")
-        .remove([get_avatar_url.url]);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-    }
-    const fileName = `avatar_${Date.now()}.${avatar.name.split(".").pop()}`;
-
-    const { data: urlData, error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, avatar);
-
-    if (uploadError) {
-      return { success: false, error: uploadError.message };
-    }
-
-    avatar_url = urlData.path;
-  }
-
   const updateData: Partial<UserModel.updateData> = {};
 
   if (name !== undefined) {
     updateData.name = name;
   }
 
-  if (avatar_url !== null) {
-    updateData.avatarUrl = avatar_url;
+  if (avatarUrl !== undefined) {
+    updateData.avatarUrl = avatarUrl;
   }
 
   if (Object.keys(updateData).length > 0) {
@@ -136,6 +112,58 @@ export async function updateService(formData: FormData) {
   }
 
   return { success: true };
+}
+
+export async function uploadAvatarService(formData: FormData) {
+  const supabase = await createSupabaseServer();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "User not found" };
+  }
+  const id = user.id;
+
+  const avatar = formData.get("avatar");
+  if (!(avatar instanceof File) || avatar.size === 0) {
+    return { success: false, error: "File avatar tidak valid" };
+  }
+
+  // Hapus avatar lama jika ada
+  const [existing] = await db
+    .select({ url: table.users.avatarUrl })
+    .from(table.users)
+    .where(eq(table.users.id, id));
+
+  if (existing?.url) {
+    await supabase.storage.from("avatars").remove([existing.url]);
+  }
+
+  // Upload avatar baru
+  const ext = avatar.name.split(".").pop();
+  const fileName = `${id}/avatar_${id}_${Date.now()}.${ext}`;
+
+  const { data: urlData, error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(fileName, avatar);
+
+  if (uploadError) {
+    return { success: false, error: uploadError.message };
+  }
+
+  // Simpan path ke database
+  await db
+    .update(table.users)
+    .set({ avatarUrl: urlData.path, updatedAt: new Date() })
+    .where(eq(table.users.id, id));
+
+  // Ambil public URL
+  const { data: publicUrlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(urlData.path);
+
+  return { success: true, avatarUrl: publicUrlData.publicUrl };
 }
 
 export async function completeOnboardingService(

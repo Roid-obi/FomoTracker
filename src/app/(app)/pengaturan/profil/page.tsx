@@ -59,7 +59,9 @@ export default function ProfilSettingsPage() {
       }
     } catch (error) {
       const apiError = error as { response?: { data?: { error?: string } } };
-      gooeyToast.error(apiError.response?.data?.error || "Gagal mengupload avatar!");
+      gooeyToast.error(
+        apiError.response?.data?.error || "Gagal mengupload avatar!",
+      );
     } finally {
       setIsUploadingAvatar(false);
       // Reset input agar file yang sama bisa dipilih lagi
@@ -133,13 +135,13 @@ export default function ProfilSettingsPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  name
+                  (name
                     .trim()
                     .split(" ")
                     .map((kata) => kata.charAt(0))
                     .join("")
                     .substring(0, 2)
-                    .toUpperCase() ?? "?"
+                    .toUpperCase() ?? "?")
                 )}
               </div>
 

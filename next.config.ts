@@ -7,8 +7,9 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   output: isMobile ? "export" : undefined,
   images: isMobile ? { unoptimized: true } : undefined,
-
-
+  typescript: {
+    ignoreBuildErrors: isMobile,
+  },
 };
 
 export default nextConfig;

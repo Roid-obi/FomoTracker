@@ -280,16 +280,73 @@ export async function updateTrackedAppService(
     return { success: false, error: validationError(parsed.error) };
   }
 
+  let appId = parsed.data.appId;
+  const { packageName, name, isActive } = parsed.data;
+
+  // If appId is not provided, look up or create the app by packageName
+  if (!appId) {
+    if (!packageName || !name) {
+      return {
+        success: false,
+        error: "appId atau packageName dan name harus diisi",
+      };
+    }
+
+    // Look up by package name
+    const [existingApp] = await db
+      .select({ id: table.apps.id })
+      .from(table.apps)
+      .where(eq(table.apps.packageName, packageName))
+      .limit(1);
+
+    if (existingApp) {
+      appId = existingApp.id;
+    } else {
+      // Create new app
+      const [newApp] = await db
+        .insert(table.apps)
+        .values({
+          name: name,
+          packageName: packageName,
+          platform: "android",
+          isActive: true,
+        })
+        .returning({ id: table.apps.id });
+      appId = newApp.id;
+    }
+  }
+
   const [trackedApp] = await db
     .insert(table.userTrackedApps)
-    .values({ userId, ...parsed.data })
+    .values({ userId, appId, isActive: isActive ?? true })
     .onConflictDoUpdate({
       target: [table.userTrackedApps.userId, table.userTrackedApps.appId],
-      set: { isActive: parsed.data.isActive ?? true },
+      set: { isActive: isActive ?? true },
     })
     .returning(trackedAppSelect);
 
-  const response = TrackedAppModel.getResponse.safeParse(trackedApp);
+  // We need to return getResponse which joins with apps table
+  const [row] = await db
+    .select({
+      appId: table.userTrackedApps.appId,
+      isActive: table.userTrackedApps.isActive,
+      addedAt: table.userTrackedApps.addedAt,
+      name: table.apps.name,
+      packageName: table.apps.packageName,
+      iconUrl: table.apps.iconUrl,
+      platform: table.apps.platform,
+    })
+    .from(table.userTrackedApps)
+    .innerJoin(table.apps, eq(table.userTrackedApps.appId, table.apps.id))
+    .where(
+      and(
+        eq(table.userTrackedApps.userId, userId),
+        eq(table.userTrackedApps.appId, appId),
+      ),
+    )
+    .limit(1);
+
+  const response = TrackedAppModel.getResponse.safeParse(row);
 
   if (!response.success) {
     return { success: false, error: validationError(response.error) };

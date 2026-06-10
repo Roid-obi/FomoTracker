@@ -12,11 +12,11 @@ export async function middleware(request: NextRequest) {
     "https://fomotracker.vercel.app",
   ];
 
-  const isAllowedOrigin = origin && (
-    allowedOrigins.includes(origin) ||
-    origin.endsWith(".vercel.app") ||
-    /^http:\/\/localhost:\d+$/.test(origin)
-  );
+  const isAllowedOrigin =
+    origin &&
+    (allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app") ||
+      /^http:\/\/localhost:\d+$/.test(origin));
 
   // Handle preflight OPTIONS requests for APIs
   if (request.method === "OPTIONS" && isApi) {
@@ -26,7 +26,8 @@ export async function middleware(request: NextRequest) {
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": isAllowedOrigin ? origin : "",
         "Access-Control-Allow-Methods": "GET,DELETE,PATCH,POST,PUT,OPTIONS",
-        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+        "Access-Control-Allow-Headers":
+          "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
       },
     });
   }
@@ -87,8 +88,14 @@ export async function middleware(request: NextRequest) {
   if (isApi && isAllowedOrigin) {
     response.headers.set("Access-Control-Allow-Credentials", "true");
     response.headers.set("Access-Control-Allow-Origin", origin);
-    response.headers.set("Access-Control-Allow-Methods", "GET,DELETE,PATCH,POST,PUT,OPTIONS");
-    response.headers.set("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Content-Type");
+    response.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET,DELETE,PATCH,POST,PUT,OPTIONS",
+    );
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Content-Type",
+    );
   }
 
   return response;

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createClient, createSupabaseServer } from "@/lib/databases/supabase";
 import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 
-export async function registerService(formData: FormData) {
+export async function registerService(formData: FormData, origin?: string) {
   // Use browser client only for storage (anon key is sufficient)
   const supabase = createClient();
   const raw = Object.fromEntries(formData);
@@ -35,6 +35,7 @@ export async function registerService(formData: FormData) {
     email,
     password,
     options: {
+      emailRedirectTo: origin ? `${origin}/auth/confirm` : undefined,
       data: {
         name: name,
         avatar_url: avatar_url,

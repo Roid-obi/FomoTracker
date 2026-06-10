@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,15 +36,15 @@ export default function Login() {
       <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-accent/20 rounded-full blur-[100px] -z-10" />
       <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-secondary/15 rounded-full blur-[100px] -z-10" />
 
-      {/* Back Button */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors font-semibold"
-      >
-        <ArrowLeft className="w-4 h-4" /> Kembali
-      </Link>
-
-      <div className="w-full max-w-md bg-card rounded-3xl border border-border p-8 shadow-lg shadow-primary/5">
+      <div className="w-full max-w-md bg-card rounded-3xl border border-border p-8 shadow-lg shadow-primary/5 relative">
+        {/* Close Button */}
+        <Link
+          href="/"
+          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted hover:text-primary hover:bg-muted-light/10 transition-colors"
+          aria-label="Kembali ke Beranda"
+        >
+          <X className="w-4 h-4" />
+        </Link>
         {/* Header Logo */}
         <div className="text-center mb-8">
           <div className="flex items-baseline justify-center gap-0.5 select-none mb-3">

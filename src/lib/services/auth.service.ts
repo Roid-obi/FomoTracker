@@ -17,6 +17,7 @@ export async function registerService(body: unknown) {
     email,
     password,
     options: {
+      emailRedirectTo: origin ? `${origin}/auth/confirm` : undefined,
       data: {
         name: name,
       },

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 
-export async function registerService(body: unknown) {
+export async function registerService(body: unknown, origin?: string) {
   const parsed = RegisterModel.registerRequest.safeParse(body);
 
   if (!parsed.success) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart2,
   Bell,
@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   LogOut,
+  RefreshCw,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
@@ -47,6 +48,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: user } = useUser();
   const [todayStr, setTodayStr] = useState("");
+  const queryClient = useQueryClient();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (!user) return;
+    setIsSyncing(true);
+
+    try {
+      if (Capacitor.getPlatform() === "android") {
+        const { fetchAndSyncUsageData } = await import("@/lib/capacitor/usageStats");
+        const result = await fetchAndSyncUsageData(user.id);
+        console.log("Manual refresh sync result:", result);
+      } else {
+        // Mock delay on non-Android for visual feedback
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      // Invalidate query client keys to refresh all dashboard statistics and hourly chart
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-status"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-hourly"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-screentime"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-breakdown"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-flag"] });
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } catch (err) {
+      console.error("Refresh failed:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Load tracked apps to pass to setupBackgroundSync
   const { data: trackedAppsData } = useQuery({
@@ -324,25 +355,43 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             </div>
-            <Link
-              href="/notifications"
-              className={`relative p-2 rounded-xl border transition-all cursor-pointer shadow-xs ${
-                pathname.startsWith("/notifications")
-                  ? "bg-primary border-primary text-white"
-                  : "border-border bg-card text-primary hover:bg-muted-light"
-              }`}
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span
-                  className={`absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border rounded-full animate-pulse ${
-                    pathname.startsWith("/notifications")
-                      ? "border-primary"
-                      : "border-card"
+            <div className="flex items-center gap-2">
+              {/* Refresh Button */}
+              {user && (
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isSyncing}
+                  className={`p-2 rounded-xl border border-border bg-card text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs flex items-center justify-center ${
+                    isSyncing ? "opacity-70 pointer-events-none" : ""
                   }`}
-                />
+                  title="Sinkronkan data sekarang"
+                >
+                  <RefreshCw className={`w-5 h-5 text-secondary ${isSyncing ? "animate-spin" : ""}`} />
+                </button>
               )}
-            </Link>
+
+              {/* Notification Button */}
+              <Link
+                href="/notifications"
+                className={`relative p-2 rounded-xl border transition-all cursor-pointer shadow-xs ${
+                  pathname.startsWith("/notifications")
+                    ? "bg-primary border-primary text-white"
+                    : "border-border bg-card text-primary hover:bg-muted-light"
+                }`}
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span
+                    className={`absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border rounded-full animate-pulse ${
+                      pathname.startsWith("/notifications")
+                        ? "border-primary"
+                        : "border-card"
+                    }`}
+                  />
+                )}
+              </Link>
+            </div>
           </div>
 
           <div className="flex-1 flex flex-col">{children}</div>

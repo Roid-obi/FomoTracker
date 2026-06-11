@@ -22,6 +22,11 @@ function validationError(error: z.ZodError) {
   return z.treeifyError(error);
 }
 
+function getWIBDateString(date: Date = new Date()): string {
+  const wibTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return wibTime.toISOString().slice(0, 10);
+}
+
 /**
  * Ambil skor behavioral dan status harian untuk tanggal tertentu.
  * Default: hari ini (UTC).
@@ -35,7 +40,7 @@ export async function getDailyStatusService(
     return { success: false, error: "User not authenticated" };
   }
 
-  const targetDate = date ?? new Date().toISOString().slice(0, 10);
+  const targetDate = date ?? getWIBDateString();
 
   const [row] = await db
     .select({
@@ -96,12 +101,13 @@ export async function getChartService(
     return { success: false, error: "User not authenticated" };
   }
 
-  const today = new Date();
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - (days - 1));
+  const todayWIBStr = getWIBDateString();
+  const todayDate = new Date(todayWIBStr);
+  const startDate = new Date(todayDate);
+  startDate.setDate(todayDate.getDate() - (days - 1));
 
-  const startDateStr = startDate.toISOString().slice(0, 10);
-  const endDateStr = today.toISOString().slice(0, 10);
+  const startDateStr = getWIBDateString(startDate);
+  const endDateStr = todayWIBStr;
 
   // Aggregate semua apps per hari
   const rows = await db
@@ -154,7 +160,7 @@ export async function getBehaviorFlagService(
     return { success: false, error: "User not authenticated" };
   }
 
-  const targetDate = date ?? new Date().toISOString().slice(0, 10);
+  const targetDate = date ?? getWIBDateString();
 
   const [row] = await db
     .select({
@@ -174,7 +180,7 @@ export async function getBehaviorFlagService(
     );
 
   let openFrequencyLastHour = 0;
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getWIBDateString();
 
   if (targetDate === todayStr) {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
@@ -191,8 +197,8 @@ export async function getBehaviorFlagService(
       );
     openFrequencyLastHour = cntRow?.count ?? 0;
   } else {
-    const startTs = new Date(`${targetDate}T00:00:00Z`);
-    const endTs = new Date(`${targetDate}T23:59:59Z`);
+    const startTs = new Date(`${targetDate}T00:00:00+07:00`);
+    const endTs = new Date(`${targetDate}T23:59:59.999+07:00`);
     const hourlyCounts = await db
       .select({
         count: sql<number>`cast(count(*) as integer)`,
@@ -206,7 +212,7 @@ export async function getBehaviorFlagService(
         ),
       )
       .groupBy(
-        sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+        sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta')`,
       );
 
     if (hourlyCounts.length > 0) {
@@ -245,14 +251,14 @@ export async function getHourlyBreakdownService(
     return { success: false, error: "User not authenticated" };
   }
 
-  const targetDate = date ?? new Date().toISOString().slice(0, 10);
-  const startTs = new Date(`${targetDate}T00:00:00Z`);
-  const endTs = new Date(`${targetDate}T23:59:59Z`);
+  const targetDate = date ?? getWIBDateString();
+  const startTs = new Date(`${targetDate}T00:00:00+07:00`);
+  const endTs = new Date(`${targetDate}T23:59:59.999+07:00`);
 
   // 1. Ambil activity logs hari ini
   const logs = await db
     .select({
-      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC') as integer)`,
+      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta') as integer)`,
       appName: table.apps.name,
       durationSeconds: table.activityLogs.durationSeconds,
     })

@@ -1,6 +1,6 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { api } from "@/lib/utils/api";
-import { analyzeUsageEvents, fetchUsageEvents } from "./usageEvents";
+import { analyzeUsageEvents, fetchUsageEvents, getDetailedSessions, type DetailedSession } from "./usageEvents";
 
 export interface InstalledApp {
   packageName: string;
@@ -135,6 +135,7 @@ export async function getUserSettingsClient(userId: string) {
 export async function syncUsageStatsClient(
   userId: string,
   stats: SyncUsageStatInput[],
+  detailedSessions: DetailedSession[] = [],
 ) {
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
@@ -182,23 +183,37 @@ export async function syncUsageStatsClient(
     }
 
     // 3. Prepare payload for activity logs sync
-    const logsPayload = stats.map((stat) => {
-      const durationSeconds = Math.floor(stat.totalTimeInForeground / 1000);
-      const endedAt = new Date().toISOString();
-      const startedAt = new Date(
-        Date.now() - durationSeconds * 1000,
-      ).toISOString();
-      return {
-        packageName: stat.packageName,
-        startedAt,
-        endedAt,
-        durationSeconds,
-        isMidnight: (stat.midnightDurationSeconds || 0) > 0,
-        isProductiveHour: (stat.productiveHourDurationSeconds || 0) > 0,
-        isContinuous: (stat.maxContinuousSeconds || 0) > 0,
+    let logsPayload = [];
+    if (detailedSessions && detailedSessions.length > 0) {
+      logsPayload = detailedSessions.map((session) => ({
+        packageName: session.packageName,
+        startedAt: session.startedAt,
+        endedAt: session.endedAt,
+        durationSeconds: session.durationSeconds,
+        isMidnight: session.isMidnight,
+        isProductiveHour: session.isProductiveHour,
+        isContinuous: session.isContinuous,
         source: "android_app" as const,
-      };
-    });
+      }));
+    } else {
+      logsPayload = stats.map((stat) => {
+        const durationSeconds = Math.floor(stat.totalTimeInForeground / 1000);
+        const endedAt = new Date().toISOString();
+        const startedAt = new Date(
+          Date.now() - durationSeconds * 1000,
+        ).toISOString();
+        return {
+          packageName: stat.packageName,
+          startedAt,
+          endedAt,
+          durationSeconds,
+          isMidnight: (stat.midnightDurationSeconds || 0) > 0,
+          isProductiveHour: (stat.productiveHourDurationSeconds || 0) > 0,
+          isContinuous: (stat.maxContinuousSeconds || 0) > 0,
+          source: "android_app" as const,
+        };
+      });
+    }
 
     // Post to `/api/tracking/sync/activity`
     const logsRes = await api.post("/api/tracking/sync/activity", {
@@ -284,6 +299,17 @@ export async function fetchAndSyncUsageData(userId: string) {
       }
     }
 
+    const continuousLimitSeconds = settings?.continuousLimitSeconds ?? 3600;
+    const sessionsList = getDetailedSessions(
+      rawEvents,
+      monitoredApps,
+      sleepStartStr,
+      sleepEndStr,
+      productiveStartStr,
+      productiveEndStr,
+      continuousLimitSeconds,
+    );
+
     // Filter to only sync monitored applications
     const filteredStats = Object.values(statsRecord).filter((stat) =>
       monitoredApps.includes(stat.packageName),
@@ -304,7 +330,7 @@ export async function fetchAndSyncUsageData(userId: string) {
     });
 
     if (statsToSync.length > 0) {
-      const syncResult = await syncUsageStatsClient(userId, statsToSync);
+      const syncResult = await syncUsageStatsClient(userId, statsToSync, sessionsList);
       return syncResult;
     }
 

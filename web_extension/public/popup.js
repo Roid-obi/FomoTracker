@@ -429,9 +429,10 @@ document.getElementById("rule-form").addEventListener("submit", async (e) => {
   const newRule = { id, url, duration, breakTime, enabled: true };
 
   if (document.getElementById("edit-id").value) {
-    // Preserve enabled state on edit
+    // Preserve enabled state and name on edit
     const existing = rules.find((r) => r.id === id);
     newRule.enabled = existing?.enabled ?? true;
+    if (existing?.name) newRule.name = existing.name;
     rules = rules.map((r) => (r.id === id ? newRule : r));
   } else {
     rules = [...rules, newRule];

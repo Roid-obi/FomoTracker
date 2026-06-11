@@ -49,16 +49,35 @@ export default function PerangkatSettingsPage() {
   const [sleepStart, setSleepStart] = useState("22:00");
   const [sleepEnd, setSleepEnd] = useState("06:00");
 
-  // Browser Extension URL Rules state (Mock local state as extension is not built yet)
-  const [webUrls, setWebUrls] = useState([
-    { id: "web-yt", name: "YouTube", url: "youtube.com" },
-    { id: "web-ig", name: "Instagram", url: "instagram.com" },
-    { id: "web-fb", name: "Facebook", url: "facebook.com" },
-  ]);
+  // Browser Extension URL Rules state (Syncs with extension)
+  const [webUrls, setWebUrls] = useState<{id: string, name?: string, url: string, duration?: number, breakTime?: number, enabled?: boolean}[]>([]);
 
   // Form states for adding web URL
   const [newWebName, setNewWebName] = useState("");
   const [newWebUrl, setNewWebUrl] = useState("");
+
+  // Sync rules with extension
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === "FOMOTRACKER_RULES_DATA") {
+        setWebUrls(event.data.rules || []);
+      } else if (event.data && event.data.type === "FOMOTRACKER_SYNC_SUCCESS") {
+        // Successfully synced
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    
+    // Request initial data from extension after a slight delay
+    const timer = setTimeout(() => {
+      window.postMessage({ type: "FOMOTRACKER_GET_RULES" }, "*");
+    }, 500);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // 1. Fetch User Settings
   const { data: settingsData, isLoading: isSettingsLoading } = useQuery({
@@ -315,6 +334,34 @@ export default function PerangkatSettingsPage() {
     trackAppMutation.mutate({ appId, isActive: false });
   };
 
+  const handleToggleBrowserExtension = () => {
+    if (browserConnected) {
+      deviceMutation.mutate({
+        platform: "browser_extension",
+        isConnected: false,
+        browserName: "Google Chrome",
+      });
+    } else {
+      // Deteksi apakah extension sudah terinstall (mock via window object atau DOM)
+      // Dalam implementasi nyata, extension akan menyuntikkan script/variabel global ini.
+      const isExtensionInstalled =
+        typeof window !== "undefined" &&
+        ((window as any).__FOMOTRACKER_EXTENSION_INSTALLED__ ||
+          document.getElementById("fomotracker-extension-root"));
+
+      if (isExtensionInstalled) {
+        deviceMutation.mutate({
+          platform: "browser_extension",
+          isConnected: true,
+          browserName: "Google Chrome",
+        });
+      } else {
+        gooeyToast.error("Browser Extension belum terinstall!");
+        window.open("/panduan#install-extension", "_blank");
+      }
+    }
+  };
+
   const handleSaveUserSettings = () => {
     updateSettingsMutation.mutate({
       productiveStart: prodStart,
@@ -335,16 +382,24 @@ export default function PerangkatSettingsPage() {
       id: `web-${Date.now()}`,
       name: newWebName.trim(),
       url: url,
+      duration: 30, // Default duration 30 mins
+      breakTime: 5, // Default break 5 mins
+      enabled: true
     };
 
-    setWebUrls((prev) => [...prev, newRule]);
+    const updatedRules = [...webUrls, newRule];
+    setWebUrls(updatedRules);
+    window.postMessage({ type: "FOMOTRACKER_SYNC_RULES", rules: updatedRules }, "*");
+
     setNewWebName("");
     setNewWebUrl("");
-    gooeyToast.success("Domain pemantauan berhasil ditambahkan!");
+    gooeyToast.success("Domain pemantauan berhasil ditambahkan dan disinkronkan ke Ekstensi!");
   };
 
   const handleDeleteWebUrl = (id: string) => {
-    setWebUrls((prev) => prev.filter((item) => item.id !== id));
+    const updatedRules = webUrls.filter((item) => item.id !== id);
+    setWebUrls(updatedRules);
+    window.postMessage({ type: "FOMOTRACKER_SYNC_RULES", rules: updatedRules }, "*");
     gooeyToast.success("Domain pemantauan dihapus.");
   };
 
@@ -529,13 +584,7 @@ export default function PerangkatSettingsPage() {
               </span>
               <button
                 type="button"
-                onClick={() =>
-                  deviceMutation.mutate({
-                    platform: "browser_extension",
-                    isConnected: !browserConnected,
-                    browserName: "Google Chrome",
-                  })
-                }
+                onClick={handleToggleBrowserExtension}
                 className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
                   browserConnected
                     ? "text-red-600 bg-red-50 hover:bg-red-100"
@@ -840,7 +889,7 @@ export default function PerangkatSettingsPage() {
                     <div className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
                       <span className="text-xs font-bold text-primary">
-                        {web.name}
+                        {web.name || web.url}
                       </span>
                       <span className="text-[10px] text-muted font-mono font-light bg-muted-light/40 border border-border/40 px-1.5 py-0.5 rounded-md">
                         {web.url}

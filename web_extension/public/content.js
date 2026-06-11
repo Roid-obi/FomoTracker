@@ -4,6 +4,16 @@
 (function () {
   "use strict";
 
+  // Signal to the web app that the extension is installed
+  document.documentElement.dataset.fomotrackerExtensionInstalled = "true";
+  if (!document.getElementById("fomotracker-extension-root")) {
+    const marker = document.createElement("div");
+    marker.id = "fomotracker-extension-root";
+    marker.style.display = "none";
+    marker.setAttribute("aria-hidden", "true");
+    document.documentElement.appendChild(marker);
+  }
+
   let tickInterval = null;
   let overlayShown = false;
   let breakTimerInterval = null;
@@ -365,6 +375,8 @@
     if (tickInterval) clearInterval(tickInterval);
 
     tickInterval = setInterval(async () => {
+      if (document.visibilityState !== "visible") return;
+
       try {
         const url = location.href;
         const status = await chrome.runtime.sendMessage({
@@ -462,4 +474,25 @@
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
+
+  // Listen to messages from the web app to sync rules
+  window.addEventListener("message", async (event) => {
+    if (event.source !== window) return;
+
+    if (event.data && event.data.type === "FOMOTRACKER_SYNC_RULES") {
+      try {
+        await chrome.runtime.sendMessage({ type: "SAVE_RULES", rules: event.data.rules });
+        window.postMessage({ type: "FOMOTRACKER_SYNC_SUCCESS" }, "*");
+      } catch (e) {
+        // Extension context might be invalid
+      }
+    } else if (event.data && event.data.type === "FOMOTRACKER_GET_RULES") {
+      try {
+        const rules = await chrome.runtime.sendMessage({ type: "GET_RULES" });
+        window.postMessage({ type: "FOMOTRACKER_RULES_DATA", rules }, "*");
+      } catch (e) {
+        // Extension context might be invalid
+      }
+    }
+  });
 })();

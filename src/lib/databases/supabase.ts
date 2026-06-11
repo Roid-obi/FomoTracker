@@ -20,12 +20,21 @@ export const createClient = () => {
           }
           return typeof document !== "undefined" ? document.cookie : null;
         },
-        set: async (name, value, _options) => {
+        set: async (name, value, options) => {
           if (isMobile) {
+            let expires: string | undefined = undefined;
+            if (options?.expires) {
+              expires = options.expires.toUTCString();
+            } else if (options?.maxAge) {
+              expires = new Date(Date.now() + options.maxAge * 1000).toUTCString();
+            }
+
             await CapacitorCookies.setCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
               key: name,
               value: value,
+              expires: expires,
+              path: options?.path,
             });
           }
         },

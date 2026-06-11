@@ -28,8 +28,10 @@ import type {
   TrackedAppModel,
 } from "@/lib/models/setting.model";
 import { api } from "@/lib/utils/api";
+import { useUser } from "@/hooks/useUser";
 
 export default function PerangkatSettingsPage() {
+  const { data: user } = useUser();
   const queryClient = useQueryClient();
 
   // Search and selector panel states
@@ -214,10 +216,48 @@ export default function PerangkatSettingsPage() {
       });
       return res.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       if (data.success) {
+        // Update localStorage monitored apps list
+        let currentApps: string[] = [];
+        const stored = window.localStorage.getItem("fomotracker_monitored_apps");
+        if (stored) {
+          try {
+            currentApps = JSON.parse(stored);
+          } catch (e) {}
+        }
+
+        if (variables.packageName) {
+          if (variables.isActive) {
+            if (!currentApps.includes(variables.packageName)) {
+              currentApps.push(variables.packageName);
+            }
+          } else {
+            currentApps = currentApps.filter((pkg) => pkg !== variables.packageName);
+          }
+          window.localStorage.setItem(
+            "fomotracker_monitored_apps",
+            JSON.stringify(currentApps),
+          );
+        }
+
         queryClient.invalidateQueries({ queryKey: ["trackedApps"] });
         gooeyToast.success("Daftar aplikasi dipantau diperbarui!");
+
+        // Trigger immediate sync on Android if adding an app
+        if (variables.isActive && user && Capacitor.getPlatform() === "android") {
+          import("@/lib/capacitor/usageStats").then(({ fetchAndSyncUsageData }) => {
+            fetchAndSyncUsageData(user.id)
+              .then((result) => {
+                console.log("Immediate usage data sync result:", result);
+                queryClient.invalidateQueries({ queryKey: ["dashboard-screentime"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-breakdown"] });
+              })
+              .catch((err) => {
+                console.error("Immediate sync failed:", err);
+              });
+          });
+        }
       }
     },
     onError: (error: unknown) => {

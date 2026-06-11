@@ -17,6 +17,8 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import type { NotificationModel } from "@/lib/models/notification.model";
 import { api } from "@/lib/utils/api";
+import { Capacitor, registerPlugin } from "@capacitor/core";
+import type { TrackedAppModel } from "@/lib/models/setting.model";
 
 const navigationItems = [
   { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
@@ -45,6 +47,74 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: user } = useUser();
   const [todayStr, setTodayStr] = useState("");
+
+  // Load tracked apps to pass to setupBackgroundSync
+  const { data: trackedAppsData } = useQuery({
+    queryKey: ["trackedApps"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: TrackedAppModel.getResponse[];
+      }>("/api/setting/tracked-app");
+      return res.data.data;
+    },
+    enabled: !!user,
+  });
+
+  // 1. Foreground stats synchronization on mount / load
+  useEffect(() => {
+    if (user && Capacitor.getPlatform() === "android") {
+      import("@/lib/capacitor/usageStats").then(({ fetchAndSyncUsageData }) => {
+        fetchAndSyncUsageData(user.id).then((result) => {
+          console.log("Foreground usage data sync result:", result);
+        }).catch((err) => {
+          console.error("Foreground sync failed:", err);
+        });
+      });
+    }
+  }, [user]);
+
+  // 2. Background sync setup when tracked apps are loaded or updated
+  useEffect(() => {
+    if (user && trackedAppsData && Capacitor.getPlatform() === "android") {
+      const activeMonitoredApps = trackedAppsData
+        .filter((app) => app.isActive)
+        .map((app) => app.packageName)
+        .filter(Boolean) as string[];
+
+      // Save monitored apps to localStorage so frontend logic reads it
+      window.localStorage.setItem(
+        "fomotracker_monitored_apps",
+        JSON.stringify(activeMonitoredApps),
+      );
+
+      // Register device first to get deviceId
+      api.put<{ success: boolean; data: { id: string } }>("/api/setting/device", {
+        platform: "android_app",
+        deviceName: "Android Phone",
+        isConnected: true,
+      }).then((res) => {
+        if (res.data.success) {
+          const deviceId = res.data.data.id;
+          // Set up native background WorkManager task
+          const CapacitorUsageStatsManager = registerPlugin<any>("CapacitorUsageStatsManager");
+          if (CapacitorUsageStatsManager && CapacitorUsageStatsManager.setupBackgroundSync) {
+            CapacitorUsageStatsManager.setupBackgroundSync({
+              userId: user.id,
+              deviceId: deviceId,
+              monitoredApps: activeMonitoredApps,
+            }).then((bgResult: any) => {
+              console.log("Background WorkManager sync scheduled:", bgResult);
+            }).catch((err: any) => {
+              console.error("Failed to schedule background sync:", err);
+            });
+          }
+        }
+      }).catch((err) => {
+        console.error("Failed to register/sync device for background tracking:", err);
+      });
+    }
+  }, [user, trackedAppsData]);
 
   // Fetch notifications to get real-time unread count
   const { data: notifications = [] } = useQuery({

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export namespace UserModel {
   export const userData = z.object({
+    id: z.string(),
     name: z.string(),
     avatarUrl: z.string().nullable(),
     email: z.string().email(),

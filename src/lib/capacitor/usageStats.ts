@@ -1,5 +1,4 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
-import { createClient } from "@/lib/databases/supabase";
 import { api } from "@/lib/utils/api";
 import { analyzeUsageEvents, fetchUsageEvents } from "./usageEvents";
 
@@ -29,6 +28,11 @@ interface CapacitorUsageStatsManagerPluginType {
     endTime: number;
   }): Promise<Record<string, UsageStatRecord>>;
   getInstalledApps(): Promise<{ apps: InstalledApp[] }>;
+  setupBackgroundSync(options: {
+    userId: string;
+    deviceId: string;
+    monitoredApps: string[];
+  }): Promise<{ success: boolean }>;
 }
 
 const CapacitorUsageStatsManager =
@@ -96,31 +100,28 @@ export async function fetchInstalledApps(): Promise<InstalledApp[]> {
 }
 
 export async function getUserSettingsClient(userId: string) {
-  const supabase = createClient();
   try {
-    const { data: settings, error } = await supabase
-      .from("user_settings")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) throw error;
+    const res = await api.get<{ success: boolean; data: any }>("/api/setting/user");
+    if (!res.data.success) {
+      throw new Error("Gagal mengambil pengaturan");
+    }
+    const settings = res.data.data;
 
     const camelCasedSettings = settings
       ? {
-          id: settings.id,
-          userId: settings.user_id,
-          productiveStart: settings.productive_start,
-          productiveEnd: settings.productive_end,
-          sleepStart: settings.sleep_start,
-          sleepEnd: settings.sleep_end,
-          screenTimeLimitSeconds: settings.screen_time_limit_seconds,
-          continuousLimitSeconds: settings.continuous_limit_seconds,
-          notifScreenTimeEnabled: settings.notif_screen_time_enabled,
-          notifProductiveHourEnabled: settings.notif_productive_hour_enabled,
-          notifMidnightEnabled: settings.notif_midnight_enabled,
-          notifContinuousEnabled: settings.notif_continuous_enabled,
-          updatedAt: settings.updated_at,
+          id: "",
+          userId: userId,
+          productiveStart: settings.productiveStart,
+          productiveEnd: settings.productiveEnd,
+          sleepStart: settings.sleepStart,
+          sleepEnd: settings.sleepEnd,
+          screenTimeLimitSeconds: settings.screenTimeLimitSeconds,
+          continuousLimitSeconds: settings.continuousLimitSeconds,
+          notifScreenTimeEnabled: settings.notifScreenTimeEnabled,
+          notifProductiveHourEnabled: settings.notifProductiveHourEnabled,
+          notifMidnightEnabled: settings.notifMidnightEnabled,
+          notifContinuousEnabled: settings.notifContinuousEnabled,
+          updatedAt: null,
         }
       : null;
 

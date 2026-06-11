@@ -123,4 +123,58 @@ public class UsageStatsManagerPlugin extends Plugin {
 
         call.resolve(result);
     }
+
+    @PluginMethod
+    public void setupBackgroundSync(PluginCall call) {
+        String userId = call.getString("userId");
+        String deviceId = call.getString("deviceId");
+        JSArray monitoredAppsArray = call.getArray("monitoredApps");
+
+        if (userId == null || deviceId == null || monitoredAppsArray == null) {
+            call.reject("Must provide userId, deviceId and monitoredApps");
+            return;
+        }
+
+        StringBuilder monitoredAppsBuilder = new StringBuilder();
+        try {
+            List<String> monitoredAppsList = monitoredAppsArray.toList();
+            for (int i = 0; i < monitoredAppsList.size(); i++) {
+                if (i > 0) monitoredAppsBuilder.append(",");
+                monitoredAppsBuilder.append(monitoredAppsList.get(i));
+            }
+        } catch (Exception e) {
+            call.reject("Failed to parse monitoredApps: " + e.getMessage());
+            return;
+        }
+
+        android.content.SharedPreferences prefs = getContext().getSharedPreferences("FomoTrackerPrefs", Context.MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("userId", userId);
+        editor.putString("deviceId", deviceId);
+        editor.putString("monitoredApps", monitoredAppsBuilder.toString());
+        editor.apply();
+
+        try {
+            androidx.work.Constraints constraints = new androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                .build();
+
+            androidx.work.PeriodicWorkRequest syncWorkRequest =
+                new androidx.work.PeriodicWorkRequest.Builder(SyncWorker.class, 15, java.util.concurrent.TimeUnit.MINUTES)
+                    .setConstraints(constraints)
+                    .build();
+
+            androidx.work.WorkManager.getInstance(getContext()).enqueueUniquePeriodicWork(
+                "FomoTrackerSyncWork",
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                syncWorkRequest
+            );
+
+            JSObject result = new JSObject();
+            result.put("success", true);
+            call.resolve(result);
+        } catch (Exception e) {
+            call.reject("Failed to schedule background sync work: " + e.getMessage());
+        }
+    }
 }

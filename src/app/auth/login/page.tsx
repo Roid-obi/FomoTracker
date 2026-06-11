@@ -1,15 +1,23 @@
 "use client";
 
-import { Eye, EyeOff, Lock, Mail, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/lib/utils/api";
+import { useUser } from "@/hooks/useUser";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { data: user, isLoading: isUserLoading } = useUser();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, isUserLoading, router]);
 
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -133,9 +141,17 @@ export default function Login() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2"
+            disabled={isLoading}
+            className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Masuk
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Memproses...</span>
+              </>
+            ) : (
+              "Masuk"
+            )}
           </button>
 
           <div className="flex items-center my-4">

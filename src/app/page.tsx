@@ -19,8 +19,20 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/hooks/useUser";
+import { useEffect } from "react";
 
 export default function Home() {
+  const { data: user, isLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, isLoading, router]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
       {/* Hero Section */}

@@ -29,6 +29,11 @@ interface CapacitorUsageStatsManagerPluginType {
     endTime: number;
   }): Promise<Record<string, UsageStatRecord>>;
   getInstalledApps(): Promise<{ apps: InstalledApp[] }>;
+  setupBackgroundSync(options: {
+    userId: string;
+    deviceId: string;
+    monitoredApps: string[];
+  }): Promise<{ success: boolean }>;
 }
 
 const CapacitorUsageStatsManager =

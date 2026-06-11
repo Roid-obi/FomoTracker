@@ -39,6 +39,7 @@ export async function getService() {
 
   const parsed = UserModel.userData.safeParse({
     ...userData,
+    id,
     avatarUrl,
     email: user.email,
     onboardingCompleted: userData.onboardingCompleted ?? false,

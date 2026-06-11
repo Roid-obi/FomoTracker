@@ -170,3 +170,88 @@ export function analyzeUsageEvents(
 
   return appSessions;
 }
+
+export interface DetailedSession {
+  packageName: string;
+  startedAt: string;
+  endedAt: string;
+  durationSeconds: number;
+  isMidnight: boolean;
+  isProductiveHour: boolean;
+  isContinuous: boolean;
+}
+
+export function getDetailedSessions(
+  events: UsageEventData[],
+  monitoredApps: string[],
+  midnightStartStr = "22:00:00",
+  midnightEndStr = "06:00:00",
+  productiveStartStr = "08:00:00",
+  productiveEndStr = "17:00:00",
+  continuousLimitSeconds = 3600,
+): DetailedSession[] {
+  const midnightStart = parseTimeStrToSeconds(midnightStartStr);
+  const midnightEnd = parseTimeStrToSeconds(midnightEndStr);
+  const productiveStart = parseTimeStrToSeconds(productiveStartStr);
+  const productiveEnd = parseTimeStrToSeconds(productiveEndStr);
+
+  const activeResumed: Record<string, number> = {};
+  const sessions: DetailedSession[] = [];
+
+  const sortedEvents = [...events].sort((a, b) => a.timeStamp - b.timeStamp);
+
+  for (const event of sortedEvents) {
+    if (!monitoredApps.includes(event.packageName)) continue;
+
+    if (event.eventType === 1) {
+      activeResumed[event.packageName] = event.timeStamp;
+    } else if (event.eventType === 2) {
+      const resumedTime = activeResumed[event.packageName];
+      if (resumedTime) {
+        const pausedTime = event.timeStamp;
+        const durationSeconds = Math.max(0, Math.floor((pausedTime - resumedTime) / 1000));
+
+        if (durationSeconds >= 1) {
+          const resumedDate = new Date(resumedTime);
+          const pausedDate = new Date(pausedTime);
+
+          const resumedSecs =
+            resumedDate.getHours() * 3600 +
+            resumedDate.getMinutes() * 60 +
+            resumedDate.getSeconds();
+          const pausedSecs =
+            pausedDate.getHours() * 3600 +
+            pausedDate.getMinutes() * 60 +
+            pausedDate.getSeconds();
+
+          let midnightDuration = 0;
+          let productiveDuration = 0;
+
+          if (pausedSecs < resumedSecs) {
+            midnightDuration += calculateOverlap(resumedSecs, 86400, midnightStart, midnightEnd) +
+                               calculateOverlap(0, pausedSecs, midnightStart, midnightEnd);
+            productiveDuration += calculateOverlap(resumedSecs, 86400, productiveStart, productiveEnd) +
+                                  calculateOverlap(0, pausedSecs, productiveStart, productiveEnd);
+          } else {
+            midnightDuration += calculateOverlap(resumedSecs, pausedSecs, midnightStart, midnightEnd);
+            productiveDuration += calculateOverlap(resumedSecs, pausedSecs, productiveStart, productiveEnd);
+          }
+
+          sessions.push({
+            packageName: event.packageName,
+            startedAt: resumedDate.toISOString(),
+            endedAt: pausedDate.toISOString(),
+            durationSeconds,
+            isMidnight: midnightDuration > 0,
+            isProductiveHour: productiveDuration > 0,
+            isContinuous: durationSeconds > continuousLimitSeconds,
+          });
+        }
+        delete activeResumed[event.packageName];
+      }
+    }
+  }
+
+  return sessions;
+}
+

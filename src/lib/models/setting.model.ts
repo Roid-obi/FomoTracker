@@ -81,6 +81,11 @@ export namespace TrackedAppModel {
     addedAt: true,
   });
 
-  export const insertRequest = baseInsertRequest;
+  export const insertRequest = z.object({
+    appId: z.string().uuid().optional(),
+    packageName: z.string().optional(),
+    name: z.string().optional(),
+    isActive: z.boolean().optional(),
+  });
   export type insertRequest = z.infer<typeof insertRequest>;
 }

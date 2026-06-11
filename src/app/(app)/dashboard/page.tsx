@@ -812,7 +812,7 @@ export default function DashboardPage() {
               </div>
               <div className="mt-4 space-y-1">
                 <h3 className="text-2xl font-black leading-none">
-                  {scoreData ? `${scoreData.total_score}/100` : "—"}
+                  {scoreData ? `${scoreData.totalScore}/100` : "—"}
                 </h3>
                 <h4 className="text-xs font-bold">{statusTitle}</h4>
                 <p className="text-[9px] font-light leading-normal opacity-85">

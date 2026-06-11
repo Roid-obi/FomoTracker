@@ -1,8 +1,7 @@
 import { CapacitorCookies } from "@capacitor/core";
 import { createBrowserClient, createServerClient } from "@supabase/ssr";
 
-const isMobile =
-  typeof window !== "undefined" && window.origin.startsWith("capacitor://");
+const isMobile = process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
 
 export const createClient = () => {
   return createBrowserClient(
@@ -21,12 +20,21 @@ export const createClient = () => {
           }
           return typeof document !== "undefined" ? document.cookie : null;
         },
-        set: async (name, value, _options) => {
+        set: async (name, value, options) => {
           if (isMobile) {
+            let expires: string | undefined = undefined;
+            if (options?.expires) {
+              expires = options.expires.toUTCString();
+            } else if (options?.maxAge) {
+              expires = new Date(Date.now() + options.maxAge * 1000).toUTCString();
+            }
+
             await CapacitorCookies.setCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
               key: name,
               value: value,
+              expires: expires,
+              path: options?.path,
             });
           }
         },
@@ -57,7 +65,11 @@ export const createSupabaseServer = async () => {
         setAll(cookiesToSet) {
           try {
             for (const { name, value, options } of cookiesToSet) {
-              cookieStore.set(name, value, options);
+              const isProd = process.env.NODE_ENV === "production";
+              const cookieOptions = isProd
+                ? { ...options, sameSite: "none" as const, secure: true }
+                : options;
+              cookieStore.set(name, value, cookieOptions);
             }
           } catch {
             // Route Handler may not be able to set cookies after streaming starts

@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart2,
   Bell,
@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   LogOut,
+  RefreshCw,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +18,8 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import type { NotificationModel } from "@/lib/models/notification.model";
 import { api } from "@/lib/utils/api";
+import { Capacitor, registerPlugin } from "@capacitor/core";
+import type { TrackedAppModel } from "@/lib/models/setting.model";
 
 const navigationItems = [
   { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
@@ -45,6 +48,104 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: user } = useUser();
   const [todayStr, setTodayStr] = useState("");
+  const queryClient = useQueryClient();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (!user) return;
+    setIsSyncing(true);
+
+    try {
+      if (Capacitor.getPlatform() === "android") {
+        const { fetchAndSyncUsageData } = await import("@/lib/capacitor/usageStats");
+        const result = await fetchAndSyncUsageData(user.id);
+        console.log("Manual refresh sync result:", result);
+      } else {
+        // Mock delay on non-Android for visual feedback
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      // Invalidate query client keys to refresh all dashboard statistics and hourly chart
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-status"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-hourly"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-screentime"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-breakdown"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-flag"] });
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } catch (err) {
+      console.error("Refresh failed:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Load tracked apps to pass to setupBackgroundSync
+  const { data: trackedAppsData } = useQuery({
+    queryKey: ["trackedApps"],
+    queryFn: async () => {
+      const res = await api.get<{
+        success: boolean;
+        data: TrackedAppModel.getResponse[];
+      }>("/api/setting/tracked-app");
+      return res.data.data;
+    },
+    enabled: !!user,
+  });
+
+  // 1. Foreground stats synchronization on mount / load
+  useEffect(() => {
+    if (user && Capacitor.getPlatform() === "android") {
+      import("@/lib/capacitor/usageStats").then(({ fetchAndSyncUsageData }) => {
+        fetchAndSyncUsageData(user.id).then((result) => {
+          console.log("Foreground usage data sync result:", result);
+        }).catch((err) => {
+          console.error("Foreground sync failed:", err);
+        });
+      });
+    }
+  }, [user]);
+
+  // 2. Background sync setup when tracked apps are loaded or updated
+  useEffect(() => {
+    if (user && trackedAppsData && Capacitor.getPlatform() === "android") {
+      const activeMonitoredApps = trackedAppsData
+        .filter((app) => app.isActive)
+        .map((app) => app.packageName)
+        .filter(Boolean) as string[];
+
+      // Save monitored apps to localStorage so frontend logic reads it
+      window.localStorage.setItem(
+        "fomotracker_monitored_apps",
+        JSON.stringify(activeMonitoredApps),
+      );
+
+      // Register device first to get deviceId
+      api.put<{ success: boolean; data: { id: string } }>("/api/setting/device", {
+        platform: "android_app",
+        deviceName: "Android Phone",
+        isConnected: true,
+      }).then((res) => {
+        if (res.data.success) {
+          const deviceId = res.data.data.id;
+          // Set up native background WorkManager task
+          const CapacitorUsageStatsManager = registerPlugin<any>("CapacitorUsageStatsManager");
+          if (CapacitorUsageStatsManager && CapacitorUsageStatsManager.setupBackgroundSync) {
+            CapacitorUsageStatsManager.setupBackgroundSync({
+              userId: user.id,
+              deviceId: deviceId,
+              monitoredApps: activeMonitoredApps,
+            }).then((bgResult: any) => {
+              console.log("Background WorkManager sync scheduled:", bgResult);
+            }).catch((err: any) => {
+              console.error("Failed to schedule background sync:", err);
+            });
+          }
+        }
+      }).catch((err) => {
+        console.error("Failed to register/sync device for background tracking:", err);
+      });
+    }
+  }, [user, trackedAppsData]);
 
   // Fetch notifications to get real-time unread count
   const { data: notifications = [] } = useQuery({
@@ -254,25 +355,43 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             </div>
-            <Link
-              href="/notifications"
-              className={`relative p-2 rounded-xl border transition-all cursor-pointer shadow-xs ${
-                pathname.startsWith("/notifications")
-                  ? "bg-primary border-primary text-white"
-                  : "border-border bg-card text-primary hover:bg-muted-light"
-              }`}
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span
-                  className={`absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border rounded-full animate-pulse ${
-                    pathname.startsWith("/notifications")
-                      ? "border-primary"
-                      : "border-card"
+            <div className="flex items-center gap-2">
+              {/* Refresh Button */}
+              {user && (
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isSyncing}
+                  className={`p-2 rounded-xl border border-border bg-card text-primary hover:bg-muted-light transition-all cursor-pointer shadow-xs flex items-center justify-center ${
+                    isSyncing ? "opacity-70 pointer-events-none" : ""
                   }`}
-                />
+                  title="Sinkronkan data sekarang"
+                >
+                  <RefreshCw className={`w-5 h-5 text-secondary ${isSyncing ? "animate-spin" : ""}`} />
+                </button>
               )}
-            </Link>
+
+              {/* Notification Button */}
+              <Link
+                href="/notifications"
+                className={`relative p-2 rounded-xl border transition-all cursor-pointer shadow-xs ${
+                  pathname.startsWith("/notifications")
+                    ? "bg-primary border-primary text-white"
+                    : "border-border bg-card text-primary hover:bg-muted-light"
+                }`}
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span
+                    className={`absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border rounded-full animate-pulse ${
+                      pathname.startsWith("/notifications")
+                        ? "border-primary"
+                        : "border-card"
+                    }`}
+                  />
+                )}
+              </Link>
+            </div>
           </div>
 
           <div className="flex-1 flex flex-col">{children}</div>

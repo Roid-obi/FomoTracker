@@ -28,8 +28,10 @@ import type {
   TrackedAppModel,
 } from "@/lib/models/setting.model";
 import { api } from "@/lib/utils/api";
+import { useUser } from "@/hooks/useUser";
 
 export default function PerangkatSettingsPage() {
+  const { data: user } = useUser();
   const queryClient = useQueryClient();
 
   // Search and selector panel states
@@ -132,10 +134,8 @@ export default function PerangkatSettingsPage() {
         }
       });
     } else {
-      // For browser/development environments, mock installed apps
-      fetchInstalledApps().then((apps) => {
-        setInstalledApps(apps);
-      });
+      // For browser/development environments, do not load any apps since API is not detected
+      setInstalledApps([]);
     }
   }, []);
 
@@ -196,9 +196,13 @@ export default function PerangkatSettingsPage() {
   const trackAppMutation = useMutation({
     mutationFn: async ({
       appId,
+      packageName,
+      name,
       isActive,
     }: {
-      appId: string;
+      appId?: string;
+      packageName?: string;
+      name?: string;
       isActive: boolean;
     }) => {
       const res = await api.post<{
@@ -206,14 +210,54 @@ export default function PerangkatSettingsPage() {
         data: TrackedAppModel.getResponse;
       }>("/api/setting/tracked-app", {
         appId,
+        packageName,
+        name,
         isActive,
       });
       return res.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       if (data.success) {
+        // Update localStorage monitored apps list
+        let currentApps: string[] = [];
+        const stored = window.localStorage.getItem("fomotracker_monitored_apps");
+        if (stored) {
+          try {
+            currentApps = JSON.parse(stored);
+          } catch (e) {}
+        }
+
+        if (variables.packageName) {
+          if (variables.isActive) {
+            if (!currentApps.includes(variables.packageName)) {
+              currentApps.push(variables.packageName);
+            }
+          } else {
+            currentApps = currentApps.filter((pkg) => pkg !== variables.packageName);
+          }
+          window.localStorage.setItem(
+            "fomotracker_monitored_apps",
+            JSON.stringify(currentApps),
+          );
+        }
+
         queryClient.invalidateQueries({ queryKey: ["trackedApps"] });
         gooeyToast.success("Daftar aplikasi dipantau diperbarui!");
+
+        // Trigger immediate sync on Android if adding an app
+        if (variables.isActive && user && Capacitor.getPlatform() === "android") {
+          import("@/lib/capacitor/usageStats").then(({ fetchAndSyncUsageData }) => {
+            fetchAndSyncUsageData(user.id)
+              .then((result) => {
+                console.log("Immediate usage data sync result:", result);
+                queryClient.invalidateQueries({ queryKey: ["dashboard-screentime"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-breakdown"] });
+              })
+              .catch((err) => {
+                console.error("Immediate sync failed:", err);
+              });
+          });
+        }
       }
     },
     onError: (error: unknown) => {
@@ -263,8 +307,8 @@ export default function PerangkatSettingsPage() {
   const browserConnected = browserDevice?.isConnected ?? false;
 
   // Handlers
-  const handleAddAndroidApp = (id: string) => {
-    trackAppMutation.mutate({ appId: id, isActive: true });
+  const handleAddAndroidApp = (name: string, packageName: string) => {
+    trackAppMutation.mutate({ name, packageName, isActive: true });
   };
 
   const handleRemoveAndroidApp = (appId: string) => {
@@ -340,23 +384,18 @@ export default function PerangkatSettingsPage() {
   // Get currently monitored apps objects
   const monitoredApps = (trackedAppsData ?? []).filter((app) => app.isActive);
 
-  // Filter available apps from the full list for selection
-  const availableAppsToSelect = (availableAppsData ?? []).filter((app) => {
-    // 1. Must be installed on the device (packageName match)
-    const isInstalled = installedApps.some(
-      (installed) => installed.packageName === app.packageName,
-    );
-    if (!isInstalled) return false;
+  // Filter installed apps from the device that are NOT currently monitored
+  const availableInstalledAppsToSelect = installedApps.filter(
+    (installedApp) => {
+      const isAlreadyMonitored = monitoredApps.some(
+        (monitored) => monitored.packageName === installedApp.packageName,
+      );
+      return !isAlreadyMonitored;
+    },
+  );
 
-    // 2. Must not be currently monitored
-    const isMonitored = monitoredApps.some(
-      (monitored) => monitored.appId === app.id,
-    );
-    return !isMonitored;
-  });
-
-  const filteredAvailableAppsToSelect = availableAppsToSelect.filter((app) =>
-    app.name.toLowerCase().includes(androidSearch.toLowerCase()),
+  const filteredAvailableAppsToSelect = availableInstalledAppsToSelect.filter(
+    (app) => app.appName.toLowerCase().includes(androidSearch.toLowerCase()),
   );
 
   if (isSettingsLoading || isDevicesLoading || isTrackedAppsLoading) {
@@ -565,7 +604,7 @@ export default function PerangkatSettingsPage() {
             </div>
           </div>
 
-          {androidConnected && (
+          {androidConnected && isAndroidDevice && (
             <button
               type="button"
               onClick={() => setIsAddingAndroidApp(!isAddingAndroidApp)}
@@ -642,21 +681,23 @@ export default function PerangkatSettingsPage() {
                 filteredAvailableAppsToSelect.map((app) => (
                   <button
                     type="button"
-                    key={app.id}
-                    onClick={() => handleAddAndroidApp(app.id)}
+                    key={app.packageName}
+                    onClick={() =>
+                      handleAddAndroidApp(app.appName, app.packageName)
+                    }
                     className="p-2.5 border border-border bg-card hover:bg-muted-light/20 rounded-xl text-left flex items-center justify-between gap-2.5 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <div
                         className={`w-7.5 h-7.5 rounded-lg bg-gradient-to-tr ${getAppGradient(
-                          app.name,
+                          app.appName,
                         )} flex items-center justify-center text-white text-[8px] font-bold shrink-0 shadow-2xs`}
                       >
-                        {app.name.substring(0, 2)}
+                        {app.appName.substring(0, 2)}
                       </div>
                       <div className="min-w-0">
                         <span className="text-xs font-bold text-primary block truncate">
-                          {app.name}
+                          {app.appName}
                         </span>
                       </div>
                     </div>

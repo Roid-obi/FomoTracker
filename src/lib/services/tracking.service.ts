@@ -101,8 +101,42 @@ export async function syncActivityService(
     };
   }
 
+  if (logs.length === 0) {
+    return {
+      success: true,
+      data: {
+        inserted: 0,
+        skipped: 0,
+        deviceLastSyncedAt: new Date(),
+      },
+    };
+  }
+
   // Resolve semua appId sekaligus dalam satu query
   const appIdMap = await resolveAppIds(logs);
+
+  // Cari logs yang sudah ada untuk menghindari duplikasi
+  const startedAts = logs.map((l) => new Date(l.startedAt));
+  const minStart = new Date(Math.min(...startedAts.map((d) => d.getTime())));
+  const maxStart = new Date(Math.max(...startedAts.map((d) => d.getTime())));
+
+  const existingLogs = await db
+    .select({
+      appId: table.activityLogs.appId,
+      startedAt: table.activityLogs.startedAt,
+    })
+    .from(table.activityLogs)
+    .where(
+      and(
+        eq(table.activityLogs.userId, userId),
+        gte(table.activityLogs.startedAt, minStart),
+        lte(table.activityLogs.startedAt, maxStart),
+      ),
+    );
+
+  const existingSet = new Set(
+    existingLogs.map((el) => `${el.appId}_${new Date(el.startedAt).getTime()}`),
+  );
 
   const toInsert: (typeof table.activityLogs.$inferInsert)[] = [];
   let skipped = 0;
@@ -114,6 +148,14 @@ export async function syncActivityService(
       skipped++;
       continue;
     }
+
+    const startedAtTime = new Date(log.startedAt).getTime();
+    const keyCombo = `${appId}_${startedAtTime}`;
+    if (existingSet.has(keyCombo)) {
+      skipped++;
+      continue;
+    }
+
     toInsert.push({
       userId,
       appId,
@@ -259,8 +301,8 @@ export async function syncDailyStatsService(
   const flagExcessiveUsage = totalScreenTime > screenTimeLimit;
 
   // Open Frequency: 40 kali buka per jam (check peak openings in any hour of the day)
-  const startTs = new Date(`${statDate}T00:00:00Z`);
-  const endTs = new Date(`${statDate}T23:59:59Z`);
+  const startTs = new Date(`${statDate}T00:00:00+07:00`);
+  const endTs = new Date(`${statDate}T23:59:59.999+07:00`);
   const hourlyCounts = await db
     .select({
       count: sql<number>`cast(count(*) as integer)`,
@@ -274,7 +316,7 @@ export async function syncDailyStatsService(
       ),
     )
     .groupBy(
-      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta')`,
     );
 
   const peakHourlyOpens =

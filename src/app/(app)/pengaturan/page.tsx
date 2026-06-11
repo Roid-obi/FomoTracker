@@ -1,5 +1,14 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function PengaturanPage() {
-  redirect("/pengaturan/profil");
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/pengaturan/profil");
+  }, [router]);
+
+  return null;
 }

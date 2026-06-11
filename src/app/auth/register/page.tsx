@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, User, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,6 +11,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -20,6 +21,7 @@ export default function Register() {
       return;
     }
     setErrorMsg("");
+    setIsLoading(true);
     const form = e.currentTarget;
     const body = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
@@ -32,12 +34,14 @@ export default function Register() {
 
       if (!response.data.success) {
         setErrorMsg(response.data.error);
+        setIsLoading(false);
         return;
       }
 
       router.push(`/auth/verify-email?email=${encodeURIComponent(body.email)}`);
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : String(error));
+      setIsLoading(false);
     }
   };
 
@@ -205,9 +209,17 @@ export default function Register() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2"
+            disabled={isLoading}
+            className="w-full py-3.5 rounded-xl bg-primary text-white hover:bg-secondary transition-all font-semibold shadow-sm text-sm cursor-pointer font-poppins mt-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Daftar Akun
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Memproses...</span>
+              </>
+            ) : (
+              "Daftar Akun"
+            )}
           </button>
 
           <div className="flex items-center my-3">

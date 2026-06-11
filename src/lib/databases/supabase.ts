@@ -35,18 +35,14 @@ export const createClient = () => {
               value: value,
               expires: expires,
               path: options?.path,
-              domain: options?.domain,
-              secure: options?.secure,
             });
           }
         },
-        remove: async (name, options) => {
+        remove: async (name, _options) => {
           if (isMobile) {
             await CapacitorCookies.deleteCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
               key: name,
-              path: options?.path,
-              domain: options?.domain,
             });
           }
         },

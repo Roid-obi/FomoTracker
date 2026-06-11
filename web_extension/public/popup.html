@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FomoTracker — Time Limit Manager</title>
-    <meta name="description" content="Track and limit your browsing time on distracting websites." />
+    <meta name="description" content="Track your browsing time on specific websites." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -446,7 +446,7 @@
         🔒
       </div>
       <h2 class="empty-title" style="font-size: 18px;">Authentication Required</h2>
-      <p class="empty-sub" style="max-width: 260px;">Please login to your FomoTracker dashboard to use the extension and sync your rules.</p>
+      <div class="empty-sub" style="max-width: 260px; margin-bottom: 20px; font-size: 13px; color: var(--text-muted);">Please login to your FomoTracker dashboard to use the extension and sync your rules.</div>
       <button id="login-btn" class="empty-btn" style="width: 100%; padding: 12px; font-size: 14px; margin-top: 10px;">
         Login via Web
       </button>
@@ -464,36 +464,20 @@
           <input type="hidden" id="edit-id" value="" />
 
           <div class="field">
+            <label class="field-label" for="name-input">Label / Name</label>
+            <input type="text" id="name-input" class="field-input"
+              placeholder="e.g. YouTube Entertainment" autocomplete="off" />
+          </div>
+
+          <div class="field">
             <label class="field-label" for="url-input">Website URL</label>
             <input type="text" id="url-input" class="field-input"
               placeholder="e.g. youtube.com or twitter.com" autocomplete="off" />
             <div class="field-error" id="url-error"></div>
           </div>
 
-          <div class="field">
-            <label class="field-label">Time Limit (minutes)</label>
-            <div class="slider-row">
-              <input type="range" id="duration-slider" min="1" max="120" value="30" />
-              <div class="slider-val" id="duration-val">30m</div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="field-label">Break Duration (minutes)</label>
-            <div class="slider-row">
-              <input type="range" id="break-slider" min="1" max="60" value="5"
-                style="accent-color:#10b981" />
-              <div class="slider-val" id="break-val"
-                style="color:#10b981">5m</div>
-            </div>
-          </div>
-
           <div class="summary-box" id="summary-box">
-            After <span class="hl-accent" id="sum-dur">30 minutes</span>
-            on <span class="hl-domain" id="sum-domain">this site</span>,
-            an overlay will appear. You can then take a
-            <span class="hl-success" id="sum-break">5-minute break</span>
-            before the timer resets.
+            FomoTracker will track how much time you spend on <span class="hl-domain" id="sum-domain">this site</span> and automatically sync it to your dashboard.
           </div>
 
           <div class="btn-row">

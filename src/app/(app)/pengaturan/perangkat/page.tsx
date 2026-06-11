@@ -50,7 +50,7 @@ export default function PerangkatSettingsPage() {
   const [sleepEnd, setSleepEnd] = useState("06:00");
 
   // Browser Extension URL Rules state (Syncs with extension)
-  const [webUrls, setWebUrls] = useState<{id: string, name?: string, url: string, duration?: number, breakTime?: number, enabled?: boolean}[]>([]);
+  const [webUrls, setWebUrls] = useState<{id: string, name?: string, url: string, enabled?: boolean}[]>([]);
 
   // Form states for adding web URL
   const [newWebName, setNewWebName] = useState("");
@@ -325,6 +325,17 @@ export default function PerangkatSettingsPage() {
   const androidConnected = androidDevice?.isConnected ?? false;
   const browserConnected = browserDevice?.isConnected ?? false;
 
+  // Send user and device info to extension
+  useEffect(() => {
+    if (user?.id && browserDevice?.id && browserConnected) {
+      window.postMessage({
+        type: "FOMOTRACKER_SET_USER_INFO",
+        userId: user.id,
+        deviceId: browserDevice.id
+      }, "*");
+    }
+  }, [user?.id, browserDevice?.id, browserConnected]);
+
   // Handlers
   const handleAddAndroidApp = (name: string, packageName: string) => {
     trackAppMutation.mutate({ name, packageName, isActive: true });
@@ -382,8 +393,6 @@ export default function PerangkatSettingsPage() {
       id: `web-${Date.now()}`,
       name: newWebName.trim(),
       url: url,
-      duration: 30, // Default duration 30 mins
-      breakTime: 5, // Default break 5 mins
       enabled: true
     };
 

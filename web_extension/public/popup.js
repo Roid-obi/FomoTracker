@@ -10,8 +10,8 @@ let pollInterval = null;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 /**
- * @typedef {{ id:string, url:string, duration:number, breakTime:number, enabled:boolean }} Rule
- * @typedef {{ active:boolean, rule?:Rule, elapsed?:number, remaining?:number, onBreak?:boolean, breakRemaining?:number, limitReached?:boolean }} SessionStatus
+ * @typedef {{ id:string, url:string, enabled:boolean }} Rule
+ * @typedef {{ active:boolean, rule?:Rule, elapsed?:number }} SessionStatus
  */
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ async function saveRules(updated) {
 function getSessionStateHash(sessionsObj) {
   return Object.keys(sessionsObj).sort().map(k => {
     const s = sessionsObj[k];
-    return `${k}:${s.active}:${s.onBreak}:${s.limitReached}`;
+    return `${k}:${s.active}`;
   }).join("|");
 }
 
@@ -100,18 +100,10 @@ function updateLiveTimers() {
       if (!card) return;
       const session = sessions[rule.id];
       const isActive = rule.enabled && session?.active;
-      const limitReached = session?.limitReached;
-      const onBreak = session?.onBreak;
 
       let liveChip = "";
-      if (onBreak) {
-        liveChip = `<span class="live-chip success"><span class="live-dot"></span>Break: ${formatTime(session.breakRemaining || 0)}</span>`;
-      } else if (isActive && session?.remaining !== undefined) {
-        if (limitReached) {
-          liveChip = `<span class="live-chip danger">⏰ Limit reached</span>`;
-        } else {
-          liveChip = `<span class="live-chip muted">▶ ${formatTime(session.remaining)} left</span>`;
-        }
+      if (isActive && session?.elapsed !== undefined) {
+        liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} tracked</span>`;
       }
       
       const statsContainer = card.querySelector('.rule-stats');
@@ -134,17 +126,11 @@ function updateLiveTimers() {
       const card = document.querySelector(`.session-card[data-id="${rule.id}"]`);
       if (!card) return;
       const status = sessions[rule.id];
-      const pct = status?.elapsed && rule.duration
-        ? Math.min(100, (status.elapsed / (rule.duration * 60)) * 100)
-        : 0;
+      const pct = 100;
 
-      const timerVal = status?.onBreak
-        ? formatTime(status.breakRemaining || 0)
-        : formatTime(status?.remaining || 0);
+      const timerVal = formatTime(status?.elapsed || 0);
 
-      const subText = status?.onBreak
-        ? `<span style="color:var(--success)">On break — ${formatTime(status.breakRemaining || 0)} left</span>`
-        : `<span style="color:var(--text-muted)">${formatTime(status?.elapsed || 0)} elapsed</span>`;
+      const subText = `<span style="color:var(--text-muted)">Tracking...</span>`;
 
       const timerEl = card.querySelector('.session-timer');
       if (timerEl) timerEl.textContent = timerVal;
@@ -205,7 +191,7 @@ function renderEmpty() {
     <div id="empty">
       <div class="empty-icon">🕐</div>
       <div class="empty-title">No rules yet</div>
-      <div class="empty-sub">Add a website and set your time limit to start tracking</div>
+      <div class="empty-sub">Add a website to start tracking</div>
       <button class="empty-btn" id="empty-add-btn">+ Add First Rule</button>
     </div>`;
 }
@@ -213,21 +199,13 @@ function renderEmpty() {
 function renderRuleCard(rule) {
   const session = sessions[rule.id];
   const isActive = rule.enabled && session?.active;
-  const limitReached = session?.limitReached;
-  const onBreak = session?.onBreak;
 
-  const cardClass = `rule-card${limitReached ? " limit-reached" : ""}${onBreak ? " on-break" : ""}`;
+  const cardClass = `rule-card`;
   const dotClass = `status-dot${isActive ? " active" : ""}`;
 
   let liveChip = "";
-  if (onBreak) {
-    liveChip = `<span class="live-chip success"><span class="live-dot"></span>Break: ${formatTime(session.breakRemaining || 0)}</span>`;
-  } else if (isActive && session?.remaining !== undefined) {
-    if (limitReached) {
-      liveChip = `<span class="live-chip danger">⏰ Limit reached</span>`;
-    } else {
-      liveChip = `<span class="live-chip muted">▶ ${formatTime(session.remaining)} left</span>`;
-    }
+  if (isActive && session?.elapsed !== undefined) {
+    liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} tracked</span>`;
   }
 
   return `
@@ -236,7 +214,7 @@ function renderRuleCard(rule) {
         <div class="rule-info">
           <span class="${dotClass}"></span>
           <div style="min-width:0">
-            <div class="rule-domain">${escapeHtml(getDomain(rule.url))}</div>
+            <div class="rule-domain">${escapeHtml(rule.name || getDomain(rule.url))}</div>
             <div class="rule-url">${escapeHtml(rule.url)}</div>
           </div>
         </div>
@@ -249,39 +227,23 @@ function renderRuleCard(rule) {
         </div>
       </div>
       <div class="rule-stats">
-        <span class="stat-chip">⏱ ${rule.duration}m limit</span>
-        <span class="stat-chip">☕ ${rule.breakTime}m break</span>
         ${liveChip}
       </div>
     </div>`;
 }
 
 function renderSessionCard(rule, status) {
-  const pct = status?.elapsed && rule.duration
-    ? Math.min(100, (status.elapsed / (rule.duration * 60)) * 100)
-    : 0;
-
-  const color = pct >= 100 ? "var(--danger)"
-    : pct >= 75 ? "linear-gradient(90deg,var(--accent),#f59e0b)"
-    : "linear-gradient(90deg,var(--accent),var(--accent2))";
-
-  const timerColor = status?.limitReached ? "var(--danger)"
-    : status?.onBreak ? "var(--success)"
-    : "var(--accent2)";
-
-  const timerVal = status?.onBreak
-    ? formatTime(status.breakRemaining || 0)
-    : formatTime(status?.remaining || 0);
-
-  const subText = status?.onBreak
-    ? `<span style="color:var(--success)">On break — ${formatTime(status.breakRemaining || 0)} left</span>`
-    : `<span style="color:var(--text-muted)">${formatTime(status?.elapsed || 0)} elapsed</span>`;
+  const pct = 100;
+  const color = "linear-gradient(90deg,var(--accent),var(--accent2))";
+  const timerColor = "var(--accent2)";
+  const timerVal = formatTime(status?.elapsed || 0);
+  const subText = `<span style="color:var(--text-muted)">Tracking...</span>`;
 
   return `
     <div class="session-card" data-id="${rule.id}">
       <div class="session-top">
         <div>
-          <div class="session-domain">${escapeHtml(getDomain(rule.url))}</div>
+          <div class="session-domain">${escapeHtml(rule.name || getDomain(rule.url))}</div>
           <div class="session-sub">${subText}</div>
         </div>
         <div class="session-timer" style="color:${timerColor}">${timerVal}</div>
@@ -360,15 +322,11 @@ function openModal(rule = null) {
   document.getElementById("modal-title").textContent = rule ? "Edit Rule" : "New Rule";
   document.getElementById("modal-save").textContent = rule ? "Save Changes" : "Add Rule";
   document.getElementById("edit-id").value = rule?.id || "";
+  document.getElementById("name-input").value = rule?.name || "";
   document.getElementById("url-input").value = rule?.url || "";
   document.getElementById("url-error").textContent = "";
   document.getElementById("url-input").classList.remove("error");
-
-  const dur = rule?.duration || 30;
-  const brk = rule?.breakTime || 5;
-  document.getElementById("duration-slider").value = dur;
-  document.getElementById("break-slider").value = brk;
-  updateSliderLabels(dur, brk, rule?.url || "");
+  updateDomainLabel(rule?.url || "");
 
   modal.classList.add("open");
   setTimeout(() => document.getElementById("url-input").focus(), 100);
@@ -378,31 +336,13 @@ function closeModal() {
   document.getElementById("modal-overlay").classList.remove("open");
 }
 
-function updateSliderLabels(dur, brk, url) {
-  document.getElementById("duration-val").textContent = `${dur}m`;
-  document.getElementById("break-val").textContent = `${brk}m`;
-  document.getElementById("sum-dur").textContent = `${dur} minutes`;
-  document.getElementById("sum-break").textContent = `${brk}-minute break`;
+function updateDomainLabel(url) {
   const domain = getDomain(url) || "this site";
   document.getElementById("sum-domain").textContent = domain;
 }
 
-document.getElementById("duration-slider").addEventListener("input", (e) => {
-  const url = document.getElementById("url-input").value;
-  const brk = Number(document.getElementById("break-slider").value);
-  updateSliderLabels(Number(e.target.value), brk, url);
-});
-
-document.getElementById("break-slider").addEventListener("input", (e) => {
-  const url = document.getElementById("url-input").value;
-  const dur = Number(document.getElementById("duration-slider").value);
-  updateSliderLabels(dur, Number(e.target.value), url);
-});
-
 document.getElementById("url-input").addEventListener("input", (e) => {
-  const dur = Number(document.getElementById("duration-slider").value);
-  const brk = Number(document.getElementById("break-slider").value);
-  updateSliderLabels(dur, brk, e.target.value);
+  updateDomainLabel(e.target.value);
   document.getElementById("url-error").textContent = "";
   e.target.classList.remove("error");
 });
@@ -415,6 +355,7 @@ document.getElementById("modal-overlay").addEventListener("click", (e) => {
 
 document.getElementById("rule-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const name = document.getElementById("name-input").value.trim();
   const url = document.getElementById("url-input").value.trim();
   if (!url) {
     document.getElementById("url-error").textContent = "Please enter a URL";
@@ -423,16 +364,13 @@ document.getElementById("rule-form").addEventListener("submit", async (e) => {
   }
 
   const id = document.getElementById("edit-id").value || genId();
-  const duration = Number(document.getElementById("duration-slider").value);
-  const breakTime = Number(document.getElementById("break-slider").value);
 
-  const newRule = { id, url, duration, breakTime, enabled: true };
+  const newRule = { id, name, url, enabled: true };
 
   if (document.getElementById("edit-id").value) {
-    // Preserve enabled state and name on edit
+    // Preserve enabled state on edit
     const existing = rules.find((r) => r.id === id);
     newRule.enabled = existing?.enabled ?? true;
-    if (existing?.name) newRule.name = existing.name;
     rules = rules.map((r) => (r.id === id ? newRule : r));
   } else {
     rules = [...rules, newRule];
@@ -480,3 +418,12 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
 
 // Run auth check instead of direct init
 checkAuth();
+
+// Listen for rule changes from the background/web app
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === "local" && changes[STORAGE_KEY]) {
+    rules = changes[STORAGE_KEY].newValue || [];
+    renderContent();
+    updateFooter();
+  }
+});

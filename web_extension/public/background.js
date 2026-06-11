@@ -33,16 +33,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       getSessionStatus(message.url).then(sendResponse);
       return true;
 
-    case "START_BREAK":
-      startBreak(message.ruleId).then(sendResponse);
-      return true;
-
-    case "DISMISS_OVERLAY":
-      dismissOverlay(message.ruleId).then(sendResponse);
+    case "SET_USER_INFO":
+      chrome.storage.local.set({ 
+        fomotracker_user_id: message.userId, 
+        fomotracker_device_id: message.deviceId 
+      }).then(() => sendResponse({ success: true }));
       return true;
 
     case "CHECK_URL":
       checkUrlMatch(message.url).then(sendResponse);
+      return true;
+
+    case "HANDLE_SPA_NAVIGATION":
+      handleSpaNavigation(message.oldUrl, message.newUrl).then(sendResponse);
+      return true;
+
+    case "FLUSH_SESSION":
+      handleFlushSession(message.url).then(sendResponse);
       return true;
 
     case "TICK":
@@ -137,50 +144,16 @@ async function getSessionStatus(url) {
       active: false,
       rule,
       elapsed: 0,
-      remaining: rule.duration * 60,
-      onBreak: false,
     };
-  }
-
-  const now = Date.now();
-
-  // Check if on break
-  if (session.breakUntil && now < session.breakUntil) {
-    const breakRemaining = Math.ceil((session.breakUntil - now) / 1000);
-    return {
-      active: true,
-      rule,
-      session,
-      onBreak: true,
-      breakRemaining,
-      elapsed: Math.floor(session.totalElapsed / 1000),
-      remaining: Math.max(0, rule.duration * 60 - Math.floor(session.totalElapsed / 1000)),
-    };
-  }
-
-  // Break ended — reset overlay state
-  if (session.breakUntil && now >= session.breakUntil) {
-    session.breakUntil = null;
-    session.overlayShown = false;
-    session.startTime = now;
-    session.totalElapsed = 0;
-    sessions[rule.id] = session;
-    await saveSessions(sessions);
   }
 
   const elapsedSeconds = Math.floor(session.totalElapsed / 1000);
-  const limitSeconds = rule.duration * 60;
-  const remaining = Math.max(0, limitSeconds - elapsedSeconds);
 
   return {
     active: true,
     rule,
     session,
     elapsed: elapsedSeconds,
-    remaining,
-    onBreak: false,
-    limitReached: elapsedSeconds >= limitSeconds,
-    overlayShown: session.overlayShown,
   };
 }
 
@@ -198,79 +171,143 @@ async function handleTick(url, tabId) {
       url: url,
       startTime: now,
       totalElapsed: 0,
-      breakUntil: null,
-      overlayShown: false,
+      lastTick: now
     };
   } else {
-    // Only count time if last tick was recent (within 5 seconds).
-    // If it's been longer, the tab was closed or suspended, so we don't count the gap.
-    const gap = now - session.startTime;
+    const gap = now - session.lastTick;
     if (gap < 5000) {
       session.totalElapsed += gap;
+    } else {
+      if (session.totalElapsed > 1000) {
+        await flushSessionToApi(session);
+      }
+      session.startTime = now;
+      session.totalElapsed = 0;
     }
-    session.startTime = now;
-  }
-
-  // Check break
-  if (session.breakUntil && now < session.breakUntil) {
-    sessions[rule.id] = session;
-    await saveSessions(sessions);
-    return { active: true, onBreak: true };
-  }
-
-  // Break ended
-  if (session.breakUntil && now >= session.breakUntil) {
-    session.breakUntil = null;
-    session.overlayShown = false;
-    session.totalElapsed = 0;
+    session.lastTick = now;
   }
 
   sessions[rule.id] = session;
   await saveSessions(sessions);
 
-  const elapsedSeconds = Math.floor(session.totalElapsed / 1000);
-  const limitSeconds = rule.duration * 60;
-  const limitReached = elapsedSeconds >= limitSeconds;
-
   return {
     active: true,
     rule,
-    elapsed: elapsedSeconds,
-    remaining: Math.max(0, limitSeconds - elapsedSeconds),
-    limitReached,
-    onBreak: false,
-    overlayShown: session.overlayShown,
+    elapsed: Math.floor(session.totalElapsed / 1000),
   };
 }
 
-async function startBreak(ruleId) {
-  const rules = await getRules();
-  const rule = rules.find((r) => r.id === ruleId);
-  if (!rule) return { success: false };
+async function handleFlushSession(url) {
+  const { rule } = await checkUrlMatch(url);
+  if (!rule) return;
 
   const sessions = await getSessions();
-  const session = sessions[ruleId];
-  if (!session) return { success: false };
-
-  session.breakUntil = Date.now() + rule.breakTime * 60 * 1000;
-  session.overlayShown = false;
-  session.totalElapsed = 0;
-  session.startTime = Date.now();
-  sessions[ruleId] = session;
-  await saveSessions(sessions);
-
-  return { success: true, breakUntil: session.breakUntil };
-}
-
-async function dismissOverlay(ruleId) {
-  const sessions = await getSessions();
-  const session = sessions[ruleId];
-  if (session) {
-    session.overlayShown = true;
-    sessions[ruleId] = session;
+  const session = sessions[rule.id];
+  
+  if (session && session.totalElapsed > 1000) {
+    await flushSessionToApi(session);
+    delete sessions[rule.id];
     await saveSessions(sessions);
   }
-  return { success: true };
+}
+
+async function handleSpaNavigation(oldUrl, newUrl) {
+  const oldMatch = await checkUrlMatch(oldUrl);
+  const newMatch = await checkUrlMatch(newUrl);
+
+  if (oldMatch.rule && oldMatch.rule.id !== newMatch.rule?.id) {
+    const sessions = await getSessions();
+    const session = sessions[oldMatch.rule.id];
+    if (session && session.totalElapsed > 1000) {
+      await flushSessionToApi(session);
+      delete sessions[oldMatch.rule.id];
+      await saveSessions(sessions);
+    }
+  }
+}
+
+async function flushSessionToApi(session) {
+  const durationSeconds = Math.floor(session.totalElapsed / 1000);
+  if (durationSeconds < 1) return;
+
+  const targetUrl = new URL(session.url.startsWith("http") ? session.url : `https://${session.url}`);
+  const webDomain = targetUrl.hostname.replace(/^www\./, "");
+
+  const logs = [{
+    webDomain,
+    startedAt: new Date(session.startTime).toISOString(),
+    endedAt: new Date(session.startTime + session.totalElapsed).toISOString(),
+    durationSeconds,
+    isMidnight: new Date(session.startTime).getHours() < 5,
+    isProductiveHour: false,
+    isContinuous: true,
+    source: "browser_extension"
+  }];
+
+  const data = await chrome.storage.local.get(["fomotracker_user_id", "fomotracker_device_id"]);
+  const userId = data.fomotracker_user_id;
+  const deviceId = data.fomotracker_device_id;
+  
+  if (!userId || !deviceId) return;
+
+  const authData = await getAuthTokenAndDomain();
+  if (!authData) return;
+
+  try {
+    const apiUrl = `${authData.domain}/api/tracking/sync/activity`;
+    await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authData.token}`
+      },
+      body: JSON.stringify({ userId, deviceId, logs })
+    });
+  } catch (e) {
+    console.error("Failed to sync log", e);
+  }
+}
+
+async function getAuthTokenAndDomain() {
+  return new Promise((resolve) => {
+    const domains = ["http://localhost:3000", "https://localhost:3000", "https://fomotracker.vercel.app"];
+    
+    let foundToken = null;
+    let foundDomain = null;
+    let checkedCount = 0;
+
+    const checkNext = () => {
+      if (checkedCount >= domains.length || foundToken) {
+        resolve(foundToken ? { token: foundToken, domain: foundDomain } : null);
+        return;
+      }
+      const url = domains[checkedCount];
+      checkedCount++;
+      
+      chrome.cookies.getAll({ url }, (cookies) => {
+        const authCookie = cookies.find(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+        if (authCookie) {
+          try {
+            const sessionData = JSON.parse(decodeURIComponent(authCookie.value));
+            if (Array.isArray(sessionData) && sessionData.length > 0) {
+              foundToken = sessionData[0];
+            } else if (sessionData && sessionData.access_token) {
+              foundToken = sessionData.access_token;
+            } else {
+              foundToken = sessionData;
+            }
+            foundDomain = url;
+          } catch (e) {
+            foundToken = authCookie.value;
+            foundDomain = url;
+          }
+        }
+        checkNext();
+      });
+    };
+    
+    checkNext();
+  });
 }
 
 async function handleTabActivated(url, tabId) {
@@ -282,7 +319,6 @@ async function handleTabActivated(url, tabId) {
   }
 }
 
-// Check if user is logged into the main web app
 async function getAuthToken() {
   return new Promise((resolve) => {
     // Check both http and https for localhost or production

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Mail, X } from "lucide-react";
 import { createClient } from "@/lib/databases/supabase";
 import { gooeyToast } from "goey-toast";
+import { api } from "@/lib/utils/api";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -22,12 +23,10 @@ function VerifyEmailContent() {
 
     const supabase = createClient();
 
-    // Polling server-side session check (guarantees cookie sync)
     const checkSession = async () => {
       try {
-        const res = await fetch("/api/auth/check-session");
-        const data = await res.json();
-        if (data.authenticated) {
+        const res = await api.get<{ authenticated: boolean }>("/api/auth/check-session");
+        if (res.data.authenticated) {
           clearInterval(interval);
           gooeyToast.success(
             "Email berhasil diverifikasi! Mengalihkan ke dashboard...",

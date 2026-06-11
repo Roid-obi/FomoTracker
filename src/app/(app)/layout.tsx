@@ -65,13 +65,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
-      // Invalidate query client keys to refresh all dashboard statistics and hourly chart
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-status"] });
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-hourly"] });
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-screentime"] });
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-breakdown"] });
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-flag"] });
-      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      // Invalidate all query client keys to refresh all statistics, dashboards, and daily details in real-time
+      await queryClient.invalidateQueries();
     } catch (err) {
       console.error("Refresh failed:", err);
     } finally {
@@ -240,7 +235,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       const response = await api.post("/api/auth/logout");
 
       if (response.status === 200) {
-        router.push("/");
+        queryClient.setQueryData(["user"], null);
+        queryClient.clear();
+        window.localStorage.removeItem("fomotracker_monitored_apps");
+        router.replace("/auth/login");
       }
     } catch (error) {
       console.error(error);

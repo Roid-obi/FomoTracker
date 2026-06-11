@@ -255,11 +255,12 @@ export async function getHourlyBreakdownService(
   const startTs = new Date(`${targetDate}T00:00:00+07:00`);
   const endTs = new Date(`${targetDate}T23:59:59.999+07:00`);
 
-  // 1. Ambil activity logs hari ini
+  // 1. Ambil activity logs hari ini beserta startedAt dan endedAt
   const logs = await db
     .select({
-      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta') as integer)`,
       appName: table.apps.name,
+      startedAt: table.activityLogs.startedAt,
+      endedAt: table.activityLogs.endedAt,
       durationSeconds: table.activityLogs.durationSeconds,
     })
     .from(table.activityLogs)
@@ -285,31 +286,76 @@ export async function getHourlyBreakdownService(
 
   const top4Apps = sortedApps.slice(0, 4);
 
-  // 3. Inisialisasi 24 jam data chart
-  const chartData = Array.from({ length: 24 }, (_, i) => {
-    const hourLabel = `${String(i).padStart(2, "0")}.00`;
-    const dataObj: Record<string, string | number> = { jam: hourLabel };
+  // 3. Inisialisasi 24 jam data chart (hourlyDurations menyimpan nilai float menit)
+  const hourlyDurations: Record<string, number>[] = Array.from({ length: 24 }, () => {
+    const obj: Record<string, number> = {};
     for (const app of top4Apps) {
-      dataObj[app] = 0;
+      obj[app] = 0;
     }
-    dataObj.Lainnya = 0;
-    return dataObj;
+    obj.Lainnya = 0;
+    return obj;
   });
 
-  // 4. Isi data chart dari log
+  // 4. Isi data chart dari log dengan membagi durasi sesi ke jam-jam yang sesuai
   for (const log of logs) {
-    const hour = log.hour;
-    if (hour >= 0 && hour < 24) {
-      const durationMinutes = Math.round(log.durationSeconds / 60);
-      if (top4Apps.includes(log.appName)) {
-        chartData[hour][log.appName] =
-          ((chartData[hour][log.appName] as number) || 0) + durationMinutes;
-      } else {
-        chartData[hour].Lainnya =
-          ((chartData[hour].Lainnya as number) || 0) + durationMinutes;
+    const sessionStart = new Date(log.startedAt).getTime();
+    const sessionEnd = new Date(log.endedAt).getTime();
+
+    for (let h = 0; h < 24; h++) {
+      const hourStart = startTs.getTime() + h * 3600 * 1000;
+      const hourEnd = startTs.getTime() + (h + 1) * 3600 * 1000;
+
+      // Hitung overlap antara sesi dengan jam h ini (dalam milidetik)
+      const overlapMs = Math.max(0, Math.min(sessionEnd, hourEnd) - Math.max(sessionStart, hourStart));
+      if (overlapMs > 0) {
+        const overlapMinutes = overlapMs / 60000;
+        if (top4Apps.includes(log.appName)) {
+          hourlyDurations[h][log.appName] =
+            (hourlyDurations[h][log.appName] || 0) + overlapMinutes;
+        } else {
+          hourlyDurations[h].Lainnya =
+            (hourlyDurations[h].Lainnya || 0) + overlapMinutes;
+        }
       }
     }
   }
+
+  // 5. Batasi total menit per jam maksimal 60, dan limpahkan kelebihannya ke jam berikutnya
+  for (let h = 0; h < 24; h++) {
+    const appsKeys = Object.keys(hourlyDurations[h]);
+    const totalMinutes = appsKeys.reduce((sum, key) => sum + hourlyDurations[h][key], 0);
+
+    if (totalMinutes > 60) {
+      const ratio = 60 / totalMinutes;
+
+      // Limpahkan overflow ke jam berikutnya (h + 1) jika h < 23
+      if (h < 23) {
+        for (const key of appsKeys) {
+          const val = hourlyDurations[h][key];
+          const currentScaled = val * ratio;
+          const carryOver = val - currentScaled;
+
+          hourlyDurations[h][key] = currentScaled;
+          hourlyDurations[h + 1][key] += carryOver;
+        }
+      } else {
+        // Untuk jam 23, batasi saja pada rasio 60 menit
+        for (const key of appsKeys) {
+          hourlyDurations[h][key] *= ratio;
+        }
+      }
+    }
+  }
+
+  // 6. Konversi ke integer bulat dan format hasil akhir chartData
+  const chartData = Array.from({ length: 24 }, (_, i) => {
+    const hourLabel = `${String(i).padStart(2, "0")}.00`;
+    const dataObj: Record<string, string | number> = { jam: hourLabel };
+    for (const key of Object.keys(hourlyDurations[i])) {
+      dataObj[key] = Math.round(hourlyDurations[i][key]);
+    }
+    return dataObj;
+  });
 
   const parsed = DashboardModel.getHourlyBreakdownResponse.safeParse({
     chartData,

@@ -368,7 +368,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
         <div className="flex items-center gap-2 text-xs font-bold shrink-0 self-start sm:self-center">
           {hasPrev ? (
             <Link
-              href={`/statistik/${prevStr}`}
+              href={`/statistik/detail?tanggal=${prevStr}`}
               className="px-3.5 py-2 rounded-xl border border-border bg-card hover:border-primary/20 text-muted hover:text-primary transition-all cursor-pointer shadow-2xs"
             >
               ← Hari sebelumnya
@@ -381,7 +381,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
 
           {hasNext ? (
             <Link
-              href={`/statistik/${nextStr}`}
+              href={`/statistik/detail?tanggal=${nextStr}`}
               className="px-3.5 py-2 rounded-xl border border-border bg-card hover:border-primary/20 text-muted hover:text-primary transition-all cursor-pointer shadow-2xs"
             >
               Hari berikutnya →

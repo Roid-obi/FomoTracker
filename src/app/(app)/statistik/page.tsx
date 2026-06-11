@@ -843,7 +843,7 @@ export default function StatistikPage() {
                   return (
                     <Link
                       key={dateStr}
-                      href={`/statistik/${dateStr}`}
+                      href={`/statistik/detail?tanggal=${dateStr}`}
                       className="group relative flex flex-col justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-xs transition-all duration-300 min-h-24 cursor-pointer"
                     >
                       <div>

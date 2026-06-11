@@ -178,12 +178,12 @@ export async function getActiveHoursService(
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
 
-  const startTs = new Date(`${startDate}T00:00:00Z`);
-  const endTs = new Date(`${endDate}T23:59:59Z`);
+  const startTs = new Date(`${startDate}T00:00:00+07:00`);
+  const endTs = new Date(`${endDate}T23:59:59.999+07:00`);
 
   const rows = await db
     .select({
-      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC') as integer)`,
+      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta') as integer)`,
       totalDurationSeconds: sql<number>`cast(sum(${table.activityLogs.durationSeconds}) as integer)`,
       sessionCount: sql<number>`cast(count(*) as integer)`,
     })
@@ -196,10 +196,10 @@ export async function getActiveHoursService(
       ),
     )
     .groupBy(
-      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta')`,
     )
     .orderBy(
-      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta')`,
     );
 
   // Isi penuh 24 slot (jam tanpa data = 0)
@@ -399,13 +399,13 @@ export async function getHeatmapService(
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
 
-  const startTs = new Date(`${startDate}T00:00:00Z`);
-  const endTs = new Date(`${endDate}T23:59:59Z`);
+  const startTs = new Date(`${startDate}T00:00:00+07:00`);
+  const endTs = new Date(`${endDate}T23:59:59.999+07:00`);
 
   const rows = await db
     .select({
-      statDate: sql<string>`to_char(${table.activityLogs.startedAt} at time zone 'UTC', 'YYYY-MM-DD')`,
-      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC') as integer)`,
+      statDate: sql<string>`to_char(${table.activityLogs.startedAt} at time zone 'Asia/Jakarta', 'YYYY-MM-DD')`,
+      hour: sql<number>`cast(extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta') as integer)`,
       totalDurationSeconds: sql<number>`cast(sum(${table.activityLogs.durationSeconds}) as integer)`,
     })
     .from(table.activityLogs)
@@ -417,8 +417,8 @@ export async function getHeatmapService(
       ),
     )
     .groupBy(
-      sql`to_char(${table.activityLogs.startedAt} at time zone 'UTC', 'YYYY-MM-DD')`,
-      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'UTC')`,
+      sql`to_char(${table.activityLogs.startedAt} at time zone 'Asia/Jakarta', 'YYYY-MM-DD')`,
+      sql`extract(hour from ${table.activityLogs.startedAt} at time zone 'Asia/Jakarta')`,
     );
 
   const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];

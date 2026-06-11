@@ -55,6 +55,26 @@ function calculateOverlap(
   return Math.max(0, end - start);
 }
 
+/**
+ * Menghitung durasi overlap dengan mendukung batas waktu yang melewati tengah malam (cross midnight).
+ */
+function calculateOverlapWithMidnightCross(
+  sessionStart: number,
+  sessionEnd: number,
+  boundStart: number,
+  boundEnd: number,
+): number {
+  if (boundStart > boundEnd) {
+    // Boundary melewati tengah malam (misal: 22:00 - 06:00)
+    // Pecah menjadi 2 interval: [boundStart, 86400] dan [0, boundEnd]
+    return (
+      calculateOverlap(sessionStart, sessionEnd, boundStart, 86400) +
+      calculateOverlap(sessionStart, sessionEnd, 0, boundEnd)
+    );
+  }
+  return calculateOverlap(sessionStart, sessionEnd, boundStart, boundEnd);
+}
+
 export function analyzeUsageEvents(
   events: UsageEventData[],
   midnightStartStr = "00:00:00",
@@ -124,44 +144,47 @@ export function analyzeUsageEvents(
       if (pausedSecs < resumedSecs) {
         // Jika menyeberang tengah malam, kita pisahkan jadi dua hari (atau anggap saja untuk hari start)
         // Untuk sederhananya, potong di 23:59:59 (86400 detik)
-        session.midnightDurationSeconds += calculateOverlap(
+        session.midnightDurationSeconds += calculateOverlapWithMidnightCross(
           resumedSecs,
           86400,
           midnightStart,
           midnightEnd,
         );
-        session.productiveHourDurationSeconds += calculateOverlap(
-          resumedSecs,
-          86400,
-          productiveStart,
-          productiveEnd,
-        );
+        session.productiveHourDurationSeconds +=
+          calculateOverlapWithMidnightCross(
+            resumedSecs,
+            86400,
+            productiveStart,
+            productiveEnd,
+          );
 
-        session.midnightDurationSeconds += calculateOverlap(
+        session.midnightDurationSeconds += calculateOverlapWithMidnightCross(
           0,
           pausedSecs,
           midnightStart,
           midnightEnd,
         );
-        session.productiveHourDurationSeconds += calculateOverlap(
-          0,
-          pausedSecs,
-          productiveStart,
-          productiveEnd,
-        );
+        session.productiveHourDurationSeconds +=
+          calculateOverlapWithMidnightCross(
+            0,
+            pausedSecs,
+            productiveStart,
+            productiveEnd,
+          );
       } else {
-        session.midnightDurationSeconds += calculateOverlap(
+        session.midnightDurationSeconds += calculateOverlapWithMidnightCross(
           resumedSecs,
           pausedSecs,
           midnightStart,
           midnightEnd,
         );
-        session.productiveHourDurationSeconds += calculateOverlap(
-          resumedSecs,
-          pausedSecs,
-          productiveStart,
-          productiveEnd,
-        );
+        session.productiveHourDurationSeconds +=
+          calculateOverlapWithMidnightCross(
+            resumedSecs,
+            pausedSecs,
+            productiveStart,
+            productiveEnd,
+          );
       }
 
       session.lastResumedTime = null;
@@ -209,7 +232,10 @@ export function getDetailedSessions(
       const resumedTime = activeResumed[event.packageName];
       if (resumedTime) {
         const pausedTime = event.timeStamp;
-        const durationSeconds = Math.max(0, Math.floor((pausedTime - resumedTime) / 1000));
+        const durationSeconds = Math.max(
+          0,
+          Math.floor((pausedTime - resumedTime) / 1000),
+        );
 
         if (durationSeconds >= 1) {
           const resumedDate = new Date(resumedTime);
@@ -228,13 +254,45 @@ export function getDetailedSessions(
           let productiveDuration = 0;
 
           if (pausedSecs < resumedSecs) {
-            midnightDuration += calculateOverlap(resumedSecs, 86400, midnightStart, midnightEnd) +
-                               calculateOverlap(0, pausedSecs, midnightStart, midnightEnd);
-            productiveDuration += calculateOverlap(resumedSecs, 86400, productiveStart, productiveEnd) +
-                                  calculateOverlap(0, pausedSecs, productiveStart, productiveEnd);
+            midnightDuration +=
+              calculateOverlapWithMidnightCross(
+                resumedSecs,
+                86400,
+                midnightStart,
+                midnightEnd,
+              ) +
+              calculateOverlapWithMidnightCross(
+                0,
+                pausedSecs,
+                midnightStart,
+                midnightEnd,
+              );
+            productiveDuration +=
+              calculateOverlapWithMidnightCross(
+                resumedSecs,
+                86400,
+                productiveStart,
+                productiveEnd,
+              ) +
+              calculateOverlapWithMidnightCross(
+                0,
+                pausedSecs,
+                productiveStart,
+                productiveEnd,
+              );
           } else {
-            midnightDuration += calculateOverlap(resumedSecs, pausedSecs, midnightStart, midnightEnd);
-            productiveDuration += calculateOverlap(resumedSecs, pausedSecs, productiveStart, productiveEnd);
+            midnightDuration += calculateOverlapWithMidnightCross(
+              resumedSecs,
+              pausedSecs,
+              midnightStart,
+              midnightEnd,
+            );
+            productiveDuration += calculateOverlapWithMidnightCross(
+              resumedSecs,
+              pausedSecs,
+              productiveStart,
+              productiveEnd,
+            );
           }
 
           sessions.push({
@@ -254,4 +312,3 @@ export function getDetailedSessions(
 
   return sessions;
 }
-

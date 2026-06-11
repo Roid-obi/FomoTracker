@@ -516,13 +516,6 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"rules" | "active">("rules");
   const [loading, setLoading] = useState(true);
 
-  // Load rules
-  const loadRules = useCallback(async () => {
-    const stored = await getFromStorage<Rule[]>("fomotracker_rules");
-    setRules(stored || []);
-    setLoading(false);
-  }, []);
-
   // Save rules
   const persistRules = useCallback(async (updated: Rule[]) => {
     await saveToStorage("fomotracker_rules", updated);
@@ -531,36 +524,51 @@ export default function Home() {
     }
   }, []);
 
-  // Poll active sessions
-  const pollSessions = useCallback(async (currentRules: Rule[]) => {
-    const sessionMap: Record<string, SessionStatus> = {};
-    for (const rule of currentRules) {
-      if (!rule.enabled) continue;
-      try {
-        const status = await sendMessage<SessionStatus>({
-          type: "GET_SESSION_STATUS",
-          url: rule.url,
-        });
-        if (status?.active) {
-          sessionMap[rule.id] = status;
-        }
-      } catch {
-        // ignore
+  // Load rules on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const stored = await getFromStorage<Rule[]>("fomotracker_rules");
+      if (!cancelled) {
+        setRules(stored || []);
+        setLoading(false);
       }
     }
-    setSessions(sessionMap);
+    load();
+    return () => { cancelled = true; };
   }, []);
 
-  useEffect(() => {
-    loadRules();
-  }, [loadRules]);
-
+  // Poll active sessions
   useEffect(() => {
     if (rules.length === 0) return;
-    pollSessions(rules);
-    const interval = setInterval(() => pollSessions(rules), 2000);
-    return () => clearInterval(interval);
-  }, [rules, pollSessions]);
+    let cancelled = false;
+
+    async function poll() {
+      const sessionMap: Record<string, SessionStatus> = {};
+      for (const rule of rules) {
+        if (!rule.enabled) continue;
+        try {
+          const status = await sendMessage<SessionStatus>({
+            type: "GET_SESSION_STATUS",
+            url: rule.url,
+          });
+          if (status?.active) {
+            sessionMap[rule.id] = status;
+          }
+        } catch {
+          // ignore
+        }
+      }
+      if (!cancelled) setSessions(sessionMap);
+    }
+
+    poll();
+    const interval = setInterval(poll, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [rules]);
 
   const handleAddRule = async (data: Omit<Rule, "id"> & { id?: string }) => {
     const newRule: Rule = {

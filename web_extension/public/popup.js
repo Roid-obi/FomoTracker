@@ -444,14 +444,38 @@ document.getElementById("rule-form").addEventListener("submit", async (e) => {
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-async function init() {
-  rules = await loadRules();
-  renderContent();
-  updateFooter();
+// ── Init & Auth ─────────────────────────────────────────────────────────────
+async function checkAuth() {
+  const authStatus = await new Promise((resolve) => {
+    chrome.runtime.sendMessage({ type: "GET_AUTH_STATUS" }, resolve);
+  });
 
-  // Start polling sessions
-  pollInterval = setInterval(pollSessions, 1000);
-  pollSessions(); // immediate first poll
+  const appEl = document.getElementById("app");
+  const authEl = document.getElementById("auth-screen");
+
+  if (!authStatus || !authStatus.isAuthenticated) {
+    appEl.style.display = "none";
+    authEl.style.display = "flex";
+  } else {
+    appEl.style.display = "flex";
+    authEl.style.display = "none";
+    
+    // Proceed with initialization
+    rules = await loadRules();
+    renderContent();
+    updateFooter();
+
+    // Start polling sessions
+    pollInterval = setInterval(pollSessions, 1000);
+    pollSessions(); // immediate first poll
+  }
 }
 
-init();
+// ── Login Button ──────────────────────────────────────────────────────────────
+document.getElementById("login-btn")?.addEventListener("click", () => {
+  // Try to use environment's next app, fallback to localhost for dev
+  chrome.tabs.create({ url: "http://localhost:3000/auth/login" });
+});
+
+// Run auth check instead of direct init
+checkAuth();

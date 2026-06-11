@@ -17,6 +17,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       getRules().then(sendResponse);
       return true;
 
+    case "GET_AUTH_STATUS":
+      getAuthToken().then(token => sendResponse({ isAuthenticated: !!token, token }));
+      return true;
+
     case "SAVE_RULES":
       saveRules(message.rules).then(sendResponse);
       return true;
@@ -276,4 +280,49 @@ async function handleTabActivated(url, tabId) {
   } catch {
     // Content script not ready yet
   }
+}
+
+// Check if user is logged into the main web app
+async function getAuthToken() {
+  return new Promise((resolve) => {
+    // Check both http and https for localhost or production
+    const domains = ["http://localhost:3000", "https://localhost:3000", "https://fomotracker.vercel.app"];
+    
+    // Check domains one by one
+    let foundToken = null;
+    let checkedCount = 0;
+
+    const checkNext = () => {
+      if (checkedCount >= domains.length || foundToken) {
+        resolve(foundToken);
+        return;
+      }
+      const url = domains[checkedCount];
+      checkedCount++;
+      
+      chrome.cookies.getAll({ url }, (cookies) => {
+        // Find cookie starting with sb- and ending with -auth-token
+        const authCookie = cookies.find(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+        if (authCookie) {
+          try {
+            const sessionData = JSON.parse(decodeURIComponent(authCookie.value));
+            // In typical Supabase session cookie, the first element is the access token or it's an object with access_token
+            if (Array.isArray(sessionData) && sessionData.length > 0) {
+              foundToken = sessionData[0];
+            } else if (sessionData && sessionData.access_token) {
+              foundToken = sessionData.access_token;
+            } else {
+              foundToken = sessionData; // Fallback
+            }
+          } catch (e) {
+            // parsing failed, but cookie exists
+            foundToken = authCookie.value;
+          }
+        }
+        checkNext();
+      });
+    };
+    
+    checkNext();
+  });
 }

@@ -1,15 +1,12 @@
 "use client";
 
 import { gooeyToast } from "goey-toast";
-import {
-  AlertTriangle,
-  Database,
-  Download,
-  ShieldCheck,
-  Trash2,
-} from "lucide-react";
+import { AlertTriangle, Database, Download, ShieldCheck, Trash2, LogOut } from "lucide-react";
 import { useState } from "react";
 import { initialDatabaseData } from "@/lib/data/databaseInitialData";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/utils/api";
 
 export default function PrivasiSettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -68,6 +65,25 @@ export default function PrivasiSettingsPage() {
       }, 1500);
     } else {
       gooeyToast.error("Teks konfirmasi tidak cocok!");
+    }
+  };
+
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await api.post("/api/auth/logout");
+      if (response.status === 200) {
+        queryClient.setQueryData(["user"], null);
+        queryClient.clear();
+        window.localStorage.removeItem("fomotracker_monitored_apps");
+        gooeyToast.success("Berhasil keluar!");
+        router.replace("/auth/login");
+      }
+    } catch (error) {
+      console.error(error);
+      gooeyToast.error("Gagal keluar. Silakan coba lagi.");
     }
   };
 
@@ -215,6 +231,25 @@ export default function PrivasiSettingsPage() {
               </span>
             </button>
           </div>
+        </section>
+
+        {/* Sesi & Keluar */}
+        <section className="space-y-3 border-t border-border/40 pt-5">
+          <h3 className="text-xs font-bold text-primary flex items-center gap-1.5">
+            <LogOut className="w-4 h-4 text-red-500" />
+            <span className="text-red-600">Keluar dari Akun</span>
+          </h3>
+          <p className="text-[11px] text-muted font-light leading-relaxed">
+            Keluar dari sesi aktif pada perangkat ini. Anda perlu masuk kembali untuk mengakses data statistik Anda.
+          </p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="px-4 py-2.5 rounded-xl border border-red-200 bg-red-50/10 hover:bg-red-50/30 text-red-600 font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Keluar Sekarang</span>
+          </button>
         </section>
 
         {/* Danger Zone: Hapus Akun */}

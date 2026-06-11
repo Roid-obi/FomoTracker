@@ -129,6 +129,11 @@ public class UsageStatsManagerPlugin extends Plugin {
         String userId = call.getString("userId");
         String deviceId = call.getString("deviceId");
         JSArray monitoredAppsArray = call.getArray("monitoredApps");
+        String sleepStart = call.getString("sleepStart", "22:00:00");
+        String sleepEnd = call.getString("sleepEnd", "06:00:00");
+        String productiveStart = call.getString("productiveStart", "08:00:00");
+        String productiveEnd = call.getString("productiveEnd", "17:00:00");
+        Integer continuousLimitSeconds = call.getInt("continuousLimitSeconds", 3600);
 
         if (userId == null || deviceId == null || monitoredAppsArray == null) {
             call.reject("Must provide userId, deviceId and monitoredApps");
@@ -143,7 +148,7 @@ public class UsageStatsManagerPlugin extends Plugin {
                 monitoredAppsBuilder.append(monitoredAppsList.get(i));
             }
         } catch (Exception e) {
-            call.reject("Failed to parse monitoredApps: " + e.getMessage());
+            call.reject("Failed to parse monitored apps: " + e.getMessage());
             return;
         }
 
@@ -152,6 +157,11 @@ public class UsageStatsManagerPlugin extends Plugin {
         editor.putString("userId", userId);
         editor.putString("deviceId", deviceId);
         editor.putString("monitoredApps", monitoredAppsBuilder.toString());
+        editor.putString("sleepStart", sleepStart);
+        editor.putString("sleepEnd", sleepEnd);
+        editor.putString("productiveStart", productiveStart);
+        editor.putString("productiveEnd", productiveEnd);
+        editor.putInt("continuousLimitSeconds", continuousLimitSeconds != null ? continuousLimitSeconds : 3600);
         editor.apply();
 
         try {

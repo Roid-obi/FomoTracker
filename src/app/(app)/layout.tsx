@@ -108,15 +108,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // 1. Foreground stats synchronization on mount / load
   useEffect(() => {
     if (user && Capacitor.getPlatform() === "android") {
-      import("@/lib/capacitor/usageStats").then(({ fetchAndSyncUsageData }) => {
-        fetchAndSyncUsageData(user.id)
-          .then((result) => {
-            console.log("Foreground usage data sync result:", result);
-          })
-          .catch((err) => {
-            console.error("Foreground sync failed:", err);
+      import("@/lib/capacitor/usageStats").then(
+        ({ fetchAndSyncUsageData, processSyncQueue }) => {
+          processSyncQueue().catch((err) => {
+            console.error("Failed to process sync queue on mount:", err);
           });
-      });
+
+          fetchAndSyncUsageData(user.id)
+            .then((result) => {
+              console.log("Foreground usage data sync result:", result);
+            })
+            .catch((err) => {
+              console.error("Foreground sync failed:", err);
+            });
+        },
+      );
     }
   }, [user]);
 

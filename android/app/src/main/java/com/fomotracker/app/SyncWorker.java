@@ -296,6 +296,29 @@ public class SyncWorker extends Worker {
 
             if (code == 200 || code == 201) {
                 Log.d(TAG, "Stats synced successfully in background.");
+                try (java.io.BufferedReader br = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(conn.getInputStream(), "utf-8"))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine = null;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    JSONObject resObj = new JSONObject(response.toString());
+                    if (resObj.has("data")) {
+                        JSONObject dataObj = resObj.getJSONObject("data");
+                        if (dataObj.has("newNotifications")) {
+                            JSONArray newNotifs = dataObj.getJSONArray("newNotifications");
+                            for (int i = 0; i < newNotifs.length(); i++) {
+                                JSONObject notif = newNotifs.getJSONObject(i);
+                                String message = notif.getString("message");
+                                String type = notif.getString("type");
+                                triggerNativeNotification(context, type, message);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error parsing sync response:", e);
+                }
             } else {
                 Log.e(TAG, "Failed to sync stats in background. Status code: " + code);
             }
@@ -368,6 +391,54 @@ public class SyncWorker extends Worker {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to trigger notification", e);
+            }
+        }
+    }
+
+    private void triggerNativeNotification(Context context, String type, String message) {
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Peringatan FomoTracker",
+                    NotificationManager.IMPORTANCE_HIGH
+                );
+                channel.setDescription("Notifikasi Peringatan Perilaku FomoTracker");
+                manager.createNotificationChannel(channel);
+            }
+
+            String title = "Peringatan FomoTracker";
+            if ("screen_time".equals(type)) {
+                title = "Batas Screen Time";
+            } else if ("open_frequency".equals(type)) {
+                title = "Buka-Tutup Aplikasi";
+            } else if ("continuous".equals(type)) {
+                title = "Penggunaan Nonstop";
+            } else if ("midnight".equals(type)) {
+                title = "Aktivitas Larut Malam";
+            } else if ("productive_hour".equals(type)) {
+                title = "Distraksi Jam Produktif";
+            }
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
+            try {
+                if (Build.VERSION.SDK_INT < 33 ||
+                    context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                    int uniqueId = (type + "_" + System.currentTimeMillis()).hashCode();
+                    manager.notify(uniqueId, builder.build());
+                    Log.d(TAG, "Native behavior notification triggered: " + type);
+                } else {
+                    Log.w(TAG, "Cannot trigger behavior notification: POST_NOTIFICATIONS permission not granted.");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to trigger behavior notification", e);
             }
         }
     }

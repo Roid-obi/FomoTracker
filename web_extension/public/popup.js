@@ -103,7 +103,7 @@ function updateLiveTimers() {
 
       let liveChip = "";
       if (isActive && session?.elapsed !== undefined) {
-        liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} tracked</span>`;
+        liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} terlacak</span>`;
       }
       
       const statsContainer = card.querySelector('.rule-stats');
@@ -130,7 +130,7 @@ function updateLiveTimers() {
 
       const timerVal = formatTime(status?.elapsed || 0);
 
-      const subText = `<span style="color:var(--text-muted)">Tracking...</span>`;
+      const subText = `<span style="color:var(--text-muted)">Melacak...</span>`;
 
       const timerEl = card.querySelector('.session-timer');
       if (timerEl) timerEl.textContent = timerVal;
@@ -163,8 +163,8 @@ function renderContent() {
       content.innerHTML = `
         <div class="no-active">
           <div class="no-active-icon">🎉</div>
-          <div class="no-active-text">No active sessions</div>
-          <div class="no-active-sub">You're not on any tracked site</div>
+          <div class="no-active-text">Tidak ada sesi aktif</div>
+          <div class="no-active-sub">Anda tidak berada di situs yang dilacak</div>
         </div>`;
     } else {
       content.innerHTML = activeSessions
@@ -190,9 +190,8 @@ function renderEmpty() {
   return `
     <div id="empty">
       <div class="empty-icon">🕐</div>
-      <div class="empty-title">No rules yet</div>
-      <div class="empty-sub">Add a website to start tracking</div>
-      <button class="empty-btn" id="empty-add-btn">+ Add First Rule</button>
+      <div class="empty-title">Belum ada aturan</div>
+      <div class="empty-sub">Tambahkan situs web untuk mulai melacak</div>
     </div>`;
 }
 
@@ -205,7 +204,7 @@ function renderRuleCard(rule) {
 
   let liveChip = "";
   if (isActive && session?.elapsed !== undefined) {
-    liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} tracked</span>`;
+    liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} terlacak</span>`;
   }
 
   return `
@@ -220,8 +219,8 @@ function renderRuleCard(rule) {
         </div>
         <div class="rule-actions">
           <button class="icon-btn edit-btn" data-action="edit" data-id="${rule.id}" title="Edit">✎</button>
-          <button class="icon-btn del-btn" data-action="delete" data-id="${rule.id}" title="Delete">🗑</button>
-          <button class="toggle${rule.enabled ? " on" : ""}" data-action="toggle" data-id="${rule.id}" title="${rule.enabled ? "Disable" : "Enable"}">
+          <button class="icon-btn del-btn" data-action="delete" data-id="${rule.id}" title="Hapus">🗑</button>
+          <button class="toggle${rule.enabled ? " on" : ""}" data-action="toggle" data-id="${rule.id}" title="${rule.enabled ? "Nonaktifkan" : "Aktifkan"}">
             <span class="toggle-thumb"></span>
           </button>
         </div>
@@ -237,7 +236,7 @@ function renderSessionCard(rule, status) {
   const color = "linear-gradient(90deg,var(--accent),var(--accent2))";
   const timerColor = "var(--accent2)";
   const timerVal = formatTime(status?.elapsed || 0);
-  const subText = `<span style="color:var(--text-muted)">Tracking...</span>`;
+  const subText = `<span style="color:var(--text-muted)">Melacak...</span>`;
 
   return `
     <div class="session-card" data-id="${rule.id}">
@@ -256,9 +255,9 @@ function renderSessionCard(rule, status) {
 
 function updateFooter() {
   document.getElementById("footer-total").textContent =
-    `${rules.length} rule${rules.length !== 1 ? "s" : ""}`;
+    `${rules.length} aturan`;
   document.getElementById("footer-enabled").textContent =
-    `${rules.filter((r) => r.enabled).length} active`;
+    `${rules.filter((r) => r.enabled).length} aktif`;
 }
 
 function escapeHtml(str) {
@@ -319,8 +318,8 @@ document.getElementById("add-btn").addEventListener("click", () => openModal());
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function openModal(rule = null) {
   const modal = document.getElementById("modal-overlay");
-  document.getElementById("modal-title").textContent = rule ? "Edit Rule" : "New Rule";
-  document.getElementById("modal-save").textContent = rule ? "Save Changes" : "Add Rule";
+  document.getElementById("modal-title").textContent = rule ? "Edit Aturan" : "Aturan Baru";
+  document.getElementById("modal-save").textContent = rule ? "Simpan Perubahan" : "Tambah Aturan";
   document.getElementById("edit-id").value = rule?.id || "";
   document.getElementById("name-input").value = rule?.name || "";
   document.getElementById("url-input").value = rule?.url || "";
@@ -337,7 +336,7 @@ function closeModal() {
 }
 
 function updateDomainLabel(url) {
-  const domain = getDomain(url) || "this site";
+  const domain = getDomain(url) || "situs ini";
   document.getElementById("sum-domain").textContent = domain;
 }
 
@@ -358,7 +357,7 @@ document.getElementById("rule-form").addEventListener("submit", async (e) => {
   const name = document.getElementById("name-input").value.trim();
   const url = document.getElementById("url-input").value.trim();
   if (!url) {
-    document.getElementById("url-error").textContent = "Please enter a URL";
+    document.getElementById("url-error").textContent = "Harap masukkan URL";
     document.getElementById("url-input").classList.add("error");
     return;
   }

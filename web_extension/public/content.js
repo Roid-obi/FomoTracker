@@ -15,8 +15,6 @@
   }
 
   let tickInterval = null;
-  let overlayShown = false;
-  let breakTimerInterval = null;
   let currentRule = null;
   let lastUrl = location.href;
 

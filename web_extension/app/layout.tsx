@@ -15,9 +15,9 @@ const yellowtail = Yellowtail({
 });
 
 export const metadata: Metadata = {
-  title: "FomoTracker — Time Limit Manager",
+  title: "FomoTracker — Pengelola Batas Waktu",
   description:
-    "Track and limit your browsing time on distracting websites. Set custom durations and break times.",
+    "Lacak dan batasi waktu browsing Anda di situs web yang mengganggu. Atur batas waktu kustom.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       className={`${poppins.variable} ${yellowtail.variable}`}
     >
       <body>{children}</body>

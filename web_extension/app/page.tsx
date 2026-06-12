@@ -8,7 +8,6 @@ interface Rule {
   id: string;
   url: string;
   duration: number; // minutes
-  breakTime: number; // minutes
   enabled: boolean;
 }
 
@@ -17,8 +16,6 @@ interface SessionStatus {
   rule?: Rule;
   elapsed?: number;
   remaining?: number;
-  onBreak?: boolean;
-  breakRemaining?: number;
   limitReached?: boolean;
 }
 
@@ -113,7 +110,6 @@ function RuleCard({
 }) {
   const isActive = rule.enabled && sessionStatus?.active;
   const limitReached = sessionStatus?.limitReached;
-  const onBreak = sessionStatus?.onBreak;
 
   return (
     <div
@@ -121,13 +117,9 @@ function RuleCard({
       style={{
         background: limitReached
           ? "linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 100%)"
-          : onBreak
-          ? "linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0.02) 100%)"
           : "var(--bg-surface)",
         border: limitReached
           ? "1px solid rgba(239,68,68,0.2)"
-          : onBreak
-          ? "1px solid rgba(16,185,129,0.2)"
           : "1px solid var(--border-subtle)",
       }}
     >
@@ -163,7 +155,7 @@ function RuleCard({
               background: "var(--bg-hover)",
               color: "var(--text-muted)",
             }}
-            aria-label="Edit rule"
+            aria-label="Edit aturan"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -183,7 +175,7 @@ function RuleCard({
               background: "var(--danger-bg)",
               color: "var(--danger)",
             }}
-            aria-label="Delete rule"
+            aria-label="Hapus aturan"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -207,7 +199,7 @@ function RuleCard({
                 : "var(--bg-hover)",
               boxShadow: rule.enabled ? "0 0 12px var(--accent-glow)" : "none",
             }}
-            aria-label={rule.enabled ? "Disable rule" : "Enable rule"}
+            aria-label={rule.enabled ? "Nonaktifkan aturan" : "Aktifkan aturan"}
           >
             <span
               className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-200"
@@ -232,34 +224,11 @@ function RuleCard({
             <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
           </svg>
-          {rule.duration}m limit
-        </div>
-
-        <div
-          className="flex items-center gap-1.5 text-xs rounded-lg px-2.5 py-1"
-          style={{
-            background: "var(--bg-elevated)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-          </svg>
-          {rule.breakTime}m break
+          {rule.duration}m batas
         </div>
 
         {/* Live status */}
-        {onBreak && (
-          <div
-            className="flex items-center gap-1 text-xs rounded-lg px-2.5 py-1 ml-auto"
-            style={{ background: "var(--success-bg)", color: "var(--success)" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            Break: {formatTime(sessionStatus?.breakRemaining || 0)}
-          </div>
-        )}
-
-        {!onBreak && isActive && sessionStatus?.remaining !== undefined && (
+        {isActive && sessionStatus?.remaining !== undefined && (
           <div
             className="flex items-center gap-1 text-xs rounded-lg px-2.5 py-1 ml-auto"
             style={{
@@ -268,7 +237,7 @@ function RuleCard({
             }}
           >
             {limitReached ? "⏰" : "▶"}
-            {limitReached ? " Limit reached" : ` ${formatTime(sessionStatus.remaining)} left`}
+            {limitReached ? " Batas tercapai" : ` ${formatTime(sessionStatus.remaining)} tersisa`}
           </div>
         )}
       </div>
@@ -289,7 +258,6 @@ function RuleModal({
 }) {
   const [url, setUrl] = useState(initial?.url ?? "");
   const [duration, setDuration] = useState(initial?.duration ?? 30);
-  const [breakTime, setBreakTime] = useState(initial?.breakTime ?? 5);
   const [urlError, setUrlError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -303,7 +271,6 @@ function RuleModal({
       id: initial?.id,
       url: url.trim(),
       duration,
-      breakTime,
       enabled: initial?.enabled ?? true,
     });
   };
@@ -338,13 +305,13 @@ function RuleModal({
               color: "var(--text-primary)",
             }}
           >
-            {initial ? "Edit Rule" : "New Rule"}
+            {initial ? "Edit Aturan" : "Aturan Baru"}
           </h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
             style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}
-            aria-label="Close modal"
+            aria-label="Tutup modal"
           >
             ✕
           </button>
@@ -357,14 +324,14 @@ function RuleModal({
               className="block text-xs font-semibold mb-2 uppercase tracking-wider"
               style={{ color: "var(--text-muted)" }}
             >
-              Website URL
+              URL Situs
             </label>
             <input
               type="text"
               id="rule-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="e.g. youtube.com or twitter.com"
+              placeholder="mis. youtube.com atau twitter.com"
               className={`${inputClass} focus:outline-none`}
               style={{
                 ...inputStyle,
@@ -392,7 +359,7 @@ function RuleModal({
               className="block text-xs font-semibold mb-2 uppercase tracking-wider"
               style={{ color: "var(--text-muted)" }}
             >
-              Time limit (minutes)
+              Batas waktu (menit)
             </label>
             <div className="flex items-center gap-3">
               <input
@@ -418,38 +385,6 @@ function RuleModal({
             </div>
           </div>
 
-          {/* Break time */}
-          <div>
-            <label
-              className="block text-xs font-semibold mb-2 uppercase tracking-wider"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Break duration (minutes)
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                id="rule-break"
-                min={1}
-                max={60}
-                value={breakTime}
-                onChange={(e) => setBreakTime(Number(e.target.value))}
-                className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                style={{ accentColor: "var(--success)" }}
-              />
-              <div
-                className="w-16 text-center rounded-xl py-2 text-sm font-bold tabular-nums"
-                style={{
-                  background: "var(--bg-elevated)",
-                  color: "var(--success)",
-                  fontFamily: "var(--font-display)",
-                }}
-              >
-                {breakTime}m
-              </div>
-            </div>
-          </div>
-
           {/* Summary */}
           <div
             className="rounded-xl p-3 text-xs leading-relaxed"
@@ -459,19 +394,15 @@ function RuleModal({
               color: "var(--text-secondary)",
             }}
           >
-            After{" "}
+            Setelah{" "}
             <span style={{ color: "var(--accent-secondary)", fontWeight: 600 }}>
-              {duration} minutes
+              {duration} menit
             </span>{" "}
-            on{" "}
+            di{" "}
             <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-              {getDomain(url) || "this site"}
+              {getDomain(url) || "situs ini"}
             </span>
-            , an overlay will appear. You can then take a{" "}
-            <span style={{ color: "var(--success)", fontWeight: 600 }}>
-              {breakTime}-minute break
-            </span>{" "}
-            before the timer resets.
+            , akan muncul pemberitahuan waktu.
           </div>
 
           {/* Actions */}
@@ -485,7 +416,7 @@ function RuleModal({
                 color: "var(--text-secondary)",
               }}
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
@@ -497,7 +428,7 @@ function RuleModal({
                 boxShadow: "0 4px 16px var(--accent-glow)",
               }}
             >
-              {initial ? "Save Changes" : "Add Rule"}
+              {initial ? "Simpan Perubahan" : "Tambah Aturan"}
             </button>
           </div>
         </form>
@@ -575,7 +506,6 @@ export default function Home() {
       id: data.id || generateId(),
       url: data.url,
       duration: data.duration,
-      breakTime: data.breakTime,
       enabled: data.enabled,
     };
 
@@ -666,7 +596,7 @@ export default function Home() {
             }}
           >
             <span className="text-base leading-none">+</span>
-            Add Rule
+            Tambah Aturan
           </button>
         </header>
 
@@ -693,7 +623,7 @@ export default function Home() {
             >
               {tab === "active" ? (
                 <span className="flex items-center justify-center gap-1.5">
-                  Active
+                  Aktif
                   {activeRules.length > 0 && (
                     <span
                       className="w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold"
@@ -707,7 +637,7 @@ export default function Home() {
                   )}
                 </span>
               ) : (
-                "All Rules"
+                "Semua Aturan"
               )}
             </button>
           ))}
@@ -748,9 +678,9 @@ export default function Home() {
               style={{ color: "var(--text-muted)" }}
             >
               <div className="text-3xl mb-3">🎉</div>
-              <p className="text-sm font-medium">No active sessions</p>
+              <p className="text-sm font-medium">Tidak ada sesi aktif</p>
               <p className="text-xs mt-1 opacity-70">
-                You&apos;re not on any tracked site
+                Anda tidak berada di situs yang dilacak
               </p>
             </div>
           ) : (
@@ -774,10 +704,10 @@ export default function Home() {
           }}
         >
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {rules.length} rule{rules.length !== 1 ? "s" : ""}
+            {rules.length} aturan
           </span>
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {rules.filter((r) => r.enabled).length} active
+            {rules.filter((r) => r.enabled).length} aktif
           </span>
         </footer>
       </div>
@@ -818,23 +748,11 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
           color: "var(--text-primary)",
         }}
       >
-        No rules yet
+        Belum ada aturan
       </h3>
       <p className="text-xs mb-5 max-w-[200px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-        Add a website and set your time limit to start tracking
+        Tambahkan situs web dan atur batas waktu untuk mulai melacak
       </p>
-      <button
-        id="empty-add-btn"
-        onClick={onAdd}
-        className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 hover:opacity-90"
-        style={{
-          background: "var(--accent-primary)",
-          color: "white",
-          boxShadow: "0 4px 16px var(--accent-glow)",
-        }}
-      >
-        + Add First Rule
-      </button>
     </div>
   );
 }
@@ -871,13 +789,13 @@ function ActiveSessionCard({
           >
             {getDomain(rule.url)}
           </div>
-          {status?.onBreak ? (
-            <div className="text-xs mt-0.5" style={{ color: "var(--success)" }}>
-              On break — {formatTime(status.breakRemaining || 0)} left
+          {status?.limitReached ? (
+            <div className="text-xs mt-0.5" style={{ color: "var(--danger)" }}>
+              Batas tercapai
             </div>
           ) : (
             <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-              {formatTime(status?.elapsed || 0)} elapsed
+              {formatTime(status?.elapsed || 0)} berlalu
             </div>
           )}
         </div>
@@ -888,14 +806,10 @@ function ActiveSessionCard({
             fontFamily: "var(--font-display)",
             color: status?.limitReached
               ? "var(--danger)"
-              : status?.onBreak
-              ? "var(--success)"
               : "var(--accent-secondary)",
           }}
         >
-          {status?.onBreak
-            ? formatTime(status.breakRemaining || 0)
-            : formatTime(status?.remaining || 0)}
+          {formatTime(status?.remaining || 0)}
         </div>
       </div>
 

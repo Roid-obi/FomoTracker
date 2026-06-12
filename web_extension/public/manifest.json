@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "FomoTracker",
   "version": "1.0.0",
-  "description": "Track and limit your time on distracting websites. Set custom durations and break times with overlay alerts.",
+  "description": "Lacak waktu browsing Anda di situs web.",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

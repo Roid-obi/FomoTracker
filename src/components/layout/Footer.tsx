@@ -12,6 +12,7 @@ export default function Footer() {
     pathname.startsWith("/statistik") ||
     pathname.startsWith("/insight") ||
     pathname.startsWith("/notifications") ||
+    pathname.startsWith("/fomo-ai") ||
     pathname.startsWith("/pengaturan");
 
   if (isExcluded) return null;

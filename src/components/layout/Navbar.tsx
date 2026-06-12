@@ -14,6 +14,7 @@ export default function Navbar() {
     pathname.startsWith("/statistik") ||
     pathname.startsWith("/insight") ||
     pathname.startsWith("/notifications") ||
+    pathname.startsWith("/fomo-ai") ||
     pathname.startsWith("/pengaturan");
 
   const handleLinkClick = () => {

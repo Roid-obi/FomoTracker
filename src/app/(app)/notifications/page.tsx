@@ -134,17 +134,6 @@ export default function NotificationsPage() {
     return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px] gap-3 font-poppins">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <div className="text-xs font-bold text-muted animate-pulse">
-          Memuat pesan masuk...
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="bg-card border border-red-200 rounded-3xl p-12 text-center text-red-800 shadow-xs font-poppins">
@@ -200,7 +189,7 @@ export default function NotificationsPage() {
               : "border-border bg-card text-muted hover:text-primary hover:bg-muted-light"
           }`}
         >
-          Semua ({notifications.length})
+          Semua ({isLoading ? "—" : notifications.length})
         </button>
         <button
           type="button"
@@ -211,13 +200,29 @@ export default function NotificationsPage() {
               : "border-border bg-card text-muted hover:text-primary hover:bg-muted-light"
           }`}
         >
-          Belum Dibaca ({unreadCount})
+          Belum Dibaca ({isLoading ? "—" : unreadCount})
         </button>
       </div>
 
       {/* List items */}
       <div className="space-y-3">
-        {filteredNotifications.length === 0 ? (
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-full p-4 rounded-2xl border border-border bg-card flex gap-4 animate-pulse"
+            >
+              <div className="p-3 rounded-xl bg-muted-light/60 border border-border/40 w-11 h-11 shrink-0" />
+              <div className="space-y-2 flex-1 pt-1">
+                <div className="flex items-center gap-2">
+                  <div className="h-3.5 bg-muted-light rounded w-24" />
+                  <div className="h-3 bg-muted-light rounded w-16" />
+                </div>
+                <div className="h-4 bg-muted-light rounded w-3/4" />
+              </div>
+            </div>
+          ))
+        ) : filteredNotifications.length === 0 ? (
           <div className="bg-card border border-border rounded-3xl p-12 text-center text-muted font-light shadow-xs">
             <Bell className="w-8 h-8 text-muted/30 mx-auto mb-3" />
             <p className="text-xs">Tidak ada notifikasi dalam filter ini.</p>

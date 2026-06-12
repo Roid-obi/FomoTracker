@@ -239,7 +239,9 @@ export default function PerangkatSettingsPage() {
       if (data.success) {
         // Update localStorage monitored apps list
         let currentApps: string[] = [];
-        const stored = window.localStorage.getItem("fomotracker_monitored_apps");
+        const stored = window.localStorage.getItem(
+          "fomotracker_monitored_apps",
+        );
         if (stored) {
           try {
             currentApps = JSON.parse(stored);
@@ -252,7 +254,9 @@ export default function PerangkatSettingsPage() {
               currentApps.push(variables.packageName);
             }
           } else {
-            currentApps = currentApps.filter((pkg) => pkg !== variables.packageName);
+            currentApps = currentApps.filter(
+              (pkg) => pkg !== variables.packageName,
+            );
           }
           window.localStorage.setItem(
             "fomotracker_monitored_apps",
@@ -264,18 +268,28 @@ export default function PerangkatSettingsPage() {
         gooeyToast.success("Daftar aplikasi dipantau diperbarui!");
 
         // Trigger immediate sync on Android if adding an app
-        if (variables.isActive && user && Capacitor.getPlatform() === "android") {
-          import("@/lib/capacitor/usageStats").then(({ fetchAndSyncUsageData }) => {
-            fetchAndSyncUsageData(user.id)
-              .then((result) => {
-                console.log("Immediate usage data sync result:", result);
-                queryClient.invalidateQueries({ queryKey: ["dashboard-screentime"] });
-                queryClient.invalidateQueries({ queryKey: ["dashboard-breakdown"] });
-              })
-              .catch((err) => {
-                console.error("Immediate sync failed:", err);
-              });
-          });
+        if (
+          variables.isActive &&
+          user &&
+          Capacitor.getPlatform() === "android"
+        ) {
+          import("@/lib/capacitor/usageStats").then(
+            ({ fetchAndSyncUsageData }) => {
+              fetchAndSyncUsageData(user.id)
+                .then((result) => {
+                  console.log("Immediate usage data sync result:", result);
+                  queryClient.invalidateQueries({
+                    queryKey: ["dashboard-screentime"],
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: ["dashboard-breakdown"],
+                  });
+                })
+                .catch((err) => {
+                  console.error("Immediate sync failed:", err);
+                });
+            },
+          );
         }
       }
     },
@@ -462,17 +476,6 @@ export default function PerangkatSettingsPage() {
     (app) => app.appName.toLowerCase().includes(androidSearch.toLowerCase()),
   );
 
-  if (isSettingsLoading || isDevicesLoading || isTrackedAppsLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <div className="text-xs font-bold text-muted animate-pulse">
-          Memuat data pengaturan...
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8 font-poppins">
       {/* Sub Header */}
@@ -492,123 +495,168 @@ export default function PerangkatSettingsPage() {
         <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
           Koneksi Perangkat
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Android App Card */}
-          <div className="p-5 rounded-3xl border border-border bg-background/50 flex flex-col justify-between h-40 hover:border-primary/10 hover:shadow-xs transition-all duration-300">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center shrink-0">
-                  <Smartphone className="w-5 h-5" />
+        {isDevicesLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
+            {/* Skeleton 1 */}
+            <div className="p-5 rounded-3xl border border-border bg-background/50 flex flex-col justify-between h-40">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex gap-3 flex-1">
+                  <div className="w-10 h-10 rounded-2xl bg-muted-light/60 border border-border/40 shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-3.5 bg-muted-light rounded w-32" />
+                    <div className="h-3 bg-muted-light rounded w-20" />
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-primary">
-                    Android Application
-                  </h4>
-                  <p className="text-[10px] text-muted font-light leading-normal">
-                    {androidConnected
-                      ? androidDevice?.deviceName || "Perangkat Android"
-                      : "Belum ditautkan"}
-                  </p>
-                </div>
+                <div className="w-16 h-5 bg-muted-light/60 rounded-full animate-pulse" />
               </div>
-              <div>
-                {androidConnected ? (
-                  <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full uppercase tracking-wider">
-                    Connected
-                  </span>
-                ) : (
-                  <span className="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-0.5 rounded-full uppercase tracking-wider">
-                    Disconnected
-                  </span>
-                )}
+              <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
+                <div className="h-3 bg-muted-light rounded w-36" />
+                <div className="w-20 h-6 bg-muted-light/60 rounded-xl" />
               </div>
             </div>
-
-            <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
-              <span className="text-[10px] text-muted font-light">
-                {androidConnected
-                  ? androidDevice?.lastSyncedAt
-                    ? `Terakhir sinkron: ${new Date(androidDevice.lastSyncedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
-                    : "Terakhir sinkron: Baru saja"
-                  : "Belum tersinkron"}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  deviceMutation.mutate({
-                    platform: "android_app",
-                    isConnected: !androidConnected,
-                    deviceName: "Perangkat Android",
-                  })
-                }
-                className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
-                  androidConnected
-                    ? "text-red-600 bg-red-50 hover:bg-red-100"
-                    : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                }`}
-              >
-                {androidConnected ? "Putuskan" : "Hubungkan"}
-              </button>
+            {/* Skeleton 2 */}
+            <div className="p-5 rounded-3xl border border-border bg-background/50 flex flex-col justify-between h-40">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex gap-3 flex-1">
+                  <div className="w-10 h-10 rounded-2xl bg-muted-light/60 border border-border/40 shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-3.5 bg-muted-light rounded w-32" />
+                    <div className="h-3 bg-muted-light rounded w-20" />
+                  </div>
+                </div>
+                <div className="w-16 h-5 bg-muted-light/60 rounded-full animate-pulse" />
+              </div>
+              <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
+                <div className="h-3 bg-muted-light rounded w-36" />
+                <div className="w-20 h-6 bg-muted-light/60 rounded-xl" />
+              </div>
             </div>
           </div>
-
-          {/* Browser Extension Card */}
-          <div className="p-5 rounded-3xl border border-border bg-background/50 flex flex-col justify-between h-40 hover:border-primary/10 hover:shadow-xs transition-all duration-300">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-sky-100/70 text-sky-700 flex items-center justify-center shrink-0">
-                  <Laptop className="w-5 h-5" />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Android App Card */}
+            <div className="p-5 rounded-3xl border border-border bg-background/50 flex flex-col justify-between h-40 hover:border-primary/10 hover:shadow-xs transition-all duration-300">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center shrink-0">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-primary">
+                      Android Application
+                    </h4>
+                    <p className="text-[10px] text-muted font-light leading-normal">
+                      {androidConnected
+                        ? androidDevice?.deviceName || "Perangkat Android"
+                        : "Belum ditautkan"}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-primary">
-                    Browser Extension
-                  </h4>
-                  <p className="text-[10px] text-muted font-light leading-normal">
-                    {browserConnected
-                      ? browserDevice?.browserName || "Google Chrome"
-                      : "Belum ditautkan"}
-                  </p>
+                <div>
+                  {androidConnected ? (
+                    <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full uppercase tracking-wider">
+                      Connected
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-0.5 rounded-full uppercase tracking-wider">
+                      Disconnected
+                    </span>
+                  )}
                 </div>
               </div>
-              <div>
-                {browserConnected ? (
-                  <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full uppercase tracking-wider">
-                    Connected
-                  </span>
-                ) : (
-                  <span className="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-0.5 rounded-full uppercase tracking-wider">
-                    Disconnected
-                  </span>
-                )}
+
+              <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
+                <span className="text-[10px] text-muted font-light">
+                  {androidConnected
+                    ? androidDevice?.lastSyncedAt
+                      ? `Terakhir sinkron: ${new Date(androidDevice.lastSyncedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                      : "Terakhir sinkron: Baru saja"
+                    : "Belum tersinkron"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    deviceMutation.mutate({
+                      platform: "android_app",
+                      isConnected: !androidConnected,
+                      deviceName: "Perangkat Android",
+                    })
+                  }
+                  className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
+                    androidConnected
+                      ? "text-red-600 bg-red-50 hover:bg-red-100"
+                      : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                  }`}
+                >
+                  {androidConnected ? "Putuskan" : "Hubungkan"}
+                </button>
               </div>
             </div>
 
-            <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
-              <span className="text-[10px] text-muted font-light">
-                {browserConnected
-                  ? browserDevice?.lastSyncedAt
-                    ? `Terakhir sinkron: ${new Date(browserDevice.lastSyncedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
-                    : "Terakhir sinkron: Baru saja"
-                  : "Belum tersinkron"}
-              </span>
-              <button
-                type="button"
-                onClick={handleToggleBrowserExtension}
-                className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
-                  browserConnected
-                    ? "text-red-600 bg-red-50 hover:bg-red-100"
-                    : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                }`}
-              >
-                {browserConnected ? "Putuskan" : "Hubungkan"}
-              </button>
+            {/* Browser Extension Card */}
+            <div className="p-5 rounded-3xl border border-border bg-background/50 flex flex-col justify-between h-40 hover:border-primary/10 hover:shadow-xs transition-all duration-300">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-sky-100/70 text-sky-700 flex items-center justify-center shrink-0">
+                    <Laptop className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-primary">
+                      Browser Extension
+                    </h4>
+                    <p className="text-[10px] text-muted font-light leading-normal">
+                      {browserConnected
+                        ? browserDevice?.browserName || "Google Chrome"
+                        : "Belum ditautkan"}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  {browserConnected ? (
+                    <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full uppercase tracking-wider">
+                      Connected
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-0.5 rounded-full uppercase tracking-wider">
+                      Disconnected
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-baseline justify-between border-t border-border/40 pt-3">
+                <span className="text-[10px] text-muted font-light">
+                  {browserConnected
+                    ? browserDevice?.lastSyncedAt
+                      ? `Terakhir sinkron: ${new Date(browserDevice.lastSyncedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                      : "Terakhir sinkron: Baru saja"
+                    : "Belum tersinkron"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    deviceMutation.mutate({
+                      platform: "browser_extension",
+                      isConnected: !browserConnected,
+                      browserName: "Google Chrome",
+                    })
+                  }
+                  className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${
+                    browserConnected
+                      ? "text-red-600 bg-red-50 hover:bg-red-100"
+                      : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                  }`}
+                >
+                  {browserConnected ? "Putuskan" : "Hubungkan"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Warning Notice if both disconnected */}
-      {!androidConnected && !browserConnected && (
+      {!isDevicesLoading && !androidConnected && !browserConnected && (
         <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 text-amber-800 flex items-start gap-3 shadow-2xs">
           <Info className="w-5 h-5 shrink-0 text-amber-600 mt-0.5 animate-pulse" />
           <div className="space-y-0.5">
@@ -674,144 +722,168 @@ export default function PerangkatSettingsPage() {
           )}
         </div>
 
-        {/* 1. Android Not Connected Warning */}
-        {!androidConnected && (
-          <div className="text-center p-8 border border-dashed border-border rounded-2xl bg-background/30 text-xs text-muted">
-            Status API Android terputus. Silakan hubungkan perangkat Android
-            Anda untuk mengimpor dan memilih aplikasi pemantauan.
-          </div>
-        )}
-
-        {/* 2. Android Connected but usage permission missing */}
-        {androidConnected && isAndroidDevice && hasPermission === false && (
-          <div className="text-center p-8 border border-dashed border-border rounded-2xl bg-background/30 text-xs text-muted space-y-3">
-            <p>Izin data penggunaan Android (Usage Stats) belum diaktifkan.</p>
-            <button
-              type="button"
-              onClick={handleRequestPermission}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition-colors cursor-pointer shadow-xs"
-            >
-              Aktifkan Akses Data Penggunaan
-            </button>
-          </div>
-        )}
-
-        {/* 3. Android Connected & Adding App Selector Panel */}
-        {androidConnected && isAddingAndroidApp && (
-          <div className="p-4 sm:p-5 border border-primary/20 bg-primary/[0.01] rounded-2xl space-y-4 animate-page-enter">
-            <div className="flex justify-between items-center">
-              <span className="block text-[10px] font-bold text-muted uppercase tracking-wider">
-                Pilih Aplikasi dari Device Android
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAddingAndroidApp(false);
-                  setAndroidSearch("");
-                }}
-                className="p-1 rounded-lg hover:bg-muted-light text-muted hover:text-primary transition-colors cursor-pointer"
+        {isDevicesLoading || isTrackedAppsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 animate-pulse">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="p-3 border border-border bg-background/50 rounded-2xl flex items-center justify-between gap-3 shadow-3xs"
               >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Searchbar */}
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-              <input
-                type="text"
-                placeholder="Cari aplikasi terpasang (misal: Spotify, Netflix, Discord)..."
-                value={androidSearch}
-                onChange={(e) => setAndroidSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary placeholder:font-light"
-              />
-            </div>
-
-            {/* Selection Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-              {filteredAvailableAppsToSelect.length === 0 ? (
-                <div className="col-span-full text-center py-6 text-xs text-muted font-light">
-                  {androidSearch
-                    ? "Aplikasi tidak ditemukan"
-                    : "Semua aplikasi terpasang sudah ditambahkan ke daftar pantau."}
-                </div>
-              ) : (
-                filteredAvailableAppsToSelect.map((app) => (
-                  <button
-                    type="button"
-                    key={app.packageName}
-                    onClick={() =>
-                      handleAddAndroidApp(app.appName, app.packageName)
-                    }
-                    className="p-2.5 border border-border bg-card hover:bg-muted-light/20 rounded-xl text-left flex items-center justify-between gap-2.5 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className={`w-7.5 h-7.5 rounded-lg bg-gradient-to-tr ${getAppGradient(
-                          app.appName,
-                        )} flex items-center justify-center text-white text-[8px] font-bold shrink-0 shadow-2xs`}
-                      >
-                        {app.appName.substring(0, 2)}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-xs font-bold text-primary block truncate">
-                          {app.appName}
-                        </span>
-                      </div>
-                    </div>
-                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 4. Currently Monitored Android Apps Grid */}
-        {androidConnected && (
-          <div className="space-y-2">
-            {monitoredApps.length === 0 ? (
-              <div className="text-center p-6 border border-dashed border-border rounded-2xl bg-background/20 text-xs text-muted">
-                Belum ada aplikasi yang dipilih untuk dipantau. Klik "Tambah
-                Aplikasi" di atas.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                {monitoredApps.map((app) => (
-                  <div
-                    key={app.appId}
-                    className="p-3 border border-border bg-background/50 rounded-2xl flex items-center justify-between gap-3 shadow-3xs group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={`w-7.5 h-7.5 rounded-lg bg-gradient-to-tr ${getAppGradient(
-                          app.name,
-                        )} flex items-center justify-center text-white text-[9px] font-bold shrink-0 shadow-2xs`}
-                      >
-                        {app.name.substring(0, 2)}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-xs font-bold text-primary block truncate">
-                          {app.name}
-                        </span>
-                        <span className="text-[8px] text-muted block truncate font-light">
-                          {app.packageName}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAndroidApp(app.appId)}
-                      className="p-2 rounded-lg hover:bg-red-50 text-muted hover:text-red-600 transition-colors shrink-0 cursor-pointer"
-                      aria-label="Remove application"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="w-7.5 h-7.5 rounded-lg bg-muted-light/60 border border-border/40 shrink-0" />
+                  <div className="min-w-0 space-y-1.5 flex-1">
+                    <div className="h-3 bg-muted-light rounded w-16" />
+                    <div className="h-2 bg-muted-light rounded w-24" />
                   </div>
-                ))}
+                </div>
+                <div className="w-7 h-7 rounded-lg bg-muted-light/60 shrink-0" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* 1. Android Not Connected Warning */}
+            {!androidConnected && (
+              <div className="text-center p-8 border border-dashed border-border rounded-2xl bg-background/30 text-xs text-muted">
+                Status API Android terputus. Silakan hubungkan perangkat Android
+                Anda untuk mengimpor dan memilih aplikasi pemantauan.
               </div>
             )}
-          </div>
+
+            {/* 2. Android Connected but usage permission missing */}
+            {androidConnected && isAndroidDevice && hasPermission === false && (
+              <div className="text-center p-8 border border-dashed border-border rounded-2xl bg-background/30 text-xs text-muted space-y-3">
+                <p>
+                  Izin data penggunaan Android (Usage Stats) belum diaktifkan.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRequestPermission}
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition-colors cursor-pointer shadow-xs"
+                >
+                  Aktifkan Akses Data Penggunaan
+                </button>
+              </div>
+            )}
+
+            {/* 3. Android Connected & Adding App Selector Panel */}
+            {androidConnected && isAddingAndroidApp && (
+              <div className="p-4 sm:p-5 border border-primary/20 bg-primary/[0.01] rounded-2xl space-y-4 animate-page-enter">
+                <div className="flex justify-between items-center">
+                  <span className="block text-[10px] font-bold text-muted uppercase tracking-wider">
+                    Pilih Aplikasi dari Device Android
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingAndroidApp(false);
+                      setAndroidSearch("");
+                    }}
+                    className="p-1 rounded-lg hover:bg-muted-light text-muted hover:text-primary transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Searchbar */}
+                <div className="relative">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                  <input
+                    type="text"
+                    placeholder="Cari aplikasi terpasang (misal: Spotify, Netflix, Discord)..."
+                    value={androidSearch}
+                    onChange={(e) => setAndroidSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary placeholder:font-light"
+                  />
+                </div>
+
+                {/* Selection Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {filteredAvailableAppsToSelect.length === 0 ? (
+                    <div className="col-span-full text-center py-6 text-xs text-muted font-light">
+                      {androidSearch
+                        ? "Aplikasi tidak ditemukan"
+                        : "Semua aplikasi terpasang sudah ditambahkan ke daftar pantau."}
+                    </div>
+                  ) : (
+                    filteredAvailableAppsToSelect.map((app) => (
+                      <button
+                        type="button"
+                        key={app.packageName}
+                        onClick={() =>
+                          handleAddAndroidApp(app.appName, app.packageName)
+                        }
+                        className="p-2.5 border border-border bg-card hover:bg-muted-light/20 rounded-xl text-left flex items-center justify-between gap-2.5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className={`w-7.5 h-7.5 rounded-lg bg-gradient-to-tr ${getAppGradient(
+                              app.appName,
+                            )} flex items-center justify-center text-white text-[8px] font-bold shrink-0 shadow-2xs`}
+                          >
+                            {app.appName.substring(0, 2)}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-primary block truncate">
+                              {app.appName}
+                            </span>
+                          </div>
+                        </div>
+                        <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 4. Currently Monitored Android Apps Grid */}
+            {androidConnected && (
+              <div className="space-y-2">
+                {monitoredApps.length === 0 ? (
+                  <div className="text-center p-6 border border-dashed border-border rounded-2xl bg-background/20 text-xs text-muted">
+                    Belum ada aplikasi yang dipilih untuk dipantau. Klik "Tambah
+                    Aplikasi" di atas.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    {monitoredApps.map((app) => (
+                      <div
+                        key={app.appId}
+                        className="p-3 border border-border bg-background/50 rounded-2xl flex items-center justify-between gap-3 shadow-3xs group"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className={`w-7.5 h-7.5 rounded-lg bg-gradient-to-tr ${getAppGradient(
+                              app.name,
+                            )} flex items-center justify-center text-white text-[9px] font-bold shrink-0 shadow-2xs`}
+                          >
+                            {app.name.substring(0, 2)}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-primary block truncate">
+                              {app.name}
+                            </span>
+                            <span className="text-[8px] text-muted block truncate font-light">
+                              {app.packageName}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAndroidApp(app.appId)}
+                          className="p-2 rounded-lg hover:bg-red-50 text-muted hover:text-red-600 transition-colors shrink-0 cursor-pointer"
+                          aria-label="Remove application"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </section>
 
@@ -925,112 +997,167 @@ export default function PerangkatSettingsPage() {
         <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
           Target Jam Pemakaian
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Jam Belajar / Kerja */}
-          <div className="p-5 rounded-3xl border border-border bg-background/40 space-y-4">
-            <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-              <Briefcase className="w-4.5 h-4.5 text-primary shrink-0" />
-              <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-primary">
-                  Jam Belajar / Kerja
-                </h4>
-                <p className="text-[10px] text-muted font-light">
-                  Mendeteksi distraksi media sosial saat berfokus.
-                </p>
+        {isSettingsLoading ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Jam Belajar / Kerja Skeleton */}
+              <div className="p-5 rounded-3xl border border-border bg-background/40 space-y-4">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
+                  <div className="w-4.5 h-4.5 rounded bg-muted-light/60 border border-border/40 shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3 bg-muted-light rounded w-28" />
+                    <div className="h-2.5 bg-muted-light rounded w-36" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <div className="h-2.5 bg-muted-light rounded w-12" />
+                    <div className="h-8 bg-muted-light rounded-xl w-full" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="h-2.5 bg-muted-light rounded w-12" />
+                    <div className="h-8 bg-muted-light rounded-xl w-full" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Jam Tidur Skeleton */}
+              <div className="p-5 rounded-3xl border border-border bg-background/40 space-y-4">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
+                  <div className="w-4.5 h-4.5 rounded bg-muted-light/60 border border-border/40 shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3 bg-muted-light rounded w-28" />
+                    <div className="h-2.5 bg-muted-light rounded w-36" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <div className="h-2.5 bg-muted-light rounded w-12" />
+                    <div className="h-8 bg-muted-light rounded-xl w-full" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="h-2.5 bg-muted-light rounded w-12" />
+                    <div className="h-8 bg-muted-light rounded-xl w-full" />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label
-                  htmlFor="prod-start-picker"
-                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
-                >
-                  Jam Mulai
-                </label>
-                <input
-                  id="prod-start-picker"
-                  type="time"
-                  value={prodStart}
-                  onChange={(e) => setProdStart(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div className="space-y-1">
-                <label
-                  htmlFor="prod-end-picker"
-                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
-                >
-                  Jam Selesai
-                </label>
-                <input
-                  id="prod-end-picker"
-                  type="time"
-                  value={prodEnd}
-                  onChange={(e) => setProdEnd(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
-                />
-              </div>
+
+            {/* Save button placeholder */}
+            <div className="flex justify-end pt-2">
+              <div className="w-36 h-9 bg-muted-light/60 rounded-xl" />
             </div>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Jam Belajar / Kerja */}
+              <div className="p-5 rounded-3xl border border-border bg-background/40 space-y-4">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
+                  <Briefcase className="w-4.5 h-4.5 text-primary shrink-0" />
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-primary">
+                      Jam Belajar / Kerja
+                    </h4>
+                    <p className="text-[10px] text-muted font-light">
+                      Mendeteksi distraksi media sosial saat berfokus.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="prod-start-picker"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                    >
+                      Jam Mulai
+                    </label>
+                    <input
+                      id="prod-start-picker"
+                      type="time"
+                      value={prodStart}
+                      onChange={(e) => setProdStart(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="prod-end-picker"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                    >
+                      Jam Selesai
+                    </label>
+                    <input
+                      id="prod-end-picker"
+                      type="time"
+                      value={prodEnd}
+                      onChange={(e) => setProdEnd(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* Jam Tidur */}
-          <div className="p-5 rounded-3xl border border-border bg-background/40 space-y-4">
-            <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-              <Moon className="w-4.5 h-4.5 text-primary shrink-0" />
-              <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-primary">
-                  Jam Tidur Malam
-                </h4>
-                <p className="text-[10px] text-muted font-light">
-                  Mendeteksi aktivitas scroll larut malam sebelum tidur.
-                </p>
+              {/* Jam Tidur */}
+              <div className="p-5 rounded-3xl border border-border bg-background/40 space-y-4">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
+                  <Moon className="w-4.5 h-4.5 text-primary shrink-0" />
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-primary">
+                      Jam Tidur Malam
+                    </h4>
+                    <p className="text-[10px] text-muted font-light">
+                      Mendeteksi aktivitas scroll larut malam sebelum tidur.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="sleep-start-picker"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                    >
+                      Jam Mulai
+                    </label>
+                    <input
+                      id="sleep-start-picker"
+                      type="time"
+                      value={sleepStart}
+                      onChange={(e) => setSleepStart(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="sleep-end-picker"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider"
+                    >
+                      Jam Selesai
+                    </label>
+                    <input
+                      id="sleep-end-picker"
+                      type="time"
+                      value={sleepEnd}
+                      onChange={(e) => setSleepEnd(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label
-                  htmlFor="sleep-start-picker"
-                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
-                >
-                  Jam Mulai
-                </label>
-                <input
-                  id="sleep-start-picker"
-                  type="time"
-                  value={sleepStart}
-                  onChange={(e) => setSleepStart(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div className="space-y-1">
-                <label
-                  htmlFor="sleep-end-picker"
-                  className="block text-[9px] font-bold text-muted uppercase tracking-wider"
-                >
-                  Jam Selesai
-                </label>
-                <input
-                  id="sleep-end-picker"
-                  type="time"
-                  value={sleepEnd}
-                  onChange={(e) => setSleepEnd(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Save button for Target Jam Pemakaian */}
-        <div className="flex justify-end pt-2">
-          <button
-            type="button"
-            onClick={handleSaveUserSettings}
-            className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-secondary transition-all text-xs cursor-pointer shadow-xs"
-          >
-            Simpan Jam Waktu
-          </button>
-        </div>
+            {/* Save button for Target Jam Pemakaian */}
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={handleSaveUserSettings}
+                className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-secondary transition-all text-xs cursor-pointer shadow-xs"
+              >
+                Simpan Jam Waktu
+              </button>
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

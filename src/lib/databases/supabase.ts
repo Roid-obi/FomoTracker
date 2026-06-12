@@ -26,7 +26,9 @@ export const createClient = () => {
             if (options?.expires) {
               expires = options.expires.toUTCString();
             } else if (options?.maxAge) {
-              expires = new Date(Date.now() + options.maxAge * 1000).toUTCString();
+              expires = new Date(
+                Date.now() + options.maxAge * 1000,
+              ).toUTCString();
             }
 
             await CapacitorCookies.setCookie({

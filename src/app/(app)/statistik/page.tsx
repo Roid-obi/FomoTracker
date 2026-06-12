@@ -12,9 +12,9 @@ import {
   Moon,
   RotateCcw,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { Rectangle } from "recharts";
 import { api } from "@/lib/utils/api";
 
@@ -262,14 +262,6 @@ export default function StatistikPage() {
       default:
         return "#E2E8F0";
     }
-  };
-
-  const formatDiffSecToHoursMinsIndo = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    if (h === 0) return `${m} menit`;
-    if (m === 0) return `${h} jam`;
-    return `${h} jam ${m} menit`;
   };
 
   // Process Stacked Chart Data
@@ -588,18 +580,18 @@ export default function StatistikPage() {
                   {diffDirection === "down" ? (
                     <div>
                       <h3 className="text-2xl sm:text-3xl font-black text-emerald-600">
-                        -{formatDiffSecToHoursMinsIndo(diffSec)}
+                        -{formatSecToHoursMins(diffSec)}
                       </h3>
-                      <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                      <p className="text-[10px] text-muted font-light mt-0.5">
                         {compSubtext}
                       </p>
                     </div>
                   ) : (
                     <div>
                       <h3 className="text-2xl sm:text-3xl font-black text-red-500">
-                        +{formatDiffSecToHoursMinsIndo(diffSec)}
+                        +{formatSecToHoursMins(diffSec)}
                       </h3>
-                      <p className="text-[10px] text-red-500 font-bold mt-0.5">
+                      <p className="text-[10px] text-muted font-light mt-0.5">
                         {compSubtextUp}
                       </p>
                     </div>

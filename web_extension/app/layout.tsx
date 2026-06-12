@@ -15,9 +15,9 @@ const yellowtail = Yellowtail({
 });
 
 export const metadata: Metadata = {
-  title: "FomoTracker — Pengelola Batas Waktu",
+  title: "FomoTracker — Pengelola Waktu",
   description:
-    "Lacak dan batasi waktu browsing Anda di situs web yang mengganggu. Atur batas waktu kustom.",
+    "Lacak waktu browsing Anda di situs web.",
 };
 
 export default function RootLayout({

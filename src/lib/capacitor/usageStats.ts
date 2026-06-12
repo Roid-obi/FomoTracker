@@ -1,6 +1,11 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { api } from "@/lib/utils/api";
-import { analyzeUsageEvents, fetchUsageEvents, getDetailedSessions, type DetailedSession } from "./usageEvents";
+import {
+  analyzeUsageEvents,
+  type DetailedSession,
+  fetchUsageEvents,
+  getDetailedSessions,
+} from "./usageEvents";
 
 export interface InstalledApp {
   packageName: string;
@@ -101,7 +106,9 @@ export async function fetchInstalledApps(): Promise<InstalledApp[]> {
 
 export async function getUserSettingsClient(userId: string) {
   try {
-    const res = await api.get<{ success: boolean; data: any }>("/api/setting/user");
+    const res = await api.get<{ success: boolean; data: any }>(
+      "/api/setting/user",
+    );
     if (!res.data.success) {
       throw new Error("Gagal mengambil pengaturan");
     }
@@ -140,7 +147,11 @@ export async function syncUsageStatsClient(
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
   try {
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const nowLocal = new Date();
+    const year = nowLocal.getFullYear();
+    const month = String(nowLocal.getMonth() + 1).padStart(2, "0");
+    const date = String(nowLocal.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${date}`;
     const source = "android_app";
 
     // 1. Get or register the user device in backend database
@@ -235,6 +246,25 @@ export async function syncUsageStatsClient(
   }
 }
 
+export async function fetchTrackedAppsClient(): Promise<string[]> {
+  try {
+    const res = await api.get<{
+      success: boolean;
+      data: any[];
+    }>("/api/setting/tracked-app");
+    if (!res.data.success) {
+      throw new Error("Gagal mengambil daftar aplikasi yang dipantau");
+    }
+    return res.data.data
+      .filter((app) => app.isActive)
+      .map((app) => app.packageName)
+      .filter(Boolean) as string[];
+  } catch (error) {
+    console.error("Error fetching tracked apps:", error);
+    return [];
+  }
+}
+
 export async function fetchAndSyncUsageData(userId: string) {
   if (Capacitor.getPlatform() !== "android") {
     console.warn("Usage tracking is only supported on Android.");
@@ -286,18 +316,7 @@ export async function fetchAndSyncUsageData(userId: string) {
       productiveEndStr,
     );
 
-    // Read user's monitored apps selection from localStorage
-    let monitoredApps: string[] = [];
-    if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem("fomotracker_monitored_apps");
-      if (stored) {
-        try {
-          monitoredApps = JSON.parse(stored);
-        } catch (e) {
-          console.error("Failed to parse monitored apps from localStorage:", e);
-        }
-      }
-    }
+    const monitoredApps = await fetchTrackedAppsClient();
 
     const continuousLimitSeconds = settings?.continuousLimitSeconds ?? 3600;
     const sessionsList = getDetailedSessions(
@@ -330,7 +349,11 @@ export async function fetchAndSyncUsageData(userId: string) {
     });
 
     if (statsToSync.length > 0) {
-      const syncResult = await syncUsageStatsClient(userId, statsToSync, sessionsList);
+      const syncResult = await syncUsageStatsClient(
+        userId,
+        statsToSync,
+        sessionsList,
+      );
       return syncResult;
     }
 

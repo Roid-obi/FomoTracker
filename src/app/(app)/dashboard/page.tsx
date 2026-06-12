@@ -14,19 +14,27 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  Legend,
-  Rectangle,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { useUser } from "@/hooks/useUser";
 import { api } from "@/lib/utils/api";
+
+const DashboardHourlyChart = dynamic(
+  () => import("@/components/usage/DashboardHourlyChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 w-full flex items-end justify-between px-4 pb-2 animate-pulse bg-muted-light/10 rounded-3xl border border-border/40">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-[6%] bg-muted-light/60 rounded-t"
+            style={{ height: `${20 + (i % 4) * 20}%` }}
+          />
+        ))}
+      </div>
+    ),
+  },
+);
 
 const rankColors = ["#334155", "#475569", "#64748B", "#94A3B8", "#E2E8F0"];
 
@@ -226,24 +234,6 @@ export default function DashboardPage() {
     setTodayStr(formatIndonesianDate());
   }, []);
 
-  // Show a premium loading state
-  if (
-    userLoading ||
-    statusQuery.isLoading ||
-    flagQuery.isLoading ||
-    hourlyQuery.isLoading ||
-    devicesQuery.isLoading ||
-    breakdownQuery.isLoading ||
-    screenTimeQuery.isLoading ||
-    isSettingLoading
-  ) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
   // 1. Calculate stats from backend queries
   const totalDurationSeconds = breakdownQuery.data?.grandTotalSeconds ?? 0;
   const totalHours = Math.floor(totalDurationSeconds / 3600);
@@ -369,7 +359,13 @@ export default function DashboardPage() {
             <div className="space-y-4 max-w-md relative z-10 text-left">
               {/* Badge for Current Date */}
               <h2 className="text-2xl md:text-3xl font-black tracking-tight text-primary leading-tight">
-                Halo, {user?.name || "User"}!
+                Halo,{" "}
+                {userLoading ? (
+                  <span className="inline-block w-24 h-6 bg-muted-light/60 rounded animate-pulse align-middle" />
+                ) : (
+                  user?.name || "User"
+                )}
+                !
               </h2>
               <p className="text-xs sm:text-sm text-muted font-light leading-relaxed">
                 Selamat datang kembali. FomoTracker siap membantumu memantau
@@ -801,65 +797,105 @@ export default function DashboardPage() {
           {/* Row of 3 Cards side-by-side */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Card 1: Status Hari Ini & Skor */}
-            <div
-              className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
-                  Status & Skor hari ini
-                </span>
-                <span className="text-xl">{statusEmoji}</span>
+            {statusQuery.isLoading || isSettingLoading ? (
+              <div className="border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 bg-card animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="h-2.5 bg-muted-light rounded w-28" />
+                  <div className="w-6 h-6 rounded-full bg-muted-light" />
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="h-7 bg-muted-light rounded w-16" />
+                  <div className="h-3 bg-muted-light rounded w-24" />
+                  <div className="h-2 bg-muted-light rounded w-32" />
+                </div>
               </div>
-              <div className="mt-4 space-y-1">
-                <h3 className="text-2xl font-black leading-none">
-                  {scoreData ? `${scoreData.totalScore}/100` : "—"}
-                </h3>
-                <h4 className="text-xs font-bold">{statusTitle}</h4>
-                <p className="text-[9px] font-light leading-normal opacity-85">
-                  {statusDesc}
-                </p>
+            ) : (
+              <div
+                className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
+                    Status & Skor hari ini
+                  </span>
+                  <span className="text-xl">{statusEmoji}</span>
+                </div>
+                <div className="mt-4 space-y-1">
+                  <h3 className="text-2xl font-black leading-none">
+                    {scoreData ? `${scoreData.totalScore}/100` : "—"}
+                  </h3>
+                  <h4 className="text-xs font-bold">{statusTitle}</h4>
+                  <p className="text-[9px] font-light leading-normal opacity-85">
+                    {statusDesc}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Card 2: Screen Time Hari Ini */}
-            <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-                  Screen Time hari ini
-                </span>
-                <div className="p-2 rounded-xl bg-muted-light/60">
-                  <Clock className="w-4 h-4 text-primary" />
+            {screenTimeQuery.isLoading || isSettingLoading ? (
+              <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="h-2.5 bg-muted-light rounded w-28" />
+                  <div className="w-8 h-8 rounded-xl bg-muted-light" />
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="h-7 bg-muted-light rounded w-20" />
+                  <div className="h-2 bg-muted-light rounded w-36" />
                 </div>
               </div>
-              <div className="mt-4 space-y-1">
-                <h3 className="text-2xl font-black text-primary leading-none">
-                  {totalHours}j {totalMinutes}m
-                </h3>
-                <p className="text-[9px] text-muted font-light leading-normal">
-                  Total durasi pemakaian media sosial hari ini.
-                </p>
+            ) : (
+              <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                    Screen Time hari ini
+                  </span>
+                  <div className="p-2 rounded-xl bg-muted-light/60">
+                    <Clock className="w-4 h-4 text-primary" />
+                  </div>
+                </div>
+                <div className="mt-4 space-y-1">
+                  <h3 className="text-2xl font-black text-primary leading-none">
+                    {totalHours}j {totalMinutes}m
+                  </h3>
+                  <p className="text-[9px] text-muted font-light leading-normal">
+                    Total durasi pemakaian media sosial hari ini.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Card 3: Aplikasi Tersering Hari Ini */}
-            <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-                  Tersering hari ini
-                </span>
-                <div className="p-2 rounded-xl bg-muted-light/60">
-                  <Activity className="w-4 h-4 text-indigo-500" />
+            {breakdownQuery.isLoading || isSettingLoading ? (
+              <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="h-2.5 bg-muted-light rounded w-24" />
+                  <div className="w-8 h-8 rounded-xl bg-muted-light" />
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="h-7 bg-muted-light rounded w-24" />
+                  <div className="h-2 bg-muted-light rounded w-32" />
                 </div>
               </div>
-              <div className="mt-4 space-y-1">
-                <h3 className="text-2xl font-black text-primary leading-none truncate max-w-full">
-                  {topApp.name}
-                </h3>
-                <p className="text-[9px] text-muted font-light leading-normal">
-                  Durasi terlama: {Math.floor(topApp.duration / 60)} menit.
-                </p>
+            ) : (
+              <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                    Tersering hari ini
+                  </span>
+                  <div className="p-2 rounded-xl bg-muted-light/60">
+                    <Activity className="w-4 h-4 text-indigo-500" />
+                  </div>
+                </div>
+                <div className="mt-4 space-y-1">
+                  <h3 className="text-2xl font-black text-primary leading-none truncate max-w-full">
+                    {topApp.name}
+                  </h3>
+                  <p className="text-[9px] text-muted font-light leading-normal">
+                    Durasi terlama: {Math.floor(topApp.duration / 60)} menit.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Grafik Aktivitas Hari Ini */}
@@ -898,112 +934,28 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
-              <div className="h-64 min-w-[700px] lg:min-w-0 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={rankedChartData}
-                    margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
-                  >
-                    <XAxis
-                      dataKey="jam"
-                      stroke="#888888"
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={false}
+            {hourlyQuery.isLoading || isSettingLoading ? (
+              <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
+                <div className="h-64 min-w-[700px] lg:min-w-0 w-full flex items-end justify-between px-4 pb-2 animate-pulse bg-muted-light/10 rounded-3xl border border-border/40">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-[6%] bg-muted-light/60 rounded-t"
+                      style={{ height: `${20 + (i % 4) * 20}%` }}
                     />
-                    <YAxis
-                      stroke="#888888"
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={false}
-                      domain={[0, 120]}
-                    />
-                    {/* Highlight areas behind the bars */}
-                    {sleepStartHour > sleepEndHour ? (
-                      <>
-                        <ReferenceArea
-                          x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
-                          x2="23.00"
-                          fill="#fff0f3"
-                          fillOpacity={0.75}
-                          stroke="none"
-                        />
-                        <ReferenceArea
-                          x1="00.00"
-                          x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
-                          fill="#fff0f3"
-                          fillOpacity={0.75}
-                          stroke="none"
-                        />
-                      </>
-                    ) : (
-                      <ReferenceArea
-                        x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
-                        x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
-                        fill="#fff0f3"
-                        fillOpacity={0.75}
-                        stroke="none"
-                      />
-                    )}
-                    <ReferenceArea
-                      x1={`${String(prodStartHour).padStart(2, "0")}.00`}
-                      x2={`${String(prodEndHour).padStart(2, "0")}.00`}
-                      fill="#fffbeb"
-                      fillOpacity={0.75}
-                      stroke="none"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#ffffff",
-                        borderRadius: "16px",
-                        borderColor: "#e1e8ef",
-                        fontFamily: "Poppins",
-                        fontSize: "11px",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
-                      }}
-                      // biome-ignore lint/suspicious/noExplicitAny: needed for Recharts dynamic Tooltip formatter types
-                      formatter={(value: any, name: any) => {
-                        if (value === 0) return null;
-                        return [`${value} menit`, name];
-                      }}
-                    />
-                    <Legend
-                      iconSize={8}
-                      iconType="circle"
-                      wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
-                    />
-                    {top4Apps.map((appName, index) => (
-                      <Bar
-                        key={appName}
-                        dataKey={appName}
-                        stackId="a"
-                        fill={rankColors[index]}
-                        // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
-                        shape={(shapeProps: any) => (
-                          <CustomBar
-                            {...shapeProps}
-                            rankedApps={[...top4Apps, "Lainnya"]}
-                          />
-                        )}
-                      />
-                    ))}
-                    <Bar
-                      dataKey="Lainnya"
-                      stackId="a"
-                      fill={rankColors[4]}
-                      // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape receives dynamic properties
-                      shape={(shapeProps: any) => (
-                        <CustomBar
-                          {...shapeProps}
-                          rankedApps={[...top4Apps, "Lainnya"]}
-                        />
-                      )}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <DashboardHourlyChart
+                rankedChartData={rankedChartData}
+                top4Apps={top4Apps}
+                sleepStartHour={sleepStartHour}
+                sleepEndHour={sleepEndHour}
+                prodStartHour={prodStartHour}
+                prodEndHour={prodEndHour}
+              />
+            )}
           </div>
         </div>
 
@@ -1015,44 +967,62 @@ export default function DashboardPage() {
               Perangkat Terhubung
             </h3>
             <div className="space-y-3">
-              {(devicesQuery.data || []).map((device) => {
-                const isAndroid = device.platform === "android_app";
-                return (
-                  <div
-                    key={device.id}
-                    className="flex items-center justify-between p-3 rounded-2xl border border-border bg-background/30"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-muted-light/60 flex items-center justify-center text-primary shrink-0 border border-border/40">
-                        {isAndroid ? (
-                          <Smartphone className="w-4 h-4" />
-                        ) : (
-                          <Laptop className="w-4 h-4" />
-                        )}
+              {devicesQuery.isLoading
+                ? Array.from({ length: 2 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-3 rounded-2xl border border-border bg-background/30 animate-pulse"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-muted-light/60" />
+                        <div className="space-y-1.5">
+                          <div className="h-2.5 bg-muted-light rounded w-16" />
+                          <div className="h-2 bg-muted-light rounded w-24" />
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        <span className="text-[11px] font-bold text-primary block">
-                          {isAndroid ? "Android App" : "Browser Extension"}
-                        </span>
-                        <p className="text-[9px] text-muted font-light">
-                          {isAndroid ? device.deviceName : device.browserName}
-                        </p>
+                      <div className="w-12 h-4 bg-muted-light rounded-full" />
+                    </div>
+                  ))
+                : (devicesQuery.data || []).map((device) => {
+                    const isAndroid = device.platform === "android_app";
+                    return (
+                      <div
+                        key={device.id}
+                        className="flex items-center justify-between p-3 rounded-2xl border border-border bg-background/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-muted-light/60 flex items-center justify-center text-primary shrink-0 border border-border/40">
+                            {isAndroid ? (
+                              <Smartphone className="w-4 h-4" />
+                            ) : (
+                              <Laptop className="w-4 h-4" />
+                            )}
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] font-bold text-primary block">
+                              {isAndroid ? "Android App" : "Browser Extension"}
+                            </span>
+                            <p className="text-[9px] text-muted font-light">
+                              {isAndroid
+                                ? device.deviceName
+                                : device.browserName}
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          {device.isConnected ? (
+                            <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
+                              Aktif
+                            </span>
+                          ) : (
+                            <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-muted-light text-muted border border-border uppercase tracking-wider">
+                              Offline
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      {device.isConnected ? (
-                        <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
-                          Aktif
-                        </span>
-                      ) : (
-                        <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-muted-light text-muted border border-border uppercase tracking-wider">
-                          Offline
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
             </div>
           </div>
 
@@ -1062,53 +1032,78 @@ export default function DashboardPage() {
               Kebiasaan Hari Ini
             </h3>
             <div className="space-y-3">
-              {coreBehaviors.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <div
-                    key={item.id}
-                    className={`flex gap-3 items-start p-3 rounded-2xl border transition-all ${
-                      item.active
-                        ? "border-red-100 bg-red-50/20"
-                        : "border-border/60 bg-background/20"
-                    }`}
-                  >
+              {flagQuery.isLoading || screenTimeQuery.isLoading
+                ? Array.from({ length: 5 }).map((_, i) => (
                     <div
-                      className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
-                        item.active
-                          ? item.color
-                          : "text-muted bg-muted-light/40 border-border/40"
-                      }`}
+                      key={i}
+                      className="flex gap-3 items-start p-3 rounded-2xl border border-border bg-background/20 animate-pulse"
                     >
-                      <IconComponent className="w-4 h-4" />
-                    </div>
-                    <div className="space-y-0.5 flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-1">
-                        <h4 className="text-[11px] font-bold text-primary truncate">
-                          {item.name}
-                        </h4>
-                        {item.active ? (
-                          <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-850 border border-red-200 shrink-0 uppercase tracking-wider">
-                            Terdeteksi
-                          </span>
-                        ) : (
-                          <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-850 border border-emerald-250 shrink-0 uppercase tracking-wider">
-                            Aman
-                          </span>
-                        )}
+                      <div className="w-9 h-9 rounded-xl bg-muted-light/60 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="flex justify-between items-start">
+                          <div className="h-3 bg-muted-light rounded w-24" />
+                          <div className="w-12 h-4 bg-muted-light rounded-full" />
+                        </div>
+                        <div className="h-2 bg-muted-light rounded w-36" />
                       </div>
-                      <p className="text-[10px] text-muted font-light leading-normal">
-                        {item.desc}
-                      </p>
                     </div>
-                  </div>
-                );
-              })}
+                  ))
+                : coreBehaviors.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <div
+                        key={item.id}
+                        className={`flex gap-3 items-start p-3 rounded-2xl border transition-all ${
+                          item.active
+                            ? "border-red-100 bg-red-50/20"
+                            : "border-border/60 bg-background/20"
+                        }`}
+                      >
+                        <div
+                          className={`p-2.5 rounded-xl border shrink-0 mt-0.5 ${
+                            item.active
+                              ? item.color
+                              : "text-muted bg-muted-light/40 border-border/40"
+                          }`}
+                        >
+                          <IconComponent className="w-4 h-4" />
+                        </div>
+                        <div className="space-y-0.5 flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-1">
+                            <h4 className="text-[11px] font-bold text-primary truncate">
+                              {item.name}
+                            </h4>
+                            {item.active ? (
+                              <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-850 border border-red-200 shrink-0 uppercase tracking-wider">
+                                Terdeteksi
+                              </span>
+                            ) : (
+                              <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-850 border border-emerald-250 shrink-0 uppercase tracking-wider">
+                                Aman
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted font-light leading-normal">
+                            {item.desc}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
           </div>
 
           {/* AI Weekly Insight Snippet Card (Bottom card in style of reference image) */}
-          {latestInsight && (
+          {insightQuery.isLoading ? (
+            <div className="bg-primary border border-secondary rounded-3xl p-5 shadow-sm space-y-4 flex flex-col justify-between min-h-40 animate-pulse">
+              <div className="space-y-2">
+                <div className="h-3 bg-white/20 rounded w-24" />
+                <div className="h-2.5 bg-white/10 rounded w-full" />
+                <div className="h-2.5 bg-white/10 rounded w-5/6" />
+              </div>
+              <div className="h-9 bg-white/25 rounded-xl w-full" />
+            </div>
+          ) : latestInsight ? (
             <div className="bg-primary text-white border border-secondary rounded-3xl p-5 shadow-sm space-y-4 flex flex-col justify-between min-h-40 relative overflow-hidden">
               {/* background abstract light glow */}
               <div className="absolute right-0 top-0 w-24 h-24 bg-accent/15 rounded-full blur-xl" />
@@ -1131,7 +1126,7 @@ export default function DashboardPage() {
                 Baca Laporan Mingguan
               </Link>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

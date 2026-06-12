@@ -2,6 +2,7 @@ package com.fomotracker.app;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -40,6 +41,30 @@ public class SyncWorker extends Worker {
         super(context, params);
     }
 
+    private static long parseTimeStrToSeconds(String timeStr) {
+        if (timeStr == null || timeStr.isEmpty()) return 0;
+        String[] parts = timeStr.split(":");
+        long h = parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
+        long m = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        long s = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+        return h * 3600 + m * 60 + s;
+    }
+
+    private static long calculateOverlap(long sessionStart, long sessionEnd, long boundStart, long boundEnd) {
+        long start = Math.max(sessionStart, boundStart);
+        long end = Math.min(sessionEnd, boundEnd);
+        return Math.max(0, end - start);
+    }
+
+    private static long calculateOverlapWithMidnightCross(long sessionStart, long sessionEnd, long boundStart, long boundEnd) {
+        if (boundStart > boundEnd) {
+            // Boundary crosses midnight (e.g. 22:00 to 06:00)
+            return calculateOverlap(sessionStart, sessionEnd, boundStart, 86400) +
+                   calculateOverlap(sessionStart, sessionEnd, 0, boundEnd);
+        }
+        return calculateOverlap(sessionStart, sessionEnd, boundStart, boundEnd);
+    }
+
     @NonNull
     @Override
     public Result doWork() {
@@ -62,6 +87,18 @@ public class SyncWorker extends Worker {
             Log.d(TAG, "Sync skipped: Monitored apps list is empty.");
             return Result.success();
         }
+
+        // Get configurations from SharedPreferences
+        String sleepStartStr = prefs.getString("sleepStart", "22:00:00");
+        String sleepEndStr = prefs.getString("sleepEnd", "06:00:00");
+        String productiveStartStr = prefs.getString("productiveStart", "08:00:00");
+        String productiveEndStr = prefs.getString("productiveEnd", "17:00:00");
+        int continuousLimitSeconds = prefs.getInt("continuousLimitSeconds", 3600);
+
+        long sleepStart = parseTimeStrToSeconds(sleepStartStr);
+        long sleepEnd = parseTimeStrToSeconds(sleepEndStr);
+        long productiveStart = parseTimeStrToSeconds(productiveStartStr);
+        long productiveEnd = parseTimeStrToSeconds(productiveEndStr);
 
         try {
             // 1. Get usage statistics from UsageStatsManager for the current day
@@ -97,6 +134,87 @@ public class SyncWorker extends Worker {
                 }
             }
 
+            // Query UsageEvents for calculating detail stats (openFrequency, midnight, productive, continuous)
+            UsageEvents usageEvents = usageStatsManager.queryEvents(beginTime, endTime);
+            
+            Map<String, Long> lastResumedMap = new HashMap<>();
+            Map<String, Integer> openFrequencyMap = new HashMap<>();
+            Map<String, Long> midnightDurationMap = new HashMap<>();
+            Map<String, Long> productiveDurationMap = new HashMap<>();
+            Map<String, Long> maxContinuousMap = new HashMap<>();
+            JSONArray activityLogsArray = new JSONArray();
+
+            if (usageEvents != null) {
+                UsageEvents.Event event = new UsageEvents.Event();
+                while (usageEvents.hasNextEvent()) {
+                    usageEvents.getNextEvent(event);
+                    String pkg = event.getPackageName();
+                    
+                    if (monitoredApps.contains(pkg)) {
+                        int eventType = event.getEventType();
+                        long timestamp = event.getTimeStamp();
+                        
+                        if (eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+                            openFrequencyMap.put(pkg, openFrequencyMap.getOrDefault(pkg, 0) + 1);
+                            lastResumedMap.put(pkg, timestamp);
+                        } else if (eventType == UsageEvents.Event.ACTIVITY_PAUSED) {
+                            Long resumedTime = lastResumedMap.get(pkg);
+                            if (resumedTime != null) {
+                                long durationSeconds = Math.max(0, (timestamp - resumedTime) / 1000);
+                                if (durationSeconds >= 1) {
+                                    maxContinuousMap.put(pkg, Math.max(maxContinuousMap.getOrDefault(pkg, 0L), durationSeconds));
+                                    
+                                    java.util.Calendar resCal = java.util.Calendar.getInstance();
+                                    resCal.setTimeInMillis(resumedTime);
+                                    long resumedSecs = resCal.get(java.util.Calendar.HOUR_OF_DAY) * 3600L + 
+                                                       resCal.get(java.util.Calendar.MINUTE) * 60L + 
+                                                       resCal.get(java.util.Calendar.SECOND);
+                                                       
+                                    java.util.Calendar pauseCal = java.util.Calendar.getInstance();
+                                    pauseCal.setTimeInMillis(timestamp);
+                                    long pausedSecs = pauseCal.get(java.util.Calendar.HOUR_OF_DAY) * 3600L + 
+                                                      pauseCal.get(java.util.Calendar.MINUTE) * 60L + 
+                                                      pauseCal.get(java.util.Calendar.SECOND);
+                                    
+                                    long midnightOverlap = 0;
+                                    long productiveOverlap = 0;
+                                    
+                                    if (pausedSecs < resumedSecs) { // Crossed midnight
+                                        midnightOverlap += calculateOverlapWithMidnightCross(resumedSecs, 86400, sleepStart, sleepEnd) +
+                                                          calculateOverlapWithMidnightCross(0, pausedSecs, sleepStart, sleepEnd);
+                                        productiveOverlap += calculateOverlapWithMidnightCross(resumedSecs, 86400, productiveStart, productiveEnd) +
+                                                             calculateOverlapWithMidnightCross(0, pausedSecs, productiveStart, productiveEnd);
+                                    } else {
+                                        midnightOverlap += calculateOverlapWithMidnightCross(resumedSecs, pausedSecs, sleepStart, sleepEnd);
+                                        productiveOverlap += calculateOverlapWithMidnightCross(resumedSecs, pausedSecs, productiveStart, productiveEnd);
+                                    }
+                                    
+                                    midnightDurationMap.put(pkg, midnightDurationMap.getOrDefault(pkg, 0L) + midnightOverlap);
+                                    productiveDurationMap.put(pkg, productiveDurationMap.getOrDefault(pkg, 0L) + productiveOverlap);
+                                    
+                                    java.text.SimpleDateFormat isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+                                    isoFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                                    String startedAtStr = isoFormat.format(new Date(resumedTime));
+                                    String endedAtStr = isoFormat.format(new Date(timestamp));
+                                    
+                                    JSONObject logObj = new JSONObject();
+                                    logObj.put("packageName", pkg);
+                                    logObj.put("startedAt", startedAtStr);
+                                    logObj.put("endedAt", endedAtStr);
+                                    logObj.put("durationSeconds", durationSeconds);
+                                    logObj.put("isMidnight", midnightOverlap > 0);
+                                    logObj.put("isProductiveHour", productiveOverlap > 0);
+                                    logObj.put("isContinuous", durationSeconds > continuousLimitSeconds);
+                                    logObj.put("source", "android_app");
+                                    activityLogsArray.put(logObj);
+                                }
+                                lastResumedMap.remove(pkg);
+                            }
+                        }
+                    }
+                }
+            }
+
             // 2. Process limits and show local notifications
             PackageManager pm = context.getPackageManager();
             String todayDateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
@@ -107,14 +225,20 @@ public class SyncWorker extends Worker {
                 long durationMs = totalsByPackage.getOrDefault(pkg, 0L);
                 long durationSec = durationMs / 1000;
 
+                int openFreq = openFrequencyMap.getOrDefault(pkg, 0);
+                // Fallback to at least 1 open frequency if usage exists
+                if (openFreq == 0 && durationSec > 0) {
+                    openFreq = 1;
+                }
+
                 // Add to stats payload
                 JSONObject statObj = new JSONObject();
                 statObj.put("packageName", pkg);
                 statObj.put("totalDurationSeconds", durationSec);
-                statObj.put("openFrequency", 1); // fallback
-                statObj.put("midnightDurationSeconds", 0);
-                statObj.put("productiveHourDurationSeconds", 0);
-                statObj.put("maxContinuousSeconds", 0);
+                statObj.put("openFrequency", openFreq);
+                statObj.put("midnightDurationSeconds", midnightDurationMap.getOrDefault(pkg, 0L));
+                statObj.put("productiveHourDurationSeconds", productiveDurationMap.getOrDefault(pkg, 0L));
+                statObj.put("maxContinuousSeconds", maxContinuousMap.getOrDefault(pkg, 0L));
                 statsArray.put(statObj);
 
                 // Check 4-hour limit (4 hours = 14400 seconds)
@@ -135,6 +259,9 @@ public class SyncWorker extends Worker {
                 }
             }
 
+            // Get cookies for authentication
+            String cookies = CookieManager.getInstance().getCookie("https://fomotracker.vercel.app");
+
             // 3. Post statistics payload directly to the API
             JSONObject payload = new JSONObject();
             payload.put("userId", userId);
@@ -147,13 +274,9 @@ public class SyncWorker extends Worker {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
             conn.setRequestProperty("Accept", "application/json");
-
-            // Get cookies for authentication
-            String cookies = CookieManager.getInstance().getCookie("https://fomotracker.vercel.app");
             if (cookies != null) {
                 conn.setRequestProperty("Cookie", cookies);
             }
-
             conn.setDoOutput(true);
 
             try (OutputStream os = conn.getOutputStream()) {
@@ -162,7 +285,7 @@ public class SyncWorker extends Worker {
             }
 
             int code = conn.getResponseCode();
-            Log.d(TAG, "API sync response code: " + code);
+            Log.d(TAG, "API sync stats response code: " + code);
 
             if (code == 200 || code == 201) {
                 Log.d(TAG, "Stats synced successfully in background.");
@@ -170,6 +293,33 @@ public class SyncWorker extends Worker {
                 Log.e(TAG, "Failed to sync stats in background. Status code: " + code);
             }
             conn.disconnect();
+
+            // 4. Post activity logs if any
+            if (activityLogsArray.length() > 0) {
+                JSONObject activityPayload = new JSONObject();
+                activityPayload.put("userId", userId);
+                activityPayload.put("deviceId", deviceId);
+                activityPayload.put("logs", activityLogsArray);
+
+                URL activityUrl = new URL("https://fomotracker.vercel.app/api/tracking/sync/activity");
+                HttpURLConnection activityConn = (HttpURLConnection) activityUrl.openConnection();
+                activityConn.setRequestMethod("POST");
+                activityConn.setRequestProperty("Content-Type", "application/json; utf-8");
+                activityConn.setRequestProperty("Accept", "application/json");
+                if (cookies != null) {
+                    activityConn.setRequestProperty("Cookie", cookies);
+                }
+                activityConn.setDoOutput(true);
+
+                try (OutputStream os = activityConn.getOutputStream()) {
+                    byte[] input = activityPayload.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int activityCode = activityConn.getResponseCode();
+                Log.d(TAG, "API sync activity response code: " + activityCode);
+                activityConn.disconnect();
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "Error performing background stats sync:", e);

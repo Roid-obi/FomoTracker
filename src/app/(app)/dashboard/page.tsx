@@ -914,15 +914,11 @@ export default function DashboardPage() {
               <div className="flex gap-4 text-[10px] font-bold text-muted uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border  border-pink-300 block" />
-                  <span>
-                    🌙 Jam Tidur
-                  </span>
+                  <span>🌙 Jam Tidur</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-300 block" />
-                  <span>
-                    💼 Jam Belajar
-                  </span>
+                  <span>💼 Jam Belajar</span>
                 </div>
               </div>
             </div>
@@ -1067,11 +1063,11 @@ export default function DashboardPage() {
                               {item.name}
                             </h4>
                             {item.active ? (
-                              <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-850 border border-red-200 shrink-0 uppercase tracking-wider">
+                              <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 shrink-0 uppercase tracking-wider">
                                 Terdeteksi
                               </span>
                             ) : (
-                              <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-850 border border-emerald-250 shrink-0 uppercase tracking-wider">
+                              <span className="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0 uppercase tracking-wider">
                                 Aman
                               </span>
                             )}

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { Rectangle } from "recharts";
 import { api } from "@/lib/utils/api";
 
 const StatistikDetailHourlyChart = dynamic(

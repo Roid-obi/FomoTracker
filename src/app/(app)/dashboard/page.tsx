@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useUser } from "@/hooks/useUser";
+import { Rectangle } from "recharts";
 import { api } from "@/lib/utils/api";
 
 const DashboardHourlyChart = dynamic(

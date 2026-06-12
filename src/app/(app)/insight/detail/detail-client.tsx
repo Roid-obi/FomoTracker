@@ -1,4 +1,6 @@
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Brain,
@@ -11,20 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { db } from "@/lib/databases";
-import { table } from "@/lib/databases/schema";
-import { createSupabaseServer } from "@/lib/databases/supabase";
-import { getByIdService } from "@/lib/services/insight.service";
-
-export const dynamic = "force-dynamic";
-
-const formatSecToHoursMins = (seconds: number) => {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h === 0) return `${m}m`;
-  return `${h}j ${m}m`;
-};
+import { api } from "@/lib/utils/api";
 
 const formatPeriodRange = (startStr: string, endStr: string) => {
   try {
@@ -50,146 +39,89 @@ const formatPeriodRange = (startStr: string, endStr: string) => {
   }
 };
 
-export default async function DetailInsightPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const resolvedParams = await params;
-  const id = resolvedParams.id;
-
-  // 1. Authenticate user
-  const supabase = await createSupabaseServer();
+export default function DetailClient({ id }: { id: string }) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/auth/login");
-  }
-
-  // 2. Fetch insight details
-  const result = await getByIdService(id);
-  if (!result.success) {
-    notFound();
-  }
-  const insight = result.data;
-
-  // 3. Find previous week's details for comparison
-  const prevWeekStart = new Date(`${insight.weekStart}T00:00:00Z`);
-  prevWeekStart.setUTCDate(prevWeekStart.getUTCDate() - 7);
-  const prevWeekStartStr = prevWeekStart.toISOString().slice(0, 10);
-
-  const prevWeekEnd = new Date(prevWeekStart);
-  prevWeekEnd.setUTCDate(prevWeekStart.getUTCDate() + 6);
-  const prevWeekEndStr = prevWeekEnd.toISOString().slice(0, 10);
-
-  const [prevInsight] = await db
-    .select({
-      totalScreenTimeSeconds: table.weeklyInsights.totalScreenTimeSeconds,
-      avgBehavioralScore: table.weeklyInsights.avgBehavioralScore,
-    })
-    .from(table.weeklyInsights)
-    .where(
-      and(
-        eq(table.weeklyInsights.userId, user.id),
-        eq(table.weeklyInsights.weekStart, prevWeekStartStr),
-        eq(table.weeklyInsights.generationStatus, "generated"),
-      ),
-    )
-    .limit(1);
-
-  // 4. Calculate comparisons
-  let comparisonDuration = "same";
-  let comparisonDurationText = "Tidak ada data pembanding minggu sebelumnya";
-  let comparisonFlags = "sama";
-  let comparisonFlagsText = "Tidak ada data pembanding minggu sebelumnya";
-  let comparisonOverall = "Stabil";
-
-  if (prevInsight) {
-    // Screen time comparison
-    const timeDiff =
-      insight.totalScreenTimeSeconds - prevInsight.totalScreenTimeSeconds;
-    if (timeDiff > 0) {
-      comparisonDuration = "up";
-      comparisonDurationText = `Naik ${formatSecToHoursMins(timeDiff)} dibanding minggu sebelumnya`;
-    } else if (timeDiff < 0) {
-      comparisonDuration = "down";
-      comparisonDurationText = `Turun ${formatSecToHoursMins(Math.abs(timeDiff))} dibanding minggu sebelumnya`;
-    } else {
-      comparisonDuration = "same";
-      comparisonDurationText = "Sama dengan minggu sebelumnya";
-    }
-
-    // Score comparison (lower score is better)
-    const scoreDiff =
-      insight.avgBehavioralScore - prevInsight.avgBehavioralScore;
-    if (scoreDiff < 0) {
-      comparisonOverall = "Membaik";
-    } else if (scoreDiff > 0) {
-      comparisonOverall = "Memburuk";
-    } else {
-      comparisonOverall = "Stabil";
-    }
-
-    // Query flag count for both weeks to compare flags
-    const queryFlagsCount = async (start: string, end: string) => {
-      const [row] = await db
-        .select({
-          excessive: sql<number>`sum(case when ${table.behavioralScores.flagExcessiveUsage} = true then 1 else 0 end)`,
-          compulsive: sql<number>`sum(case when ${table.behavioralScores.flagCompulsiveChecking} = true then 1 else 0 end)`,
-          midnight: sql<number>`sum(case when ${table.behavioralScores.flagMidnightUsage} = true then 1 else 0 end)`,
-          continuous: sql<number>`sum(case when ${table.behavioralScores.flagContinuousUsage} = true then 1 else 0 end)`,
-          distraction: sql<number>`sum(case when ${table.behavioralScores.flagProductiveHourDistraction} = true then 1 else 0 end)`,
-        })
-        .from(table.behavioralScores)
-        .where(
-          and(
-            eq(table.behavioralScores.userId, user.id),
-            gte(table.behavioralScores.scoreDate, start),
-            lte(table.behavioralScores.scoreDate, end),
-          ),
-        );
-      return (
-        Number(row?.excessive ?? 0) +
-        Number(row?.compulsive ?? 0) +
-        Number(row?.midnight ?? 0) +
-        Number(row?.continuous ?? 0) +
-        Number(row?.distraction ?? 0)
+    data: insightData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["insight-detail", id],
+    queryFn: async () => {
+      const res = await api.get<{ success: boolean; data: any }>(
+        `/api/insight/${id}`,
       );
-    };
+      return res.data.data;
+    },
+  });
 
-    const currentFlagsSum = await queryFlagsCount(
-      insight.weekStart,
-      insight.weekEnd,
-    );
-    const prevFlagsSum = await queryFlagsCount(
-      prevWeekStartStr,
-      prevWeekEndStr,
-    );
+  if (isLoading) {
+    return (
+      <div className="space-y-6 font-poppins animate-pulse">
+        {/* Back Button */}
+        <div className="h-4 bg-muted-light rounded w-32" />
 
-    const flagDiff = currentFlagsSum - prevFlagsSum;
-    if (flagDiff > 0) {
-      comparisonFlags = "lebih banyak";
-      comparisonFlagsText = `Lebih banyak ${flagDiff} flag dibanding minggu sebelumnya`;
-    } else if (flagDiff < 0) {
-      comparisonFlags = "lebih sedikit";
-      comparisonFlagsText = `Lebih sedikit ${Math.abs(flagDiff)} flag dibanding minggu sebelumnya`;
-    } else {
-      comparisonFlags = "sama";
-      comparisonFlagsText = "Jumlah flag sama dengan minggu sebelumnya";
-    }
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="h-6 bg-muted-light rounded w-28" />
+          <div className="h-8 bg-muted-light rounded w-80" />
+        </div>
+
+        {/* Status Card Skeleton */}
+        <div className="p-6 rounded-3xl border border-border bg-card shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-muted-light/60 shrink-0" />
+          <div className="space-y-2 flex-1">
+            <div className="h-2.5 bg-muted-light rounded w-28" />
+            <div className="h-4 bg-muted-light rounded w-36" />
+            <div className="h-3 bg-muted-light rounded w-48" />
+          </div>
+        </div>
+
+        {/* Comparison grid skeleton */}
+        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="h-4 bg-muted-light rounded w-48" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="h-24 bg-muted-light/40 rounded-2xl border border-border/40" />
+            <div className="h-24 bg-muted-light/40 rounded-2xl border border-border/40" />
+            <div className="h-24 bg-muted-light/40 rounded-2xl border border-border/40" />
+          </div>
+        </div>
+
+        {/* 2 columns highlights skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-card border border-border rounded-3xl p-6 shadow-xs h-32" />
+          <div className="bg-card border border-border rounded-3xl p-6 shadow-xs h-32" />
+        </div>
+
+        {/* Analysis skeleton */}
+        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs h-40" />
+      </div>
+    );
   }
 
-  // Parse tips
-  let tips: string[] = [];
-  if (insight.aiTips) {
-    try {
-      tips = JSON.parse(insight.aiTips);
-    } catch {
-      tips = [];
-    }
+  if (error || !insightData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="text-red-500 font-bold text-sm">
+          Laporan insight tidak ditemukan
+        </div>
+        <Link
+          href="/insight"
+          className="text-xs font-bold text-secondary hover:underline"
+        >
+          Kembali ke Insight
+        </Link>
+      </div>
+    );
   }
+
+  const insight = insightData;
+  const comparison = insightData.comparison || {
+    comparisonDuration: "same",
+    comparisonDurationText: "Tidak ada data pembanding minggu sebelumnya",
+    comparisonFlags: "sama",
+    comparisonFlagsText: "Tidak ada data pembanding minggu sebelumnya",
+    comparisonOverall: "Stabil",
+  };
 
   const getStatusDetails = (status: string) => {
     switch (status) {
@@ -221,7 +153,6 @@ export default async function DetailInsightPage({
     }
   };
 
-  // Helper mappers for comparisons
   const getDurationComparison = (duration: string) => {
     if (duration === "up") {
       return {
@@ -286,10 +217,20 @@ export default async function DetailInsightPage({
     };
   };
 
+  // Parse tips
+  let tips: string[] = [];
+  if (insight.aiTips) {
+    try {
+      tips = JSON.parse(insight.aiTips);
+    } catch {
+      tips = [];
+    }
+  }
+
   const cond = getStatusDetails(insight.weeklyStatus);
-  const durComp = getDurationComparison(comparisonDuration);
-  const flagComp = getFlagsComparison(comparisonFlags);
-  const overallComp = getOverallComparison(comparisonOverall);
+  const durComp = getDurationComparison(comparison.comparisonDuration);
+  const flagComp = getFlagsComparison(comparison.comparisonFlags);
+  const overallComp = getOverallComparison(comparison.comparisonOverall);
 
   return (
     <div className="space-y-6 font-poppins">
@@ -356,7 +297,7 @@ export default async function DetailInsightPage({
                 <span>{durComp.label}</span>
               </div>
               <p className="text-[10px] text-muted font-light mt-1.5 leading-snug">
-                {comparisonDurationText}
+                {comparison.comparisonDurationText}
               </p>
             </div>
           </div>
@@ -373,7 +314,7 @@ export default async function DetailInsightPage({
                 {flagComp.label}
               </div>
               <p className="text-[10px] text-muted font-light mt-1.5 leading-snug">
-                {comparisonFlagsText}
+                {comparison.comparisonFlagsText}
               </p>
             </div>
           </div>
@@ -391,9 +332,9 @@ export default async function DetailInsightPage({
               </div>
               <p className="text-[10px] text-muted font-light mt-1.5 leading-snug">
                 Pola perilaku secara umum menunjukkan tanda{" "}
-                {comparisonOverall.toLowerCase() === "membaik"
+                {comparison.comparisonOverall.toLowerCase() === "membaik"
                   ? "peningkatan kontrol diri"
-                  : comparisonOverall.toLowerCase() === "memburuk"
+                  : comparison.comparisonOverall.toLowerCase() === "memburuk"
                     ? "penurunan kontrol diri"
                     : "stabilisasi"}
                 .

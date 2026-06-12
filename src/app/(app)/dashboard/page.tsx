@@ -914,21 +914,13 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border  border-pink-300 block" />
                   <span>
-                    🌙 Jam Tidur (
-                    {settingData
-                      ? `${settingData.sleepStart.slice(0, 5)} - ${settingData.sleepEnd.slice(0, 5)}`
-                      : "22:00 - 06:00"}
-                    )
+                    🌙 Jam Tidur
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-300 block" />
                   <span>
-                    💼 Jam Belajar (
-                    {settingData
-                      ? `${settingData.productiveStart.slice(0, 5)} - ${settingData.productiveEnd.slice(0, 5)}`
-                      : "08:00 - 17:00"}
-                    )
+                    💼 Jam Belajar
                   </span>
                 </div>
               </div>

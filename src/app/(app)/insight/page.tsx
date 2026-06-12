@@ -782,7 +782,7 @@ export default function InsightPage() {
                     </h4>
                   </div>
                   <Link
-                    href={`/insight/${past.id}`}
+                    href={`/insight/detail?id=${past.id}`}
                     className="text-xs font-bold text-secondary flex items-center gap-1 hover:underline mt-2 self-start"
                   >
                     <span>Baca Selengkapnya</span>

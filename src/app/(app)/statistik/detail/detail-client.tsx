@@ -508,21 +508,13 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 rounded bg-[#fff0f3] border border-pink-300 block" />
                 <span>
-                  🌙 Jam Tidur (
-                  {settingData
-                    ? `${settingData.sleepStart.slice(0, 5)} - ${settingData.sleepEnd.slice(0, 5)}`
-                    : "22:00 - 06:00"}
-                  )
+                  🌙 Jam Tidur
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 rounded bg-[#fffbeb] border border-amber-300 block" />
                 <span>
-                  💼 Jam Produktif (
-                  {settingData
-                    ? `${settingData.productiveStart.slice(0, 5)} - ${settingData.productiveEnd.slice(0, 5)}`
-                    : "08:00 - 17:00"}
-                  )
+                  💼 Jam Produktif
                 </span>
               </div>
             </div>
@@ -610,7 +602,7 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
                                   : "bg-emerald-105 text-emerald-800 border border-emerald-200"
                               }`}
                             >
-                              {flag.active ? "⚠️ Terdeteksi" : "✅ Aman"}
+                              {flag.active ? "Terdeteksi" : "Aman"}
                             </span>
                           </div>
                           <p className="text-[9px] font-light opacity-85 mt-0.5 leading-snug">

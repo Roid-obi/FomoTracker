@@ -7,24 +7,7 @@ const renamedFiles: { original: string; temp: string }[] = [];
 const modifiedFiles: { path: string; originalContent: string }[] = [];
 
 // Specific dynamic pages to stub for the mobile static export
-const stubs: { [filePath: string]: string } = {
-  "src/app/(app)/insight/[id]/page.tsx": `import { redirect } from "next/navigation";
-
-export async function generateStaticParams() {
-  return [{ id: "1" }];
-}
-
-export default async function DetailInsightPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const resolvedParams = await params;
-  const id = resolvedParams.id;
-  redirect(\`https://fomotracker.vercel.app/insight/\${id}\`);
-}
-`,
-};
+const stubs: { [filePath: string]: string } = {};
 
 // Recursive function to process files
 function processFiles(dir: string) {

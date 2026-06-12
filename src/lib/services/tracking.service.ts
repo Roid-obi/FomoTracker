@@ -405,6 +405,10 @@ export async function recalculateScoreAndNotifications(
     flagContinuousUsage,
     flagProductiveHourDistraction,
     notificationsCreatedCount: notificationsToCreate.length,
+    newNotifications: notificationsToCreate.map((n) => ({
+      type: n.type,
+      message: n.message,
+    })),
   };
 }
 
@@ -592,6 +596,7 @@ export async function syncDailyStatsService(
           scoreResult.flagProductiveHourDistraction,
       },
       notificationsCreated: scoreResult.notificationsCreatedCount,
+      newNotifications: scoreResult.newNotifications,
     },
   };
 }

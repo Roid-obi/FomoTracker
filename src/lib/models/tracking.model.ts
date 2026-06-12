@@ -73,6 +73,14 @@ export namespace TrackingModel {
     statsUpserted: z.number(),
     behavioralScore: behavioralScoreResult,
     notificationsCreated: z.number(),
+    newNotifications: z
+      .array(
+        z.object({
+          type: z.string(),
+          message: z.string(),
+        }),
+      )
+      .optional(),
   });
   export type syncStatsResponse = z.infer<typeof syncStatsResponse>;
 }

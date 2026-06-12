@@ -12,6 +12,7 @@ import {
   LogOut,
   RefreshCw,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -34,6 +35,12 @@ const navigationItems = [
     href: "/insight",
     icon: Brain,
     matchPrefix: "/insight",
+  },
+  {
+    name: "FomoAI",
+    href: "/fomo-ai",
+    icon: Sparkles,
+    matchPrefix: "/fomo-ai",
   },
   {
     name: "Pengaturan",

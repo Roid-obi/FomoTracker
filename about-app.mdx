@@ -166,6 +166,17 @@ activity timeline,
 trend analytics,
 risk visualization.
 
+8.7 FomoAI Chat Assistant
+Asisten chatbot interaktif berbasis AI untuk berdiskusi secara langsung terkait produktivitas dan kesejahteraan digital.
+Fungsi:
+menjawab pertanyaan pengguna mengenai data pemakaian mereka secara real-time,
+memberikan tips produktivitas personal,
+serta menawarkan solusi dan teknik pengurangan efek FOMO berdasarkan riwayat perilaku pribadi.
+Output:
+real-time conversational guidance,
+actionable daily habits tips,
+personalized behavior analysis.
+
 9. Core Behavioral Indicators
 FomoTracker menggunakan beberapa indikator utama dalam menganalisis perilaku digital pengguna.
 Indicator
@@ -192,20 +203,20 @@ Usage Duration
 Open Frequency
 20%
 Midnight Usage
-20%
-Continuous Usage
 15%
+Continuous Usage
+20%
 Productivity Hour Usage
 15%
 
 Risk Categories
 Score
 Category
-0–39
+0–30
 Low Risk
-40–69
+31–60
 Moderate Risk
-70–100
+61–100
 High Risk
 
 
@@ -259,7 +270,7 @@ C. Backend & Database
 Database: PostgreSQL
 Backend Platform: Supabase
 ORM: Drizzle
-AI Integration: OpenRouter API / LLM API
+AI Integration: Gemini API (Google GenAI SDK) / gemini-2.5-flash
 D. Tracking System
 Mobile Tracking: Android Usage Stats API
 Runtime Lintas Platform/cross-platform runtime: Capacitorjs
@@ -293,7 +304,8 @@ behavioral analytics,
 risk scoring system,
 AI insight generation,
 smart notification system,
-digital wellbeing dashboard.
+digital wellbeing dashboard,
+FomoAI chat assistant.
 Secondary Features
 weekly reflection summary,
 usage trend report,

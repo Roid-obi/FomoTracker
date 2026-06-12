@@ -4,6 +4,10 @@ import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { DashboardModel } from "@/lib/models/dashboard.model";
+import {
+  recalculateScoreAndNotifications,
+  updateDailyStatsFromLogs,
+} from "@/lib/services/tracking.service";
 
 type ServiceResult<T = undefined> =
   | { success: true; data: T }
@@ -41,6 +45,16 @@ export async function getDailyStatusService(
   }
 
   const targetDate = date ?? getWIBDateString();
+
+  const todayWIBStr = getWIBDateString();
+  if (targetDate === todayWIBStr) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIBStr);
+      await recalculateScoreAndNotifications(userId, todayWIBStr);
+    } catch (err) {
+      console.error("Failed to auto-update daily stats from logs:", err);
+    }
+  }
 
   const [row] = await db
     .select({
@@ -102,6 +116,16 @@ export async function getChartService(
   }
 
   const todayWIBStr = getWIBDateString();
+  try {
+    await updateDailyStatsFromLogs(userId, todayWIBStr);
+    await recalculateScoreAndNotifications(userId, todayWIBStr);
+  } catch (err) {
+    console.error(
+      "Failed to auto-update chart today daily stats from logs:",
+      err,
+    );
+  }
+
   const todayDate = new Date(todayWIBStr);
   const startDate = new Date(todayDate);
   startDate.setDate(todayDate.getDate() - (days - 1));
@@ -161,6 +185,16 @@ export async function getBehaviorFlagService(
   }
 
   const targetDate = date ?? getWIBDateString();
+  const todayStr = getWIBDateString();
+
+  if (targetDate === todayStr) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayStr);
+      await recalculateScoreAndNotifications(userId, todayStr);
+    } catch (err) {
+      console.error("Failed to auto-update behavioral flags from logs:", err);
+    }
+  }
 
   const [row] = await db
     .select({
@@ -180,7 +214,6 @@ export async function getBehaviorFlagService(
     );
 
   let openFrequencyLastHour = 0;
-  const todayStr = getWIBDateString();
 
   if (targetDate === todayStr) {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);

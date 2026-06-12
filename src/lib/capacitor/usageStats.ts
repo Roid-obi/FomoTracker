@@ -298,15 +298,25 @@ export async function fetchAndSyncUsageData(userId: string) {
     const productiveStartStr = settings?.productiveStart || "09:00:00";
     const productiveEndStr = settings?.productiveEnd || "17:00:00";
 
+    const endOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+
     const statsRecord =
       await CapacitorUsageStatsManager.queryAndAggregateUsageStats({
         beginTime: startOfDay.getTime(),
-        endTime: now.getTime(),
+        endTime: endOfDay.getTime(),
       });
 
     const rawEvents = await fetchUsageEvents(
       startOfDay.getTime(),
-      now.getTime(),
+      endOfDay.getTime(),
     );
     const detailedSessions = analyzeUsageEvents(
       rawEvents,

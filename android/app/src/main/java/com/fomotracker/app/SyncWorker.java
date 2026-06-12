@@ -115,7 +115,14 @@ public class SyncWorker extends Worker {
             cal.set(java.util.Calendar.SECOND, 0);
             cal.set(java.util.Calendar.MILLISECOND, 0);
             long beginTime = cal.getTimeInMillis();
-            long endTime = System.currentTimeMillis();
+
+            // Get end of today (local time)
+            java.util.Calendar calEnd = java.util.Calendar.getInstance();
+            calEnd.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            calEnd.set(java.util.Calendar.MINUTE, 59);
+            calEnd.set(java.util.Calendar.SECOND, 59);
+            calEnd.set(java.util.Calendar.MILLISECOND, 999);
+            long endTime = calEnd.getTimeInMillis();
 
             List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY,

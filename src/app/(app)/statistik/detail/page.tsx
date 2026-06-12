@@ -6,7 +6,8 @@ import DetailClient from "./detail-client";
 
 function DetailContent() {
   const searchParams = useSearchParams();
-  const tanggal = searchParams.get("tanggal") || new Date().toISOString().slice(0, 10);
+  const tanggal =
+    searchParams.get("tanggal") || new Date().toISOString().slice(0, 10);
   return <DetailClient tanggal={tanggal} />;
 }
 

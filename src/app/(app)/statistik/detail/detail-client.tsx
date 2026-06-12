@@ -10,18 +10,26 @@ import {
   RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  Bar,
-  BarChart,
-  Legend,
-  Rectangle,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { api } from "@/lib/utils/api";
+
+const StatistikDetailHourlyChart = dynamic(
+  () => import("@/components/usage/StatistikDetailHourlyChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 w-full flex items-end justify-between px-4 pb-2 animate-pulse bg-muted-light/10 rounded-3xl border border-border/40">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-[6%] bg-muted-light/60 rounded-t"
+            style={{ height: `${20 + (i % 4) * 20}%` }}
+          />
+        ))}
+      </div>
+    ),
+  },
+);
 
 const rankColors = ["#334155", "#475569", "#64748B", "#94A3B8", "#E2E8F0"];
 
@@ -191,24 +199,6 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
   const sleepEndHour = settingData
     ? parseInt(settingData.sleepEnd.split(":")[0])
     : 6;
-
-  if (
-    isStatusLoading ||
-    isFlagLoading ||
-    isHourlyLoading ||
-    isBreakdownLoading ||
-    isScreenTimeLoading ||
-    isSettingLoading
-  ) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <div className="text-xs font-bold text-muted animate-pulse">
-          Memuat rincian statistik harian...
-        </div>
-      </div>
-    );
-  }
 
   // Process behavioral scores status
   const totalScore = statusData?.totalScore ?? 0;
@@ -397,67 +387,107 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
       {/* Rangkuman 3 Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Status & Skor Hari Itu */}
-        <div
-          className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
-              Status & Skor Hari Itu
-            </span>
-            <span className="text-xl">{statusEmoji}</span>
+        {isStatusLoading || isSettingLoading ? (
+          <div className="border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 bg-card animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="h-2.5 bg-muted-light rounded w-28" />
+              <div className="w-6 h-6 rounded-full bg-muted-light" />
+            </div>
+            <div className="mt-4 space-y-2">
+              <div className="h-7 bg-muted-light rounded w-16" />
+              <div className="h-3 bg-muted-light rounded w-24" />
+              <div className="h-2 bg-muted-light rounded w-32" />
+            </div>
           </div>
-          <div className="mt-4 space-y-1">
-            <h3 className="text-2xl font-black leading-none">
-              {totalScore}/100
-            </h3>
-            <h4 className="text-xs font-bold">{statusTitle}</h4>
-            <p className="text-[9px] font-light leading-normal opacity-85">
-              {statusDesc}
-            </p>
+        ) : (
+          <div
+            className={`border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 ${statusCardBg}`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
+                Status & Skor Hari Itu
+              </span>
+              <span className="text-xl">{statusEmoji}</span>
+            </div>
+            <div className="mt-4 space-y-1">
+              <h3 className="text-2xl font-black leading-none">
+                {totalScore}/100
+              </h3>
+              <h4 className="text-xs font-bold">{statusTitle}</h4>
+              <p className="text-[9px] font-light leading-normal opacity-85">
+                {statusDesc}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Card 2: Total Screen Time */}
-        <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-              Total Screen Time
-            </span>
-            <div className="p-2 rounded-xl bg-muted-light/60">
-              <Clock className="w-4 h-4 text-primary" />
+        {isScreenTimeLoading || isBreakdownLoading ? (
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="h-2.5 bg-muted-light rounded w-28" />
+              <div className="w-8 h-8 rounded-xl bg-muted-light" />
+            </div>
+            <div className="mt-4 space-y-2">
+              <div className="h-7 bg-muted-light rounded w-20" />
+              <div className="h-2 bg-muted-light rounded w-36" />
             </div>
           </div>
-          <div className="mt-4 space-y-1">
-            <h3 className="text-2xl font-black text-primary leading-none">
-              {formatSecToHoursMins(grandTotalSeconds)}
-            </h3>
-            <p className="text-[9px] text-muted font-light leading-normal">
-              Total durasi penggunaan gawai hari itu.
-            </p>
+        ) : (
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                Total Screen Time
+              </span>
+              <div className="p-2 rounded-xl bg-muted-light/60">
+                <Clock className="w-4 h-4 text-primary" />
+              </div>
+            </div>
+            <div className="mt-4 space-y-1">
+              <h3 className="text-2xl font-black text-primary leading-none">
+                {formatSecToHoursMins(grandTotalSeconds)}
+              </h3>
+              <p className="text-[9px] text-muted font-light leading-normal">
+                Total durasi penggunaan gawai hari itu.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Card 3: Aplikasi Paling Banyak Digunakan */}
-        <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-              Tersering hari itu
-            </span>
-            <div className="p-2 rounded-xl bg-muted-light/60">
-              <Activity className="w-4 h-4 text-indigo-500" />
+        {isBreakdownLoading ? (
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="h-2.5 bg-muted-light rounded w-24" />
+              <div className="w-8 h-8 rounded-xl bg-muted-light" />
+            </div>
+            <div className="mt-4 space-y-2">
+              <div className="h-7 bg-muted-light rounded w-24" />
+              <div className="h-2 bg-muted-light rounded w-32" />
             </div>
           </div>
-          <div className="mt-4 space-y-1">
-            <h3 className="text-2xl font-black text-primary leading-none truncate max-w-full">
-              {topApp ? topApp.appName : "Tidak ada"}
-            </h3>
-            <p className="text-[9px] text-muted font-light leading-normal">
-              {topApp
-                ? `Digunakan selama ${formatSecToHoursMins(topApp.totalDurationSeconds)}.`
-                : "Tidak ada pemakaian gawai."}
-            </p>
+        ) : (
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                Tersering hari itu
+              </span>
+              <div className="p-2 rounded-xl bg-muted-light/60">
+                <Activity className="w-4 h-4 text-indigo-500" />
+              </div>
+            </div>
+            <div className="mt-4 space-y-1">
+              <h3 className="text-2xl font-black text-primary leading-none truncate max-w-full">
+                {topApp ? topApp.appName : "Tidak ada"}
+              </h3>
+              <p className="text-[9px] text-muted font-light leading-normal">
+                {topApp
+                  ? `Digunakan selama ${formatSecToHoursMins(topApp.totalDurationSeconds)}.`
+                  : "Tidak ada pemakaian gawai."}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Main Grid: Hourly Chart + Details */}
@@ -498,111 +528,28 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
             </div>
           </div>
 
-          <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
-            <div className="h-64 min-w-[700px] lg:min-w-0 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 10, right: 5, left: -25, bottom: 0 }}
-                >
-                  <XAxis
-                    dataKey="jam"
-                    stroke="#888888"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
+          {isHourlyLoading || isSettingLoading ? (
+            <div className="overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-thin">
+              <div className="h-64 min-w-[700px] lg:min-w-0 w-full flex items-end justify-between px-4 pb-2 animate-pulse bg-muted-light/10 rounded-3xl border border-border/40">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-[6%] bg-muted-light/60 rounded-t"
+                    style={{ height: `${20 + (i % 4) * 20}%` }}
                   />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  {/* Reference Areas */}
-                  {sleepStartHour > sleepEndHour ? (
-                    <>
-                      <ReferenceArea
-                        x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
-                        x2="23.00"
-                        fill="#fff0f3"
-                        fillOpacity={0.75}
-                        stroke="none"
-                      />
-                      <ReferenceArea
-                        x1="00.00"
-                        x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
-                        fill="#fff0f3"
-                        fillOpacity={0.75}
-                        stroke="none"
-                      />
-                    </>
-                  ) : (
-                    <ReferenceArea
-                      x1={`${String(sleepStartHour).padStart(2, "0")}.00`}
-                      x2={`${String(sleepEndHour).padStart(2, "0")}.00`}
-                      fill="#fff0f3"
-                      fillOpacity={0.75}
-                      stroke="none"
-                    />
-                  )}
-                  <ReferenceArea
-                    x1={`${String(prodStartHour).padStart(2, "0")}.00`}
-                    x2={`${String(prodEndHour).padStart(2, "0")}.00`}
-                    fill="#fffbeb"
-                    fillOpacity={0.75}
-                    stroke="none"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "16px",
-                      borderColor: "#e1e8ef",
-                      fontFamily: "Poppins",
-                      fontSize: "11px",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
-                    }}
-                    // biome-ignore lint/suspicious/noExplicitAny: Recharts Tooltip formatter types
-                    formatter={(value: any, name: any) => {
-                      if (value === 0) return null;
-                      return [`${value} menit`, name];
-                    }}
-                  />
-                  <Legend
-                    iconSize={8}
-                    iconType="circle"
-                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }}
-                  />
-                  {top4AppsForRender.map((appName, index) => (
-                    <Bar
-                      key={appName}
-                      dataKey={appName}
-                      stackId="a"
-                      fill={rankColors[index]}
-                      // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape props
-                      shape={(shapeProps: any) => (
-                        <CustomBar
-                          {...shapeProps}
-                          rankedApps={[...top4AppsForRender, "Lainnya"]}
-                        />
-                      )}
-                    />
-                  ))}
-                  <Bar
-                    dataKey="Lainnya"
-                    stackId="a"
-                    fill={rankColors[4]}
-                    // biome-ignore lint/suspicious/noExplicitAny: Recharts custom shape props
-                    shape={(shapeProps: any) => (
-                      <CustomBar
-                        {...shapeProps}
-                        rankedApps={[...top4AppsForRender, "Lainnya"]}
-                      />
-                    )}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <StatistikDetailHourlyChart
+              chartData={chartData}
+              top4AppsForRender={top4AppsForRender}
+              sleepStartHour={sleepStartHour}
+              sleepEndHour={sleepEndHour}
+              prodStartHour={prodStartHour}
+              prodEndHour={prodEndHour}
+            />
+          )}
         </div>
 
         {/* Detailed Apps breakdown & Flags */}
@@ -615,48 +562,64 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
               Pola kebiasaan penggunaan gawai teridentifikasi hari ini.
             </p>
             <div className="space-y-3">
-              {flagsList.map((flag) => {
-                const IconComp = flag.icon;
-                return (
-                  <div
-                    key={flag.name}
-                    className={`flex gap-3 items-center p-3 rounded-2xl border transition-all ${
-                      flag.active
-                        ? "bg-red-50/45 border-red-100 text-red-800"
-                        : "bg-emerald-50/20 border-emerald-100/60 text-emerald-800"
-                    }`}
-                  >
+              {isFlagLoading || isScreenTimeLoading
+                ? Array.from({ length: 5 }).map((_, i) => (
                     <div
-                      className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${
-                        flag.active
-                          ? "bg-red-50 border-red-200 text-red-600"
-                          : "bg-emerald-50 border-emerald-200 text-emerald-600"
-                      }`}
+                      key={i}
+                      className="flex gap-3 items-center p-3 rounded-2xl border border-border bg-background/20 animate-pulse"
                     >
-                      <IconComp className="w-4.5 h-4.5" />
+                      <div className="w-8 h-8 rounded-xl bg-muted-light/60 shrink-0" />
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="h-3 bg-muted-light rounded w-28" />
+                          <div className="w-12 h-4 bg-muted-light rounded-full" />
+                        </div>
+                        <div className="h-2 bg-muted-light rounded w-36" />
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold truncate">
-                          {flag.name}
-                        </h4>
-                        <span
-                          className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
+                  ))
+                : flagsList.map((flag) => {
+                    const IconComp = flag.icon;
+                    return (
+                      <div
+                        key={flag.name}
+                        className={`flex gap-3 items-center p-3 rounded-2xl border transition-all ${
+                          flag.active
+                            ? "bg-red-50/45 border-red-100 text-red-800"
+                            : "bg-emerald-50/20 border-emerald-100/60 text-emerald-800"
+                        }`}
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${
                             flag.active
-                              ? "bg-red-105 text-red-800 border border-red-200"
-                              : "bg-emerald-105 text-emerald-800 border border-emerald-200"
+                              ? "bg-red-50 border-red-200 text-red-600"
+                              : "bg-emerald-50 border-emerald-200 text-emerald-600"
                           }`}
                         >
-                          {flag.active ? "⚠️ Terdeteksi" : "✅ Aman"}
-                        </span>
+                          <IconComp className="w-4.5 h-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-bold truncate">
+                              {flag.name}
+                            </h4>
+                            <span
+                              className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
+                                flag.active
+                                  ? "bg-red-105 text-red-800 border border-red-200"
+                                  : "bg-emerald-105 text-emerald-800 border border-emerald-200"
+                              }`}
+                            >
+                              {flag.active ? "⚠️ Terdeteksi" : "✅ Aman"}
+                            </span>
+                          </div>
+                          <p className="text-[9px] font-light opacity-85 mt-0.5 leading-snug">
+                            {flag.active ? flag.descActive : flag.descInactive}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[9px] font-light opacity-85 mt-0.5 leading-snug">
-                        {flag.active ? flag.descActive : flag.descInactive}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
             </div>
           </div>
         </div>
@@ -674,59 +637,76 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {breakdownItems.map((item) => {
-            const Icon = item.icon;
-            const percent = Math.round((item.nilai / item.max) * 100);
-
-            let iconBg = "bg-emerald-50 border-emerald-100";
-            let iconColor = "text-emerald-600";
-            let barColor = "bg-emerald-500";
-
-            if (percent > 66) {
-              iconBg = "bg-red-50 border-red-100";
-              iconColor = "text-red-600";
-              barColor = "bg-red-500";
-            } else if (percent > 33) {
-              iconBg = "bg-amber-50 border-amber-100";
-              iconColor = "text-amber-600";
-              barColor = "bg-amber-500";
-            }
-
-            return (
-              <div
-                key={item.name}
-                className="flex gap-4 p-4 rounded-3xl border border-border bg-card shadow-xs items-center"
-              >
+          {isStatusLoading || isSettingLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
                 <div
-                  className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
+                  key={i}
+                  className="flex gap-4 p-4 rounded-3xl border border-border bg-card shadow-xs items-center animate-pulse"
                 >
-                  <Icon className="w-5 h-5" />
-                </div>
-
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <h4 className="text-xs font-bold text-primary truncate">
-                      {item.name}
-                    </h4>
-                    <span className="text-[10px] text-muted font-medium shrink-0">
-                      {item.nilai} dari {item.max} poin
-                    </span>
+                  <div className="w-10 h-10 rounded-2xl bg-muted-light/60 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-3.5 bg-muted-light rounded w-32" />
+                      <div className="h-2.5 bg-muted-light rounded w-16" />
+                    </div>
+                    <div className="w-full h-2 bg-muted-light/60 rounded-full" />
+                    <div className="h-2 bg-muted-light rounded w-24" />
                   </div>
+                </div>
+              ))
+            : breakdownItems.map((item) => {
+                const Icon = item.icon;
+                const percent = Math.round((item.nilai / item.max) * 100);
 
-                  <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
+                let iconBg = "bg-emerald-50 border-emerald-100";
+                let iconColor = "text-emerald-600";
+                let barColor = "bg-emerald-500";
+
+                if (percent > 66) {
+                  iconBg = "bg-red-50 border-red-100";
+                  iconColor = "text-red-600";
+                  barColor = "bg-red-500";
+                } else if (percent > 33) {
+                  iconBg = "bg-amber-50 border-amber-100";
+                  iconColor = "text-amber-600";
+                  barColor = "bg-amber-500";
+                }
+
+                return (
+                  <div
+                    key={item.name}
+                    className="flex gap-4 p-4 rounded-3xl border border-border bg-card shadow-xs items-center"
+                  >
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
+                      className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
 
-                  <p className="text-[9px] text-muted font-light leading-none">
-                    Bobot: {item.bobot}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex justify-between items-baseline">
+                        <h4 className="text-xs font-bold text-primary truncate">
+                          {item.name}
+                        </h4>
+                        <span className="text-[10px] text-muted font-medium shrink-0">
+                          {item.nilai} dari {item.max} poin
+                        </span>
+                      </div>
+
+                      <div className="w-full h-2 bg-muted-light rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+
+                      <p className="text-[9px] text-muted font-light leading-none">
+                        Bobot: {item.bobot}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
         </div>
       </div>
     </div>

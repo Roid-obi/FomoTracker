@@ -1,7 +1,14 @@
 "use client";
 
 import { gooeyToast } from "goey-toast";
-import { AlertTriangle, Database, Download, ShieldCheck, Trash2, LogOut } from "lucide-react";
+import {
+  AlertTriangle,
+  Database,
+  Download,
+  ShieldCheck,
+  Trash2,
+  LogOut,
+} from "lucide-react";
 import { useState } from "react";
 import { initialDatabaseData } from "@/lib/data/databaseInitialData";
 import { useQueryClient } from "@tanstack/react-query";
@@ -240,7 +247,8 @@ export default function PrivasiSettingsPage() {
             <span className="text-red-600">Keluar dari Akun</span>
           </h3>
           <p className="text-[11px] text-muted font-light leading-relaxed">
-            Keluar dari sesi aktif pada perangkat ini. Anda perlu masuk kembali untuk mengakses data statistik Anda.
+            Keluar dari sesi aktif pada perangkat ini. Anda perlu masuk kembali
+            untuk mengakses data statistik Anda.
           </p>
           <button
             type="button"

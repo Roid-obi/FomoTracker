@@ -4,6 +4,10 @@ import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { DashboardModel } from "@/lib/models/dashboard.model";
+import {
+  recalculateScoreAndNotifications,
+  updateDailyStatsFromLogs,
+} from "@/lib/services/tracking.service";
 
 type ServiceResult<T = undefined> =
   | { success: true; data: T }
@@ -41,6 +45,16 @@ export async function getDailyStatusService(
   }
 
   const targetDate = date ?? getWIBDateString();
+
+  const todayWIBStr = getWIBDateString();
+  if (targetDate === todayWIBStr) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIBStr);
+      await recalculateScoreAndNotifications(userId, todayWIBStr);
+    } catch (err) {
+      console.error("Failed to auto-update daily stats from logs:", err);
+    }
+  }
 
   const [row] = await db
     .select({
@@ -102,6 +116,16 @@ export async function getChartService(
   }
 
   const todayWIBStr = getWIBDateString();
+  try {
+    await updateDailyStatsFromLogs(userId, todayWIBStr);
+    await recalculateScoreAndNotifications(userId, todayWIBStr);
+  } catch (err) {
+    console.error(
+      "Failed to auto-update chart today daily stats from logs:",
+      err,
+    );
+  }
+
   const todayDate = new Date(todayWIBStr);
   const startDate = new Date(todayDate);
   startDate.setDate(todayDate.getDate() - (days - 1));
@@ -161,6 +185,16 @@ export async function getBehaviorFlagService(
   }
 
   const targetDate = date ?? getWIBDateString();
+  const todayStr = getWIBDateString();
+
+  if (targetDate === todayStr) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayStr);
+      await recalculateScoreAndNotifications(userId, todayStr);
+    } catch (err) {
+      console.error("Failed to auto-update behavioral flags from logs:", err);
+    }
+  }
 
   const [row] = await db
     .select({
@@ -180,7 +214,6 @@ export async function getBehaviorFlagService(
     );
 
   let openFrequencyLastHour = 0;
-  const todayStr = getWIBDateString();
 
   if (targetDate === todayStr) {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
@@ -287,14 +320,17 @@ export async function getHourlyBreakdownService(
   const top4Apps = sortedApps.slice(0, 4);
 
   // 3. Inisialisasi 24 jam data chart (hourlyDurations menyimpan nilai float menit)
-  const hourlyDurations: Record<string, number>[] = Array.from({ length: 24 }, () => {
-    const obj: Record<string, number> = {};
-    for (const app of top4Apps) {
-      obj[app] = 0;
-    }
-    obj.Lainnya = 0;
-    return obj;
-  });
+  const hourlyDurations: Record<string, number>[] = Array.from(
+    { length: 24 },
+    () => {
+      const obj: Record<string, number> = {};
+      for (const app of top4Apps) {
+        obj[app] = 0;
+      }
+      obj.Lainnya = 0;
+      return obj;
+    },
+  );
 
   // 4. Isi data chart dari log dengan membagi durasi sesi ke jam-jam yang sesuai
   for (const log of logs) {
@@ -306,7 +342,10 @@ export async function getHourlyBreakdownService(
       const hourEnd = startTs.getTime() + (h + 1) * 3600 * 1000;
 
       // Hitung overlap antara sesi dengan jam h ini (dalam milidetik)
-      const overlapMs = Math.max(0, Math.min(sessionEnd, hourEnd) - Math.max(sessionStart, hourStart));
+      const overlapMs = Math.max(
+        0,
+        Math.min(sessionEnd, hourEnd) - Math.max(sessionStart, hourStart),
+      );
       if (overlapMs > 0) {
         const overlapMinutes = overlapMs / 60000;
         if (top4Apps.includes(log.appName)) {
@@ -323,7 +362,10 @@ export async function getHourlyBreakdownService(
   // 5. Batasi total menit per jam maksimal 60, dan limpahkan kelebihannya ke jam berikutnya
   for (let h = 0; h < 24; h++) {
     const appsKeys = Object.keys(hourlyDurations[h]);
-    const totalMinutes = appsKeys.reduce((sum, key) => sum + hourlyDurations[h][key], 0);
+    const totalMinutes = appsKeys.reduce(
+      (sum, key) => sum + hourlyDurations[h][key],
+      0,
+    );
 
     if (totalMinutes > 60) {
       const ratio = 60 / totalMinutes;

@@ -25,7 +25,9 @@ function VerifyEmailContent() {
 
     const checkSession = async () => {
       try {
-        const res = await api.get<{ authenticated: boolean }>("/api/auth/check-session");
+        const res = await api.get<{ authenticated: boolean }>(
+          "/api/auth/check-session",
+        );
         if (res.data.authenticated) {
           clearInterval(interval);
           gooeyToast.success(

@@ -139,6 +139,124 @@ export async function getUserSettingsClient(userId: string) {
   }
 }
 
+interface QueueItem {
+  id: string;
+  userId: string;
+  statDate: string;
+  stats: {
+    packageName: string;
+    totalDurationSeconds: number;
+    openFrequency: number;
+    midnightDurationSeconds: number;
+    productiveHourDurationSeconds: number;
+    maxContinuousSeconds: number;
+  }[];
+  logs: {
+    packageName: string;
+    startedAt: string;
+    endedAt: string;
+    durationSeconds: number;
+    isMidnight: boolean;
+    isProductiveHour: boolean;
+    isContinuous: boolean;
+    source: "android_app";
+  }[];
+}
+
+export async function processSyncQueue() {
+  if (typeof window === "undefined") return;
+
+  const rawQueue = window.localStorage.getItem("fomotracker_sync_queue");
+  if (!rawQueue) return;
+
+  let queue: QueueItem[] = [];
+  try {
+    queue = JSON.parse(rawQueue);
+  } catch (err) {
+    console.error("Failed to parse sync queue:", err);
+    return;
+  }
+  if (queue.length === 0) return;
+
+  console.log(`Processing sync queue with ${queue.length} items...`);
+
+  const remainingQueue: QueueItem[] = [];
+  let connectionFailed = false;
+
+  for (const item of queue) {
+    if (connectionFailed) {
+      remainingQueue.push(item);
+      continue;
+    }
+
+    try {
+      // 1. Get or register the user device in backend database
+      const deviceRes = await api.put<{
+        success: boolean;
+        data: { id: string };
+      }>("/api/setting/device", {
+        platform: "android_app",
+        deviceName: "Android Device",
+        isConnected: true,
+      });
+
+      if (!deviceRes.data.success) {
+        throw new Error("Gagal menyinkronkan data perangkat");
+      }
+      const deviceId = deviceRes.data.data.id;
+
+      // 2. Send stats
+      const statsRes = await api.post("/api/tracking/sync/stats", {
+        userId: item.userId,
+        deviceId,
+        statDate: item.statDate,
+        stats: item.stats,
+      });
+
+      if (!statsRes.data.success) {
+        throw new Error(
+          statsRes.data.error || "Gagal menyinkronkan stats harian",
+        );
+      }
+
+      // 3. Send logs if any
+      if (item.logs.length > 0) {
+        const logsRes = await api.post("/api/tracking/sync/activity", {
+          userId: item.userId,
+          deviceId,
+          logs: item.logs,
+        });
+
+        if (!logsRes.data.success) {
+          throw new Error(
+            logsRes.data.error || "Gagal menyinkronkan log aktivitas",
+          );
+        }
+      }
+
+      console.log(`Successfully synced batch ${item.id}`);
+    } catch (error) {
+      console.error(`Failed to sync batch ${item.id}:`, error);
+      connectionFailed = true;
+      remainingQueue.push(item);
+    }
+  }
+
+  window.localStorage.setItem(
+    "fomotracker_sync_queue",
+    JSON.stringify(remainingQueue),
+  );
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    console.log("Device is online, processing sync queue...");
+    processSyncQueue().catch((err) => {
+      console.error("Failed to process sync queue on online event:", err);
+    });
+  });
+}
+
 export async function syncUsageStatsClient(
   userId: string,
   stats: SyncUsageStatInput[],
@@ -152,24 +270,8 @@ export async function syncUsageStatsClient(
     const month = String(nowLocal.getMonth() + 1).padStart(2, "0");
     const date = String(nowLocal.getDate()).padStart(2, "0");
     const today = `${year}-${month}-${date}`;
-    const source = "android_app";
 
-    // 1. Get or register the user device in backend database
-    const deviceRes = await api.put<{ success: boolean; data: { id: string } }>(
-      "/api/setting/device",
-      {
-        platform: source,
-        deviceName: "Android Device",
-        isConnected: true,
-      },
-    );
-
-    if (!deviceRes.data.success) {
-      throw new Error("Gagal menyinkronkan data perangkat");
-    }
-    const deviceId = deviceRes.data.data.id;
-
-    // 2. Prepare payload for stats sync
+    // 1. Prepare stats payload
     const statsPayload = stats.map((stat) => ({
       packageName: stat.packageName,
       totalDurationSeconds: Math.floor(stat.totalTimeInForeground / 1000),
@@ -179,21 +281,7 @@ export async function syncUsageStatsClient(
       maxContinuousSeconds: stat.maxContinuousSeconds || 0,
     }));
 
-    // Post to `/api/tracking/sync/stats`
-    const statsRes = await api.post("/api/tracking/sync/stats", {
-      userId,
-      deviceId,
-      statDate: today,
-      stats: statsPayload,
-    });
-
-    if (!statsRes.data.success) {
-      throw new Error(
-        statsRes.data.error || "Gagal menyinkronkan stats harian",
-      );
-    }
-
-    // 3. Prepare payload for activity logs sync
+    // 2. Prepare logs payload
     let logsPayload = [];
     if (detailedSessions && detailedSessions.length > 0) {
       logsPayload = detailedSessions.map((session) => ({
@@ -226,17 +314,28 @@ export async function syncUsageStatsClient(
       });
     }
 
-    // Post to `/api/tracking/sync/activity`
-    const logsRes = await api.post("/api/tracking/sync/activity", {
-      userId,
-      deviceId,
-      logs: logsPayload,
-    });
+    // 3. Save to local queue
+    if (typeof window !== "undefined") {
+      const queueItem: QueueItem = {
+        id: Math.random().toString(36).substring(7),
+        userId,
+        statDate: today,
+        stats: statsPayload,
+        logs: logsPayload,
+      };
 
-    if (!logsRes.data.success) {
-      throw new Error(
-        logsRes.data.error || "Gagal menyinkronkan log aktivitas",
+      const rawQueue = window.localStorage.getItem("fomotracker_sync_queue");
+      const queue: QueueItem[] = rawQueue ? JSON.parse(rawQueue) : [];
+      queue.push(queueItem);
+      window.localStorage.setItem(
+        "fomotracker_sync_queue",
+        JSON.stringify(queue),
       );
+
+      // Attempt immediate processing in the background (does not block this method)
+      processSyncQueue().catch((err) => {
+        console.error("Failed to process sync queue:", err);
+      });
     }
 
     return { success: true, count: stats.length };
@@ -298,15 +397,25 @@ export async function fetchAndSyncUsageData(userId: string) {
     const productiveStartStr = settings?.productiveStart || "09:00:00";
     const productiveEndStr = settings?.productiveEnd || "17:00:00";
 
+    const endOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+
     const statsRecord =
       await CapacitorUsageStatsManager.queryAndAggregateUsageStats({
         beginTime: startOfDay.getTime(),
-        endTime: now.getTime(),
+        endTime: endOfDay.getTime(),
       });
 
     const rawEvents = await fetchUsageEvents(
       startOfDay.getTime(),
-      now.getTime(),
+      endOfDay.getTime(),
     );
     const detailedSessions = analyzeUsageEvents(
       rawEvents,

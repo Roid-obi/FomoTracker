@@ -12,11 +12,6 @@ function validationError(error: z.ZodError) {
   return z.treeifyError(error);
 }
 
-/** Clamp nilai ke rentang [lo, hi] */
-function clamp(value: number, lo = 0, hi = 100): number {
-  return Math.min(hi, Math.max(lo, value));
-}
-
 /** Tentukan status harian dari total skor */
 function calcDailyStatus(score: number): "good" | "attention" | "heavy" {
   if (score <= 30) return "good";
@@ -190,24 +185,10 @@ export async function syncActivityService(
   };
 }
 
-export async function syncDailyStatsService(
-  body: unknown,
-): Promise<ServiceResult<TrackingModel.syncStatsResponse>> {
-  const parsed = TrackingModel.syncStatsRequest.safeParse(body);
-  if (!parsed.success) {
-    return { success: false, error: validationError(parsed.error) };
-  }
-
-  const { userId, deviceId, statDate, stats } = parsed.data;
-
-  const deviceValid = await verifyDevice(deviceId, userId);
-  if (!deviceValid) {
-    return {
-      success: false,
-      error: "Device tidak ditemukan atau bukan milik user ini",
-    };
-  }
-
+export async function recalculateScoreAndNotifications(
+  userId: string,
+  statDate: string,
+) {
   // ── 1. Ambil user settings (threshold + toggle notifikasi) ─────────────────
   const [settings] = await db
     .select({
@@ -228,51 +209,7 @@ export async function syncDailyStatsService(
   const notifContinuous = settings?.notifContinuousEnabled ?? true;
   const notifProductiveHour = settings?.notifProductiveHourEnabled ?? true;
 
-  // ── 2. Resolve appId ────────────────────────────────────────────────────────
-  const appIdMap = await resolveAppIds(stats);
-
-  // ── 3. UPSERT daily_stats ──────────────────────────────────────────────────
-  let statsUpserted = 0;
-
-  for (const stat of stats) {
-    const key = stat.packageName ?? stat.webDomain ?? "";
-    const appId = appIdMap.get(key);
-    if (!appId) continue;
-
-    await db
-      .insert(table.dailyStats)
-      .values({
-        userId,
-        appId,
-        statDate,
-        totalDurationSeconds: stat.totalDurationSeconds,
-        openFrequency: stat.openFrequency,
-        midnightDurationSeconds: stat.midnightDurationSeconds,
-        productiveHourDurationSeconds: stat.productiveHourDurationSeconds,
-        maxContinuousSeconds: stat.maxContinuousSeconds,
-        peakActiveHour: stat.peakActiveHour,
-      })
-      .onConflictDoUpdate({
-        target: [
-          table.dailyStats.userId,
-          table.dailyStats.appId,
-          table.dailyStats.statDate,
-        ],
-        set: {
-          totalDurationSeconds: stat.totalDurationSeconds,
-          openFrequency: stat.openFrequency,
-          midnightDurationSeconds: stat.midnightDurationSeconds,
-          productiveHourDurationSeconds: stat.productiveHourDurationSeconds,
-          maxContinuousSeconds: stat.maxContinuousSeconds,
-          peakActiveHour: stat.peakActiveHour ?? null,
-          updatedAt: new Date(),
-        },
-      });
-
-    statsUpserted++;
-  }
-
-  // ── 4. Agregasi seluruh daily_stats user untuk statDate ────────────────────
+  // ── 2. Agregasi seluruh daily_stats user untuk statDate ────────────────────
   // Skor dihitung dari TOTAL semua app agar hasil lintas-app representatif.
   const [agg] = await db
     .select({
@@ -291,12 +228,11 @@ export async function syncDailyStatsService(
     );
 
   const totalScreenTime = Number(agg?.totalScreenTime ?? 0);
-  const totalOpenFrequency = Number(agg?.totalOpenFrequency ?? 0);
   const totalMidnight = Number(agg?.totalMidnight ?? 0);
   const totalProductiveHour = Number(agg?.totalProductiveHour ?? 0);
   const maxContinuous = Number(agg?.maxContinuous ?? 0);
 
-  // ── 5. Deteksi flag perilaku ────────────────────────────────────────────────
+  // ── 3. Deteksi flag perilaku ────────────────────────────────────────────────
   // Usage Duration: > 4 jam/hari (atau sesuai batas pengguna)
   const flagExcessiveUsage = totalScreenTime > screenTimeLimit;
 
@@ -332,7 +268,7 @@ export async function syncDailyStatsService(
   // Productivity Usage: > 30 menit selama jam produktif
   const flagProductiveHourDistraction = totalProductiveHour > 1800;
 
-  // ── 6. Hitung skor per dimensi (Sistem Poin Baru) ───────────────────────────
+  // ── 4. Hitung skor per dimensi (Sistem Poin Baru) ───────────────────────────
   const usageDurationScore = flagExcessiveUsage ? 30 : 0;
   const openFrequencyScore = flagCompulsiveChecking ? 20 : 0;
   const continuousUsageScore = flagContinuousUsage ? 20 : 0;
@@ -348,7 +284,7 @@ export async function syncDailyStatsService(
 
   const dailyStatus = calcDailyStatus(totalScore);
 
-  // ── 7. Ambil status score sebelumnya untuk cegah spam notifikasi ────────────
+  // ── 5. Ambil status score sebelumnya untuk cegah spam notifikasi ────────────
   const [existingScore] = await db
     .select({
       flagExcessiveUsage: table.behavioralScores.flagExcessiveUsage,
@@ -372,7 +308,7 @@ export async function syncDailyStatsService(
   const prevContinuous = existingScore?.flagContinuousUsage ?? false;
   const prevProductive = existingScore?.flagProductiveHourDistraction ?? false;
 
-  // ── 8. UPSERT behavioral_scores ────────────────────────────────────────────
+  // ── 6. UPSERT behavioral_scores ────────────────────────────────────────────
   await db
     .insert(table.behavioralScores)
     .values({
@@ -410,7 +346,7 @@ export async function syncDailyStatsService(
       },
     });
 
-  // ── 9. Buat notifikasi hanya saat indikator berubah menjadi "Terdeteksi" ────
+  // ── 7. Buat notifikasi hanya saat indikator berubah menjadi "Terdeteksi" ────
   const notificationsToCreate: (typeof table.notifications.$inferInsert)[] = [];
 
   if (notifScreenTime && flagExcessiveUsage && !prevExcessive) {
@@ -461,19 +397,201 @@ export async function syncDailyStatsService(
   }
 
   return {
+    totalScore,
+    dailyStatus,
+    flagExcessiveUsage,
+    flagCompulsiveChecking,
+    flagMidnightUsage,
+    flagContinuousUsage,
+    flagProductiveHourDistraction,
+    notificationsCreatedCount: notificationsToCreate.length,
+  };
+}
+
+export async function updateDailyStatsFromLogs(
+  userId: string,
+  statDate: string,
+): Promise<void> {
+  const startTs = new Date(`${statDate}T00:00:00+07:00`);
+  const endTs = new Date(`${statDate}T23:59:59.999+07:00`);
+
+  // Query activity logs for the user and date
+  const logs = await db
+    .select({
+      appId: table.activityLogs.appId,
+      durationSeconds: table.activityLogs.durationSeconds,
+      isMidnight: table.activityLogs.isMidnight,
+      isProductiveHour: table.activityLogs.isProductiveHour,
+      startedAt: table.activityLogs.startedAt,
+    })
+    .from(table.activityLogs)
+    .where(
+      and(
+        eq(table.activityLogs.userId, userId),
+        gte(table.activityLogs.startedAt, startTs),
+        lte(table.activityLogs.startedAt, endTs),
+      ),
+    );
+
+  if (logs.length === 0) {
+    return;
+  }
+
+  // Group by appId
+  const appGroups = new Map<string, typeof logs>();
+  for (const log of logs) {
+    const list = appGroups.get(log.appId) ?? [];
+    list.push(log);
+    appGroups.set(log.appId, list);
+  }
+
+  for (const [appId, appLogs] of appGroups.entries()) {
+    const totalDurationSeconds = appLogs.reduce(
+      (sum, l) => sum + l.durationSeconds,
+      0,
+    );
+    const openFrequency = appLogs.length;
+    const midnightDurationSeconds = appLogs.reduce(
+      (sum, l) => sum + (l.isMidnight ? l.durationSeconds : 0),
+      0,
+    );
+    const productiveHourDurationSeconds = appLogs.reduce(
+      (sum, l) => sum + (l.isProductiveHour ? l.durationSeconds : 0),
+      0,
+    );
+    const maxContinuousSeconds = Math.max(
+      ...appLogs.map((l) => l.durationSeconds),
+    );
+
+    // Calculate peakActiveHour
+    const hourDurations = new Array(24).fill(0);
+    for (const log of appLogs) {
+      const dateInWIB = new Date(log.startedAt.getTime() + 7 * 60 * 60 * 1000);
+      const hour = dateInWIB.getUTCHours();
+      hourDurations[hour] += log.durationSeconds;
+    }
+    let peakActiveHour = 0;
+    let maxHourDuration = -1;
+    for (let h = 0; h < 24; h++) {
+      if (hourDurations[h] > maxHourDuration) {
+        maxHourDuration = hourDurations[h];
+        peakActiveHour = h;
+      }
+    }
+
+    // UPSERT daily stats
+    await db
+      .insert(table.dailyStats)
+      .values({
+        userId,
+        appId,
+        statDate,
+        totalDurationSeconds,
+        openFrequency,
+        midnightDurationSeconds,
+        productiveHourDurationSeconds,
+        maxContinuousSeconds,
+        peakActiveHour,
+      })
+      .onConflictDoUpdate({
+        target: [
+          table.dailyStats.userId,
+          table.dailyStats.appId,
+          table.dailyStats.statDate,
+        ],
+        set: {
+          totalDurationSeconds,
+          openFrequency,
+          midnightDurationSeconds,
+          productiveHourDurationSeconds,
+          maxContinuousSeconds,
+          peakActiveHour,
+          updatedAt: new Date(),
+        },
+      });
+  }
+}
+
+export async function syncDailyStatsService(
+  body: unknown,
+): Promise<ServiceResult<TrackingModel.syncStatsResponse>> {
+  const parsed = TrackingModel.syncStatsRequest.safeParse(body);
+  if (!parsed.success) {
+    return { success: false, error: validationError(parsed.error) };
+  }
+
+  const { userId, deviceId, statDate, stats } = parsed.data;
+
+  const deviceValid = await verifyDevice(deviceId, userId);
+  if (!deviceValid) {
+    return {
+      success: false,
+      error: "Device tidak ditemukan atau bukan milik user ini",
+    };
+  }
+
+  // ── 1. Resolve appId ────────────────────────────────────────────────────────
+  const appIdMap = await resolveAppIds(stats);
+
+  // ── 2. UPSERT daily_stats ──────────────────────────────────────────────────
+  let statsUpserted = 0;
+
+  for (const stat of stats) {
+    const key = stat.packageName ?? stat.webDomain ?? "";
+    const appId = appIdMap.get(key);
+    if (!appId) continue;
+
+    await db
+      .insert(table.dailyStats)
+      .values({
+        userId,
+        appId,
+        statDate,
+        totalDurationSeconds: stat.totalDurationSeconds,
+        openFrequency: stat.openFrequency,
+        midnightDurationSeconds: stat.midnightDurationSeconds,
+        productiveHourDurationSeconds: stat.productiveHourDurationSeconds,
+        maxContinuousSeconds: stat.maxContinuousSeconds,
+        peakActiveHour: stat.peakActiveHour,
+      })
+      .onConflictDoUpdate({
+        target: [
+          table.dailyStats.userId,
+          table.dailyStats.appId,
+          table.dailyStats.statDate,
+        ],
+        set: {
+          totalDurationSeconds: stat.totalDurationSeconds,
+          openFrequency: stat.openFrequency,
+          midnightDurationSeconds: stat.midnightDurationSeconds,
+          productiveHourDurationSeconds: stat.productiveHourDurationSeconds,
+          maxContinuousSeconds: stat.maxContinuousSeconds,
+          peakActiveHour: stat.peakActiveHour ?? null,
+          updatedAt: new Date(),
+        },
+      });
+
+    statsUpserted++;
+  }
+
+  // ── 3. Recalculate score and notifications ─────────────────────────────────
+  const scoreResult = await recalculateScoreAndNotifications(userId, statDate);
+
+  return {
     success: true,
     data: {
       statsUpserted,
       behavioralScore: {
-        totalScore,
-        dailyStatus,
-        flagExcessiveUsage,
-        flagCompulsiveChecking,
-        flagMidnightUsage,
-        flagContinuousUsage,
-        flagProductiveHourDistraction,
+        totalScore: scoreResult.totalScore,
+        dailyStatus: scoreResult.dailyStatus,
+        flagExcessiveUsage: scoreResult.flagExcessiveUsage,
+        flagCompulsiveChecking: scoreResult.flagCompulsiveChecking,
+        flagMidnightUsage: scoreResult.flagMidnightUsage,
+        flagContinuousUsage: scoreResult.flagContinuousUsage,
+        flagProductiveHourDistraction:
+          scoreResult.flagProductiveHourDistraction,
       },
-      notificationsCreated: notificationsToCreate.length,
+      notificationsCreated: scoreResult.notificationsCreatedCount,
     },
   };
 }

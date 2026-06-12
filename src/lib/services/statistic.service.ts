@@ -4,6 +4,10 @@ import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { StatisticModel } from "@/lib/models/statistic.model";
+import {
+  recalculateScoreAndNotifications,
+  updateDailyStatsFromLogs,
+} from "@/lib/services/tracking.service";
 
 type ServiceResult<T = undefined> =
   | { success: true; data: T }
@@ -31,6 +35,11 @@ const DAY_LABELS: StatisticModel.getWeeklyHabitItem["dayLabel"][] = [
   "Sab",
 ];
 
+function getWIBDateString(date: Date = new Date()): string {
+  const wibTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return wibTime.toISOString().slice(0, 10);
+}
+
 // ----------------------------------------------------------------
 // GET /screen-time
 // Tren screen time harian dalam rentang tanggal dari daily_stats
@@ -42,6 +51,19 @@ export async function getScreenTimeService(
 ): Promise<ServiceResult<StatisticModel.getScreenTimeResponse>> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
+
+  const todayWIB = getWIBDateString();
+  if (todayWIB >= startDate && todayWIB <= endDate) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIB);
+      await recalculateScoreAndNotifications(userId, todayWIB);
+    } catch (err) {
+      console.error(
+        "Failed to auto-update daily stats in statistic service:",
+        err,
+      );
+    }
+  }
 
   const rows = await db
     .select({
@@ -104,6 +126,19 @@ export async function getBreakdownService(
 ): Promise<ServiceResult<StatisticModel.getBreakdownResponse>> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
+
+  const todayWIB = getWIBDateString();
+  if (todayWIB >= startDate && todayWIB <= endDate) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIB);
+      await recalculateScoreAndNotifications(userId, todayWIB);
+    } catch (err) {
+      console.error(
+        "Failed to auto-update daily stats in statistic service:",
+        err,
+      );
+    }
+  }
 
   const rows = await db
     .select({
@@ -247,6 +282,19 @@ export async function getWeeklyHabitService(
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
 
+  const todayWIB = getWIBDateString();
+  if (todayWIB >= startDate && todayWIB <= endDate) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIB);
+      await recalculateScoreAndNotifications(userId, todayWIB);
+    } catch (err) {
+      console.error(
+        "Failed to auto-update daily stats in statistic service:",
+        err,
+      );
+    }
+  }
+
   // Level 1: agregasi total per hari (semua app digabung)
   const perDayRows = await db
     .select({
@@ -358,6 +406,19 @@ export async function getDailyBreakdownService(
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
 
+  const todayWIB = getWIBDateString();
+  if (todayWIB >= startDate && todayWIB <= endDate) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIB);
+      await recalculateScoreAndNotifications(userId, todayWIB);
+    } catch (err) {
+      console.error(
+        "Failed to auto-update daily stats in statistic service:",
+        err,
+      );
+    }
+  }
+
   const rows = await db
     .select({
       statDate: table.dailyStats.statDate,
@@ -463,6 +524,19 @@ export async function getFlagsService(
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
 
+  const todayWIB = getWIBDateString();
+  if (todayWIB >= startDate && todayWIB <= endDate) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIB);
+      await recalculateScoreAndNotifications(userId, todayWIB);
+    } catch (err) {
+      console.error(
+        "Failed to auto-update daily stats in statistic service getFlags:",
+        err,
+      );
+    }
+  }
+
   const rows = await db
     .select({
       flagExcessiveUsage: table.behavioralScores.flagExcessiveUsage,
@@ -541,6 +615,19 @@ export async function getScoreAverageService(
 ): Promise<ServiceResult<{ averageScore: number; totalDays: number }>> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { success: false, error: "User not authenticated" };
+
+  const todayWIB = getWIBDateString();
+  if (todayWIB >= startDate && todayWIB <= endDate) {
+    try {
+      await updateDailyStatsFromLogs(userId, todayWIB);
+      await recalculateScoreAndNotifications(userId, todayWIB);
+    } catch (err) {
+      console.error(
+        "Failed to auto-update daily stats in statistic service getScoreAverage:",
+        err,
+      );
+    }
+  }
 
   const rows = await db
     .select({

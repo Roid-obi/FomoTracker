@@ -358,80 +358,122 @@ export default function InsightPage() {
 
         <div className="space-y-4">
           {/* Status Rata-rata */}
-          <div
-            className={`p-6 rounded-3xl border flex items-center gap-4 ${condThisWeek.colorClass} shadow-xs hover:shadow-md transition-all duration-300`}
-          >
-            <span
-              className="text-4xl select-none shrink-0"
-              role="img"
-              aria-label="Status Emoji"
-            >
-              {condThisWeek.emoji}
-            </span>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
-                Status Rata-rata
-              </span>
-              <h3 className="text-base sm:text-lg font-black leading-tight">
-                {condThisWeek.label}
-              </h3>
-              <p className="text-xs font-light mt-1 leading-relaxed opacity-90">
-                Rata-rata skor perilakumu berada pada {thisWeekScore}/100.
-              </p>
+          {isScoreAverageLoading ? (
+            <div className="p-6 rounded-3xl border border-border bg-card shadow-xs animate-pulse flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-muted-light/60 shrink-0" />
+              <div className="space-y-2 flex-1">
+                <div className="h-2.5 bg-muted-light rounded w-28" />
+                <div className="h-4 bg-muted-light rounded w-36" />
+                <div className="h-3 bg-muted-light rounded w-48" />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div
+              className={`p-6 rounded-3xl border flex items-center gap-4 ${condThisWeek.colorClass} shadow-xs hover:shadow-md transition-all duration-300`}
+            >
+              <span
+                className="text-4xl select-none shrink-0"
+                role="img"
+                aria-label="Status Emoji"
+              >
+                {condThisWeek.emoji}
+              </span>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 opacity-75">
+                  Status Rata-rata
+                </span>
+                <h3 className="text-base sm:text-lg font-black leading-tight">
+                  {condThisWeek.label}
+                </h3>
+                <p className="text-xs font-light mt-1 leading-relaxed opacity-90">
+                  Rata-rata skor perilakumu berada pada {thisWeekScore}/100.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Grid for Total Screen Time & Kebiasaan Teraktif */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Total Screen Time */}
-            <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-              <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
-                Total Screen Time
-              </span>
-              <div className="flex items-center gap-3.5 mt-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-muted-light/50 flex items-center justify-center text-primary shrink-0">
-                  <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <h4 className="text-base sm:text-lg font-black text-primary leading-none">
-                    {formatSecToHoursMins(screenTimeData?.totalSeconds ?? 0)}
-                  </h4>
-                  <p className="text-[10px] text-muted font-light mt-1">
-                    Rata-rata{" "}
-                    {formatSecToHoursMins(screenTimeData?.avgDailySeconds ?? 0)}
-                    /hari
-                  </p>
+            {isScreenTimeLoading ? (
+              <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 animate-pulse">
+                <div className="h-2.5 bg-muted-light rounded w-24" />
+                <div className="flex items-center gap-3.5 mt-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-muted-light/50 shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-4 bg-muted-light rounded w-24" />
+                    <div className="h-2.5 bg-muted-light rounded w-32" />
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
+                  Total Screen Time
+                </span>
+                <div className="flex items-center gap-3.5 mt-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-muted-light/50 flex items-center justify-center text-primary shrink-0">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base sm:text-lg font-black text-primary leading-none">
+                      {formatSecToHoursMins(screenTimeData?.totalSeconds ?? 0)}
+                    </h4>
+                    <p className="text-[10px] text-muted font-light mt-1">
+                      Rata-rata{" "}
+                      {formatSecToHoursMins(
+                        screenTimeData?.avgDailySeconds ?? 0,
+                      )}
+                      /hari
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Kebiasaan Teraktif */}
-            <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
-              <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
-                Kebiasaan Teraktif
-              </span>
-              <div className="space-y-2.5 mt-3">
-                {activeFlags.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-xs text-muted font-light opacity-65">
-                    Tidak ada kebiasaan buruk terdeteksi minggu ini 😊
+            {isFlagsLoading ? (
+              <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 animate-pulse">
+                <div className="h-2.5 bg-muted-light rounded w-24" />
+                <div className="space-y-2.5 mt-3">
+                  <div className="flex justify-between">
+                    <div className="h-3 bg-muted-light rounded w-24" />
+                    <div className="h-3 bg-muted-light rounded w-12" />
                   </div>
-                ) : (
-                  activeFlags.slice(0, 2).map((flag: any) => (
-                    <div
-                      key={flag.name}
-                      className="flex items-center justify-between text-xs gap-2"
-                    >
-                      <span className="font-semibold text-primary leading-tight">
-                        {flag.name}
-                      </span>
-                      <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
-                        {flag.count}/{flag.total} hari
-                      </span>
-                    </div>
-                  ))
-                )}
+                  <div className="flex justify-between">
+                    <div className="h-3 bg-muted-light rounded w-20" />
+                    <div className="h-3 bg-muted-light rounded w-12" />
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-card border border-border rounded-3xl p-5 flex flex-col justify-between shadow-xs min-h-36 hover:border-primary/20 hover:shadow-md transition-all duration-300">
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
+                  Kebiasaan Teraktif
+                </span>
+                <div className="space-y-2.5 mt-3">
+                  {activeFlags.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-xs text-muted font-light opacity-65">
+                      Tidak ada kebiasaan buruk terdeteksi minggu ini 😊
+                    </div>
+                  ) : (
+                    activeFlags.slice(0, 2).map((flag: any) => (
+                      <div
+                        key={flag.name}
+                        className="flex items-center justify-between text-xs gap-2"
+                      >
+                        <span className="font-semibold text-primary leading-tight">
+                          {flag.name}
+                        </span>
+                        <span className="text-[10px] text-muted font-bold shrink-0 bg-muted-light/40 px-2 py-0.5 rounded-md">
+                          {flag.count}/{flag.total} hari
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -463,8 +505,41 @@ export default function InsightPage() {
           )}
         </div>
 
-        {/* 1. New User Fallback Card */}
-        {!latestInsight && (
+        {/* 1. Loading State */}
+        {isLatestLoading ? (
+          <div className="space-y-6 animate-pulse">
+            {/* Kondisi Minggu Itu */}
+            <div className="p-6 rounded-3xl border border-border bg-card shadow-xs flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-muted-light/60 shrink-0" />
+              <div className="space-y-2 flex-1">
+                <div className="h-2.5 bg-muted-light rounded w-28" />
+                <div className="h-4 bg-muted-light rounded w-36" />
+                <div className="h-3 bg-muted-light rounded w-48" />
+              </div>
+            </div>
+            {/* 2 Cols */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
+                <div className="h-3.5 bg-muted-light rounded w-48" />
+                <div className="h-2.5 bg-muted-light rounded w-full" />
+                <div className="h-2.5 bg-muted-light rounded w-5/6" />
+              </div>
+              <div className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-xs space-y-3">
+                <div className="h-3.5 bg-muted-light rounded w-48" />
+                <div className="h-2.5 bg-muted-light rounded w-full" />
+                <div className="h-2.5 bg-muted-light rounded w-5/6" />
+              </div>
+            </div>
+            {/* Analisis */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="h-4 bg-muted-light rounded w-36" />
+              <div className="h-2.5 bg-muted-light rounded w-full" />
+              <div className="h-2.5 bg-muted-light rounded w-full" />
+              <div className="h-2.5 bg-muted-light rounded w-4/5" />
+            </div>
+          </div>
+        ) : !latestInsight ? (
+          /* 2. New User Fallback Card */
           <div className="bg-card border border-border rounded-3xl p-8 max-w-xl mx-auto text-center space-y-6 shadow-xs my-4">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-muted-light/60 flex items-center justify-center text-primary">
               <Brain className="w-8 h-8 text-primary animate-pulse" />
@@ -523,10 +598,8 @@ export default function InsightPage() {
               .
             </p>
           </div>
-        )}
-
-        {/* 2. Normal State (Loaded AI Insight) */}
-        {latestInsight && (
+        ) : (
+          /* 3. Normal State (Loaded AI Insight) */
           <div className="space-y-6">
             {/* Kondisi Minggu Itu */}
             {(() => {
@@ -660,7 +733,25 @@ export default function InsightPage() {
         </div>
 
         {/* Daftar Cards */}
-        {filteredPastInsights.length === 0 ? (
+        {isHistoryLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between h-40 animate-pulse"
+              >
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="h-3 bg-muted-light rounded w-28" />
+                    <div className="w-6 h-6 rounded-full bg-muted-light" />
+                  </div>
+                  <div className="h-4 bg-muted-light rounded w-3/4" />
+                </div>
+                <div className="h-3 bg-muted-light rounded w-24 mt-4" />
+              </div>
+            ))}
+          </div>
+        ) : filteredPastInsights.length === 0 ? (
           <div className="text-center p-8 border border-border rounded-3xl bg-muted-light/10 text-xs text-muted">
             Tidak ada insight lama untuk filter terpilih.
           </div>
@@ -691,7 +782,7 @@ export default function InsightPage() {
                     </h4>
                   </div>
                   <Link
-                    href={`/insight/${past.id}`}
+                    href={`/insight/detail?id=${past.id}`}
                     className="text-xs font-bold text-secondary flex items-center gap-1 hover:underline mt-2 self-start"
                   >
                     <span>Baca Selengkapnya</span>

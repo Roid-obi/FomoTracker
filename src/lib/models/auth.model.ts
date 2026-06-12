@@ -3,11 +3,8 @@ import { z } from "zod";
 import { table } from "@/lib/databases/schema";
 
 export namespace RegisterModel {
-  const baseUserInsert = createInsertSchema(table.users).omit({
-    id: true,
-    avatarUrl: true,
-    createdAt: true,
-    updatedAt: true,
+  const baseUserInsert = createInsertSchema(table.users).pick({
+    name: true,
   });
 
   export const registerRequest = baseUserInsert.extend({

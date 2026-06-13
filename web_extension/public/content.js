@@ -87,7 +87,13 @@
     if (location.href !== lastHref) {
       const oldHref = lastHref;
       lastHref = location.href;
-      chrome.runtime.sendMessage({ type: "HANDLE_SPA_NAVIGATION", oldUrl: oldHref, newUrl: location.href }).catch(() => {});
+      chrome.runtime
+        .sendMessage({
+          type: "HANDLE_SPA_NAVIGATION",
+          oldUrl: oldHref,
+          newUrl: location.href,
+        })
+        .catch(() => {});
       clearInterval(tickInterval);
       init();
     }
@@ -97,7 +103,9 @@
   // Flush on visibility hidden or page unload
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
-      chrome.runtime.sendMessage({ type: "FLUSH_SESSION", url: location.href }).catch(() => {});
+      chrome.runtime
+        .sendMessage({ type: "FLUSH_SESSION", url: location.href })
+        .catch(() => {});
     } else if (document.visibilityState === "visible") {
       // Resume ticking if visible again
       init();
@@ -105,7 +113,9 @@
   });
 
   window.addEventListener("pagehide", () => {
-    chrome.runtime.sendMessage({ type: "FLUSH_SESSION", url: location.href }).catch(() => {});
+    chrome.runtime
+      .sendMessage({ type: "FLUSH_SESSION", url: location.href })
+      .catch(() => {});
   });
 
   // Listen to messages from the web app to sync rules
@@ -114,7 +124,10 @@
 
     if (event.data && event.data.type === "FOMOTRACKER_SYNC_RULES") {
       try {
-        await chrome.runtime.sendMessage({ type: "SAVE_RULES", rules: event.data.rules });
+        await chrome.runtime.sendMessage({
+          type: "SAVE_RULES",
+          rules: event.data.rules,
+        });
         window.postMessage({ type: "FOMOTRACKER_SYNC_SUCCESS" }, "*");
       } catch (e) {
         // Extension context might be invalid
@@ -128,10 +141,10 @@
       }
     } else if (event.data && event.data.type === "FOMOTRACKER_SET_USER_INFO") {
       try {
-        await chrome.runtime.sendMessage({ 
-          type: "SET_USER_INFO", 
-          userId: event.data.userId, 
-          deviceId: event.data.deviceId 
+        await chrome.runtime.sendMessage({
+          type: "SET_USER_INFO",
+          userId: event.data.userId,
+          deviceId: event.data.deviceId,
         });
       } catch (e) {
         // Extension context might be invalid

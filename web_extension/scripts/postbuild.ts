@@ -5,9 +5,7 @@ import { existsSync } from "fs";
 const OUT_DIR = "./out";
 
 // Folders to rename: [oldName, newName]
-const RENAMES: [string, string][] = [
-  ["_next", "nextassets"],
-];
+const RENAMES: [string, string][] = [["_next", "nextassets"]];
 
 // Folders to just delete (not needed for extension)
 const DELETE_DIRS = ["_not-found"];
@@ -26,7 +24,10 @@ async function getAllFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-async function replaceInFile(filePath: string, replacements: [string, string][]) {
+async function replaceInFile(
+  filePath: string,
+  replacements: [string, string][],
+) {
   const textExtensions = [".html", ".js", ".css", ".json", ".txt", ".map"];
   if (!textExtensions.includes(extname(filePath))) return;
 

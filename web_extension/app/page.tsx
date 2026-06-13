@@ -44,8 +44,11 @@ function getDomain(url: string): string {
 
 const isExtension =
   typeof window !== "undefined" &&
-  typeof (window as unknown as Record<string, unknown>)["chrome"] !== "undefined" &&
-  !!(window as unknown as Record<string, { runtime?: { id?: string } }>)["chrome"]?.runtime?.id;
+  typeof (window as unknown as Record<string, unknown>)["chrome"] !==
+    "undefined" &&
+  !!(window as unknown as Record<string, { runtime?: { id?: string } }>)[
+    "chrome"
+  ]?.runtime?.id;
 
 async function sendMessage<T = unknown>(message: object): Promise<T> {
   if (!isExtension) return {} as T;
@@ -86,11 +89,7 @@ function StatusDot({ active }: { active: boolean }) {
       className={`inline-block w-2 h-2 rounded-full ${
         active ? "bg-[var(--success)]" : "bg-[var(--text-muted)]"
       }`}
-      style={
-        active
-          ? { boxShadow: "0 0 6px var(--success)" }
-          : {}
-      }
+      style={active ? { boxShadow: "0 0 6px var(--success)" } : {}}
     />
   );
 }
@@ -220,9 +219,15 @@ function RuleCard({
             color: "var(--text-secondary)",
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
-            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="11"
+            height="11"
+            fill="currentColor"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z" />
+            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0" />
           </svg>
           {rule.duration}m batas
         </div>
@@ -232,12 +237,16 @@ function RuleCard({
           <div
             className="flex items-center gap-1 text-xs rounded-lg px-2.5 py-1 ml-auto"
             style={{
-              background: limitReached ? "var(--danger-bg)" : "var(--bg-elevated)",
+              background: limitReached
+                ? "var(--danger-bg)"
+                : "var(--bg-elevated)",
               color: limitReached ? "var(--danger)" : "var(--text-muted)",
             }}
           >
             {limitReached ? "⏰" : "▶"}
-            {limitReached ? " Batas tercapai" : ` ${formatTime(sessionStatus.remaining)} tersisa`}
+            {limitReached
+              ? " Batas tercapai"
+              : ` ${formatTime(sessionStatus.remaining)} tersisa`}
           </div>
         )}
       </div>
@@ -310,7 +319,10 @@ function RuleModal({
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-            style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}
+            style={{
+              background: "var(--bg-hover)",
+              color: "var(--text-muted)",
+            }}
             aria-label="Tutup modal"
           >
             ✕
@@ -338,11 +350,9 @@ function RuleModal({
                 borderColor: urlError
                   ? "var(--danger)"
                   : url
-                  ? "var(--border-accent)"
-                  : "var(--border-subtle)",
-                boxShadow: url
-                  ? "0 0 0 3px rgba(6,39,67,0.1)"
-                  : "none",
+                    ? "var(--border-accent)"
+                    : "var(--border-subtle)",
+                boxShadow: url ? "0 0 0 3px rgba(6,39,67,0.1)" : "none",
               }}
               autoFocus
             />
@@ -466,7 +476,9 @@ export default function Home() {
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Poll active sessions
@@ -524,7 +536,7 @@ export default function Home() {
 
   const handleToggle = async (id: string) => {
     const updated = rules.map((r) =>
-      r.id === id ? { ...r, enabled: !r.enabled } : r
+      r.id === id ? { ...r, enabled: !r.enabled } : r,
     );
     setRules(updated);
     await persistRules(updated);
@@ -546,9 +558,7 @@ export default function Home() {
     setShowModal(true);
   };
 
-  const activeRules = rules.filter(
-    (r) => r.enabled && sessions[r.id]?.active
-  );
+  const activeRules = rules.filter((r) => r.enabled && sessions[r.id]?.active);
 
   return (
     <>
@@ -649,7 +659,10 @@ export default function Home() {
             <div className="flex items-center justify-center py-16">
               <div
                 className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
-                style={{ borderColor: "var(--accent-primary) transparent transparent transparent" }}
+                style={{
+                  borderColor:
+                    "var(--accent-primary) transparent transparent transparent",
+                }}
               />
             </div>
           ) : activeTab === "rules" ? (
@@ -750,7 +763,10 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
       >
         Belum ada aturan
       </h3>
-      <p className="text-xs mb-5 max-w-[200px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+      <p
+        className="text-xs mb-5 max-w-[200px] leading-relaxed"
+        style={{ color: "var(--text-muted)" }}
+      >
         Tambahkan situs web dan atur batas waktu untuk mulai melacak
       </p>
     </div>
@@ -766,9 +782,10 @@ function ActiveSessionCard({
   rule: Rule;
   status?: SessionStatus;
 }) {
-  const pct = status?.elapsed && rule.duration
-    ? Math.min(100, (status.elapsed / (rule.duration * 60)) * 100)
-    : 0;
+  const pct =
+    status?.elapsed && rule.duration
+      ? Math.min(100, (status.elapsed / (rule.duration * 60)) * 100)
+      : 0;
 
   return (
     <div
@@ -794,7 +811,10 @@ function ActiveSessionCard({
               Batas tercapai
             </div>
           ) : (
-            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+            <div
+              className="text-xs mt-0.5"
+              style={{ color: "var(--text-muted)" }}
+            >
               {formatTime(status?.elapsed || 0)} berlalu
             </div>
           )}
@@ -822,11 +842,12 @@ function ActiveSessionCard({
           className="h-full rounded-full transition-all duration-1000"
           style={{
             width: `${pct}%`,
-            background: pct >= 100
-              ? "var(--danger)"
-              : pct >= 75
-              ? "linear-gradient(90deg, var(--accent-primary), #f59e0b)"
-              : "linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))",
+            background:
+              pct >= 100
+                ? "var(--danger)"
+                : pct >= 75
+                  ? "linear-gradient(90deg, var(--accent-primary), #f59e0b)"
+                  : "linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))",
           }}
         />
       </div>

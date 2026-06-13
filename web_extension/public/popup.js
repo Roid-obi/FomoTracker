@@ -56,10 +56,13 @@ async function saveRules(updated) {
 
 // ── Session Polling ───────────────────────────────────────────────────────────
 function getSessionStateHash(sessionsObj) {
-  return Object.keys(sessionsObj).sort().map(k => {
-    const s = sessionsObj[k];
-    return `${k}:${s.active}`;
-  }).join("|");
+  return Object.keys(sessionsObj)
+    .sort()
+    .map((k) => {
+      const s = sessionsObj[k];
+      return `${k}:${s.active}`;
+    })
+    .join("|");
 }
 
 async function pollSessions() {
@@ -70,7 +73,7 @@ async function pollSessions() {
       const status = await new Promise((resolve) => {
         chrome.runtime.sendMessage(
           { type: "GET_SESSION_STATUS", url: rule.url },
-          (response) => resolve(response)
+          (response) => resolve(response),
         );
       });
       if (status && status.active) {
@@ -80,7 +83,7 @@ async function pollSessions() {
       // ignore
     }
   }
-  
+
   const oldHash = getSessionStateHash(sessions);
   const newHash = getSessionStateHash(newSessions);
   sessions = newSessions;
@@ -95,7 +98,7 @@ async function pollSessions() {
 
 function updateLiveTimers() {
   if (currentTab === "rules") {
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       const card = document.querySelector(`.rule-card[data-id="${rule.id}"]`);
       if (!card) return;
       const session = sessions[rule.id];
@@ -105,15 +108,15 @@ function updateLiveTimers() {
       if (isActive && session?.elapsed !== undefined) {
         liveChip = `<span class="live-chip muted">▶ ${formatTime(session.elapsed)} terlacak</span>`;
       }
-      
-      const statsContainer = card.querySelector('.rule-stats');
+
+      const statsContainer = card.querySelector(".rule-stats");
       if (statsContainer) {
-        const existingChip = statsContainer.querySelector('.live-chip');
+        const existingChip = statsContainer.querySelector(".live-chip");
         if (liveChip) {
           if (existingChip) {
             existingChip.outerHTML = liveChip;
           } else {
-            statsContainer.insertAdjacentHTML('beforeend', liveChip);
+            statsContainer.insertAdjacentHTML("beforeend", liveChip);
           }
         } else if (existingChip) {
           existingChip.remove();
@@ -121,9 +124,13 @@ function updateLiveTimers() {
       }
     });
   } else {
-    const activeSessions = rules.filter(r => r.enabled && sessions[r.id]?.active);
-    activeSessions.forEach(rule => {
-      const card = document.querySelector(`.session-card[data-id="${rule.id}"]`);
+    const activeSessions = rules.filter(
+      (r) => r.enabled && sessions[r.id]?.active,
+    );
+    activeSessions.forEach((rule) => {
+      const card = document.querySelector(
+        `.session-card[data-id="${rule.id}"]`,
+      );
       if (!card) return;
       const status = sessions[rule.id];
       const pct = 100;
@@ -132,13 +139,13 @@ function updateLiveTimers() {
 
       const subText = `<span style="color:var(--text-muted)">Melacak...</span>`;
 
-      const timerEl = card.querySelector('.session-timer');
+      const timerEl = card.querySelector(".session-timer");
       if (timerEl) timerEl.textContent = timerVal;
 
-      const subEl = card.querySelector('.session-sub');
+      const subEl = card.querySelector(".session-sub");
       if (subEl) subEl.innerHTML = subText;
 
-      const barEl = card.querySelector('.progress-bar');
+      const barEl = card.querySelector(".progress-bar");
       if (barEl) barEl.style.width = `${pct}%`;
     });
   }
@@ -157,7 +164,7 @@ function renderContent() {
     }
   } else {
     const activeSessions = rules.filter(
-      (r) => r.enabled && sessions[r.id]?.active
+      (r) => r.enabled && sessions[r.id]?.active,
     );
     if (activeSessions.length === 0) {
       content.innerHTML = `
@@ -175,7 +182,7 @@ function renderContent() {
 
   // Update active badge
   const activeCount = rules.filter(
-    (r) => r.enabled && sessions[r.id]?.active
+    (r) => r.enabled && sessions[r.id]?.active,
   ).length;
   const badge = document.getElementById("active-badge");
   if (activeCount > 0) {
@@ -277,7 +284,9 @@ function attachCardListeners() {
       const id = el.dataset.id;
 
       if (action === "toggle") {
-        rules = rules.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r));
+        rules = rules.map((r) =>
+          r.id === id ? { ...r, enabled: !r.enabled } : r,
+        );
         await saveRules(rules);
         renderContent();
         updateFooter();
@@ -306,7 +315,9 @@ function attachCardListeners() {
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     currentTab = tab.dataset.tab;
-    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+    document
+      .querySelectorAll(".tab")
+      .forEach((t) => t.classList.remove("active"));
     tab.classList.add("active");
     renderContent();
   });
@@ -318,8 +329,12 @@ document.getElementById("add-btn").addEventListener("click", () => openModal());
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function openModal(rule = null) {
   const modal = document.getElementById("modal-overlay");
-  document.getElementById("modal-title").textContent = rule ? "Edit Aturan" : "Aturan Baru";
-  document.getElementById("modal-save").textContent = rule ? "Simpan Perubahan" : "Tambah Aturan";
+  document.getElementById("modal-title").textContent = rule
+    ? "Edit Aturan"
+    : "Aturan Baru";
+  document.getElementById("modal-save").textContent = rule
+    ? "Simpan Perubahan"
+    : "Tambah Aturan";
   document.getElementById("edit-id").value = rule?.id || "";
   document.getElementById("name-input").value = rule?.name || "";
   document.getElementById("url-input").value = rule?.url || "";
@@ -397,7 +412,7 @@ async function checkAuth() {
   } else {
     appEl.style.display = "flex";
     authEl.style.display = "none";
-    
+
     // Proceed with initialization
     rules = await loadRules();
     renderContent();

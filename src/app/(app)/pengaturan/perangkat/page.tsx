@@ -50,7 +50,9 @@ export default function PerangkatSettingsPage() {
   const [sleepEnd, setSleepEnd] = useState("06:00");
 
   // Browser Extension URL Rules state (Syncs with extension)
-  const [webUrls, setWebUrls] = useState<{id: string, name?: string, url: string, enabled?: boolean}[]>([]);
+  const [webUrls, setWebUrls] = useState<
+    { id: string; name?: string; url: string; enabled?: boolean }[]
+  >([]);
 
   // Form states for adding web URL
   const [newWebName, setNewWebName] = useState("");
@@ -67,7 +69,7 @@ export default function PerangkatSettingsPage() {
     };
 
     window.addEventListener("message", handleMessage);
-    
+
     // Request initial data from extension after a slight delay
     const timer = setTimeout(() => {
       window.postMessage({ type: "FOMOTRACKER_GET_RULES" }, "*");
@@ -342,11 +344,14 @@ export default function PerangkatSettingsPage() {
   // Send user and device info to extension
   useEffect(() => {
     if (user?.id && browserDevice?.id && browserConnected) {
-      window.postMessage({
-        type: "FOMOTRACKER_SET_USER_INFO",
-        userId: user.id,
-        deviceId: browserDevice.id
-      }, "*");
+      window.postMessage(
+        {
+          type: "FOMOTRACKER_SET_USER_INFO",
+          userId: user.id,
+          deviceId: browserDevice.id,
+        },
+        "*",
+      );
     }
   }, [user?.id, browserDevice?.id, browserConnected]);
 
@@ -407,22 +412,30 @@ export default function PerangkatSettingsPage() {
       id: `web-${Date.now()}`,
       name: newWebName.trim(),
       url: url,
-      enabled: true
+      enabled: true,
     };
 
     const updatedRules = [...webUrls, newRule];
     setWebUrls(updatedRules);
-    window.postMessage({ type: "FOMOTRACKER_SYNC_RULES", rules: updatedRules }, "*");
+    window.postMessage(
+      { type: "FOMOTRACKER_SYNC_RULES", rules: updatedRules },
+      "*",
+    );
 
     setNewWebName("");
     setNewWebUrl("");
-    gooeyToast.success("Domain pemantauan berhasil ditambahkan dan disinkronkan ke Ekstensi!");
+    gooeyToast.success(
+      "Domain pemantauan berhasil ditambahkan dan disinkronkan ke Ekstensi!",
+    );
   };
 
   const handleDeleteWebUrl = (id: string) => {
     const updatedRules = webUrls.filter((item) => item.id !== id);
     setWebUrls(updatedRules);
-    window.postMessage({ type: "FOMOTRACKER_SYNC_RULES", rules: updatedRules }, "*");
+    window.postMessage(
+      { type: "FOMOTRACKER_SYNC_RULES", rules: updatedRules },
+      "*",
+    );
     gooeyToast.success("Domain pemantauan dihapus.");
   };
 

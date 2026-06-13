@@ -27,13 +27,7 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": [
-    "storage",
-    "tabs",
-    "alarms",
-    "activeTab",
-    "cookies"
-  ],
+  "permissions": ["storage", "tabs", "alarms", "activeTab", "cookies"],
   "host_permissions": [
     "<all_urls>",
     "http://localhost:3000/*",

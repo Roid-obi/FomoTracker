@@ -16,8 +16,7 @@ const yellowtail = Yellowtail({
 
 export const metadata: Metadata = {
   title: "FomoTracker — Pengelola Waktu",
-  description:
-    "Lacak waktu browsing Anda di situs web.",
+  description: "Lacak waktu browsing Anda di situs web.",
 };
 
 export default function RootLayout({
@@ -26,10 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="id"
-      className={`${poppins.variable} ${yellowtail.variable}`}
-    >
+    <html lang="id" className={`${poppins.variable} ${yellowtail.variable}`}>
       <body>{children}</body>
     </html>
   );

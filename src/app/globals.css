@@ -40,15 +40,6 @@
   --animate-float-slow: float-slow 8s ease-in-out infinite;
   --animate-float-medium: float-medium 6s ease-in-out infinite;
   --animate-float-fast: float-fast 5s ease-in-out infinite;
-
-  /* Custom SVG Animations */
-  --animate-bracket-pulse: bracket-pulse 3s ease-in-out infinite;
-  --animate-sparkle-primary: sparkle-primary 3s ease-in-out infinite;
-  --animate-sparkle-secondary: sparkle-secondary 4s ease-in-out infinite;
-  --animate-sand-drip: sand-drip 1.5s linear infinite;
-  --animate-chart-line: draw-chart 3s ease-out infinite alternate;
-  --animate-dot-pulse: dot-pulse 2s ease-in-out infinite;
-  --animate-draw-path: draw-path 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 body {
@@ -82,73 +73,6 @@ body {
   }
   50% {
     transform: translate3d(0, -6px, 0) rotate(4deg);
-  }
-}
-
-/* Custom SVG Keyframes */
-@keyframes bracket-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 0.85;
-  }
-}
-
-@keyframes sparkle-primary {
-  0%,
-  100% {
-    transform: scale(0.7) rotate(0deg);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scale(1.2) rotate(90deg);
-    opacity: 1;
-  }
-}
-
-@keyframes sparkle-secondary {
-  0%,
-  100% {
-    transform: scale(0.6) rotate(0deg);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.1) rotate(-90deg);
-    opacity: 0.8;
-  }
-}
-
-@keyframes sand-drip {
-  to {
-    stroke-dashoffset: -6;
-  }
-}
-
-@keyframes draw-chart {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes dot-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-}
-
-@keyframes draw-path {
-  to {
-    stroke-dashoffset: 0;
   }
 }
 

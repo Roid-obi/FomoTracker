@@ -22,7 +22,9 @@
     "@hookform/resolvers": "^5.4.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.1",
+    "@tanstack/query-sync-storage-persister": "^5.101.0",
     "@tanstack/react-query": "^5.100.11",
+    "@tanstack/react-query-persist-client": "^5.101.0",
     "axios": "^1.17.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
@@ -30,6 +32,7 @@
     "drizzle-zod": "^0.8.3",
     "framer-motion": "^12.40.0",
     "goey-toast": "^0.4.0",
+    "jimp": "^1.6.1",
     "lucide-react": "^1.17.0",
     "next": "16.2.6",
     "postgres": "^3.4.9",
@@ -37,6 +40,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.76.0",
     "recharts": "^3.8.1",
+    "sharp": "^0.35.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

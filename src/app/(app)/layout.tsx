@@ -83,6 +83,222 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const getTodayStr = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const date = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${date}`;
+  };
+
+  const prefetchPageQueries = (href: string) => {
+    const today = getTodayStr();
+
+    if (href === "/dashboard") {
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-status", today],
+        queryFn: async () => {
+          const res = await api.get(`/api/dashboard/status?date=${today}`);
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-flag", today],
+        queryFn: async () => {
+          const res = await api.get(`/api/dashboard/flag?date=${today}`);
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-hourly", today],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/dashboard/hourly-breakdown?date=${today}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-devices"],
+        queryFn: async () => {
+          const res = await api.get("/api/setting/device");
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-insight"],
+        queryFn: async () => {
+          const res = await api.get("/api/insight/latest");
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-breakdown", today],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/breakdown?startDate=${today}&endDate=${today}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dashboard-screentime", today],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/screen-time?startDate=${today}&endDate=${today}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["userSettings"],
+        queryFn: async () => {
+          const res = await api.get("/api/setting/user");
+          return res.data.data;
+        },
+      });
+    } else if (href === "/statistik") {
+      const getWeeklyRange = () => {
+        const now = new Date();
+        const day = now.getDay();
+        const diffToMonday = day === 0 ? -6 : 1 - day;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diffToMonday);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        const format = (d: Date) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const dt = String(d.getDate()).padStart(2, "0");
+          return `${y}-${m}-${dt}`;
+        };
+        return { startDate: format(monday), endDate: format(sunday) };
+      };
+      const range = getWeeklyRange();
+
+      queryClient.prefetchQuery({
+        queryKey: ["screenTime", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/screen-time?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["dailyBreakdown", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/statistic/daily-breakdown?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["heatmap", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/statistic/heatmap?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["breakdown", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/breakdown?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["flags", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/statistic/flags?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["userSettings"],
+        queryFn: async () => {
+          const res = await api.get("/api/setting/user");
+          return res.data.data;
+        },
+      });
+    } else if (href === "/insight") {
+      const getWeeklyRange = () => {
+        const now = new Date();
+        const day = now.getDay();
+        const diffToMonday = day === 0 ? -6 : 1 - day;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diffToMonday);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        const format = (d: Date) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const dt = String(d.getDate()).padStart(2, "0");
+          return `${y}-${m}-${dt}`;
+        };
+        return { startDate: format(monday), endDate: format(sunday) };
+      };
+      const range = getWeeklyRange();
+
+      queryClient.prefetchQuery({
+        queryKey: ["latestInsight"],
+        queryFn: async () => {
+          const res = await api.get("/api/insight/latest");
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["insight-history"],
+        queryFn: async () => {
+          const res = await api.get("/api/insight/history?limit=50");
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["thisWeekScreenTime", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/screen-time?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["thisWeekFlags", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/statistic/flags?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+      queryClient.prefetchQuery({
+        queryKey: ["thisWeekScoreAverage", range.startDate, range.endDate],
+        queryFn: async () => {
+          const res = await api.get(
+            `/api/statistic/score-average?startDate=${range.startDate}&endDate=${range.endDate}`,
+          );
+          return res.data.data;
+        },
+      });
+    } else if (href.startsWith("/pengaturan")) {
+      queryClient.prefetchQuery({
+        queryKey: ["userSettings"],
+        queryFn: async () => {
+          const res = await api.get("/api/setting/user");
+          return res.data.data;
+        },
+      });
+    }
+  };
+
   // Load tracked apps to pass to setupBackgroundSync
   const { data: trackedAppsData } = useQuery({
     queryKey: ["trackedApps"],
@@ -332,6 +548,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onMouseEnter={() => prefetchPageQueries(item.href)}
                   className={`flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium transition-all group font-poppins cursor-pointer ${
                     active
                       ? "bg-primary text-white shadow-sm"
@@ -353,14 +570,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* User profile section & logout */}
         <div className="border-t border-border pt-4 space-y-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border">
-              {user?.name
-                ?.trim()
-                .split(" ")
-                .map((kata) => kata.charAt(0))
-                .join("")
-                .substring(0, 2)
-                .toUpperCase() ?? "?"}
+            <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border overflow-hidden">
+              {user?.avatarUrl ? (
+                // biome-ignore lint/performance/noImgElement: avatar is dynamic Supabase URL
+                <img
+                  src={user.avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                (user?.name
+                  ?.trim()
+                  .split(" ")
+                  .map((kata) => kata.charAt(0))
+                  .join("")
+                  .substring(0, 2)
+                  .toUpperCase() ?? "?")
+              )}
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-semibold truncate font-poppins text-primary">
@@ -470,6 +696,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link
               key={item.name}
               href={item.href}
+              onMouseEnter={() => prefetchPageQueries(item.href)}
+              onTouchStart={() => prefetchPageQueries(item.href)}
               className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all relative ${active ? "text-primary" : "text-muted"}`}
               aria-label={item.name}
             >

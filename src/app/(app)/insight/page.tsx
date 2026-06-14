@@ -244,23 +244,6 @@ export default function InsightPage() {
     return "heavy";
   };
 
-  if (
-    isLatestLoading ||
-    isHistoryLoading ||
-    isScreenTimeLoading ||
-    isFlagsLoading ||
-    isScoreAverageLoading
-  ) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <div className="text-xs font-bold text-muted animate-pulse">
-          Membuat narasi insight AI...
-        </div>
-      </div>
-    );
-  }
-
   // Parse this week's data
   const thisWeekScore = scoreAverageData?.averageScore ?? 0;
   const thisWeekStatus = getStatusFromScore(thisWeekScore);

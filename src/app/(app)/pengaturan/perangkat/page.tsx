@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useUser } from "@/hooks/useUser";
 import {
   checkAndRequestUsagePermission,
   fetchInstalledApps,
@@ -28,7 +29,6 @@ import type {
   TrackedAppModel,
 } from "@/lib/models/setting.model";
 import { api } from "@/lib/utils/api";
-import { useUser } from "@/hooks/useUser";
 
 export default function PerangkatSettingsPage() {
   const { data: user } = useUser();
@@ -387,7 +387,7 @@ export default function PerangkatSettingsPage() {
         });
       } else {
         gooeyToast.error("Browser Extension belum terinstall!");
-        window.open("/panduan#install-extension", "_blank");
+        window.open("/instalasi?tab=extension", "_blank");
       }
     }
   };

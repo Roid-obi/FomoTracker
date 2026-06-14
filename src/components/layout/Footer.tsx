@@ -43,10 +43,10 @@ export default function Footer() {
                 Beranda
               </Link>
               <Link
-                href="/panduan"
+                href="/instalasi"
                 className="hover:text-primary transition-colors"
               >
-                Panduan Pengguna
+                Instalasi
               </Link>
               <Link
                 href="/tentang"

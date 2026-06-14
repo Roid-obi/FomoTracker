@@ -382,12 +382,12 @@ export default function Home() {
                   perangkat Android-mu menggunakan Android Usage Stats API.
                 </p>
               </div>
-              <button
-                type="button"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white hover:bg-secondary font-semibold transition-all cursor-pointer font-poppins text-sm w-full sm:w-auto"
+              <Link
+                href="/instalasi?tab=android"
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white hover:bg-secondary font-semibold transition-all cursor-pointer font-poppins text-sm w-full sm:w-auto"
               >
                 <Download className="w-4 h-4" /> Unduh Aplikasi
-              </button>
+              </Link>
             </div>
 
             {/* Card 2: Browser Extension */}
@@ -404,12 +404,12 @@ export default function Home() {
                   laptop/komputer tanpa perlu menginstall aplikasi tambahan.
                 </p>
               </div>
-              <button
-                type="button"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white hover:bg-secondary font-semibold transition-all cursor-pointer font-poppins text-sm w-full sm:w-auto"
+              <Link
+                href="/instalasi?tab=extension"
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white hover:bg-secondary font-semibold transition-all cursor-pointer font-poppins text-sm w-full sm:w-auto"
               >
                 <Download className="w-4 h-4" /> Pasang Ekstensi
-              </button>
+              </Link>
             </div>
           </div>
         </div>

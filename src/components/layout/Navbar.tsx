@@ -65,14 +65,14 @@ export default function Navbar() {
               Tentang
             </Link>
             <Link
-              href="/panduan"
+              href="/instalasi"
               className={`font-poppins transition-colors ${
-                pathname === "/panduan"
+                pathname === "/instalasi"
                   ? "text-secondary font-semibold"
                   : "text-primary/80 hover:text-primary"
               }`}
             >
-              Panduan
+              Instalasi
             </Link>
           </nav>
 
@@ -154,15 +154,15 @@ export default function Navbar() {
               Tentang
             </Link>
             <Link
-              href="/panduan"
+              href="/instalasi"
               onClick={handleLinkClick}
               className={`text-sm font-medium transition-colors px-2 py-2 rounded-lg hover:bg-muted-light font-poppins ${
-                pathname === "/panduan"
+                pathname === "/instalasi"
                   ? "text-secondary font-semibold bg-muted-light/55"
                   : "hover:text-secondary"
               }`}
             >
-              Panduan
+              Instalasi
             </Link>
             {user ? (
               <Link

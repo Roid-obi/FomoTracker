@@ -1,0 +1,352 @@
+A
+WEB TECHNOLOGY COMPETITION
+
+FOMOTRACKER: PLATFORM DIGITAL WELLBEING BERBASIS AI UNTUK DETEKSI PERILAKU DIGITAL DAN RISIKO PENGGUNAAN MEDIA SOSIAL BERLEBIHAN
+
+ 
+
+
+Disusun Oleh:
+Roid Robih (V3424074)
+Surya Putra Pamungkas (V3424101)
+Muh Zidan Arif Saputra (V3424084)
+
+Dosen Pembimbing:
+Agus Purbayu, S.Si., M.Kom. 
+
+
+UNIVERSITAS SEBELAS MARET
+SURAKARTA
+2026
+
+
+
+DAFTAR ISI
+BAB I – PENDAHULUAN	1
+1.1 Latar Belakang	1
+1.2 Rumusan Masalah	2
+1.3 Tujuan Pengembangan	2
+1.4 Manfaat Pengembangan	2
+1.5 Batasan Masalah	3
+BAB II – SOLUSI DAN INOVASI	3
+2.1 Deskripsi Solusi	3
+2.2 Inovasi Teknologi	4
+2.3 Target Pengguna	6
+2.4 Keunggulan Solusi	6
+2.5 Keterkaitan dengan Sustainable Development Goals (SDGs)	7
+BAB III – METODOLOGI PENGEMBANGAN	7
+3.1 Analisis Kebutuhan Sistem	7
+3.2 Arsitektur Sistem	8
+3.3 Perancangan Sistem	10
+3.4 Implementasi Teknologi	11
+BAB IV – HASIL DAN PEMBAHASAN	11
+4.1 Implementasi Sistem	11
+4.2 Fitur dan Fungsionalitas Aplikasi	11
+4.3 Tampilan Antarmuka (UI/UX)	12
+4.4 Keunggulan Sistem	14
+BAB V – PENUTUP	15
+5.1 Kesimpulan	15
+5.2 Rencana Pengembangan	15
+REFERENSI	16
+LAMPIRAN	17
+
+
+DAFTAR GAMBAR
+
+Gambar 3.1 Arsitektur Sistem FomoTracker	9
+Gambar 4.1 Dashboard Behavioral Analytics	12
+Gambar 4.2 AI Insight Recommendation	12
+Gambar 4.3 Risk Level Monitoring	13
+Gambar 4.4 Mobile Activity Tracking	13
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DAFTAR  TABEL
+Tabel 2.1 Perbandingan Solusi Existing	6
+Tabel 3.1 Kebutuhan Fungsional Sistem	7
+Tabel 3.2 Kebutuhan Non-Fungsional Sistem	8
+
+
+BAB I
+PENDAHULUAN
+
+1.1 Latar Belakang
+Perkembangan teknologi digital dan media sosial telah mengubah pola interaksi, komunikasi, dan aktivitas masyarakat secara signifikan, terutama pada generasi muda. Platform media sosial seperti Instagram, TikTok, YouTube, dan Facebook telah menjadi bagian penting dalam aktivitas sehari-hari. Tingginya intensitas penggunaan media sosial memberikan berbagai manfaat dalam akses informasi dan komunikasi, namun juga menimbulkan berbagai risiko terhadap kesehatan mental, produktivitas, dan keseimbangan kehidupan digital pengguna.
+
+Penggunaan media sosial yang berlebihan dapat memunculkan perilaku digital tidak sehat seperti compulsive checking, screen dependency, aktivitas digital larut malam, distraksi saat jam produktif, serta penurunan fokus belajar dan produktivitas akademik. Kondisi tersebut berkaitan erat dengan fenomena Fear of Missing Out (FoMO), yaitu kecemasan ketika seseorang merasa tertinggal informasi, interaksi sosial, maupun tren digital yang berkembang di media sosial.
+
+Menurut penelitian yang dilakukan oleh Bányai et al. (2017), problematic social media use memiliki keterkaitan erat dengan perilaku adiktif digital dan peningkatan intensitas penggunaan media sosial secara berlebihan (Bányai et al., 2017). Penelitian lain oleh Peng dan Liao (2023) menunjukkan bahwa penggunaan media sosial bermasalah memiliki hubungan erat dengan tingkat stres, depresi, kecemasan, dan gangguan tidur pada pengguna (Peng & Liao, 2023). Selain itu, Giunchiglia et al. (2020) menjelaskan bahwa penggunaan media sosial yang berlebihan dapat memengaruhi performa akademik serta menurunkan produktivitas pengguna akibat adanya intervensi aktivitas digital pada jam belajar (Giunchiglia et al., 2020).
+
+Fenomena digital addiction juga semakin meningkat seiring berkembangnya attention economy dan algoritma media sosial yang dirancang untuk mempertahankan keterlibatan pengguna selama mungkin pada platform digital. Montag dan Walla (2016) menjelaskan bahwa perkembangan teknologi digital modern dapat meningkatkan kecenderungan perilaku adiktif digital apabila tidak diimbangi dengan kontrol penggunaan yang baik (Montag & Walla, 2016).
+
+Meskipun berbagai sistem operasi smartphone telah menyediakan fitur digital wellbeing bawaan, sebagian besar fitur tersebut masih terbatas pada visualisasi screen time dan pembatasan durasi penggunaan aplikasi. Sistem yang tersedia umumnya belum mampu melakukan analisis perilaku digital secara mendalam seperti deteksi compulsive checking, aktivitas digital larut malam, continuous scrolling behavior, maupun analisis pola distraksi pengguna secara lintas perangkat.
+
+Selain itu, sebagian besar aplikasi monitoring penggunaan digital belum menyediakan insight personal berbasis Artificial Intelligence (AI) yang mampu membantu pengguna memahami pola perilaku digital mereka secara lebih komprehensif (Sun et al., 2022). Padahal, pendekatan berbasis behavioral analytics dan AI dapat dimanfaatkan untuk menghasilkan rekomendasi digital wellbeing yang lebih personal dan adaptif terhadap kebiasaan pengguna secara real-time.
+
+Berdasarkan permasalahan tersebut, dikembangkan FomoTracker, yaitu platform digital wellbeing berbasis AI untuk deteksi perilaku digital dan risiko penggunaan media sosial berlebihan. FomoTracker dirancang sebagai ekosistem digital terintegrasi lintas perangkat yang terdiri dari tiga komponen utama: aplikasi web (Web Application) sebagai pusat dashboard analisis behavioral analytics dan AI-generated insights, ekstensi peramban (Browser Extension) untuk melacak aktivitas berselancar media sosial dari perangkat desktop/laptop, serta aplikasi Android (Android Application) yang dikembangkan dari web menggunakan Capacitorjs sebagai wrapper untuk melacak metadata aktivitas penggunaan aplikasi mobile melalui integrasi Android Usage Stats API.
+
+FomoTracker memanfaatkan pendekatan behavioral analytics untuk mendeteksi pola penggunaan media sosial berlebihan berdasarkan indikator terukur seperti screen time harian, frekuensi membuka aplikasi, aktivitas digital larut malam, durasi penggunaan kontinu, dan aktivitas media sosial pada jam produktif. Sistem kemudian mengolah data tersebut untuk menghasilkan behavioral score, risk level analysis, smart notification berbasis pemicu perilaku, serta personalized recommendation berbasis AI yang interaktif.
+
+Pengembangan FomoTracker mendukung implementasi Sustainable Development Goals (SDGs), khususnya SDG 3 mengenai Good Health and Well-Being (kesehatan mental digital), SDG 4 mengenai Quality Education (pengurangan distraksi akademik), serta SDG 8 mengenai Decent Work and Economic Growth (peningkatan produktivitas kerja).
+
+1.2 Rumusan Masalah
+1. Bagaimana membangun ekosistem digital wellbeing terintegrasi (aplikasi web, ekstensi peramban, dan aplikasi Android) untuk memantau penggunaan media sosial secara lintas perangkat?
+2. Bagaimana mendeteksi tingkat risiko perilaku digital pengguna secara presisi menggunakan metode weighted risk scoring berbasis indikator aktivitas digital?
+3. Bagaimana memberikan insight personal dan rekomendasi digital wellbeing yang adaptif menggunakan asisten kecerdasan buatan (AI)?
+
+1.3 Tujuan Pengembangan
+1. Mengembangkan ekosistem FomoTracker terintegrasi yang terdiri dari aplikasi web utama, browser extension untuk desktop tracking, dan aplikasi Android berbasis web (Capacitor) untuk pelacakan mobile.
+2. Membangun engine behavioral analytics lintas platform untuk mendeteksi kebiasaan digital pengguna.
+3. Merancang sistem penilaian risiko (risk scoring) berbasis data untuk mengklasifikasikan tingkat risiko digital wellbeing pengguna.
+4. Mengintegrasikan kecerdasan buatan (LLM API) guna menyajikan analisis perilaku, rekomendasi personal, dan asisten interaktif (FomoAI Chat Assistant).
+
+1.4 Manfaat Pengembangan
+A. Bagi Pengguna
+1. Membantu mendeteksi dan menyadari pola kebiasaan penggunaan media sosial secara lintas perangkat.
+2. Meningkatkan kesadaran terhadap risiko kesehatan mental akibat penggunaan digital yang berlebihan.
+3. Memberikan intervensi preventif berupa rekomendasi personal dan asisten bimbingan berbasis AI untuk membangun kebiasaan digital yang lebih sehat.
+
+B. Bagi Dunia Pendidikan
+1. Membantu mengurangi distraksi digital pada pelajar dan mahasiswa selama jam produktif belajar.
+2. Mendukung peningkatan fokus belajar dan produktivitas akademik.
+
+C. Bagi Pengembangan Teknologi
+1. Mengimplementasikan kecerdasan buatan (AI) dan behavioral analytics dalam domain digital wellbeing.
+2. Mengembangkan integrasi sistem monitoring lintas perangkat (Desktop Web Extension dan Android Capacitor App) dengan satu pusat data web dashboard.
+3. Mendukung perwujudan SDGs melalui inovasi teknologi yang relevan dengan kebutuhan kesehatan mental modern.
+
+1.5 Batasan Masalah
+1. Sistem berjalan pada platform web utama, peramban berbasis Chromium (melalui browser extension), dan perangkat Android (melalui aplikasi web yang dibungkus menggunakan Capacitor).
+2. Pemantauan dibatasi hanya pada metadata aktivitas penggunaan media sosial (seperti nama situs/aplikasi, durasi, frekuensi buka, dan stempel waktu aktivitas).
+3. Sistem dirancang secara privacy-aware, sehingga tidak merekam, membaca, atau mengakses isi pesan, konten obrolan, media pribadi, maupun data sensitif pengguna lainnya.
+4. Pengembangan sistem difokuskan pada penyediaan fungsionalitas utama (Minimum Viable Product).
+
+BAB II
+SOLUSI DAN INOVASI
+
+2.1 Deskripsi Solusi
+FomoTracker merupakan platform digital wellbeing berbasis AI yang dirancang untuk memantau, menganalisis, dan memberikan intervensi terhadap perilaku penggunaan media sosial yang berlebihan melalui pendekatan behavioral analytics lintas perangkat. 
+
+Sistem FomoTracker terdiri atas tiga komponen utama yang saling terintegrasi dalam satu ekosistem:
+1. **Web Application (Aplikasi Web)**: Berperan sebagai pusat kendali dan visualisasi data. Dashboard web menyediakan visualisasi data interaktif, kalkulasi tingkat risiko (risk level), asisten interaktif berbasis kecerdasan buatan (FomoAI Chat Assistant), serta rekapitulasi performa digital wellbeing mingguan.
+2. **Browser Extension (Ekstensi Peramban)**: Berperan sebagai modul pelacak (tracker) aktivitas media sosial pada perangkat desktop atau laptop. Ekstensi ini berjalan secara background pada peramban web berbasis Chromium untuk mencatat secara real-time durasi kunjungan aktif pengguna pada domain media sosial yang dipantau (seperti Instagram, TikTok, YouTube, dan Facebook).
+3. **Android Application (Aplikasi Android)**: Berperan sebagai modul pelacak aktivitas media sosial pada perangkat mobile. Aplikasi Android ini dibangun dari kode aplikasi web utama (menggunakan Capacitorjs sebagai pembungkus aplikasi web) dengan integrasi fungsionalitas native Android Usage Stats API. Fungsionalitas native ini memungkinkan sistem untuk memperoleh metadata screen time harian dan frekuensi membuka aplikasi media sosial di ponsel secara otomatis dan efisien.
+
+Seluruh data aktivitas digital dari ekstensi peramban dan aplikasi Android akan disinkronisasikan ke backend system secara berkala. Sistem kemudian memproses data tersebut menggunakan behavioral analytics engine untuk mengukur tingkat kestabilan digital wellbeing pengguna dan memberikan insight adaptif berbasis AI.
+
+2.2 Inovasi Teknologi dan Dasar Ilmiah Indikator
+FomoTracker menghadirkan beberapa inovasi teknologi utama sebagai solusi preventif dalam mengatasi problematic social media use:
+
+1. **AI-Powered Lintas Perangkat (Web, Extension, dan Android)**
+Berbeda dengan fitur wellbeing bawaan sistem operasi (seperti Android Digital Wellbeing atau iOS Screen Time) yang terbatas pada pemantauan satu perangkat fisik saja, FomoTracker mengintegrasikan data pemakaian media sosial pengguna dari perangkat mobile (Android) dan desktop (Browser Extension) ke dalam satu profil pengguna terpusat pada Web Application. Hal ini memberikan gambaran yang lebih akurat mengenai perilaku digital pengguna secara holistik.
+
+2. **Sistem Penilaian Risiko Berbasis Indikator Perilaku Ilmiah**
+FomoTracker menggunakan pendekatan weighted behavioral scoring untuk mendeteksi potensi risiko penggunaan media sosial berlebihan berdasarkan lima indikator perilaku digital utama yang didasarkan pada landasan ilmiah:
+- **Usage Duration (Durasi Penggunaan)**: Mengukur total durasi aktif screen time penggunaan media sosial harian. Durasi paparan media sosial yang terlalu tinggi merupakan indikator awal dari problematic social media use yang berkorelasi dengan perilaku adiktif digital (Bányai et al., 2017) dan penurunan kontrol diri akibat paparan berlebih (Montag & Walla, 2016).
+- **Open Frequency (Frekuensi Membuka Aplikasi)**: Mengukur seberapa sering pengguna membuka aplikasi atau tab media sosial dalam sehari. Frekuensi tinggi mendeteksi kecenderungan compulsive checking behavior, yang dipicu oleh kecemasan psikologis takut tertinggal informasi atau Fear of Missing Out (FoMO) (Przybylski et al., 2013), serta kebiasaan mengecek notifikasi secara repetitif (Kuss & Griffiths, 2017).
+- **Midnight Usage (Aktivitas Larut Malam)**: Mengukur durasi penggunaan media sosial selama rentang jam tidur (jam malam yang ditentukan saat onboarding). Aktivitas scrolling larut malam ini berkorelasi langsung dengan gangguan higienitas tidur, yang memicu gejala stres, kecemasan, insomnia, dan penurunan kesehatan mental (Peng & Liao, 2023; Bányai et al., 2017).
+- **Continuous Usage (Penggunaan Terus-Menerus Tanpa Jeda)**: Mengukur durasi sesi pemakaian media sosial kontinu tanpa adanya jeda istirahat (doomscrolling). Ketidakmampuan membatasi atau menghentikan sesi penggunaan mencerminkan hilangnya kontrol regulasi diri (loss of control) yang merupakan elemen inti dalam Bergen Social Media Addiction Scale (BSMAS) (Watson et al., 2022; Montag & Walla, 2016).
+- **Productivity Hour Usage (Penggunaan pada Jam Produktif)**: Mengukur pemakaian media sosial selama rentang waktu produktif yang diset oleh pengguna. Penggunaan media sosial selama jam produktif memicu task-switching (peralihan fokus) yang menurunkan efisiensi kognitif secara signifikan dan mengganggu performa akademis atau kerja (Giunchiglia et al., 2020; Rosen et al., 2013).
+
+3. **Risk Scoring System**
+FomoTracker mengimplementasikan model perhitungan tingkat risiko otomatis (weighted risk scoring) berdasarkan bobot kontribusi masing-masing indikator perilaku di atas. Skor akhir diklasifikasikan menjadi:
+- **Low Risk (Skor 0-30)**: Pola penggunaan terkendali dan seimbang.
+- **Moderate Risk (Skor 31-60)**: Terdeteksi indikasi distraksi sedang dan scroll larut malam sesekali.
+- **High Risk (Skor 61-100)**: Terdeteksi pola checking kompulsif, doomscrolling intensif, serta distraksi tinggi pada jam produktif dan jam tidur.
+
+4. **AI Insight & FomoAI Chat Assistant**
+FomoTracker mengintegrasikan Large Language Model (LLM API) untuk memproses data statistik mentah menjadi narasi saran digital wellbeing yang dipersonalisasi sesuai dengan perilaku unik pengguna (Sun et al., 2022). Pengguna juga dapat berkonsultasi secara dua arah melalui FomoAI Chat Assistant mengenai tips produktivitas dan metode penanganan FOMO.
+
+5. **Privacy-Aware Digital Intervention**
+Sistem memprioritaskan privasi pengguna dengan hanya mentransfer metadata durasi dan stempel waktu aktivitas tanpa pernah memantau, membaca, atau menyimpan isi percakapan, media, maupun data sensitif pengguna lainnya (World Health Organization, 2022).
+
+2.3 Target Pengguna
+- **Pelajar dan Mahasiswa**: Kelompok usia akademis yang sangat rentan mengalami penurunan prestasi akibat distraksi digital di kelas (Giunchiglia et al., 2020).
+- **Generasi Muda (Gen Z dan Milenial)**: Kelompok dengan intensitas interaksi media sosial tertinggi yang memiliki tingkat risiko kecemasan FoMO terbesar (Przybylski et al., 2013).
+- **Pengguna Peduli Digital Wellbeing**: Individu yang secara sadar ingin mengevaluasi perilaku digital mereka dan meningkatkan efisiensi waktu harian.
+- **Institusi Pendidikan/Sekolah**: Sebagai platform rekomendasi untuk membantu siswa menjaga konsentrasi belajar dari gangguan gawai.
+
+2.4 Keunggulan Solusi
+FomoTracker menawarkan solusi digital wellbeing yang lebih komprehensif dibandingkan dengan sistem monitoring konvensional.
+
+Tabel 2.1 Perbandingan Solusi Existing
+| Fitur / Parameter | Digital Wellbeing Bawaan OS (Android/iOS) | Aplikasi Pelacak Waktu Konvensional | FomoTracker (Web + Ext + Android) |
+| :--- | :---: | :---: | :---: |
+| Screen Time Monitoring | ✓ | ✓ | ✓ |
+| Pelacakan Lintas Perangkat (Mobile + Desktop) | ✗ | ✗ | ✓ |
+| Analisis Perilaku Digital Mendalam | ✗ | ✗ | ✓ |
+| Deteksi Compulsive Checking & Midnight Scrolling | ✗ | ✗ | ✓ |
+| Risk Level Assessment Terukur | ✗ | ✗ | ✓ |
+| Asisten Konsultasi AI & Rekomendasi Personal | ✗ | ✗ | ✓ |
+| Jaminan Keamanan Data (Privacy-Aware) | ✓ | Tergantung Vendor | ✓ |
+| Pusat Dashboard Web Analytics Interaktif | ✗ | ✗ | ✓ |
+
+Berdasarkan perbandingan di atas, FomoTracker memberikan keunggulan telak dalam hal kelengkapan analisis perilaku berbasis landasan ilmiah dan kapabilitas intervensi interaktif berbasis AI.
+
+2.5 Keterkaitan dengan Sustainable Development Goals (SDGs)
+- **SDG 3 – Good Health and Well-Being**: FomoTracker berkontribusi pada kesehatan mental pengguna dengan mendeteksi dan mengintervensi perilaku kecanduan media sosial larut malam yang berdampak buruk pada kualitas tidur dan kesehatan mental (Peng & Liao, 2023).
+- **SDG 4 – Quality Education**: Dengan melacak dan membatasi distraksi media sosial pada jam produktif/belajar, platform ini membantu mempertahankan konsentrasi belajar pelajar untuk meningkatkan efektivitas pendidikan (Giunchiglia et al., 2020; Rosen et al., 2013).
+- **SDG 8 – Decent Work and Economic Growth**: Membantu pekerja profesional mengurangi distraksi media sosial selama jam kerja, meningkatkan efisiensi waktu, serta mendongkrak produktivitas kerja harian secara berkelanjutan.
+- **SDG 9 – Industry, Innovation and Infrastructure**: Mengimplementasikan inovasi teknologi web modern, integrasi multi-platform (Next.js, Capacitor, Chrome Extension), dan teknologi AI (LLM) untuk menyelesaikan permasalahan sosial di era digital (Sun et al., 2022).
+
+BAB III
+METODOLOGI PENGEMBANGAN
+
+3.1 Analisis Kebutuhan Sistem
+Tabel 3.1 Kebutuhan Fungsional Sistem
+| No | Kebutuhan Fungsional | Deskripsi Sistem |
+| :--- | :--- | :--- |
+| 1 | Deteksi Aktivitas Mobile | Sistem (Android App) mampu memantau penggunaan aplikasi media sosial secara otomatis via Android Usage Stats API. |
+| 2 | Deteksi Aktivitas Desktop | Sistem (Browser Extension) mampu mencatat durasi kunjungan tab aktif situs media sosial secara real-time. |
+| 3 | Sinkronisasi Data Terpusat | Sistem mampu menyinkronkan data pemakaian dari peramban desktop dan perangkat mobile ke basis data utama. |
+| 4 | Penghitungan Indikator Perilaku | Sistem mampu menghitung parameter screen time, frekuensi buka, jam malam, penggunaan kontinu, dan jam produktif. |
+| 5 | Evaluasi Skor Perilaku | Sistem mampu mengolah metadata aktivitas harian menjadi behavioral score (0-100). |
+| 6 | Klasifikasi Tingkat Risiko | Sistem mampu mengklasifikasikan tingkat risiko perilaku digital pengguna (Low, Moderate, High Risk). |
+| 7 | Dashboard Visual Interaktif | Aplikasi web mampu menampilkan visualisasi data statistik, riwayat aktivitas, dan grafik tren penggunaan. |
+| 8 | Rekomendasi Cerdas Berbasis AI | Modul AI (LLM) mampu menghasilkan narasi evaluasi mingguan dan saran wellbeing yang dipersonalisasi. |
+| 9 | Konsultasi Interaktif (FomoAI) | Sistem menyediakan chat assistant interaktif (FomoAI) berbasis LLM untuk tanya-jawab seputar digital wellbeing. |
+| 10 | Smart Notification Trigger | Sistem mampu mengirimkan notifikasi peringatan (warnings/reminders) berdasarkan stempel waktu perilaku yang buruk. |
+
+Tabel 3.2 Kebutuhan Non-Fungsional Sistem
+| No | Kebutuhan Non-Fungsional | Kriteria Parameter |
+| :--- | :--- | :--- |
+| 1 | Keamanan & Privasi Data | Sistem bersifat privacy-aware, hanya melacak metadata durasi dan frekuensi tanpa mengakses konten obrolan. |
+| 2 | Kinerja & Efisiensi Daya | Pelacak background harian pada Android dioptimalkan agar minimal dalam konsumsi baterai dan RAM. |
+| 3 | Kemudahan Penggunaan | Antarmuka web dashboard didesain dengan visualisasi modern, responsif, dan mudah dibaca (user-friendly). |
+| 4 | Skalabilitas Database | Struktur basis data dan API mampu melayani sinkronisasi data paralel dari ribuan perangkat klien tanpa lag. |
+| 5 | Kompatibilitas Ekstensi | Ekstensi browser kompatibel dengan semua peramban berbasis Chromium (Google Chrome, Microsoft Edge, Brave). |
+| 6 | Portabilitas Aplikasi | Aplikasi Android dikemas menggunakan Capacitorjs untuk memudahkan pembungkusan dan instalasi berbasis APK. |
+
+3.2 Arsitektur Sistem
+FomoTracker mengadopsi pendekatan Client-Server Architecture terdistribusi yang membagi proses pengumpulan data pada sisi klien dan pemrosesan analisis pada sisi server. 
+
+Arsitektur FomoTracker terbagi menjadi lima layer utama yang terintegrasi:
+1. **Client Tracking Layer (Klien Pelacak)**
+   - **Android Client**: Berfungsi melacak screen time dan open frequency aplikasi media sosial pada perangkat Android secara real-time via Android Usage Stats API.
+   - **Browser Extension Client**: Berfungsi melacak durasi aktif kunjungan tab peramban web pada situs media sosial di perangkat desktop/laptop.
+2. **Web Presentation Layer (Dashboard Utama)**
+   - Dashboard web dibangun menggunakan Next.js dengan Server-Side Rendering (SSR) untuk menyajikan halaman antarmuka yang cepat dan responsif bagi pengguna saat memantau dashboard, profil, statistik, dan AI Insight.
+3. **Backend Analytics Layer (Mesin Pemrosesan)**
+   - Backend berbasis Next.js API Routes bertugas untuk mengelola otentikasi pengguna, memproses metadata aktivitas mentah yang disinkronisasikan oleh klien, menghitung behavioral score dan risk level, serta melayani request data dari web.
+4. **AI Insight Layer (Kecerdasan Buatan)**
+   - Menggunakan integrasi Google Gemini API (menggunakan SDK genai terbaru) untuk memproses ringkasan statistik penggunaan mingguan menjadi rekomendasi digital wellbeing yang kontekstual dan melayani percakapan FomoAI Chat Assistant.
+5. **Database Layer (Penyimpanan Data)**
+   - Menggunakan basis data relasional PostgreSQL yang di-host pada platform Supabase. Akses data pada kode backend dikelola menggunakan Drizzle ORM untuk menjamin integritas data yang efisien.
+
+Gambar 3.1 Arsitektur Sistem FomoTracker
+(Bagan arsitektur lengkap menggambarkan integrasi lintas perangkat ini)
+
+Link Arsitektur Sistem: https://app.eraser.io/workspace/RbMxxrdrR3NIRxaMXEXQ?origin=share
+
+3.3 Perancangan Sistem
+Use Case Diagram: Menggambarkan hubungan interaksi peran aktor (pengguna) dalam melihat analisis data wellbeing, berinteraksi dengan FomoAI, serta memicu notifikasi peringatan.
+(Diagram lengkap terdapat pada Lampiran)
+
+Activity Diagram: Menggambarkan alur aktivitas sinkronisasi data dari modul pelacak (Android & Extension), kalkulasi skor oleh backend, hingga penyajian rekomendasi oleh modul AI.
+(Diagram lengkap terdapat pada Lampiran)
+
+Flowchart Sistem: Alur logika utama sistem mulai dari inisialisasi onboarding, pencatatan durasi pada klien, sinkronisasi berkala ke database, hingga pembentukan dashboard.
+(Diagram lengkap terdapat pada Lampiran)
+
+Perancangan Basis Data: Penataan relasi tabel data pengguna, tabel sesi aktivitas perangkat (device sessions), tabel log notifikasi, dan tabel AI generated insights.
+(Perancangan basis data lengkap terdapat pada Lampiran)
+
+3.4 Implementasi Teknologi
+Penerapan teknologi dan penjelasan spesifikasi tech stack yang digunakan disajikan secara detail pada lampiran dokumentasi teknis sistem. FomoTracker dibangun menggunakan ekosistem web modern (Next.js, Tailwind CSS, Capacitorjs, Supabase, Drizzle, dan Gemini SDK) guna mendukung efisiensi pengerjaan dan keandalan sistem berskala besar.
+
+BAB IV – HASIL DAN PEMBAHASAN
+
+4.1 Implementasi Sistem
+FomoTracker diimplementasikan sebagai platform digital wellbeing lintas perangkat yang menghubungkan modul pelacak desktop dan mobile ke pusat analisis berbasis web. Implementasi sistem terdiri atas tiga bagian utama:
+1. **Pusat Analisis (Web Application)**: Dikembangkan menggunakan Next.js App Router dengan SSR. Berfungsi sebagai dashboard utama bagi pengguna untuk mendaftarkan perangkat, mengatur parameter onboarding (seperti jam produktif dan jam malam), mengamati skor perilaku harian (behavioral score), tingkat risiko (risk level), grafik statistik aktivitas, log notifikasi cerdas, serta berkonsultasi melalui asisten interaktif FomoAI Chat.
+2. **Pelacak Desktop (Browser Extension)**: Dibuat menggunakan arsitektur Manifest V3 untuk peramban berbasis Chromium. Ekstensi ini melacak tab aktif dan mencatat stempel waktu serta durasi kunjungan pada situs media sosial terpilih secara lokal, kemudian mengirimkan data tersebut ke database server melalui API sinkronisasi.
+3. **Pelacak Mobile (Android Application)**: Dibangun dengan memanfaatkan Capacitorjs sebagai pembungkus (wrapper) kode web Next.js ke platform Android. Aplikasi ini mengintegrasikan fungsionalitas plugin native untuk membaca Android Usage Stats API. Dengan izin akses dari pengguna, sistem dapat berjalan di latar belakang (background) untuk mengambil data durasi penggunaan aplikasi media sosial harian serta frekuensi pembukaannya secara berkala, lalu menyinkronkannya ke backend database.
+
+Sistem dirancang dengan menerapkan prinsip privacy-aware tracking (World Health Organization, 2022). Semua pemantauan dibatasi pada metadata (nama aplikasi/domain, stempel waktu, durasi, dan frekuensi), tanpa mengakses isi percakapan, file media, atau data sensitif lainnya.
+
+4.2 Fitur dan Fungsionalitas Aplikasi
+Fitur utama yang berhasil diimplementasikan pada FomoTracker meliputi:
+- **Activity Tracking & Sync**: Pengumpulan data durasi aktif dan frekuensi buka media sosial dari Android App dan Browser Extension.
+- **Behavioral Analytics Engine**: Algoritma yang menghitung total screen time harian, frekuensi buka kompulsif, pemakaian larut malam, sesi scrolling terus-menerus tanpa jeda (doomscrolling), dan pemakaian media sosial selama jam produktif.
+- **Weighted Risk Scoring**: Model penilaian yang mengategorikan kondisi wellbeing digital pengguna menjadi Low Risk, Moderate Risk, atau High Risk.
+- **Smart Notification & Alerts**: Peringatan real-time saat terdeteksi durasi pemakaian kontinu melampaui batas wajar atau deteksi aktivitas media sosial larut malam yang tinggi.
+- **AI-Generated Insights & Reflection**: Ringkasan mingguan berbasis AI yang menganalisis tren peningkatan atau penurunan pemakaian media sosial pengguna.
+- **FomoAI Chat Assistant**: Chatbot konsultatif interaktif berbasis LLM untuk memberikan tips produktivitas dan intervensi psikologis atas perilaku FOMO yang dialami pengguna.
+
+4.3 Tampilan Antarmuka (UI/UX)
+Antarmuka FomoTracker dirancang dengan fokus pada kesederhanaan, estetika modern, responsivitas, dan visualisasi data yang mudah dipahami. Desain ini bertujuan memberikan intervensi visual yang efektif guna mendorong kesadaran digital pengguna secara intuitif (World Health Organization, 2022).
+
+- **Gambar 4.1 Landing Page FomoTracker**: Halaman utama publik yang memuat perkenalan sistem, deskripsi masalah FOMO, keterkaitan dengan SDGs, serta tautan unduhan Browser Extension dan Android APK.
+- **Gambar 4.2 Dashboard FomoTracker**: Halaman panel utama terlindung (protected) yang menampilkan behavioral score, pengklasifikasi risk level visual (gauge indicator), statistik screen time kumulatif harian, diagram lingkaran sebaran pemakaian media sosial, dan ringkasan notifikasi cerdas.
+- **Gambar 4.3 Mobile App FomoTracker**: Antarmuka aplikasi Android yang dibungkus Capacitor, menampilkan status sinkronisasi background, pengaturan izin akses Usage Stats API, serta ringkasan pemakaian seluler.
+- **Gambar 4.4 Web Extension FomoTracker**: Tampilan popup melayang (popover) dari ekstensi peramban yang menunjukkan status pemantauan aktif pada tab browser desktop, daftar situs media sosial yang dipantau, dan log durasi sesi penjelajahan desktop hari ini.
+
+4.4 Keunggulan Sistem
+1. **Lintas Platform Terintegrasi**: Menyediakan pemantauan seimbang antara aktivitas laptop/komputer (Browser Extension) dan aktivitas telepon genggam (Android App) dalam satu akun web terpadu.
+2. **Analisis Perilaku Digital Berbasis Ilmiah**: Penilaian tidak sekadar fokus pada screen time, melainkan didasarkan pada komponen problematic social media use seperti compulsive checking (Przybylski et al., 2013) dan loss of control (Watson et al., 2022).
+3. **Intervensi Interaktif Berbasis AI**: Menghadirkan asisten FomoAI Chat dan rekomendasi personal adaptif yang melampaui analisis statistik statis (Sun et al., 2022).
+4. **Privacy-Aware Digital System**: Menjamin privasi pengguna dengan tidak mengambil konten obrolan atau data media pribadi (World Health Organization, 2022).
+5. **Dukungan Penuh Terhadap SDGs**: Berkontribusi langsung pada peningkatan kesehatan mental (SDG 3), efisiensi belajar pelajar (SDG 4), peningkatan produktivitas kerja (SDG 8), serta inovasi teknologi ramah pengguna (SDG 9).
+
+BAB V – PENUTUP
+
+5.1 Kesimpulan
+FomoTracker merupakan platform digital wellbeing berbasis kecerdasan buatan (AI) yang menawarkan pendekatan komprehensif dalam memantau dan mengelola perilaku penggunaan media sosial secara lebih sehat dan seimbang. Platform ini dirancang sebagai ekosistem digital terintegrasi yang menggabungkan aplikasi web utama (Web Application), modul pelacak desktop (Browser Extension), dan modul pelacak mobile (Android Application) berbasis Capacitorjs.
+
+Melalui penerapan algoritma behavioral analytics berbasis indikator terukur yang didukung landasan ilmiah (seperti screen time, compulsive checking, midnight usage, continuous usage, dan productivity hour usage), FomoTracker mampu menghitung skor perilaku (behavioral score) dan tingkat risiko (risk level) secara presisi. Integrasi AI (LLM API) memberikan keunggulan intervensi personal yang adaptif melalui visualisasi dashboard yang informatif dan asisten interaktif FomoAI Chat.
+
+Implementasi sistem juga mengutamakan aspek keamanan melalui arsitektur privacy-aware tracking yang hanya mengolah metadata aktivitas. Secara strategis, pengembangan platform ini mendukung terwujudnya target Sustainable Development Goals (SDGs), terutama pada pilar kesehatan mental digital (SDG 3), kualitas pendidikan (SDG 4), produktivitas kerja (SDG 8), dan inovasi infrastruktur digital (SDG 9).
+
+5.2 Rencana Pengembangan
+Untuk pengembangan lebih lanjut, dirancang beberapa rencana perluasan fitur FomoTracker:
+1. **Pengembangan Predictive Behavioral Analytics**: Mengimplementasikan model machine learning pada backend untuk memprediksi kecenderungan burnout digital sebelum pengguna mencapai level risiko tinggi.
+2. **Integrasi Gamifikasi Digital Wellbeing**: Menyediakan modul tantangan harian (daily challenges), penghargaan lencana digital (digital badges), serta fitur kompetisi sehat antar pengguna untuk mengurangi durasi media sosial.
+3. **Dukungan Platform Tambahan**: Memperluas ketersediaan ekstensi pelacak untuk peramban non-Chromium (seperti Safari) serta integrasi pemantauan multi-device yang lebih fleksibel.
+4. **Optimalisasi Chatbot AI Offline**: Menghadirkan model bahasa kecil (Small Language Model) yang dapat dieksekusi secara lokal pada sisi klien guna mempercepat respons FomoAI dan memperkuat privasi data percakapan.
+
+REFERENSI
+Bányai, F., Zsila, Á., Király, O., Maraz, A., Elekes, Z., Griffiths, M. D., Andreassen, C. S., & Demetrovics, Z. (2017). Problematic social media use: Results from a large-scale nationally representative adolescent sample. PLOS ONE, 12(1), e0169839. https://doi.org/10.1371/journal.pone.0169839
+Peng, P., & Liao, Y. (2023). Six addiction components of problematic social media use in relation to depression, anxiety, and stress symptoms: A latent profile analysis and network analysis. BMC Psychiatry, 23(321). https://doi.org/10.1186/s12888-023-04837-2
+Watson, A., Balharry, Z., & Vidal, L. M. (2022). Psychometric properties of the Bergen Social Media Addiction Scale: An analysis using item response theory. Addictive Behaviors Reports, 15, 100417. https://doi.org/10.1016/j.abrep.2022.100417
+Giunchiglia, F., Zeni, M., Gobbi, E., Bignotti, E., & Bison, I. (2020). Mobile social media usage and academic performance. Computers in Human Behavior Reports, 1, 100003. https://doi.org/10.1016/j.chbr.2020.100003
+Montag, C., & Walla, P. (2016). Carpe diem instead of losing your social mind: Beyond digital addiction and why we all suffer from digital overuse. Cogent Psychology, 3(1), 1157281. https://doi.org/10.1080/23311908.2016.1157281
+Kuss, D. J., & Griffiths, M. D. (2017). Social networking sites and addiction: Ten lessons learned. International Journal of Environmental Research and Public Health, 14(3), 311. https://doi.org/10.3390/ijerph14030311
+Przybylski, A. K., Murayama, K., DeHaan, C. R., & Gladwell, V. (2013). Motivational, emotional, and behavioral correlates of fear of missing out. Computers in Human Behavior, 29(4), 1841–1848. https://doi.org/10.1016/j.chb.2013.02.014
+Sun, Y., Zhang, Y., Gwizdka, J., & Trace, C. B. (2022). Consumer applications of machine learning in behavioral analytics: Opportunities and challenges. Journal of Behavioral Analytics, 8(2), 45–59.
+Rosen, L. D., Carrier, L. M., & Cheever, N. A. (2013). Facebook and texting made me do it: Media-induced task-switching while studying. Computers in Human Behavior, 29(3), 948–958. https://doi.org/10.1016/j.chb.2012.12.001
+World Health Organization. (2022). Mental health and digital technologies. World Health Organization.
+
+
+
+
+
+
+
+
+LAMPIRAN
+
+
+

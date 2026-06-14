@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useUser } from "@/hooks/useUser";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { data: user } = useUser();
   const isExcluded =
     pathname.startsWith("/auth") ||
     pathname.startsWith("/dashboard") ||
@@ -76,12 +78,21 @@ export default function Navbar() {
 
           {/* Desktop CTA Button */}
           <div className="hidden md:flex items-center">
-            <Link
-              href="/auth/login"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-secondary transition-all shadow-sm cursor-pointer font-poppins"
-            >
-              Masuk
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-secondary transition-all shadow-sm cursor-pointer font-poppins"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-secondary transition-all shadow-sm cursor-pointer font-poppins"
+              >
+                Masuk
+              </Link>
+            )}
           </div>
 
           {/* Mobile Hamburger Button with Animation */}
@@ -153,13 +164,23 @@ export default function Navbar() {
             >
               Panduan
             </Link>
-            <Link
-              href="/auth/login"
-              onClick={handleLinkClick}
-              className="w-full text-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-secondary transition-all shadow-sm cursor-pointer mt-2 font-poppins"
-            >
-              Masuk
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                onClick={handleLinkClick}
+                className="w-full text-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-secondary transition-all shadow-sm cursor-pointer mt-2 font-poppins"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                onClick={handleLinkClick}
+                className="w-full text-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-secondary transition-all shadow-sm cursor-pointer mt-2 font-poppins"
+              >
+                Masuk
+              </Link>
+            )}
           </nav>
         </div>
       </header>

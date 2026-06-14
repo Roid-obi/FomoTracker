@@ -206,7 +206,9 @@ Aturan Menjawab:
         latestScore.flagCompulsiveChecking ? "Sering Cek HP (Kompulsif)" : "",
         latestScore.flagMidnightUsage ? "Bermain HP saat jam tidur" : "",
         latestScore.flagContinuousUsage ? "Sesi nonstop tanpa jeda" : "",
-        latestScore.flagProductiveHourDistraction ? "Distraksi jam produktif" : "",
+        latestScore.flagProductiveHourDistraction
+          ? "Distraksi jam produktif"
+          : "",
       ]
         .filter(Boolean)
         .join(", ") || "Tidak ada kendala dominan"

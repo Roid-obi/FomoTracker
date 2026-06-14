@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { Mail, X } from "lucide-react";
-import { createClient } from "@/lib/databases/supabase";
+import { Capacitor } from "@capacitor/core";
 import { gooeyToast } from "goey-toast";
+import { Mail, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { createClient } from "@/lib/databases/supabase";
 import { api } from "@/lib/utils/api";
 
 function VerifyEmailContent() {
@@ -14,6 +15,11 @@ function VerifyEmailContent() {
   const router = useRouter();
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isResending, setIsResending] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     if (!email) {
@@ -49,7 +55,7 @@ function VerifyEmailContent() {
     // Listen to real-time auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         clearInterval(interval);
         gooeyToast.success(
@@ -94,7 +100,7 @@ function VerifyEmailContent() {
         gooeyToast.success("Email verifikasi baru berhasil dikirim!");
         setResendCooldown(60); // 60 seconds cooldown
       }
-    } catch (err) {
+    } catch (_err) {
       gooeyToast.error("Gagal mengirim ulang email verifikasi.");
     } finally {
       setIsResending(false);
@@ -104,13 +110,15 @@ function VerifyEmailContent() {
   return (
     <div className="w-full max-w-md bg-card rounded-3xl border border-border p-8 shadow-lg shadow-primary/5 relative">
       {/* Close Button */}
-      <Link
-        href="/"
-        className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted hover:text-primary hover:bg-muted-light/10 transition-colors"
-        aria-label="Kembali ke Beranda"
-      >
-        <X className="w-4 h-4" />
-      </Link>
+      {!isNative && (
+        <Link
+          href="/"
+          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted hover:text-primary hover:bg-muted-light/10 transition-colors"
+          aria-label="Kembali ke Beranda"
+        >
+          <X className="w-4 h-4" />
+        </Link>
+      )}
 
       {/* Pulsing visual envelope */}
       <div className="flex justify-center mb-6">

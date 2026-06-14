@@ -1,9 +1,10 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { Eye, EyeOff, Loader2, Lock, Mail, User, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/utils/api";
 
 export default function Register() {
@@ -13,6 +14,11 @@ export default function Register() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,13 +59,15 @@ export default function Register() {
 
       <div className="w-full max-w-md bg-card rounded-3xl border border-border p-8 shadow-lg shadow-primary/5 relative">
         {/* Close Button */}
-        <Link
-          href="/"
-          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted hover:text-primary hover:bg-muted-light/10 transition-colors"
-          aria-label="Kembali ke Beranda"
-        >
-          <X className="w-4 h-4" />
-        </Link>
+        {!isNative && (
+          <Link
+            href="/"
+            className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted hover:text-primary hover:bg-muted-light/10 transition-colors"
+            aria-label="Kembali ke Beranda"
+          >
+            <X className="w-4 h-4" />
+          </Link>
+        )}
         {/* Header Logo */}
         <div className="text-center mb-6">
           <div className="flex items-baseline justify-center gap-0.5 select-none mb-3">

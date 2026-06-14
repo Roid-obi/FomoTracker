@@ -73,7 +73,6 @@ export function Providers({ children }: { children: ReactNode }) {
           }`}
         >
           <div className="flex flex-col items-center gap-2">
-            
             <div className="flex items-baseline gap-1 mt-6 animate-pulse">
               <span className="font-yellowtail text-5xl font-normal text-primary leading-none">
                 Fomo

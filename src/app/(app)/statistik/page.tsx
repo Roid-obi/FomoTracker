@@ -608,7 +608,7 @@ export default function StatistikPage() {
                 Grafik Penggunaan Harian
               </h3>
               <p className="text-xs text-muted font-light mt-0.5">
-                Rincian durasi harian per aplikasi (dalam menit)
+                Rincian durasi harian per aplikasi (dalam jam/menit)
               </p>
             </div>
 

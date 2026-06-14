@@ -62,6 +62,14 @@ export default function StatistikDailyChart({
               fontSize={11}
               tickLine={false}
               axisLine={false}
+              tickFormatter={(val: number) => {
+                if (val === 0) return "0";
+                const h = Math.floor(val / 60);
+                const m = Math.round(val % 60);
+                if (h === 0) return `${m}m`;
+                if (m === 0) return `${h}j`;
+                return `${h}j ${m}m`;
+              }}
             />
             <Tooltip
               contentStyle={{
@@ -75,7 +83,17 @@ export default function StatistikDailyChart({
               // biome-ignore lint/suspicious/noExplicitAny: needed for Recharts dynamic Tooltip formatter types
               formatter={(value: any, name: any) => {
                 if (value === 0) return null;
-                return [`${value} menit`, name];
+                const h = Math.floor(value / 60);
+                const m = Math.round(value % 60);
+                let formattedValue = "";
+                if (h === 0) {
+                  formattedValue = `${m} menit`;
+                } else if (m === 0) {
+                  formattedValue = `${h} jam`;
+                } else {
+                  formattedValue = `${h} jam ${m} menit`;
+                }
+                return [formattedValue, name];
               }}
             />
             <Legend

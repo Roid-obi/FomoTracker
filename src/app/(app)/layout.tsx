@@ -570,14 +570,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* User profile section & logout */}
         <div className="border-t border-border pt-4 space-y-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border">
-              {user?.name
-                ?.trim()
-                .split(" ")
-                .map((kata) => kata.charAt(0))
-                .join("")
-                .substring(0, 2)
-                .toUpperCase() ?? "?"}
+            <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center font-bold text-primary font-poppins border border-border overflow-hidden">
+              {user?.avatarUrl ? (
+                // biome-ignore lint/performance/noImgElement: avatar is dynamic Supabase URL
+                <img
+                  src={user.avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                (user?.name
+                  ?.trim()
+                  .split(" ")
+                  .map((kata) => kata.charAt(0))
+                  .join("")
+                  .substring(0, 2)
+                  .toUpperCase() ?? "?")
+              )}
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-semibold truncate font-poppins text-primary">

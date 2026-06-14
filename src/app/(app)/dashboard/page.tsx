@@ -66,6 +66,13 @@ const getTodayStr = () => {
   return `${year}-${month}-${date}`;
 };
 
+const formatSecToHoursMins = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0) return `${m}m`;
+  return `${h}j ${m}m`;
+};
+
 export default function DashboardPage() {
   const { data: user, isLoading: userLoading } = useUser();
   const [_todayStr, setTodayStr] = useState("");
@@ -245,6 +252,15 @@ export default function DashboardPage() {
   const topApp = topAppItem
     ? { name: topAppItem.appName, duration: topAppItem.totalDurationSeconds }
     : { name: "Tidak ada", duration: 0 };
+
+  // Top Apps for today
+  const topAppsForDisplay = (breakdownQuery.data?.items ?? [])
+    .slice(0, 5)
+    .map((app: { appName: string; totalDurationSeconds: number }) => ({
+      name: app.appName,
+      sec: app.totalDurationSeconds,
+    }));
+  const maxSec = topAppsForDisplay[0]?.sec || 1;
 
   // 2. Behavioral score status configuration
   const scoreData = statusQuery.data;
@@ -1079,6 +1095,62 @@ export default function DashboardPage() {
                       </div>
                     );
                   })}
+            </div>
+          </div>
+
+          {/* Aplikasi Paling Sering Dibuka */}
+          <div className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col">
+            <div className="mb-4">
+              <h3 className="font-extrabold text-sm text-primary">
+                Aplikasi Paling Sering Dibuka
+              </h3>
+              <p className="text-[11px] text-muted font-light mt-0.5">
+                Durasi pemakaian tertinggi hari ini
+              </p>
+            </div>
+
+            <div className="space-y-4 flex-1 justify-center flex flex-col">
+              {breakdownQuery.isLoading || isSettingLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="space-y-1.5 animate-pulse">
+                    <div className="flex justify-between">
+                      <div className="h-3 bg-muted-light rounded w-20" />
+                      <div className="h-3 bg-muted-light rounded w-12" />
+                    </div>
+                    <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden" />
+                  </div>
+                ))
+              ) : topAppsForDisplay.length === 0 ? (
+                <div className="text-center py-6 text-xs text-muted font-light">
+                  Belum ada data aplikasi hari ini.
+                </div>
+              ) : (
+                topAppsForDisplay.map(
+                  (app: { name: string; sec: number }, index: number) => {
+                    const barWidth = Math.round((app.sec / maxSec) * 100);
+                    const barColor = rankColors[index] || rankColors[4];
+                    return (
+                      <div key={app.name} className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-primary">{app.name}</span>
+                          <span className="text-muted">
+                            {formatSecToHoursMins(app.sec)}
+                          </span>
+                        </div>
+                        <div className="w-full h-3 rounded-full bg-muted-light/60 overflow-hidden border border-border/30">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${barWidth}%`,
+                              backgroundColor: barColor,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  },
+                )
+              )}
             </div>
           </div>
 

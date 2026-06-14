@@ -17,21 +17,46 @@ import {
   ShieldAlert,
   Smartphone,
   Sparkles,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
-import { useEffect } from "react";
 
 export default function Home() {
   const { data: user, isLoading } = useUser();
   const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && user) {
       router.replace("/dashboard");
     }
   }, [user, isLoading, router]);
+
+  useEffect(() => {
+    // Check if the user has already closed the download modal in this session
+    const hasClosedModal = sessionStorage.getItem(
+      "fomotracker_download_modal_closed",
+    );
+
+    // Check if the device is mobile (based on screen width or user agent)
+    const isMobileDevice =
+      typeof window !== "undefined" &&
+      (window.innerWidth < 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        ));
+
+    // Do not show the modal if the user has closed it in this session OR if they are on mobile
+    if (!hasClosedModal && !isMobileDevice) {
+      const timer = setTimeout(() => {
+        setShowModal(true);
+      }, 1000); // 1 second delay for a smooth entry
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
@@ -478,6 +503,133 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Download App & Extension Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop with fade-in and backdrop-blur */}
+          <button
+            type="button"
+            className="absolute inset-0 w-full h-full bg-background/80 backdrop-blur-md transition-opacity duration-300 animate-fade-in border-none cursor-default"
+            onClick={() => {
+              setShowModal(false);
+              sessionStorage.setItem(
+                "fomotracker_download_modal_closed",
+                "true",
+              );
+            }}
+            aria-label="Tutup modal"
+          />
+
+          {/* Modal Container */}
+          <div className="relative w-full max-w-2xl bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden animate-scale-in">
+            {/* Glow effect inside modal */}
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-accent/20 rounded-full blur-[60px] pointer-events-none -z-10" />
+            <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-secondary/10 rounded-full blur-[60px] pointer-events-none -z-10" />
+
+            {/* Close Button */}
+            <button
+              type="button"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 text-muted hover:text-primary transition-colors p-2 rounded-xl hover:bg-muted-light cursor-pointer"
+              onClick={() => {
+                setShowModal(false);
+                sessionStorage.setItem(
+                  "fomotracker_download_modal_closed",
+                  "true",
+                );
+              }}
+              aria-label="Tutup"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-8 pr-6 pl-6">
+              <div className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-primary/10 text-primary mb-4">
+                <Sparkles className="w-6 h-6 animate-pulse" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold font-poppins text-primary">
+                Optimalkan Pengalaman FomoTracker Anda!
+              </h2>
+              <p className="text-muted text-sm font-poppins font-light mt-2">
+                Unduh aplikasi Android atau pasang ekstensi browser untuk
+                melacak waktu layar Anda secara terpadu.
+              </p>
+            </div>
+
+            {/* Content Grid */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              {/* Option 1: Android APK */}
+              <div className="flex flex-col justify-between p-6 rounded-2xl border border-border bg-background/50 hover:border-primary/20 hover:shadow-md transition-all group">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
+                    <Smartphone className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold font-poppins text-primary mb-1">
+                    FomoTracker Mobile (APK)
+                  </h3>
+                  <p className="text-muted text-xs leading-relaxed font-poppins font-light mb-6">
+                    Pantau screen time dan aktivitas media sosial langsung dari
+                    Android Anda menggunakan Usage Stats API.
+                  </p>
+                </div>
+                <a
+                  href="/FomoTracker.apk"
+                  download="FomoTracker.apk"
+                  onClick={() => {
+                    setShowModal(false);
+                    sessionStorage.setItem(
+                      "fomotracker_download_modal_closed",
+                      "true",
+                    );
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-all cursor-pointer font-poppins text-xs w-full shadow-sm shadow-emerald-600/10"
+                >
+                  <Download className="w-4 h-4" /> Unduh APK Android
+                </a>
+              </div>
+
+              {/* Option 2: Browser Extension */}
+              <div className="flex flex-col justify-between p-6 rounded-2xl border border-border bg-background/50 hover:border-primary/20 hover:shadow-md transition-all group">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
+                    <Laptop className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold font-poppins text-primary mb-1">
+                    Ekstensi Browser (ZIP)
+                  </h3>
+                  <p className="text-muted text-xs leading-relaxed font-poppins font-light mb-6">
+                    Pantau kebiasaan berselancar di laptop/komputer secara
+                    langsung. Kompatibel dengan peramban berbasis Chromium.
+                  </p>
+                </div>
+                <a
+                  href="/FomoTrackerExtension.zip"
+                  download="FomoTrackerExtension.zip"
+                  onClick={() => {
+                    setShowModal(false);
+                    sessionStorage.setItem(
+                      "fomotracker_download_modal_closed",
+                      "true",
+                    );
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-sky-600 text-white hover:bg-sky-700 font-semibold transition-all cursor-pointer font-poppins text-xs w-full shadow-sm shadow-sky-600/10"
+                >
+                  <Download className="w-4 h-4" /> Unduh Ekstensi
+                </a>
+              </div>
+            </div>
+
+            {/* Footer info */}
+            <p className="text-center text-[10px] text-muted font-poppins font-light mt-6">
+              *Setelah mengunduh ekstensi, ekstrak file zip lalu muat melalui
+              fitur{" "}
+              <span className="font-semibold text-primary">Load unpacked</span>{" "}
+              di menu ekstensi Chrome.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

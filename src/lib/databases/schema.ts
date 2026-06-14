@@ -411,6 +411,32 @@ export const notifications = pgTable(
 );
 
 // ============================================================
+// AI CONVERSATIONS
+// ============================================================
+
+export const aiConversations = pgTable(
+  "ai_conversations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    session: integer("session").notNull(),
+    role: varchar("role", { length: 10 }).notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [
+    index("ai_conversations_user_session_time_idx").on(
+      t.userId,
+      t.session,
+      t.createdAt,
+    ),
+    index("ai_conversations_user_id_idx").on(t.userId),
+  ],
+);
+
+// ============================================================
 // TYPE EXPORTS (inference helpers)
 // ============================================================
 
@@ -444,6 +470,9 @@ export type NewWeeklyInsight = typeof weeklyInsights.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
 
+export type AiConversation = typeof aiConversations.$inferSelect;
+export type NewAiConversation = typeof aiConversations.$inferInsert;
+
 export const table = {
   users,
   userSettings,
@@ -455,6 +484,7 @@ export const table = {
   behavioralScores,
   weeklyInsights,
   notifications,
+  aiConversations,
 } as const;
 
 export type Table = typeof table;

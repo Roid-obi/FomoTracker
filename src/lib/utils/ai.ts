@@ -208,3 +208,67 @@ export async function generateWeeklyInsightAI(
 
   return validated.data;
 }
+
+export async function generateChatResponseAI(
+  systemPrompt: string,
+  history: Array<{ role: "user" | "model"; content: string }>,
+  message: string,
+): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY tidak tersedia di environment");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  const contents = [
+    ...history.map((h) => ({
+      role: h.role,
+      parts: [{ text: h.content }],
+    })),
+    {
+      role: "user",
+      parts: [{ text: message }],
+    },
+  ];
+
+  const runGeneration = async (modelName: string) => {
+    return await ai.models.generateContent({
+      model: modelName,
+      contents,
+      config: {
+        systemInstruction: systemPrompt,
+        temperature: 0.7,
+        maxOutputTokens: 2048,
+      },
+    });
+  };
+
+  let response: Awaited<ReturnType<typeof runGeneration>> | null = null;
+  let lastError: unknown = null;
+
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      response = await runGeneration("gemini-2.5-flash");
+      lastError = null;
+      break;
+    } catch (err: unknown) {
+      lastError = err;
+      if (attempt < maxAttempts) {
+        const delay = attempt * 1500;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  if (lastError || !response) {
+    const errMsg =
+      lastError instanceof Error ? lastError.message : String(lastError);
+    throw new Error(
+      `AI chat generation failed after ${maxAttempts} attempts: ${errMsg}`,
+    );
+  }
+
+  return response.text ?? "Maaf, saya tidak dapat merespons saat ini.";
+}

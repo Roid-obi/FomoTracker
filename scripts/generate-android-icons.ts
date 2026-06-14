@@ -30,14 +30,14 @@ async function generate() {
       const launcherIcon = await Jimp.read(sourceIconPath);
       launcherIcon.resize({ w: mipmap.size, h: mipmap.size });
       const launcherPath = path.join(folderPath, "ic_launcher.png");
-      await launcherIcon.write(launcherPath);
+      await launcherIcon.write(launcherPath as `${string}.${string}`);
       console.log(`Generated: ${launcherPath} (${mipmap.size}x${mipmap.size})`);
 
       // 2. Generate ic_launcher_round.png (Round Icon)
       const roundIcon = await Jimp.read(sourceIconPath);
       roundIcon.resize({ w: mipmap.size, h: mipmap.size });
       const roundPath = path.join(folderPath, "ic_launcher_round.png");
-      await roundIcon.write(roundPath);
+      await roundIcon.write(roundPath as `${string}.${string}`);
       console.log(`Generated: ${roundPath} (${mipmap.size}x${mipmap.size})`);
 
       // 3. Generate ic_launcher_foreground.png (Adaptive Icon Foreground)
@@ -60,7 +60,7 @@ async function generate() {
       fgCanvas.composite(resizedLogoForFg, xOffset, yOffset);
 
       const fgPath = path.join(folderPath, "ic_launcher_foreground.png");
-      await fgCanvas.write(fgPath);
+      await fgCanvas.write(fgPath as `${string}.${string}`);
       console.log(
         `Generated adaptive foreground: ${fgPath} (${fgCanvasSize}x${fgCanvasSize})`,
       );

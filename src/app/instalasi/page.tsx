@@ -162,21 +162,19 @@ function InstallationPageContent() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-primary font-poppins relative overflow-hidden pb-16">
-      {/* Glow Effects */}
-      <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute bottom-20 right-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none -z-10" />
-
-      {/* Hero Header */}
-      <section className="relative py-12 md:py-20 text-center border-b border-border bg-card/45 backdrop-blur-xs">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/5 text-primary border border-border mb-4">
-            <Download className="w-3.5 h-3.5" /> Pusat Unduhan & Instalasi
+    <div className="min-h-screen flex flex-col bg-background text-primary font-poppins relative overflow-hidden">
+      {/* Hero Header - Matched with Tentang Page style */}
+      <section className="relative overflow-hidden py-16 md:py-24 border-b border-border bg-card">
+        <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
+        <div className="container mx-auto px-6 max-w-4xl text-center relative z-10 animate-fade-in">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary/5 text-primary border border-border mb-4 font-poppins">
+            <Download className="w-3.5 h-3.5 text-secondary" /> Pusat Unduhan &
+            Panduan
           </span>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-primary leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold font-poppins tracking-tight mb-4">
             Instalasi & Panduan Pemasangan
           </h1>
-          <p className="text-muted text-sm md:text-base max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-muted text-base md:text-lg max-w-2xl mx-auto font-poppins font-light leading-relaxed">
             Ikuti panduan langkah demi langkah di bawah ini untuk memasang
             aplikasi FomoTracker pada perangkat Android atau memasang ekstensi
             pemantau di Google Chrome Anda.
@@ -184,23 +182,24 @@ function InstallationPageContent() {
         </div>
       </section>
 
-      {/* Main Tabs Navigation */}
-      <div className="container mx-auto px-6 max-w-4xl mt-10">
-        <div className="flex justify-center p-1 rounded-2xl bg-card border border-border max-w-md mx-auto relative z-10">
+      {/* Main Content - Matched structure with Tentang Page */}
+      <main className="container mx-auto px-6 max-w-4xl py-16 space-y-20">
+        {/* Tabs switcher Navigation */}
+        <div className="flex flex-col sm:flex-row justify-center p-2 rounded-3xl sm:rounded-2xl bg-card border border-border max-w-md mx-auto relative z-10 shadow-xs gap-2 sm:gap-0">
           {/* Android Tab Button */}
           <button
             type="button"
             onClick={() => setActiveTab("android")}
-            className={`flex-1 py-3.5 rounded-xl font-semibold text-sm transition-all cursor-pointer relative z-10 flex items-center justify-center gap-2 ${
+            className={`w-full sm:flex-1 py-3.5 rounded-2xl sm:rounded-xl font-semibold text-sm transition-all cursor-pointer relative z-10 flex items-center justify-center gap-2 ${
               activeTab === "android"
-                ? "text-white animate-pulse-once"
+                ? "text-white"
                 : "text-muted hover:text-primary"
             }`}
           >
             {activeTab === "android" && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 bg-primary rounded-xl -z-10"
+                className="absolute inset-0 bg-primary rounded-2xl sm:rounded-xl -z-10"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
@@ -212,16 +211,16 @@ function InstallationPageContent() {
           <button
             type="button"
             onClick={() => setActiveTab("extension")}
-            className={`flex-1 py-3.5 rounded-xl font-semibold text-sm transition-all cursor-pointer relative z-10 flex items-center justify-center gap-2 ${
+            className={`w-full sm:flex-1 py-3.5 rounded-2xl sm:rounded-xl font-semibold text-sm transition-all cursor-pointer relative z-10 flex items-center justify-center gap-2 ${
               activeTab === "extension"
-                ? "text-white animate-pulse-once"
+                ? "text-white"
                 : "text-muted hover:text-primary"
             }`}
           >
             {activeTab === "extension" && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 bg-primary rounded-xl -z-10"
+                className="absolute inset-0 bg-primary rounded-2xl sm:rounded-xl -z-10"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
@@ -231,47 +230,54 @@ function InstallationPageContent() {
         </div>
 
         {/* Dynamic Content Switching */}
-        <div className="mt-12">
+        <AnimatePresence mode="wait">
           {activeTab === "android" ? (
             <motion.div
+              key="android-tab"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3 }}
-              className="space-y-12"
+              className="space-y-20"
             >
-              {/* Android Card Header */}
-              <div className="p-8 rounded-3xl border border-border bg-card/60 backdrop-blur-xs flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="text-left">
-                  <h2 className="text-xl md:text-2xl font-bold text-primary mb-2 flex items-center gap-2.5">
-                    <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 animate-bounce-slow">
-                      <Smartphone className="w-6 h-6" />
-                    </span>
+              {/* Android Download Card - Matched with Tentang page "Latar Belakang" style, Button placed at bottom */}
+              <section className="p-8 md:p-10 rounded-3xl border border-border bg-card relative overflow-hidden flex flex-col items-start shadow-xs">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-bl-full pointer-events-none" />
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center mb-6 shrink-0">
+                  <Smartphone className="w-8 h-8" />
+                </div>
+                <div className="w-full space-y-4">
+                  <h2 className="text-xl md:text-2xl font-bold font-poppins text-primary">
                     FomoTracker untuk Android
                   </h2>
-                  <p className="text-muted text-xs md:text-sm font-light">
+                  <p className="text-muted text-sm font-poppins font-light leading-relaxed max-w-2xl">
                     Memonitor dan membatasi waktu penggunaan aplikasi sosial
-                    langsung di ponsel Anda.
+                    langsung di ponsel Anda menggunakan Android Usage Stats API.
+                    Unduh berkas APK di bawah ini dan ikuti langkah-langkah
+                    panduan.
                   </p>
+                  <div className="pt-2">
+                    <a
+                      href="/FomoTracker.apk"
+                      download="FomoTracker.apk"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-all shadow-md shadow-emerald-600/15 group cursor-pointer font-poppins text-sm w-full sm:w-auto"
+                    >
+                      <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                      Unduh APK Android
+                    </a>
+                  </div>
                 </div>
-                <a
-                  href="/FomoTracker.apk"
-                  download="FomoTracker.apk"
-                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-all shadow-md shadow-emerald-600/15 group cursor-pointer"
-                >
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                  Unduh APK Android
-                </a>
-              </div>
+              </section>
 
               {/* Large Zoomable Image Section */}
-              <div className="space-y-4">
+              <section className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-bold text-primary">
+                  <h3 className="text-lg md:text-xl font-bold font-poppins text-primary">
                     Panduan Gambar Pemasangan & Perizinan
                   </h3>
-                  <p className="text-muted text-xs font-light mt-1">
-                    Klik gambar di bawah ini untuk memperbesar dan membaca lebih
-                    detail.
+                  <p className="text-muted text-xs md:text-sm font-poppins font-light mt-1">
+                    Klik gambar di bawah ini untuk memperbesar dan membaca
+                    detail teks petunjuk.
                   </p>
                 </div>
                 <div
@@ -284,45 +290,43 @@ function InstallationPageContent() {
                   }
                   tabIndex={0}
                   role="button"
-                  className="relative group cursor-zoom-in overflow-hidden rounded-3xl border border-border bg-card p-4 flex justify-center items-center shadow-xs max-w-2xl mx-auto hover:border-primary/20 transition-colors"
+                  className="relative group cursor-zoom-in overflow-hidden rounded-3xl border border-border bg-card p-6 flex justify-center items-center shadow-xs max-w-2xl mx-auto hover:border-primary/20 transition-colors"
                 >
-                  {/* Image with container */}
                   <img
                     src="/instalasi-aplikasi-fomotracker.png"
                     alt="Langkah Pemasangan Android"
-                    className="rounded-2xl max-h-[350px] w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                    className="rounded-2xl max-h-[400px] w-auto object-contain transition-transform duration-300 group-hover:scale-[1.01]"
                   />
-                  {/* Overlay instructions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                     <span className="flex items-center gap-2 px-4 py-2 bg-white/95 text-primary text-xs font-semibold rounded-full shadow-md">
                       <ZoomIn className="w-4 h-4" /> Klik Untuk Zoom
                     </span>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Guide Steps */}
-              <div className="space-y-10">
+              {/* Guide Steps - Highly Responsive with Flex layouts and increased gaps */}
+              <section className="space-y-16">
                 {/* Part 1: Installation */}
-                <div>
-                  <h3 className="text-lg md:text-xl font-bold text-primary mb-6 flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+                <div className="space-y-8">
+                  <h3 className="text-lg md:text-xl font-bold font-poppins text-primary mb-6 flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
                     Bagian 1: Proses Instalasi Aplikasi
                   </h3>
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {androidStepsPart1.map((item) => (
                       <div
                         key={item.step}
-                        className="p-6 rounded-2xl border border-border bg-card/45 hover:shadow-md hover:border-primary/10 transition-all flex gap-4 items-start"
+                        className="p-6 md:p-8 rounded-3xl border border-border bg-card/40 hover:shadow-md hover:border-primary/10 transition-all flex flex-col sm:flex-row gap-5 items-start"
                       >
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center shrink-0 font-bold font-poppins text-sm">
                           {item.step}
                         </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-primary mb-1.5">
+                        <div className="space-y-2">
+                          <h4 className="text-base font-bold text-primary font-poppins leading-tight">
                             {item.title}
                           </h4>
-                          <p className="text-muted text-xs font-light leading-relaxed whitespace-pre-line">
+                          <p className="text-muted text-xs md:text-sm font-poppins font-light leading-relaxed whitespace-pre-line">
                             {item.desc}
                           </p>
                         </div>
@@ -332,41 +336,45 @@ function InstallationPageContent() {
                 </div>
 
                 {/* Part 2: Permissions */}
-                <div className="pt-4">
-                  <div className="p-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 mb-8 flex gap-4 items-start">
-                    <AlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-8 pt-4">
+                  {/* Important Notice */}
+                  <div className="p-6 md:p-8 rounded-3xl border border-amber-500/20 bg-amber-500/5 flex flex-col sm:flex-row gap-5 items-start">
+                    <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600 shrink-0">
+                      <AlertCircle className="w-6 h-6" />
+                    </div>
                     <div>
-                      <h4 className="text-sm font-bold text-amber-800 dark:text-amber-500 mb-1">
-                        Penting: Izin Akses Android
+                      <h4 className="text-base font-bold text-amber-800 dark:text-amber-500 font-poppins mb-1.5">
+                        Penting: Izin Akses Android 13+
                       </h4>
-                      <p className="text-xs text-amber-700 dark:text-amber-600/90 font-light leading-relaxed">
-                        Sistem operasi Android 13+ mendeteksi file APK di luar
+                      <p className="text-muted text-xs md:text-sm font-poppins font-light leading-relaxed">
+                        Sistem operasi Android mendeteksi file instalasi luar
                         Play Store sebagai aplikasi berpotensi terbatas. Ikuti
-                        langkah 6 hingga 12 di bawah ini dengan cermat untuk
-                        memberikan izin restricted settings dan usage access.
+                        langkah 6 hingga 12 di bawah ini secara seksama untuk
+                        mengizinkan Restricted Settings serta Usage Access di HP
+                        Android Anda.
                       </p>
                     </div>
                   </div>
 
-                  <h3 className="text-lg md:text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                  <h3 className="text-lg md:text-xl font-bold font-poppins text-primary mb-6 flex items-center gap-3">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                     Bagian 2: Pengaturan Perizinan Akses (Restricted Settings &
                     Usage Access)
                   </h3>
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {androidStepsPart2.map((item) => (
                       <div
                         key={item.step}
-                        className="p-6 rounded-2xl border border-border bg-card/45 hover:shadow-md hover:border-primary/10 transition-all flex gap-4 items-start"
+                        className="p-6 md:p-8 rounded-3xl border border-border bg-card/40 hover:shadow-md hover:border-primary/10 transition-all flex flex-col sm:flex-row gap-5 items-start"
                       >
-                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 font-bold text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 font-bold font-poppins text-sm">
                           {item.step}
                         </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-primary mb-1.5">
+                        <div className="space-y-2">
+                          <h4 className="text-base font-bold text-primary font-poppins leading-tight">
                             {item.title}
                           </h4>
-                          <p className="text-muted text-xs font-light leading-relaxed whitespace-pre-line">
+                          <p className="text-muted text-xs md:text-sm font-poppins font-light leading-relaxed whitespace-pre-line">
                             {item.desc}
                           </p>
                         </div>
@@ -376,55 +384,62 @@ function InstallationPageContent() {
                 </div>
 
                 {/* Conclusion Note */}
-                <div className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 max-w-xl mx-auto text-center">
-                  <p className="text-xs font-semibold text-emerald-600 flex items-center justify-center gap-2">
-                    <span>💡</span> Selesai! Aplikasi FomoTracker sekarang sudah
-                    terinstal sepenuhnya dan memiliki izin yang diperlukan untuk
-                    memonitor waktu penggunaan aplikasi di ponsel Anda.
+                <div className="p-6 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 max-w-xl mx-auto text-center shadow-2xs">
+                  <p className="text-xs md:text-sm font-semibold text-emerald-600 font-poppins leading-relaxed">
+                    💡 Selesai! Aplikasi FomoTracker sekarang sudah terinstal
+                    sepenuhnya dan memiliki izin yang diperlukan untuk memonitor
+                    waktu penggunaan aplikasi di ponsel Anda.
                   </p>
                 </div>
-              </div>
+              </section>
             </motion.div>
           ) : (
             <motion.div
+              key="extension-tab"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3 }}
-              className="space-y-12"
+              className="space-y-20"
             >
-              {/* Extension Card Header */}
-              <div className="p-8 rounded-3xl border border-border bg-card/60 backdrop-blur-xs flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="text-left">
-                  <h2 className="text-xl md:text-2xl font-bold text-primary mb-2 flex items-center gap-2.5">
-                    <span className="p-2 rounded-xl bg-sky-500/10 text-sky-600">
-                      <Globe className="w-6 h-6 animate-spin-slow" />
-                    </span>
+              {/* Extension Download Card - Matched with Tentang page "Latar Belakang" style, Button placed at bottom */}
+              <section className="p-8 md:p-10 rounded-3xl border border-border bg-card relative overflow-hidden flex flex-col items-start shadow-xs">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 rounded-bl-full pointer-events-none" />
+                <div className="w-14 h-14 rounded-2xl bg-sky-500/15 text-sky-600 flex items-center justify-center mb-6 shrink-0">
+                  <Globe className="w-8 h-8" />
+                </div>
+                <div className="w-full space-y-4">
+                  <h2 className="text-xl md:text-2xl font-bold font-poppins text-primary">
                     FomoTracker Chrome Extension
                   </h2>
-                  <p className="text-muted text-xs md:text-sm font-light">
-                    Mencatat waktu browsing Anda secara langsung melalui
-                    ekstensi di browser Google Chrome komputer.
+                  <p className="text-muted text-sm font-poppins font-light leading-relaxed max-w-2xl">
+                    Mencatat durasi penjelajahan media sosial langsung dari
+                    peramban web Google Chrome secara otomatis tanpa instalasi
+                    program eksternal tambahan. Unduh paket ekstensi di bawah
+                    ini.
                   </p>
+                  <div className="pt-2">
+                    <a
+                      href="/fomotracker_extension.zip"
+                      download="fomotracker_extension.zip"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-sky-600 text-white hover:bg-sky-700 font-semibold transition-all shadow-md shadow-sky-600/15 group cursor-pointer font-poppins text-sm w-full sm:w-auto"
+                    >
+                      <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                      Unduh Ekstensi ZIP
+                    </a>
+                  </div>
                 </div>
-                <a
-                  href="/fomotracker_extension.zip"
-                  download="fomotracker_extension.zip"
-                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-sky-600 text-white hover:bg-sky-700 font-semibold transition-all shadow-md shadow-sky-600/15 group cursor-pointer"
-                >
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                  Unduh Ekstensi ZIP
-                </a>
-              </div>
+              </section>
 
               {/* Large Zoomable Image Section */}
-              <div className="space-y-4">
+              <section className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-bold text-primary">
+                  <h3 className="text-lg md:text-xl font-bold font-poppins text-primary">
                     Panduan Gambar Pemasangan Ekstensi
                   </h3>
-                  <p className="text-muted text-xs font-light mt-1">
-                    Klik gambar di bawah ini untuk memperbesar dan membaca lebih
-                    detail.
+                  <p className="text-muted text-xs md:text-sm font-poppins font-light mt-1">
+                    Klik gambar di bawah ini untuk memperbesar dan membaca
+                    detail teks petunjuk.
                   </p>
                 </div>
                 <div
@@ -435,54 +450,52 @@ function InstallationPageContent() {
                   }
                   tabIndex={0}
                   role="button"
-                  className="relative group cursor-zoom-in overflow-hidden rounded-3xl border border-border bg-card p-4 flex justify-center items-center shadow-xs max-w-2xl mx-auto hover:border-primary/20 transition-colors"
+                  className="relative group cursor-zoom-in overflow-hidden rounded-3xl border border-border bg-card p-6 flex justify-center items-center shadow-xs max-w-2xl mx-auto hover:border-primary/20 transition-colors"
                 >
-                  {/* Image with container */}
                   <img
                     src="/cara-pasang-extensi.jpeg"
                     alt="Langkah Pemasangan Chrome Extension"
-                    className="rounded-2xl max-h-[350px] w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                    className="rounded-2xl max-h-[400px] w-auto object-contain transition-transform duration-300 group-hover:scale-[1.01]"
                   />
-                  {/* Overlay instructions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                     <span className="flex items-center gap-2 px-4 py-2 bg-white/95 text-primary text-xs font-semibold rounded-full shadow-md">
                       <ZoomIn className="w-4 h-4" /> Klik Untuk Zoom
                     </span>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Guide Steps */}
-              <div className="space-y-6">
-                <h3 className="text-lg md:text-xl font-bold text-primary mb-6 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+              {/* Guide Steps - Chrome Extension */}
+              <section className="space-y-8">
+                <h3 className="text-lg md:text-xl font-bold font-poppins text-primary mb-6 flex items-center gap-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
                   Panduan Instalasi Ekstensi FomoTracker di Google Chrome
                 </h3>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {extensionSteps.map((item) => (
                     <div
                       key={item.step}
-                      className="p-6 rounded-2xl border border-border bg-card/45 hover:shadow-md hover:border-primary/10 transition-all flex gap-4 items-start"
+                      className="p-6 md:p-8 rounded-3xl border border-border bg-card/45 hover:shadow-md hover:border-primary/10 transition-all flex flex-col sm:flex-row gap-5 items-start"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center shrink-0 font-bold text-sm">
+                      <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center shrink-0 font-bold font-poppins text-sm">
                         {item.step}
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-primary mb-1.5">
+                      <div className="space-y-2">
+                        <h4 className="text-sm md:text-base font-bold text-primary font-poppins leading-tight">
                           {item.title}
                         </h4>
-                        <p className="text-muted text-xs font-light leading-relaxed whitespace-pre-line">
+                        <p className="text-muted text-xs md:text-sm font-poppins font-light leading-relaxed whitespace-pre-line">
                           {item.desc}
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
             </motion.div>
           )}
-        </div>
-      </div>
+        </AnimatePresence>
+      </main>
 
       {/* Lightbox Modal / Click to Zoom Component */}
       <AnimatePresence>

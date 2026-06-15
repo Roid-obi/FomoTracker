@@ -241,31 +241,62 @@ export default function Tentang() {
         </section>
 
         {/* Section 6: Tim Pengembang */}
-        <section className="space-y-6 text-center">
+        <section className="space-y-8 text-center">
           <h2 className="text-2xl font-bold font-poppins mb-2 flex items-center justify-center gap-2">
-            <>
-              <Users className="w-5 h-5 text-secondary" />
-              <span>Tim Pengembang</span>
-            </>
+            <Users className="w-5 h-5 text-secondary" />
+            <span>Tim Pengembang</span>
           </h2>
           <p className="text-muted text-sm font-poppins font-light max-w-xl mx-auto mb-8">
-            FomoTracker dirancang oleh tim akademisi dan developer berdedikasi
-            untuk kontribusi nyata dalam Lomba OLIVIA 2026.
+            FomoTracker dirancang oleh tim mahasiswa Teknik Informatika
+            Universitas Sebelas Maret untuk memberikan kontribusi nyata dalam
+            Lomba OLIVIA 2026.
           </p>
-          <div className="flex flex-col items-center justify-center">
-            <div className="p-6 rounded-2xl border border-border bg-card max-w-sm w-full">
-              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-4 text-secondary font-yellowtail text-3xl select-none">
-                F
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            {/* Roid Robih */}
+            <div className="p-6 rounded-2xl border border-border bg-card flex flex-col items-center text-center shadow-xs hover:border-primary/10 transition-all">
+              <div className="w-14 h-14 rounded-full bg-primary/5 border border-border flex items-center justify-center mb-4 text-secondary font-bold font-poppins text-base select-none">
+                RR
               </div>
-              <h3 className="text-base font-bold font-poppins">
-                Tim Developer FomoTracker
+              <h3 className="text-sm font-bold font-poppins text-primary">
+                Roid Robih
               </h3>
-              <p className="text-secondary text-xs font-semibold font-poppins mb-2">
-                Olivia 2026 Innovation Team
+              <p className="text-secondary text-[11px] font-semibold font-poppins mt-1">
+                Teknik Informatika
               </p>
-              <p className="text-muted text-xs font-poppins font-light leading-relaxed">
-                Berkolaborasi menciptakan solusi digital wellbeing berbasis
-                riset akademis dan inovasi teknologi terkini.
+              <p className="text-muted text-[11px] font-poppins font-light mt-0.5">
+                Universitas Sebelas Maret
+              </p>
+            </div>
+
+            {/* Surya Putra Pamungkas */}
+            <div className="p-6 rounded-2xl border border-border bg-card flex flex-col items-center text-center shadow-xs hover:border-primary/10 transition-all">
+              <div className="w-14 h-14 rounded-full bg-primary/5 border border-border flex items-center justify-center mb-4 text-secondary font-bold font-poppins text-base select-none">
+                SP
+              </div>
+              <h3 className="text-sm font-bold font-poppins text-primary">
+                Surya Putra Pamungkas
+              </h3>
+              <p className="text-secondary text-[11px] font-semibold font-poppins mt-1">
+                Teknik Informatika
+              </p>
+              <p className="text-muted text-[11px] font-poppins font-light mt-0.5">
+                Universitas Sebelas Maret
+              </p>
+            </div>
+
+            {/* Muh Zidan Arif Saputra */}
+            <div className="p-6 rounded-2xl border border-border bg-card flex flex-col items-center text-center shadow-xs hover:border-primary/10 transition-all">
+              <div className="w-14 h-14 rounded-full bg-primary/5 border border-border flex items-center justify-center mb-4 text-secondary font-bold font-poppins text-base select-none">
+                MZ
+              </div>
+              <h3 className="text-sm font-bold font-poppins text-primary">
+                Muh Zidan Arif Saputra
+              </h3>
+              <p className="text-secondary text-[11px] font-semibold font-poppins mt-1">
+                Teknik Informatika
+              </p>
+              <p className="text-muted text-[11px] font-poppins font-light mt-0.5">
+                Universitas Sebelas Maret
               </p>
             </div>
           </div>

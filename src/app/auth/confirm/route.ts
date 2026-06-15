@@ -1,8 +1,5 @@
-import type { EmailOtpType } from "@supabase/supabase-js";
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/databases";
-import { table } from "@/lib/databases/schema";
+import { type EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 
 function getRedirectHtml(redirectUrl: string, isError: boolean = false, errorMessage?: string) {
@@ -136,57 +133,28 @@ export async function GET(request: Request) {
 
   const supabase = await createSupabaseServer();
 
+  let isSuccess = false;
+
   if (token_hash && type) {
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     });
-    if (!error) {
-      if (platform === "mobile") {
-        if (data.session) {
-          const redirectUrl = new URL("fomotracker://auth/confirm");
-          redirectUrl.searchParams.set("access_token", data.session.access_token);
-          redirectUrl.searchParams.set("refresh_token", data.session.refresh_token);
-          return new Response(getRedirectHtml(redirectUrl.toString()), {
-            headers: { "Content-Type": "text/html" },
-          });
-        }
-        const errorUrl = "fomotracker://auth/login?error=Sesi+autentikasi+tidak+ditemukan";
-        return new Response(getRedirectHtml(errorUrl, true, "Sesi autentikasi tidak ditemukan."), {
-          headers: { "Content-Type": "text/html" },
-        });
-      }
-      return NextResponse.redirect(new URL(next, request.url));
-    }
+    if (!error) isSuccess = true;
   } else if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      if (platform === "mobile") {
-        if (data.session) {
-          const redirectUrl = new URL("fomotracker://auth/confirm");
-          redirectUrl.searchParams.set("access_token", data.session.access_token);
-          redirectUrl.searchParams.set("refresh_token", data.session.refresh_token);
-          return new Response(getRedirectHtml(redirectUrl.toString()), {
-            headers: { "Content-Type": "text/html" },
-          });
-        }
-        const errorUrl = "fomotracker://auth/login?error=Sesi+autentikasi+tidak+ditemukan";
-        return new Response(getRedirectHtml(errorUrl, true, "Sesi autentikasi tidak ditemukan."), {
-          headers: { "Content-Type": "text/html" },
-        });
-      }
-      return NextResponse.redirect(new URL(next, request.url));
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) isSuccess = true;
+  }
+
+  if (isSuccess) {
+    if (platform === "mobile") {
+      return NextResponse.redirect("com.fomotracker.app://dashboard");
     }
+    return NextResponse.redirect(new URL(next, request.url));
   }
 
   // Redirect user to login page if something goes wrong
-  if (platform === "mobile") {
-    const errorUrl = "fomotracker://auth/login?error=Verifikasi+email+gagal";
-    return new Response(getRedirectHtml(errorUrl, true, "Verifikasi email gagal."), {
-      headers: { "Content-Type": "text/html" },
-    });
-  }
   return NextResponse.redirect(
-    new URL("/auth/login?error=Verifikasi email gagal", request.url),
+    new URL("/auth/login?error=Verifikasi gagal", request.url),
   );
 }

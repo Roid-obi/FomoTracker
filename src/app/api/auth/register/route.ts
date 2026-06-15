@@ -5,7 +5,8 @@ export async function POST(request: Request) {
   try {
     const { origin } = new URL(request.url);
     const body = await request.json();
-    const result = await registerService(body, origin);
+    const platform = body.platform || "web";
+    const result = await registerService(body, origin, platform);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });

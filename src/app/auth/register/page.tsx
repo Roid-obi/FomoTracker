@@ -69,10 +69,12 @@ function RegisterContent() {
     setErrorMsg("");
     setIsLoading(true);
     const form = e.currentTarget;
+    const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
     const body = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       password,
+      platform: isNative ? "mobile" : "web",
     };
 
     try {

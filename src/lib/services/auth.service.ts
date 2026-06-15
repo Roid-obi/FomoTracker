@@ -2,7 +2,11 @@ import { z } from "zod";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { LoginModel, RegisterModel } from "@/lib/models/auth.model";
 
-export async function registerService(body: unknown, origin?: string) {
+export async function registerService(
+  body: unknown,
+  origin?: string,
+  platform: string = "web",
+) {
   const parsed = RegisterModel.registerRequest.safeParse(body);
 
   if (!parsed.success) {
@@ -17,7 +21,9 @@ export async function registerService(body: unknown, origin?: string) {
     email,
     password,
     options: {
-      emailRedirectTo: origin ? `${origin}/auth/confirm` : undefined,
+      emailRedirectTo: origin
+        ? `${origin}/auth/confirm?platform=${platform}`
+        : undefined,
       data: {
         name: name,
       },
@@ -52,6 +58,27 @@ export async function loginService(body: unknown) {
   }
 
   return { success: true };
+}
+
+export async function loginOauthService(
+  origin?: string,
+  platform: string = "web",
+) {
+  const supabase = await createSupabaseServer();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: origin
+        ? `${origin}/auth/confirm?platform=${platform}`
+        : undefined,
+    },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, url: data.url };
 }
 
 export async function logoutService() {

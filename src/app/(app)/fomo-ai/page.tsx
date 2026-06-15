@@ -36,22 +36,23 @@ export default function FomoAIPage() {
   const rawHistory = initialContext?.history || [];
 
   // Compute messages with SWR history or fallback welcome message
-  const messages: Message[] = rawHistory.length > 0
-    ? rawHistory.map((msg: any, index: number) => ({
-        id: msg.id || `msg-${index}`,
-        role: msg.role,
-        content: msg.content,
-        timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date(),
-      }))
-    : [
-        {
-          id: "welcome",
-          role: "assistant",
-          content:
-            "Halo! Saya FomoAI, asisten pintar pemantau media sosial Anda. Di sini Anda bisa bertanya tentang data pemakaian aplikasi, pola kecanduan, hingga tips produktivitas dan pengurangan FOMO berdasarkan riwayat pribadi Anda. Ada yang ingin Anda diskusikan?",
-          timestamp: new Date(),
-        },
-      ];
+  const messages: Message[] =
+    rawHistory.length > 0
+      ? rawHistory.map((msg: any, index: number) => ({
+          id: msg.id || `msg-${index}`,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date(),
+        }))
+      : [
+          {
+            id: "welcome",
+            role: "assistant",
+            content:
+              "Halo! Saya FomoAI, asisten pintar pemantau media sosial Anda. Di sini Anda bisa bertanya tentang data pemakaian aplikasi, pola kecanduan, hingga tips produktivitas dan pengurangan FOMO berdasarkan riwayat pribadi Anda. Ada yang ingin Anda diskusikan?",
+            timestamp: new Date(),
+          },
+        ];
 
   // Auto-scroll to bottom of chat
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on message or loading state update
@@ -114,7 +115,7 @@ export default function FomoAIPage() {
         );
         return {
           session: data.session,
-          questionsCount: data.questionsCount ?? (old?.questionsCount ?? 0),
+          questionsCount: data.questionsCount ?? old?.questionsCount ?? 0,
           history: [...historyWithoutOptimisticUserMsg, userMessage, aiMessage],
         };
       });
@@ -155,7 +156,7 @@ export default function FomoAIPage() {
         setIsSending(true);
         const res = await api.delete("/api/ai");
         const nextSession = res.data.session;
-        
+
         // Update query cache to empty history
         queryClient.setQueryData(["fomoAiContext"], {
           session: nextSession,
@@ -326,14 +327,19 @@ export default function FomoAIPage() {
                 ? "Batas harian tercapai. Kembali besok!"
                 : "Tanyakan pola kecanduan media sosial Anda..."
             }
-            disabled={questionsCount >= maxQuestions || isSending || isQueryLoading}
+            disabled={
+              questionsCount >= maxQuestions || isSending || isQueryLoading
+            }
             className="flex-1 bg-background text-foreground border border-border focus:border-secondary focus:ring-1 focus:ring-secondary rounded-2xl px-4 py-3.5 text-sm font-poppins outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
           <button
             type="submit"
             disabled={
-              !input.trim() || questionsCount >= maxQuestions || isSending || isQueryLoading
+              !input.trim() ||
+              questionsCount >= maxQuestions ||
+              isSending ||
+              isQueryLoading
             }
             className="p-3.5 bg-primary text-white rounded-2xl hover:bg-secondary disabled:opacity-50 disabled:pointer-events-none transition-all cursor-pointer flex items-center justify-center shrink-0"
           >

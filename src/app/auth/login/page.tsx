@@ -52,12 +52,16 @@ function LoginContent() {
     setIsLoading(true);
     try {
       const supabase = createClient();
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
+      const isNativePlatform = Capacitor.isNativePlatform();
+      const origin = isNativePlatform
+        ? "https://fomotracker.vercel.app"
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : "";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/confirm`,
+          redirectTo: `${origin}/auth/confirm${isNativePlatform ? "?platform=mobile" : ""}`,
         },
       });
       if (error) {
@@ -65,7 +69,9 @@ function LoginContent() {
       }
     } catch (err) {
       console.error(err);
-      gooeyToast.error("Terjadi kesalahan sistem saat mencoba masuk dengan Google.");
+      gooeyToast.error(
+        "Terjadi kesalahan sistem saat mencoba masuk dengan Google.",
+      );
     } finally {
       setIsLoading(false);
     }

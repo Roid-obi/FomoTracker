@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Clock, Send, Sparkles, Trash2, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { api } from "@/lib/utils/api";
 
 interface Message {
   id: string;
@@ -24,9 +25,53 @@ export default function FomoAIPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [questionsCount, setQuestionsCount] = useState(0);
+  const [session, setSession] = useState<number | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const maxQuestions = 20;
+
+  // Fetch chat context (history, active session, daily quota count) on mount
+  useEffect(() => {
+    const fetchContext = async () => {
+      try {
+        setIsLoading(true);
+        const res = await api.get("/api/ai");
+        const {
+          history,
+          session: currentSession,
+          questionsCount: count,
+        } = res.data;
+        setSession(currentSession);
+        setQuestionsCount(count);
+        if (history && history.length > 0) {
+          setMessages(
+            history.map(
+              (
+                msg: {
+                  id?: string;
+                  role: "user" | "assistant";
+                  content: string;
+                  createdAt?: string;
+                },
+                index: number,
+              ) => ({
+                id: msg.id || `msg-${index}`,
+                role: msg.role,
+                content: msg.content,
+                timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date(),
+              }),
+            ),
+          );
+        }
+      } catch (err) {
+        console.error("Gagal memuat histori chat FomoAI:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContext();
+  }, []);
 
   // Auto-scroll to bottom of chat
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on message or loading state update
@@ -55,71 +100,67 @@ export default function FomoAIPage() {
     setQuestionsCount((prev) => prev + 1);
     setIsLoading(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      let aiReply = "";
-      const lowerInput = userMessage.content.toLowerCase();
+    try {
+      const res = await api.post("/api/ai", {
+        message: userMessage.content,
+        session,
+      });
 
-      if (lowerInput.includes("instagram") || lowerInput.includes("ig")) {
-        aiReply =
-          "Berdasarkan data harian Anda, screen time Instagram Anda rata-rata mencapai 2 jam 45 menit. Puncak aktivitas terjadi di malam hari pukul 21:00-23:00. Ini berkontribusi tinggi terhadap gangguan tidur Anda. Saya sarankan batasi pemakaian maksimal 45 menit sehari.";
-      } else if (
-        lowerInput.includes("tidur") ||
-        lowerInput.includes("malam") ||
-        lowerInput.includes("begadang")
-      ) {
-        aiReply =
-          "Analisis kami menunjukkan Anda sering membuka HP di atas pukul 22:00, dengan durasi rata-rata 35 menit per sesi. Cahaya biru dari layar dapat menekan produksi melatonin. Cobalah menyalakan fitur 'Mode Tidur' di HP Anda 1 jam sebelum tidur.";
-      } else if (
-        lowerInput.includes("produktif") ||
-        lowerInput.includes("kerja") ||
-        lowerInput.includes("belajar")
-      ) {
-        aiReply =
-          "Selama jam produktif (08:00 - 17:00), kami mendeteksi Anda membuka aplikasi hiburan sebanyak 18 kali hari ini. Rata-rata jeda waktu fokus Anda terputus setiap 22 menit. Mengaktifkan mode Do Not Disturb dapat meningkatkan fokus Anda hingga 40%.";
-      } else if (
-        lowerInput.includes("fomo") ||
-        lowerInput.includes("kecanduan") ||
-        lowerInput.includes("kurangi")
-      ) {
-        aiReply =
-          "Kecanduan FOMO biasanya dipicu oleh kebiasaan reflek membuka media sosial saat bosan. Cobalah teknik 'Jeda 10 Detik': ketika ingin membuka Instagram, tunggu 10 detik dan tanyakan 'apakah saya benar-benar butuh melihat ini sekarang?'. Ini membantu melatih kontrol diri.";
-      } else if (
-        lowerInput.includes("halo") ||
-        lowerInput.includes("hi") ||
-        lowerInput.includes("siapa")
-      ) {
-        aiReply =
-          "Halo! Saya adalah FomoAI. Saya dapat memproyeksikan data screen time, frekuensi buka-tutup aplikasi, serta waktu aktif Anda ke dalam bentuk solusi yang disesuaikan secara personal. Silakan tanyakan hal-hal yang berkaitan dengan penggunaan perangkat Anda!";
-      } else {
-        aiReply =
-          "Analisis riwayat mingguan menunjukkan screen time keseluruhan Anda menurun 12% dibandingkan minggu lalu. Ini pencapaian yang bagus! Namun, frekuensi buka-tutup aplikasi (open frequency) Anda masih di atas 65 kali sehari. Cobalah kurangi reflex mengecek HP secara berulang.";
-      }
-
+      const data = res.data;
       const aiMessage: Message = {
-        id: Math.random().toString(36).substring(7),
-        role: "assistant",
-        content: aiReply,
-        timestamp: new Date(),
+        id: data.message.id || Math.random().toString(36).substring(7),
+        role: data.message.role,
+        content: data.message.content,
+        timestamp: data.message.createdAt
+          ? new Date(data.message.createdAt)
+          : new Date(),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+      setSession(data.session);
+    } catch (err) {
+      console.error("Gagal mengirim pesan ke FomoAI:", err);
+      const errorMsg = (err as { response?: { data?: { error?: string } } })
+        .response?.data?.error;
+      const errorMessage =
+        errorMsg || "Terjadi kesalahan pada sistem FomoAI. Silakan coba lagi.";
+
+      const errorMsgObj: Message = {
+        id: Math.random().toString(36).substring(7),
+        role: "assistant",
+        content: `Error: ${errorMessage}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMsgObj]);
+      // rollback quota since it failed
+      setQuestionsCount((prev) => Math.max(0, prev - 1));
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat chat?")) {
-      setMessages([
-        {
-          id: "welcome",
-          role: "assistant",
-          content:
-            "Halo! Saya FomoAI, asisten pintar pemantau media sosial Anda. Di sini Anda bisa bertanya tentang data pemakaian aplikasi, pola kecanduan, hingga tips produktivitas dan pengurangan FOMO berdasarkan riwayat pribadi Anda. Ada yang ingin Anda diskusikan?",
-          timestamp: new Date(),
-        },
-      ]);
-      setQuestionsCount(0);
+      try {
+        setIsLoading(true);
+        const res = await api.delete("/api/ai");
+        const nextSession = res.data.session;
+        setSession(nextSession);
+        setMessages([
+          {
+            id: "welcome",
+            role: "assistant",
+            content:
+              "Halo! Saya FomoAI, asisten pintar pemantau media sosial Anda. Di sini Anda bisa bertanya tentang data pemakaian aplikasi, pola kecanduan, hingga tips produktivitas dan pengurangan FOMO berdasarkan riwayat pribadi Anda. Ada yang ingin Anda diskusikan?",
+            timestamp: new Date(),
+          },
+        ]);
+      } catch (err) {
+        console.error("Gagal melakukan reset sesi chat FomoAI:", err);
+        alert("Gagal melakukan reset chat. Silakan coba lagi.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

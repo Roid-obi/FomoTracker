@@ -1,10 +1,10 @@
+import { and, asc, desc, eq, gte } from "drizzle-orm";
+import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { AiconModel } from "@/lib/models/aicon.model";
 import { generateChatResponseAI } from "@/lib/utils/ai";
-import { and, asc, desc, eq, gte } from "drizzle-orm";
-import { z } from "zod";
 
 type ServiceResult<T = undefined> =
   | { success: true; data: T }
@@ -52,7 +52,8 @@ export async function getHistoryService(
 
   const parsed = AiconModel.historySchema.safeParse(
     historyRows.map((r) => ({
-      role: r.role,
+      id: r.id,
+      role: r.role as "user" | "assistant",
       content: r.content,
       createdAt: r.createdAt ?? undefined,
     })),
@@ -62,6 +63,77 @@ export async function getHistoryService(
     return { success: false, error: validationError(parsed.error) };
 
   return { success: true, data: parsed.data };
+}
+
+export async function getChatContextService(): Promise<
+  ServiceResult<{
+    session: number;
+    history: AiconModel.historySchema;
+    questionsCount: number;
+  }>
+> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  // 1. Ambil session aktif (session terbesar)
+  const latest = await db.query.aiConversations.findFirst({
+    where: eq(table.aiConversations.userId, userId),
+    orderBy: [desc(table.aiConversations.session)],
+  });
+  const currentSession = latest ? latest.session : 1;
+
+  // 2. Ambil histori
+  const historyRes = await getHistoryService(currentSession);
+  if (!historyRes.success) {
+    return { success: false, error: historyRes.error };
+  }
+
+  // 3. Hitung jumlah pertanyaan user hari ini
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todayRows = await db.query.aiConversations.findMany({
+    where: and(
+      eq(table.aiConversations.userId, userId),
+      eq(table.aiConversations.role, "user"),
+      gte(table.aiConversations.createdAt, today),
+    ),
+    columns: { id: true },
+  });
+
+  return {
+    success: true,
+    data: {
+      session: currentSession,
+      history: historyRes.data,
+      questionsCount: todayRows.length,
+    },
+  };
+}
+
+export async function resetChatSessionService(): Promise<
+  ServiceResult<{ session: number }>
+> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  // Ambil session terakhir
+  const latest = await db.query.aiConversations.findFirst({
+    where: eq(table.aiConversations.userId, userId),
+    orderBy: [desc(table.aiConversations.session)],
+  });
+  const nextSession = latest ? latest.session + 1 : 2;
+
+  // Simpan welcome message awal di session baru ini ke database
+  await db.insert(table.aiConversations).values({
+    userId,
+    session: nextSession,
+    role: "assistant",
+    content:
+      "Halo! Saya FomoAI, asisten pintar pemantau media sosial Anda. Di sini Anda bisa bertanya tentang data pemakaian aplikasi, pola kecanduan, hingga tips produktivitas dan pengurangan FOMO berdasarkan riwayat pribadi Anda. Ada yang ingin Anda diskusikan?",
+  });
+
+  return { success: true, data: { session: nextSession } };
 }
 
 export async function sendMessageService(
@@ -253,7 +325,8 @@ Aturan Menjawab:
     const responseParsed = AiconModel.chatResponseSchema.safeParse({
       session: currentSession,
       message: {
-        role: savedAiMessage.role,
+        id: savedAiMessage.id,
+        role: savedAiMessage.role as "user" | "assistant",
         content: savedAiMessage.content,
         createdAt: savedAiMessage.createdAt ?? undefined,
       },

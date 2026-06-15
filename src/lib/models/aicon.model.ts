@@ -1,9 +1,10 @@
-import { table } from "@/lib/databases/schema";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { table } from "@/lib/databases/schema";
 
 export namespace AiconModel {
   export const messageSchema = z.object({
+    id: z.string().optional(),
     role: z.enum(["user", "assistant"]),
     content: z.string().min(1, "Pesan tidak boleh kosong"),
     createdAt: z.coerce.date().optional(),

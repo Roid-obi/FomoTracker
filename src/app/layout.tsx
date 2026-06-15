@@ -29,13 +29,27 @@ const isMobile = process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "FomoTracker",
+    default: "FomoTracker - Kelola Kebiasaan Digital & Screen Time Anda",
     template: "%s | FomoTracker",
   },
-  description: "Track habits, activities, and usage insights with style",
+  description:
+    "Pantau durasi pemakaian aplikasi HP dan browser secara real-time, kurangi screen time media sosial yang berlebihan, dan dapatkan insight kebiasaan sehat berbasis AI bersama FomoTracker.",
+  keywords: [
+    "digital wellbeing",
+    "screen time tracker",
+    "pantau pemakaian hp",
+    "adiksi media sosial",
+    "fomo",
+    "fomotracker",
+    "kesejahteraan digital",
+    "analisis kebiasaan",
+    "fomoai",
+    "olivia 2026",
+  ],
   openGraph: {
-    title: "FomoTracker",
-    description: "Track habits, activities, and usage insights with style",
+    title: "FomoTracker - Kelola Kebiasaan Digital & Screen Time Anda",
+    description:
+      "Pantau durasi pemakaian aplikasi HP dan browser secara real-time, kurangi screen time media sosial yang berlebihan, dan dapatkan insight kebiasaan sehat berbasis AI bersama FomoTracker.",
     url: baseUrl,
     siteName: "FomoTracker",
     images: [
@@ -43,7 +57,7 @@ export const metadata: Metadata = {
         url: "/preview-fomotracker.png",
         width: 1200,
         height: 630,
-        alt: "FomoTracker - Track habits, activities, and usage insights with style",
+        alt: "FomoTracker - Kelola Kebiasaan Digital & Screen Time Anda",
       },
     ],
     locale: "id_ID",
@@ -51,8 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "FomoTracker",
-    description: "Track habits, activities, and usage insights with style",
+    title: "FomoTracker - Kelola Kebiasaan Digital & Screen Time Anda",
+    description:
+      "Pantau durasi pemakaian aplikasi HP dan browser secara real-time, kurangi screen time media sosial yang berlebihan, dan dapatkan insight kebiasaan sehat berbasis AI bersama FomoTracker.",
     images: ["/preview-fomotracker.png"],
   },
   icons: {

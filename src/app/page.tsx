@@ -70,6 +70,26 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "FomoTracker",
+            url: "https://fomotracker.vercel.app",
+            description:
+              "Platform digital wellbeing untuk melacak screen time, mengelola adiksi media sosial, dan meningkatkan fokus menggunakan asisten AI cerdas.",
+            applicationCategory: "HealthApplication, BusinessApplication",
+            operatingSystem: "Android, Web, Chrome Extension",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "IDR",
+            },
+          }),
+        }}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
         {/* Glow effects */}

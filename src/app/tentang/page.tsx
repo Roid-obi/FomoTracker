@@ -1,5 +1,4 @@
-"use client";
-
+import type { Metadata } from "next";
 import {
   Brain,
   FileText,
@@ -11,6 +10,12 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Tentang Kami",
+  description:
+    "Pelajari visi, misi, landasan ilmiah, dan tim di balik pengembangan platform digital wellbeing FomoTracker.",
+};
 
 export default function Tentang() {
   return (

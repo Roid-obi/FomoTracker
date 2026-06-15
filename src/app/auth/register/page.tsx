@@ -23,10 +23,12 @@ export default function Register() {
     setErrorMsg("");
     setIsLoading(true);
     const form = e.currentTarget;
+    const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
     const body = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       password,
+      platform: isNative ? "mobile" : "web",
     };
 
     try {
@@ -232,7 +234,10 @@ export default function Register() {
 
           <button
             type="button"
-            onClick={() => router.push("/onboarding")}
+            onClick={() => {
+              const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
+              window.location.href = `/api/auth/login/google?platform=${isNative ? "mobile" : "web"}`;
+            }}
             className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">

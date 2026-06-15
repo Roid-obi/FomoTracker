@@ -5,6 +5,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail, User, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/databases/supabase";
 import { api } from "@/lib/utils/api";
 
 export default function Register() {
@@ -19,6 +20,29 @@ export default function Register() {
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform());
   }, []);
+
+  const handleGoogleRegister = async () => {
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/auth/confirm`,
+        },
+      });
+      if (error) {
+        alert(`Gagal mendaftar dengan Google: ${error.message}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan sistem saat mencoba mendaftar dengan Google.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -240,8 +264,9 @@ export default function Register() {
 
           <button
             type="button"
-            onClick={() => router.push("/onboarding")}
-            className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins"
+            onClick={handleGoogleRegister}
+            disabled={isLoading}
+            className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins disabled:opacity-50"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
               <path

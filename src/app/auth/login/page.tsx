@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
+import { createClient } from "@/lib/databases/supabase";
 import { api } from "@/lib/utils/api";
 
 export default function Login() {
@@ -25,6 +26,29 @@ export default function Login() {
     }
   }, [user, isUserLoading, router]);
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/auth/confirm`,
+        },
+      });
+      if (error) {
+        alert(`Gagal masuk dengan Google: ${error.message}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan sistem saat mencoba masuk dengan Google.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -41,8 +65,9 @@ export default function Login() {
       if (response.data.success) {
         router.push("/dashboard");
       }
-    } catch (error: any) {
-      console.log(error.response?.data?.error || "Login Gagal");
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: string } } };
+      console.log(err.response?.data?.error || "Login Gagal");
     } finally {
       setIsLoading(false);
     }
@@ -172,8 +197,9 @@ export default function Login() {
 
           <button
             type="button"
-            onClick={() => router.push("/dashboard")}
-            className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins disabled:opacity-50"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
               <path

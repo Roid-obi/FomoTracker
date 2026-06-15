@@ -1,5 +1,8 @@
+import type { EmailOtpType } from "@supabase/supabase-js";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { type EmailOtpType } from "@supabase/supabase-js";
+import { db } from "@/lib/databases";
+import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 
 export async function GET(request: Request) {
@@ -22,6 +25,37 @@ export async function GET(request: Request) {
   } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        // Cek apakah user sudah terdaftar di public.users
+        const existingUser = await db
+          .select()
+          .from(table.users)
+          .where(eq(table.users.id, user.id))
+          .limit(1)
+          .then((res) => res[0]);
+
+        if (!existingUser) {
+          // Sync nama dan avatar dari user metadata
+          const name =
+            user.user_metadata.full_name ||
+            user.user_metadata.name ||
+            user.email?.split("@")[0] ||
+            "User Google";
+          const avatarUrl = user.user_metadata.avatar_url || null;
+
+          await db.insert(table.users).values({
+            id: user.id,
+            name,
+            avatarUrl,
+            onboardingCompleted: false,
+          });
+        }
+      }
+
       return NextResponse.redirect(new URL(next, request.url));
     }
   }

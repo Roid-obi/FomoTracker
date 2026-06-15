@@ -26,6 +26,7 @@ export const createClient = () => {
               ).toUTCString();
             }
 
+            // Sync with Supabase domain
             await CapacitorCookies.setCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
               key: name,
@@ -33,10 +34,26 @@ export const createClient = () => {
               expires: expires,
               path: options?.path,
             });
+
+            // Sync with our backend API domain
+            await CapacitorCookies.setCookie({
+              url: "https://fomotracker.vercel.app",
+              key: name,
+              value: value,
+              expires: expires,
+              path: options?.path,
+            });
           },
           remove: async (name, _options) => {
+            // Remove from Supabase domain
             await CapacitorCookies.deleteCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              key: name,
+            });
+
+            // Remove from our backend API domain
+            await CapacitorCookies.deleteCookie({
+              url: "https://fomotracker.vercel.app",
               key: name,
             });
           },

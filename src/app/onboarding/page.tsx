@@ -47,7 +47,9 @@ export default function OnboardingPage() {
   // Platform & Extension Detection states
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
   const [isAndroidPlatform, setIsAndroidPlatform] = useState(false);
-  const [selectedInstallOption, setSelectedInstallOption] = useState<"android" | "extension" | null>(null);
+  const [selectedInstallOption, setSelectedInstallOption] = useState<
+    "android" | "extension" | null
+  >(null);
   const [waitingForInstall, setWaitingForInstall] = useState(false);
   const [needsUsagePermission, setNeedsUsagePermission] = useState(false);
   const [isCheckingPermission, setIsCheckingPermission] = useState(true);
@@ -57,7 +59,9 @@ export default function OnboardingPage() {
     "550e8400-e29b-41d4-a716-446655440010", // Instagram
     "550e8400-e29b-41d4-a716-446655440011", // TikTok
   ]);
-  const [monitoredUrls, setMonitoredUrls] = useState<{ name: string; url: string }[]>([
+  const [monitoredUrls, setMonitoredUrls] = useState<
+    { name: string; url: string }[]
+  >([
     { name: "Instagram", url: "instagram.com" },
     { name: "TikTok", url: "tiktok.com" },
   ]);
@@ -142,7 +146,7 @@ export default function OnboardingPage() {
     list.push(
       { id: "hours", title: "Jadwal Harian" },
       { id: "alerts", title: "Batasan & Notifikasi" },
-      { id: "finish", title: "Selesai" }
+      { id: "finish", title: "Selesai" },
     );
 
     return list;
@@ -155,7 +159,9 @@ export default function OnboardingPage() {
 
   const handleToggleApp = (appId: string) => {
     setSelectedApps((prev) =>
-      prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId]
+      prev.includes(appId)
+        ? prev.filter((id) => id !== appId)
+        : [...prev, appId],
     );
   };
 
@@ -172,7 +178,10 @@ export default function OnboardingPage() {
       return;
     }
 
-    setMonitoredUrls((prev) => [...prev, { name: newUrlName.trim(), url: cleanUrl }]);
+    setMonitoredUrls((prev) => [
+      ...prev,
+      { name: newUrlName.trim(), url: cleanUrl },
+    ]);
     setNewUrlName("");
     setNewUrlAddress("");
     gooeyToast.success("Situs web berhasil ditambahkan!");
@@ -253,7 +262,7 @@ export default function OnboardingPage() {
                   enabled: true,
                 })),
               },
-              "*"
+              "*",
             );
           }
 
@@ -266,7 +275,8 @@ export default function OnboardingPage() {
       } catch (error: any) {
         console.error(error);
         gooeyToast.error(
-          error.response?.data?.error || "Terjadi kesalahan saat menyimpan data"
+          error.response?.data?.error ||
+            "Terjadi kesalahan saat menyimpan data",
         );
       } finally {
         setIsSubmitting(false);
@@ -321,7 +331,9 @@ export default function OnboardingPage() {
       <div className="min-h-screen flex items-center justify-center bg-background font-poppins">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-muted font-bold">Memeriksa izin perangkat...</p>
+          <p className="text-xs text-muted font-bold">
+            Memeriksa izin perangkat...
+          </p>
         </div>
       </div>
     );
@@ -343,13 +355,18 @@ export default function OnboardingPage() {
               Akses Pemakaian Diperlukan 📱
             </h1>
             <p className="text-muted font-light leading-relaxed max-w-md mx-auto text-sm">
-              Untuk memantau durasi penggunaan aplikasi media sosial Anda secara akurat pada perangkat Android, FomoTracker memerlukan izin <strong>Akses Pemakaian (Usage Access)</strong>.
+              Untuk memantau durasi penggunaan aplikasi media sosial Anda secara
+              akurat pada perangkat Android, FomoTracker memerlukan izin{" "}
+              <strong>Akses Pemakaian (Usage Access)</strong>.
             </p>
           </div>
           <div className="bg-muted-light/45 rounded-2xl p-4 border border-border flex items-start gap-3 text-left">
             <Info className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
             <p className="text-xs text-muted font-light leading-relaxed">
-              Silakan ketuk tombol di bawah, cari <strong>FomoTracker</strong> di daftar aplikasi, lalu aktifkan izin <strong>Bolehkan akses pemakaian</strong>. Setelah itu, kembalilah ke aplikasi ini.
+              Silakan ketuk tombol di bawah, cari <strong>FomoTracker</strong>{" "}
+              di daftar aplikasi, lalu aktifkan izin{" "}
+              <strong>Bolehkan akses pemakaian</strong>. Setelah itu, kembalilah
+              ke aplikasi ini.
             </p>
           </div>
           <button
@@ -418,12 +435,13 @@ export default function OnboardingPage() {
                 Hubungkan Perangkat Anda
               </h2>
               <p className="text-xs text-muted font-light">
-                FomoTracker membutuhkan koneksi ke HP atau browser untuk melacak waktu pemakaian.
+                FomoTracker membutuhkan koneksi ke HP atau browser untuk melacak
+                waktu pemakaian.
               </p>
             </div>
 
             {/* Display connectivity status if connected */}
-            {(isAndroidPlatform || isExtensionInstalled) ? (
+            {isAndroidPlatform || isExtensionInstalled ? (
               <div className="space-y-4">
                 {isAndroidPlatform && (
                   <div className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/20 flex items-center justify-between">
@@ -432,11 +450,17 @@ export default function OnboardingPage() {
                         <Smartphone className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-emerald-800">Aplikasi Android Terhubung</h4>
-                        <p className="text-[10px] text-emerald-600">Melacak aplikasi HP Anda.</p>
+                        <h4 className="text-xs font-bold text-emerald-800">
+                          Aplikasi Android Terhubung
+                        </h4>
+                        <p className="text-[10px] text-emerald-600">
+                          Melacak aplikasi HP Anda.
+                        </p>
                       </div>
                     </div>
-                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Aktif</span>
+                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">
+                      Aktif
+                    </span>
                   </div>
                 )}
 
@@ -447,11 +471,17 @@ export default function OnboardingPage() {
                         <Laptop className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-emerald-800">Ekstensi Browser Terhubung</h4>
-                        <p className="text-[10px] text-emerald-600">Melacak tab browser komputer Anda.</p>
+                        <h4 className="text-xs font-bold text-emerald-800">
+                          Ekstensi Browser Terhubung
+                        </h4>
+                        <p className="text-[10px] text-emerald-600">
+                          Melacak tab browser komputer Anda.
+                        </p>
                       </div>
                     </div>
-                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Aktif</span>
+                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">
+                      Aktif
+                    </span>
                   </div>
                 )}
               </div>
@@ -462,9 +492,13 @@ export default function OnboardingPage() {
                   <div className="p-6 rounded-2xl border border-border bg-card flex flex-col items-center justify-center text-center space-y-4">
                     <div className="w-10 h-10 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
                     <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-primary">Menunggu Koneksi Terdeteksi...</h4>
+                      <h4 className="text-xs font-bold text-primary">
+                        Menunggu Koneksi Terdeteksi...
+                      </h4>
                       <p className="text-[10px] text-muted max-w-xs leading-relaxed">
-                        Silakan pasang aplikasi/ekstensi Anda di tab baru. Setelah terpasang, sistem akan mendeteksinya secara otomatis.
+                        Silakan pasang aplikasi/ekstensi Anda di tab baru.
+                        Setelah terpasang, sistem akan mendeteksinya secara
+                        otomatis.
                       </p>
                     </div>
                     <button
@@ -480,7 +514,9 @@ export default function OnboardingPage() {
                     <div className="p-4 rounded-2xl border border-red-100 bg-red-50/10 flex items-start gap-2.5">
                       <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                       <p className="text-[10px] text-red-700 leading-relaxed">
-                        Perangkat pemantau belum terdeteksi. Silakan pilih minimal salah satu opsi di bawah ini untuk diarahkan ke halaman instalasi terlebih dahulu.
+                        Perangkat pemantau belum terdeteksi. Silakan pilih
+                        minimal salah satu opsi di bawah ini untuk diarahkan ke
+                        halaman instalasi terlebih dahulu.
                       </p>
                     </div>
 
@@ -494,10 +530,16 @@ export default function OnboardingPage() {
                             : "border-border hover:bg-muted-light/10"
                         }`}
                       >
-                        <Smartphone className={`w-6 h-6 ${selectedInstallOption === "android" ? "text-primary" : "text-muted"}`} />
+                        <Smartphone
+                          className={`w-6 h-6 ${selectedInstallOption === "android" ? "text-primary" : "text-muted"}`}
+                        />
                         <div>
-                          <h4 className="text-xs font-bold text-primary">Aplikasi Android</h4>
-                          <p className="text-[9px] text-muted font-light mt-0.5 leading-tight">Unduh APK untuk HP Android Anda.</p>
+                          <h4 className="text-xs font-bold text-primary">
+                            Aplikasi Android
+                          </h4>
+                          <p className="text-[9px] text-muted font-light mt-0.5 leading-tight">
+                            Unduh APK untuk HP Android Anda.
+                          </p>
                         </div>
                       </button>
 
@@ -510,10 +552,16 @@ export default function OnboardingPage() {
                             : "border-border hover:bg-muted-light/10"
                         }`}
                       >
-                        <Laptop className={`w-6 h-6 ${selectedInstallOption === "extension" ? "text-primary" : "text-muted"}`} />
+                        <Laptop
+                          className={`w-6 h-6 ${selectedInstallOption === "extension" ? "text-primary" : "text-muted"}`}
+                        />
                         <div>
-                          <h4 className="text-xs font-bold text-primary">Ekstensi Browser</h4>
-                          <p className="text-[9px] text-muted font-light mt-0.5 leading-tight">Pasang di Google Chrome komputer.</p>
+                          <h4 className="text-xs font-bold text-primary">
+                            Ekstensi Browser
+                          </h4>
+                          <p className="text-[9px] text-muted font-light mt-0.5 leading-tight">
+                            Pasang di Google Chrome komputer.
+                          </p>
                         </div>
                       </button>
                     </div>
@@ -534,10 +582,18 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={waitingForInstall && !isAndroidPlatform && !isExtensionInstalled}
+                disabled={
+                  waitingForInstall &&
+                  !isAndroidPlatform &&
+                  !isExtensionInstalled
+                }
                 className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-primary text-white font-semibold hover:bg-secondary transition-all cursor-pointer text-xs disabled:opacity-50"
               >
-                <span>{(!isAndroidPlatform && !isExtensionInstalled) ? "Lanjutkan ke Instalasi" : "Lanjutkan"}</span>
+                <span>
+                  {!isAndroidPlatform && !isExtensionInstalled
+                    ? "Lanjutkan ke Instalasi"
+                    : "Lanjutkan"}
+                </span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -552,7 +608,8 @@ export default function OnboardingPage() {
                 Pilih Aplikasi HP yang Dipantau
               </h2>
               <p className="text-xs text-muted font-light">
-                Pilih aplikasi media sosial yang biasa Anda gunakan di HP Android.
+                Pilih aplikasi media sosial yang biasa Anda gunakan di HP
+                Android.
               </p>
             </div>
 
@@ -573,7 +630,7 @@ export default function OnboardingPage() {
                     <div className="flex items-center gap-2 min-w-0">
                       <div
                         className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${getAppColor(
-                          app.name
+                          app.name,
                         )} flex items-center justify-center text-white text-[9px] font-bold shrink-0`}
                       >
                         {app.name.substring(0, 2)}
@@ -625,7 +682,8 @@ export default function OnboardingPage() {
                 Atur Daftar Situs yang Dipantau
               </h2>
               <p className="text-xs text-muted font-light">
-                Masukkan nama dan domain situs web yang ingin dipantau oleh Ekstensi FomoTracker.
+                Masukkan nama dan domain situs web yang ingin dipantau oleh
+                Ekstensi FomoTracker.
               </p>
             </div>
 
@@ -633,7 +691,10 @@ export default function OnboardingPage() {
             <div className="p-4 rounded-2xl border border-border bg-muted-light/10 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="url-name" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                  <label
+                    htmlFor="url-name"
+                    className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                  >
                     Nama Situs
                   </label>
                   <input
@@ -646,7 +707,10 @@ export default function OnboardingPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="url-address" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                  <label
+                    htmlFor="url-address"
+                    className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                  >
                     Domain Website
                   </label>
                   <input
@@ -672,10 +736,17 @@ export default function OnboardingPage() {
             {/* URL List */}
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
               {monitoredUrls.map((item) => (
-                <div key={item.url} className="flex items-center justify-between p-3 rounded-xl border border-border bg-card">
+                <div
+                  key={item.url}
+                  className="flex items-center justify-between p-3 rounded-xl border border-border bg-card"
+                >
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-primary">{item.name}</span>
-                    <span className="text-[10px] text-muted truncate">{item.url}</span>
+                    <span className="text-xs font-bold text-primary">
+                      {item.name}
+                    </span>
+                    <span className="text-[10px] text-muted truncate">
+                      {item.url}
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -717,7 +788,8 @@ export default function OnboardingPage() {
                 Atur Waktu Harian Anda
               </h2>
               <p className="text-xs text-muted font-light">
-                FomoTracker akan menganalisis jam tidur dan jam produktif harian Anda.
+                FomoTracker akan menganalisis jam tidur dan jam produktif harian
+                Anda.
               </p>
             </div>
 
@@ -726,11 +798,16 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">Jam Belajar / Kerja</span>
+                  <span className="text-xs font-bold text-primary">
+                    Jam Belajar / Kerja
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="prod-start" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="prod-start"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Mulai
                     </label>
                     <input
@@ -742,7 +819,10 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="prod-end" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="prod-end"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Selesai
                     </label>
                     <input
@@ -760,11 +840,16 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Moon className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">Jam Tidur Malam</span>
+                  <span className="text-xs font-bold text-primary">
+                    Jam Tidur Malam
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="sleep-start" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="sleep-start"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Mulai
                     </label>
                     <input
@@ -776,7 +861,10 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="sleep-end" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    <label
+                      htmlFor="sleep-end"
+                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
+                    >
                       Bangun
                     </label>
                     <input
@@ -820,7 +908,8 @@ export default function OnboardingPage() {
                 Atur Batasan & Pengingat
               </h2>
               <p className="text-xs text-muted font-light">
-                Sesuaikan notifikasi pengingat untuk melatih disiplin digital Anda.
+                Sesuaikan notifikasi pengingat untuk melatih disiplin digital
+                Anda.
               </p>
             </div>
 
@@ -829,8 +918,12 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-primary text-xs sm:text-sm">Batas Pemakaian Harian</h3>
-                    <p className="text-[10px] text-muted font-light">Batas pemakaian media sosial harian.</p>
+                    <h3 className="font-bold text-primary text-xs sm:text-sm">
+                      Batas Pemakaian Harian
+                    </h3>
+                    <p className="text-[10px] text-muted font-light">
+                      Batas pemakaian media sosial harian.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -848,16 +941,22 @@ export default function OnboardingPage() {
                 </div>
                 {notifExcessive && (
                   <div className="flex items-center gap-2 border-t border-border/50 pt-2.5">
-                    <span className="text-[11px] text-muted font-light">Batasi berapa jam per hari?</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Batasi berapa jam per hari?
+                    </span>
                     <input
                       type="number"
                       min="1"
                       max="24"
                       value={excessiveHours}
-                      onChange={(e) => setExcessiveHours(Number(e.target.value))}
+                      onChange={(e) =>
+                        setExcessiveHours(Number(e.target.value))
+                      }
                       className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none"
                     />
-                    <span className="text-[11px] text-muted font-light">Jam</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Jam
+                    </span>
                   </div>
                 )}
               </div>
@@ -865,8 +964,12 @@ export default function OnboardingPage() {
               {/* Productive Alert */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Jam Kerja</h3>
-                  <p className="text-[10px] text-muted font-light">Ingatkan jika membuka medsos di jam kerja.</p>
+                  <h3 className="font-bold text-primary text-xs sm:text-sm">
+                    Pengingat Jam Kerja
+                  </h3>
+                  <p className="text-[10px] text-muted font-light">
+                    Ingatkan jika membuka medsos di jam kerja.
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -886,8 +989,12 @@ export default function OnboardingPage() {
               {/* Midnight Sleep Alert */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Jam Tidur</h3>
-                  <p className="text-[10px] text-muted font-light">Ingatkan jika main HP di jam tidur malam.</p>
+                  <h3 className="font-bold text-primary text-xs sm:text-sm">
+                    Pengingat Jam Tidur
+                  </h3>
+                  <p className="text-[10px] text-muted font-light">
+                    Ingatkan jika main HP di jam tidur malam.
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -908,8 +1015,12 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Nonstop</h3>
-                    <p className="text-[10px] text-muted font-light">Ingatkan jika online terus tanpa jeda.</p>
+                    <h3 className="font-bold text-primary text-xs sm:text-sm">
+                      Pengingat Nonstop
+                    </h3>
+                    <p className="text-[10px] text-muted font-light">
+                      Ingatkan jika online terus tanpa jeda.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -927,16 +1038,22 @@ export default function OnboardingPage() {
                 </div>
                 {notifContinuous && (
                   <div className="flex items-center gap-2 border-t border-border/50 pt-2.5">
-                    <span className="text-[11px] text-muted font-light">Batas online nonstop?</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Batas online nonstop?
+                    </span>
                     <input
                       type="number"
                       min="5"
                       max="180"
                       value={continuousMinutes}
-                      onChange={(e) => setContinuousMinutes(Number(e.target.value))}
+                      onChange={(e) =>
+                        setContinuousMinutes(Number(e.target.value))
+                      }
                       className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none"
                     />
-                    <span className="text-[11px] text-muted font-light">Menit</span>
+                    <span className="text-[11px] text-muted font-light">
+                      Menit
+                    </span>
                   </div>
                 )}
               </div>
@@ -970,33 +1087,54 @@ export default function OnboardingPage() {
               <div className="mx-auto w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <CheckCircle className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-extrabold text-primary">Semua siap! 🎉</h2>
-              <p className="text-xs text-muted font-light">Konfigurasi awal FomoTracker telah berhasil disiapkan.</p>
+              <h2 className="text-2xl font-extrabold text-primary">
+                Semua siap! 🎉
+              </h2>
+              <p className="text-xs text-muted font-light">
+                Konfigurasi awal FomoTracker telah berhasil disiapkan.
+              </p>
             </div>
 
             <div className="space-y-3.5 p-5 rounded-2xl border border-border bg-muted-light/10 text-xs">
               <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Metode Pemantauan</span>
+                <span className="font-semibold text-muted">
+                  Metode Pemantauan
+                </span>
                 <div className="text-right space-y-0.5 font-bold text-primary">
-                  <div>{isAndroidPlatform ? "✅ Aplikasi Android HP" : "❌ Aplikasi Android HP (Mati)"}</div>
-                  <div>{isExtensionInstalled ? "✅ Ekstensi Browser" : "❌ Ekstensi Browser (Mati)"}</div>
+                  <div>
+                    {isAndroidPlatform
+                      ? "✅ Aplikasi Android HP"
+                      : "❌ Aplikasi Android HP (Mati)"}
+                  </div>
+                  <div>
+                    {isExtensionInstalled
+                      ? "✅ Ekstensi Browser"
+                      : "❌ Ekstensi Browser (Mati)"}
+                  </div>
                 </div>
               </div>
 
               {isAndroidPlatform && (
                 <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                  <span className="font-semibold text-muted">Aplikasi HP Dipantau</span>
+                  <span className="font-semibold text-muted">
+                    Aplikasi HP Dipantau
+                  </span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
                     {selectedApps.length > 0 ? (
                       initialApps
                         .filter((app) => selectedApps.includes(app.id))
                         .map((app) => (
-                          <span key={app.id} className="text-[9px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                          <span
+                            key={app.id}
+                            className="text-[9px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase"
+                          >
                             {app.name}
                           </span>
                         ))
                     ) : (
-                      <span className="text-[10px] text-red-500 font-semibold">Belum memilih</span>
+                      <span className="text-[10px] text-red-500 font-semibold">
+                        Belum memilih
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1004,38 +1142,57 @@ export default function OnboardingPage() {
 
               {isExtensionInstalled && (
                 <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                  <span className="font-semibold text-muted">Situs Web Dipantau</span>
+                  <span className="font-semibold text-muted">
+                    Situs Web Dipantau
+                  </span>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
                     {monitoredUrls.length > 0 ? (
                       monitoredUrls.map((item) => (
-                        <span key={item.url} className="text-[9px] font-bold px-2 py-0.5 rounded bg-secondary/10 text-secondary uppercase">
+                        <span
+                          key={item.url}
+                          className="text-[9px] font-bold px-2 py-0.5 rounded bg-secondary/10 text-secondary uppercase"
+                        >
                           {item.name}
                         </span>
                       ))
                     ) : (
-                      <span className="text-[10px] text-red-500 font-semibold">Belum ada situs</span>
+                      <span className="text-[10px] text-red-500 font-semibold">
+                        Belum ada situs
+                      </span>
                     )}
                   </div>
                 </div>
               )}
 
               <div className="flex justify-between items-center pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Jadwal Jam Kerja</span>
-                <span className="font-bold text-primary">{productiveStart} – {productiveEnd}</span>
+                <span className="font-semibold text-muted">
+                  Jadwal Jam Kerja
+                </span>
+                <span className="font-bold text-primary">
+                  {productiveStart} – {productiveEnd}
+                </span>
               </div>
 
               <div className="flex justify-between items-center pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Jadwal Tidur Malam</span>
-                <span className="font-bold text-primary">{sleepStart} – {sleepEnd}</span>
+                <span className="font-semibold text-muted">
+                  Jadwal Tidur Malam
+                </span>
+                <span className="font-bold text-primary">
+                  {sleepStart} – {sleepEnd}
+                </span>
               </div>
 
               <div className="flex justify-between items-start">
                 <span className="font-semibold text-muted">Alerts Aktif</span>
                 <div className="flex flex-col items-end gap-1 font-bold text-emerald-600">
-                  {notifExcessive && <span>✓ Harian ({excessiveHours} Jam)</span>}
+                  {notifExcessive && (
+                    <span>✓ Harian ({excessiveHours} Jam)</span>
+                  )}
                   {notifProductive && <span>✓ Jam Kerja</span>}
                   {notifMidnight && <span>✓ Jam Tidur</span>}
-                  {notifContinuous && <span>✓ Nonstop ({continuousMinutes} Mnt)</span>}
+                  {notifContinuous && (
+                    <span>✓ Nonstop ({continuousMinutes} Mnt)</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -1055,7 +1212,9 @@ export default function OnboardingPage() {
                 disabled={isSubmitting}
                 className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-secondary disabled:bg-primary/50 transition-all cursor-pointer text-sm shadow-md"
               >
-                <span>{isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}</span>
+                <span>
+                  {isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}
+                </span>
                 <Check className="w-4 h-4" />
               </button>
             </div>

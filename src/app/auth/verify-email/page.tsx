@@ -112,11 +112,17 @@ function VerifyEmailContent() {
 
     try {
       const supabase = createClient();
+      const isNativePlatform = Capacitor.isNativePlatform();
+      const origin = isNativePlatform
+        ? "https://fomotracker.vercel.app"
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : "";
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${origin}/auth/confirm${isNativePlatform ? "?platform=mobile" : ""}`,
         },
       });
 

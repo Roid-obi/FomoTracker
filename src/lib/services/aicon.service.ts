@@ -250,11 +250,13 @@ Aturan Menjawab:
     .where(
       and(
         eq(table.behavioralScores.userId, userId),
-        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr)
-      )
+        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr),
+      ),
     )
     .orderBy(desc(table.behavioralScores.scoreDate))
     .limit(7);
+
+  const latestScore = last7DaysScores[0];
 
   const last7DaysStats = await db
     .select({
@@ -268,8 +270,8 @@ Aturan Menjawab:
     .where(
       and(
         eq(table.dailyStats.userId, userId),
-        gte(table.dailyStats.statDate, sevenDaysAgoStr)
-      )
+        gte(table.dailyStats.statDate, sevenDaysAgoStr),
+      ),
     )
     .orderBy(
       desc(table.dailyStats.statDate),

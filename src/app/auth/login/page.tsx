@@ -52,12 +52,16 @@ function LoginContent() {
     setIsLoading(true);
     try {
       const supabase = createClient();
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
+      const isNativePlatform = Capacitor.isNativePlatform();
+      const origin = isNativePlatform
+        ? "https://fomotracker.vercel.app"
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : "";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/confirm`,
+          redirectTo: `${origin}/auth/confirm${isNativePlatform ? "?platform=mobile" : ""}`,
         },
       });
       if (error) {
@@ -65,7 +69,9 @@ function LoginContent() {
       }
     } catch (err) {
       console.error(err);
-      gooeyToast.error("Terjadi kesalahan sistem saat mencoba masuk dengan Google.");
+      gooeyToast.error(
+        "Terjadi kesalahan sistem saat mencoba masuk dengan Google.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -212,32 +218,33 @@ function LoginContent() {
           <div className="flex-1 border-t border-border" />
         </div>
 
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill="#EA4335"
-                d="M12 5.04c1.67 0 3.2.58 4.38 1.69l3.27-3.27C17.67 1.54 15.02 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.87 3a7.16 7.16 0 0 1 6.89-5.68z"
-              />
-              <path
-                fill="#4285F4"
-                d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.45h6.46a5.52 5.52 0 0 1-2.4 3.62l3.72 2.89c2.18-2 3.71-4.96 3.71-8.62z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.11 14.72A7.12 7.12 0 0 1 4.75 12c0-.95.16-1.87.46-2.72L1.24 6.28a11.96 11.96 0 0 0 0 11.44l3.87-3z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.72-2.89c-1.03.69-2.35 1.1-4.24 1.1a7.16 7.16 0 0 1-6.89-5.68l-3.87 3A11.97 11.97 0 0 0 12 23z"
-              />
-            </svg>
-            <span>Masuk dengan Google</span>
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={isLoading}
+          className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins disabled:opacity-50"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="#EA4335"
+              d="M12 5.04c1.67 0 3.2.58 4.38 1.69l3.27-3.27C17.67 1.54 15.02 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.87 3a7.16 7.16 0 0 1 6.89-5.68z"
+            />
+            <path
+              fill="#4285F4"
+              d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.45h6.46a5.52 5.52 0 0 1-2.4 3.62l3.72 2.89c2.18-2 3.71-4.96 3.71-8.62z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.11 14.72A7.12 7.12 0 0 1 4.75 12c0-.95.16-1.87.46-2.72L1.24 6.28a11.96 11.96 0 0 0 0 11.44l3.87-3z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.72-2.89c-1.03.69-2.35 1.1-4.24 1.1a7.16 7.16 0 0 1-6.89-5.68l-3.87 3A11.97 11.97 0 0 0 12 23z"
+            />
+          </svg>
+          <span>Masuk dengan Google</span>
+        </button>
+      </form>
 
       {/* Footer */}
       <p className="text-center text-xs text-muted font-poppins font-light mt-6">

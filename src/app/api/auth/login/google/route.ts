@@ -7,14 +7,14 @@ export async function GET(request: Request) {
     const origin = url.origin;
     const platform = url.searchParams.get("platform") || "web";
     const result = await loginOauthService(origin, platform);
-    
+
     if (result.success && result.url) {
       return NextResponse.redirect(result.url);
     }
-    
+
     return NextResponse.json(
       { error: result.error || "Failed to initialize Google login" },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

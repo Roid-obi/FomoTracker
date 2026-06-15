@@ -41,12 +41,16 @@ function RegisterContent() {
     setIsLoading(true);
     try {
       const supabase = createClient();
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
+      const isNativePlatform = Capacitor.isNativePlatform();
+      const origin = isNativePlatform
+        ? "https://fomotracker.vercel.app"
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : "";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/confirm`,
+          redirectTo: `${origin}/auth/confirm${isNativePlatform ? "?platform=mobile" : ""}`,
         },
       });
       if (error) {
@@ -54,7 +58,9 @@ function RegisterContent() {
       }
     } catch (err) {
       console.error(err);
-      gooeyToast.error("Terjadi kesalahan sistem saat mencoba mendaftar dengan Google.");
+      gooeyToast.error(
+        "Terjadi kesalahan sistem saat mencoba mendaftar dengan Google.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -69,12 +75,12 @@ function RegisterContent() {
     setErrorMsg("");
     setIsLoading(true);
     const form = e.currentTarget;
-    const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
+    const isNativePlatform = Capacitor.isNativePlatform();
     const body = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       password,
-      platform: isNative ? "mobile" : "web",
+      platform: isNativePlatform ? "mobile" : "web",
     };
 
     try {

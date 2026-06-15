@@ -24,6 +24,8 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL
     ? `https://${process.env.VERCEL_URL}`
     : "http://localhost:3000";
 
+const isMobile = process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
+
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
@@ -76,9 +78,9 @@ export default function RootLayout({
         className="min-h-full flex flex-col bg-background text-foreground font-sans"
       >
         <Providers>
-          <Navbar />
+          {!isMobile && <Navbar />}
           {children}
-          <Footer />
+          {!isMobile && <Footer />}
         </Providers>
       </body>
     </html>

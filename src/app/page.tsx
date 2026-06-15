@@ -29,6 +29,7 @@ export default function Home() {
   const router = useRouter();
   const [isNative, setIsNative] = useState(false);
   const [isNativeChecked, setIsNativeChecked] = useState(false);
+  const isMobileTarget = process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
 
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform());
@@ -36,7 +37,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (isNativeChecked && isNative) {
+    if (isMobileTarget || (isNativeChecked && isNative)) {
       if (!isLoading) {
         if (user) {
           router.replace("/dashboard");
@@ -45,13 +46,24 @@ export default function Home() {
         }
       }
     }
-  }, [isNative, isNativeChecked, user, isLoading, router]);
+  }, [isNative, isNativeChecked, user, isLoading, router, isMobileTarget]);
 
-  if (isNative) {
+  if (isMobileTarget || isNative) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center font-poppins">
-        <div className="w-10 h-10 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm text-muted font-light">Memuat...</p>
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-baseline gap-1 animate-pulse">
+            <span className="font-yellowtail text-5xl font-normal text-primary leading-none">
+              Fomo
+            </span>
+            <span className="font-poppins text-sm font-bold tracking-widest text-primary uppercase leading-none">
+              Tracker
+            </span>
+          </div>
+          <p className="text-[10px] text-muted font-light tracking-widest uppercase mt-2 opacity-60">
+            Digital Wellbeing Assistant
+          </p>
+        </div>
       </div>
     );
   }

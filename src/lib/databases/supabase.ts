@@ -4,24 +4,19 @@ import { createBrowserClient, createServerClient } from "@supabase/ssr";
 const isMobile = process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
 
 export const createClient = () => {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        // Jika di HP (Capacitor), kita override cara Supabase membaca/menulis cookie
-        get: (name) => {
-          if (isMobile) {
-            // CapacitorCookies berjalan secara sinkronus/asinkronus, untuk 'get' di client:
+  if (isMobile) {
+    return createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      {
+        cookies: {
+          get: (name) => {
             const match = document.cookie.match(
               new RegExp(`(^| )${name}=([^;]*)`),
             );
             return match ? decodeURIComponent(match[2]) : null;
-          }
-          return typeof document !== "undefined" ? document.cookie : null;
-        },
-        set: async (name, value, options) => {
-          if (isMobile) {
+          },
+          set: async (name, value, options) => {
             let expires: string | undefined = undefined;
             if (options?.expires) {
               expires = options.expires.toUTCString();
@@ -38,18 +33,22 @@ export const createClient = () => {
               expires: expires,
               path: options?.path,
             });
-          }
-        },
-        remove: async (name, _options) => {
-          if (isMobile) {
+          },
+          remove: async (name, _options) => {
             await CapacitorCookies.deleteCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
               key: name,
             });
-          }
+          },
         },
       },
-    },
+    );
+  }
+
+  // Web (Default Supabase Client behavior)
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
   );
 };
 

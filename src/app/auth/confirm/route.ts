@@ -22,6 +22,10 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(new URL(next, request.url));
     }
+    console.error("OTP verification error:", error);
+    return NextResponse.redirect(
+      new URL(`/auth/login?error=${encodeURIComponent(error.message)}`, request.url),
+    );
   } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
@@ -58,10 +62,14 @@ export async function GET(request: Request) {
 
       return NextResponse.redirect(new URL(next, request.url));
     }
+    console.error("Exchange code for session error:", error);
+    return NextResponse.redirect(
+      new URL(`/auth/login?error=${encodeURIComponent(error.message)}`, request.url),
+    );
   }
 
   // Redirect user to login page if something goes wrong
   return NextResponse.redirect(
-    new URL("/auth/login?error=Verifikasi email gagal", request.url),
+    new URL("/auth/login?error=Invalid request configuration", request.url),
   );
 }

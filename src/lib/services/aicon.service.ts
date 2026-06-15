@@ -1,10 +1,10 @@
-import { and, asc, desc, eq, gte } from "drizzle-orm";
-import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { AiconModel } from "@/lib/models/aicon.model";
 import { generateChatResponseAI } from "@/lib/utils/ai";
+import { and, asc, desc, eq, gte } from "drizzle-orm";
+import { z } from "zod";
 
 type ServiceResult<T = undefined> =
   | { success: true; data: T }
@@ -52,8 +52,7 @@ export async function getHistoryService(
 
   const parsed = AiconModel.historySchema.safeParse(
     historyRows.map((r) => ({
-      id: r.id,
-      role: r.role as "user" | "assistant",
+      role: r.role,
       content: r.content,
       createdAt: r.createdAt ?? undefined,
     })),
@@ -63,77 +62,6 @@ export async function getHistoryService(
     return { success: false, error: validationError(parsed.error) };
 
   return { success: true, data: parsed.data };
-}
-
-export async function getChatContextService(): Promise<
-  ServiceResult<{
-    session: number;
-    history: AiconModel.historySchema;
-    questionsCount: number;
-  }>
-> {
-  const userId = await getAuthenticatedUserId();
-  if (!userId) return { success: false, error: "User not authenticated" };
-
-  // 1. Ambil session aktif (session terbesar)
-  const latest = await db.query.aiConversations.findFirst({
-    where: eq(table.aiConversations.userId, userId),
-    orderBy: [desc(table.aiConversations.session)],
-  });
-  const currentSession = latest ? latest.session : 1;
-
-  // 2. Ambil histori
-  const historyRes = await getHistoryService(currentSession);
-  if (!historyRes.success) {
-    return { success: false, error: historyRes.error };
-  }
-
-  // 3. Hitung jumlah pertanyaan user hari ini
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const todayRows = await db.query.aiConversations.findMany({
-    where: and(
-      eq(table.aiConversations.userId, userId),
-      eq(table.aiConversations.role, "user"),
-      gte(table.aiConversations.createdAt, today),
-    ),
-    columns: { id: true },
-  });
-
-  return {
-    success: true,
-    data: {
-      session: currentSession,
-      history: historyRes.data,
-      questionsCount: todayRows.length,
-    },
-  };
-}
-
-export async function resetChatSessionService(): Promise<
-  ServiceResult<{ session: number }>
-> {
-  const userId = await getAuthenticatedUserId();
-  if (!userId) return { success: false, error: "User not authenticated" };
-
-  // Ambil session terakhir
-  const latest = await db.query.aiConversations.findFirst({
-    where: eq(table.aiConversations.userId, userId),
-    orderBy: [desc(table.aiConversations.session)],
-  });
-  const nextSession = latest ? latest.session + 1 : 2;
-
-  // Simpan welcome message awal di session baru ini ke database
-  await db.insert(table.aiConversations).values({
-    userId,
-    session: nextSession,
-    role: "assistant",
-    content:
-      "Halo! Saya FomoAI, asisten pintar pemantau media sosial Anda. Di sini Anda bisa bertanya tentang data pemakaian aplikasi, pola kecanduan, hingga tips produktivitas dan pengurangan FOMO berdasarkan riwayat pribadi Anda. Ada yang ingin Anda diskusikan?",
-  });
-
-  return { success: true, data: { session: nextSession } };
 }
 
 export async function sendMessageService(
@@ -250,13 +178,11 @@ Aturan Menjawab:
     .where(
       and(
         eq(table.behavioralScores.userId, userId),
-        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr),
-      ),
+        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr)
+      )
     )
     .orderBy(desc(table.behavioralScores.scoreDate))
     .limit(7);
-
-  const latestScore = last7DaysScores[0];
 
   const last7DaysStats = await db
     .select({
@@ -270,8 +196,8 @@ Aturan Menjawab:
     .where(
       and(
         eq(table.dailyStats.userId, userId),
-        gte(table.dailyStats.statDate, sevenDaysAgoStr),
-      ),
+        gte(table.dailyStats.statDate, sevenDaysAgoStr)
+      )
     )
     .orderBy(
       desc(table.dailyStats.statDate),
@@ -294,23 +220,23 @@ Aturan Menjawab:
     userContextText += `\nNama Pengguna: ${userRecord.name}`;
   }
 
-  if (latestScore) {
-    userContextText += `\nStatus Perilaku Terakhir (${latestScore.scoreDate}):
-- Skor: ${latestScore.totalScore}/100 (Makin tinggi makin buruk, <40 Baik)
-- Kategori Status: ${latestScore.dailyStatus}
-- Kendala Utama Terdeteksi: ${
-      [
-        latestScore.flagExcessiveUsage ? "Pemakaian Berlebih" : "",
-        latestScore.flagCompulsiveChecking ? "Sering Cek HP (Kompulsif)" : "",
-        latestScore.flagMidnightUsage ? "Bermain HP saat jam tidur" : "",
-        latestScore.flagContinuousUsage ? "Sesi nonstop tanpa jeda" : "",
-        latestScore.flagProductiveHourDistraction
-          ? "Distraksi jam produktif"
-          : "",
-      ]
-        .filter(Boolean)
-        .join(", ") || "Tidak ada kendala dominan"
-    }`;
+  if (last7DaysScores.length > 0) {
+    userContextText += `\n\nData Skor Perilaku (Maks 7 Hari Terakhir):`;
+    last7DaysScores.forEach((score) => {
+      userContextText += `\nTanggal: ${score.scoreDate}
+- Skor: ${score.totalScore}/100 (Kategori: ${score.dailyStatus})
+- Kendala Utama: ${
+        [
+          score.flagExcessiveUsage ? "Pemakaian Berlebih" : "",
+          score.flagCompulsiveChecking ? "Sering Cek HP" : "",
+          score.flagMidnightUsage ? "Bermain HP saat jam tidur" : "",
+          score.flagContinuousUsage ? "Sesi nonstop tanpa jeda" : "",
+          score.flagProductiveHourDistraction ? "Distraksi jam produktif" : "",
+        ]
+          .filter(Boolean)
+          .join(", ") || "Tidak ada"
+      }`;
+    });
   } else {
     userContextText += `\nData Skor Perilaku: Belum ada data dalam 7 hari terakhir.`;
   }
@@ -351,8 +277,7 @@ Aturan Menjawab:
     const responseParsed = AiconModel.chatResponseSchema.safeParse({
       session: currentSession,
       message: {
-        id: savedAiMessage.id,
-        role: savedAiMessage.role as "user" | "assistant",
+        role: savedAiMessage.role,
         content: savedAiMessage.content,
         createdAt: savedAiMessage.createdAt ?? undefined,
       },

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/utils/api";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +47,38 @@ export default function Register() {
       setErrorMsg(error instanceof Error ? error.message : String(error));
       setIsLoading(false);
     }
+  };
+
+  const handleOauthRegister = async (e?: any) => {
+    if (e) e.preventDefault();
+    const isMobileApp = Capacitor.isNativePlatform() || process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
+
+    if (isMobileApp) {
+      try {
+        const { createClient } = await import("@/lib/databases/supabase");
+        const supabase = createClient();
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: "fomotracker://callback",
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) throw error;
+        if (data?.url) {
+          await Browser.open({ url: data.url });
+        } else {
+          throw new Error("Failed to get Google login URL");
+        }
+      } catch (error: any) {
+        console.error("Failed to initiate Google register:", error);
+        alert("Gagal membuka halaman daftar Google: " + error.message);
+      }
+      return;
+    }
+
+    window.location.href = "/api/auth/login/google?platform=web";
   };
 
   return (
@@ -234,10 +268,7 @@ export default function Register() {
 
           <button
             type="button"
-            onClick={() => {
-              const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
-              window.location.href = `/api/auth/login/google?platform=${isNative ? "mobile" : "web"}`;
-            }}
+            onClick={handleOauthRegister}
             className="w-full py-3 rounded-xl border border-border bg-white hover:bg-muted-light/35 text-primary transition-all font-semibold shadow-xs text-xs flex items-center justify-center gap-2.5 cursor-pointer font-poppins"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">

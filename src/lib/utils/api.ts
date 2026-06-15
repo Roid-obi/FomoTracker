@@ -1,8 +1,14 @@
 import axios from "axios";
-
-const isMobile = process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
+import { Capacitor } from "@capacitor/core";
 
 export const api = axios.create({
-  baseURL: isMobile ? "https://fomotracker.vercel.app" : "",
+  baseURL: process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile" ? "https://fomotracker.vercel.app" : "",
   withCredentials: true,
+});
+
+api.interceptors.request.use((config) => {
+  if (Capacitor.isNativePlatform()) {
+    config.baseURL = "https://fomotracker.vercel.app";
+  }
+  return config;
 });

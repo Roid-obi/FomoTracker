@@ -74,6 +74,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/statistik") ||
     request.nextUrl.pathname.startsWith("/insight") ||
     request.nextUrl.pathname.startsWith("/notifications") ||
+    request.nextUrl.pathname.startsWith("/onboarding") ||
     request.nextUrl.pathname.startsWith("/pengaturan");
 
   if (!user && isAppPage) {

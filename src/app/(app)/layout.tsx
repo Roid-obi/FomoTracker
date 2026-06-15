@@ -59,6 +59,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  useEffect(() => {
+    if (user && !user.onboardingCompleted) {
+      router.replace("/onboarding");
+    }
+  }, [user, router]);
+
   const handleRefresh = async () => {
     if (!user) return;
     setIsSyncing(true);

@@ -12,34 +12,52 @@ import {
   Info,
   Laptop,
   Moon,
+  Plus,
   Smartphone,
   Sparkles,
+  Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { initialApps } from "@/lib/data/databaseInitialData";
 import { api } from "@/lib/utils/api";
+import { Capacitor } from "@capacitor/core";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: user } = useUser();
 
-  useEffect(() => {
-    if (user && user.onboardingCompleted) {
-      router.push("/dashboard");
-    }
-  }, [user, router]);
+  // Platform & Extension Detection states
+  const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
+  const [isAndroidPlatform, setIsAndroidPlatform] = useState(false);
+  const [selectedInstallOption, setSelectedInstallOption] = useState<"android" | "extension" | null>(null);
+  const [waitingForInstall, setWaitingForInstall] = useState(false);
 
   // Form States
-  const [isAndroidConnected, setIsAndroidConnected] = useState(false);
-  const [isBrowserConnected, setIsBrowserConnected] = useState(false);
   const [selectedApps, setSelectedApps] = useState<string[]>([
     "550e8400-e29b-41d4-a716-446655440010", // Instagram
     "550e8400-e29b-41d4-a716-446655440011", // TikTok
   ]);
+  const [monitoredUrls, setMonitoredUrls] = useState<{ name: string; url: string }[]>([
+    { name: "Instagram", url: "instagram.com" },
+    { name: "TikTok", url: "tiktok.com" },
+  ]);
+  const [newUrlName, setNewUrlName] = useState("");
+  const [newUrlAddress, setNewUrlAddress] = useState("");
+
   const [productiveStart, setProductiveStart] = useState("08:00");
   const [productiveEnd, setProductiveEnd] = useState("17:00");
   const [sleepStart, setSleepStart] = useState("22:00");
@@ -52,28 +70,142 @@ export default function OnboardingPage() {
   const [notifContinuous, setNotifContinuous] = useState(true);
   const [continuousMinutes, setContinuousMinutes] = useState(45);
 
+  // Detect connection settings
+  useEffect(() => {
+    const checkExtension = () => {
+      const hasExtension =
+        typeof window !== "undefined" &&
+        ((window as any).__FOMOTRACKER_EXTENSION_INSTALLED__ ||
+          document.getElementById("fomotracker-extension-root"));
+      setIsExtensionInstalled(!!hasExtension);
+    };
+
+    const isAndroid = Capacitor.getPlatform() === "android";
+    setIsAndroidPlatform(isAndroid);
+
+    checkExtension();
+    const timer = setTimeout(checkExtension, 1000);
+
+    // If waiting for install, run a polling loop every 2 seconds
+    const interval = setInterval(checkExtension, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Lockdown: Redirect back to dashboard if they somehow got here but completed onboarding
+  useEffect(() => {
+    if (user && user.onboardingCompleted) {
+      router.replace("/dashboard");
+    }
+  }, [user, router]);
+
+  // Dynamic steps mapping
+  const getSteps = () => {
+    const list = [
+      { id: "welcome", title: "Selamat Datang" },
+      { id: "devices", title: "Hubungkan Perangkat" },
+    ];
+
+    if (isAndroidPlatform) {
+      list.push({ id: "android_apps", title: "Aplikasi Android" });
+    }
+
+    if (isExtensionInstalled) {
+      list.push({ id: "browser_urls", title: "Situs Browser" });
+    }
+
+    list.push(
+      { id: "hours", title: "Jadwal Harian" },
+      { id: "alerts", title: "Batasan & Notifikasi" },
+      { id: "finish", title: "Selesai" }
+    );
+
+    return list;
+  };
+
+  const stepsList = getSteps();
+  const totalSteps = stepsList.length;
+  const currentStepConfig = stepsList[step - 1];
+  const stepId = currentStepConfig?.id;
+
   const handleToggleApp = (appId: string) => {
     setSelectedApps((prev) =>
-      prev.includes(appId)
-        ? prev.filter((id) => id !== appId)
-        : [...prev, appId],
+      prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId]
     );
   };
 
+  const handleAddUrl = () => {
+    if (!newUrlName.trim() || !newUrlAddress.trim()) {
+      gooeyToast.error("Nama dan URL situs harus diisi!");
+      return;
+    }
+    let cleanUrl = newUrlAddress.trim().toLowerCase();
+    cleanUrl = cleanUrl.replace(/^(https?:\/\/)?(www\.)?/, "");
+
+    if (monitoredUrls.some((item) => item.url === cleanUrl)) {
+      gooeyToast.error("Situs web ini sudah terdaftar!");
+      return;
+    }
+
+    setMonitoredUrls((prev) => [...prev, { name: newUrlName.trim(), url: cleanUrl }]);
+    setNewUrlName("");
+    setNewUrlAddress("");
+    gooeyToast.success("Situs web berhasil ditambahkan!");
+  };
+
+  const handleRemoveUrl = (urlToRemove: string) => {
+    setMonitoredUrls((prev) => prev.filter((item) => item.url !== urlToRemove));
+  };
+
+  const handleManualCheckConnection = () => {
+    const hasExtension =
+      typeof window !== "undefined" &&
+      ((window as any).__FOMOTRACKER_EXTENSION_INSTALLED__ ||
+        document.getElementById("fomotracker-extension-root"));
+    setIsExtensionInstalled(!!hasExtension);
+
+    if (hasExtension) {
+      gooeyToast.success("Koneksi Ekstensi Browser berhasil dideteksi!");
+      setWaitingForInstall(false);
+    } else {
+      gooeyToast.error("Koneksi Ekstensi Browser belum dideteksi.");
+    }
+  };
+
   const handleNext = async () => {
-    if (step === 3 && selectedApps.length === 0) {
+    // Validation
+    if (stepId === "android_apps" && selectedApps.length === 0) {
       gooeyToast.warning("Pilih minimal 1 aplikasi untuk dipantau.");
       return;
     }
-    if (step < 6) {
+
+    if (stepId === "browser_urls" && monitoredUrls.length === 0) {
+      gooeyToast.warning("Masukkan minimal 1 situs web untuk dipantau.");
+      return;
+    }
+
+    if (stepId === "devices" && !isAndroidPlatform && !isExtensionInstalled) {
+      if (!selectedInstallOption) {
+        gooeyToast.error("Silakan pilih minimal 1 dari 2 opsi perangkat!");
+        return;
+      }
+      window.open(`/instalasi?tab=${selectedInstallOption}`, "_blank");
+      setWaitingForInstall(true);
+      return;
+    }
+
+    if (step < totalSteps) {
       setStep((prev) => prev + 1);
     } else {
       setIsSubmitting(true);
       try {
         const response = await api.post("/api/onboarding", {
-          isAndroidConnected,
-          isBrowserConnected,
-          selectedApps,
+          isAndroidConnected: isAndroidPlatform,
+          isBrowserConnected: isExtensionInstalled,
+          selectedApps: isAndroidPlatform ? selectedApps : [],
           productiveStart,
           productiveEnd,
           sleepStart,
@@ -87,16 +219,32 @@ export default function OnboardingPage() {
         });
 
         if (response.data.success) {
+          // Sync rules with browser extension if connected
+          if (isExtensionInstalled) {
+            window.postMessage(
+              {
+                type: "FOMOTRACKER_SYNC_RULES",
+                rules: monitoredUrls.map((item) => ({
+                  id: Math.random().toString(36).substring(7),
+                  name: item.name,
+                  url: item.url,
+                  enabled: true,
+                })),
+              },
+              "*"
+            );
+          }
+
           gooeyToast.success("Pengaturan onboarding berhasil disimpan!");
-          router.push("/dashboard");
+          await queryClient.invalidateQueries({ queryKey: ["user"] });
+          router.replace("/dashboard");
         } else {
           gooeyToast.error(response.data.error || "Gagal menyimpan onboarding");
         }
       } catch (error: any) {
         console.error(error);
         gooeyToast.error(
-          error.response?.data?.error ||
-            "Terjadi kesalahan saat menyimpan data",
+          error.response?.data?.error || "Terjadi kesalahan saat menyimpan data"
         );
       } finally {
         setIsSubmitting(false);
@@ -112,12 +260,12 @@ export default function OnboardingPage() {
 
   const renderProgress = () => {
     return (
-      <div className="flex items-center gap-1.5 mb-8">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+      <div className="flex items-center gap-1.5 mb-8 select-none">
+        {stepsList.map((cfg, idx) => (
           <div
-            key={i}
+            key={cfg.id}
             className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-              i <= step ? "bg-primary" : "bg-muted-light"
+              idx + 1 <= step ? "bg-primary" : "bg-muted-light"
             }`}
           />
         ))}
@@ -125,7 +273,6 @@ export default function OnboardingPage() {
     );
   };
 
-  // Helper colors for apps
   const getAppColor = (name: string) => {
     switch (name.toLowerCase()) {
       case "instagram":
@@ -156,10 +303,10 @@ export default function OnboardingPage() {
       <div className="w-full max-w-xl bg-card border border-border shadow-md rounded-3xl p-6 md:p-10 transition-all duration-300">
         {renderProgress()}
 
-        {/* STEP 1: Selamat Datang */}
-        {step === 1 && (
+        {/* STEP: welcome */}
+        {stepId === "welcome" && (
           <div className="text-center space-y-6">
-            <div className="mx-auto w-24 h-24 rounded-3xl bg-muted-light flex items-center justify-center border border-border text-primary animate-float-medium">
+            <div className="mx-auto w-24 h-24 rounded-3xl bg-muted-light flex items-center justify-center border border-border text-primary">
               <Sparkles className="w-12 h-12 text-primary" />
             </div>
             <div className="space-y-2">
@@ -190,103 +337,117 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 2: Hubungkan Perangkat */}
-        {step === 2 && (
+        {/* STEP: devices */}
+        {stepId === "devices" && (
           <div className="space-y-6">
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-primary">
-                Hubungkan HP atau Browsermu
+                Hubungkan Perangkat Anda
               </h2>
               <p className="text-xs text-muted font-light">
-                FomoTracker butuh izin untuk membaca aktivitas media sosialmu.
+                FomoTracker membutuhkan koneksi ke HP atau browser untuk melacak waktu pemakaian.
               </p>
             </div>
 
-            <div className="space-y-4">
-              {/* Android Card */}
-              <div className="p-5 rounded-2xl border border-border bg-card flex items-start justify-between gap-4">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                    <Smartphone className="w-6 h-6" />
+            {/* Display connectivity status if connected */}
+            {(isAndroidPlatform || isExtensionInstalled) ? (
+              <div className="space-y-4">
+                {isAndroidPlatform && (
+                  <div className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                        <Smartphone className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-emerald-800">Aplikasi Android Terhubung</h4>
+                        <p className="text-[10px] text-emerald-600">Melacak aplikasi HP Anda.</p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Aktif</span>
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-primary">
-                      Untuk Pengguna HP Android
-                    </h3>
-                    <p className="text-[11px] text-muted leading-relaxed font-light">
-                      Memantau semua aplikasi media sosial yang kamu pakai di
-                      HP.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setIsAndroidConnected(true)}
-                      className={`text-[10px] font-bold py-1.5 px-3 rounded-lg border transition-all mt-2 flex items-center gap-1 cursor-pointer ${
-                        isAndroidConnected
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                          : "bg-white border-border hover:bg-muted-light text-primary"
-                      }`}
-                    >
-                      <Download className="w-3 h-3" />
-                      {isAndroidConnected
-                        ? "Unduh Lagi (APK)"
-                        : "Unduh Aplikasi"}
-                    </button>
-                  </div>
-                </div>
-                <div className="shrink-0 pt-1">
-                  {isAndroidConnected ? (
-                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase">
-                      ✅ Terhubung
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-muted bg-muted-light border border-border px-2 py-0.5 rounded-full uppercase">
-                      ⏳ Belum
-                    </span>
-                  )}
-                </div>
-              </div>
+                )}
 
-              {/* Browser Card */}
-              <div className="p-5 rounded-2xl border border-border bg-card flex items-start justify-between gap-4">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-sky-600 shrink-0">
-                    <Laptop className="w-6 h-6" />
+                {isExtensionInstalled && (
+                  <div className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                        <Laptop className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-emerald-800">Ekstensi Browser Terhubung</h4>
+                        <p className="text-[10px] text-emerald-600">Melacak tab browser komputer Anda.</p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Aktif</span>
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-primary">
-                      Untuk Pengguna Laptop/Komputer
-                    </h3>
-                    <p className="text-[11px] text-muted leading-relaxed font-light">
-                      Memantau media sosial yang kamu buka lewat browser seperti
-                      Chrome.
-                    </p>
+                )}
+              </div>
+            ) : (
+              // Neither connected: Ask user to choose one to install
+              <div className="space-y-4">
+                {waitingForInstall ? (
+                  <div className="p-6 rounded-2xl border border-border bg-card flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="w-10 h-10 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-primary">Menunggu Koneksi Terdeteksi...</h4>
+                      <p className="text-[10px] text-muted max-w-xs leading-relaxed">
+                        Silakan pasang aplikasi/ekstensi Anda di tab baru. Setelah terpasang, sistem akan mendeteksinya secara otomatis.
+                      </p>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setIsBrowserConnected(true)}
-                      className={`text-[10px] font-bold py-1.5 px-3 rounded-lg border transition-all mt-2 flex items-center gap-1 cursor-pointer ${
-                        isBrowserConnected
-                          ? "bg-sky-50 border-sky-200 text-sky-700"
-                          : "bg-white border-border hover:bg-muted-light text-primary"
-                      }`}
+                      onClick={handleManualCheckConnection}
+                      className="px-4 py-2 border border-border bg-white hover:bg-muted-light rounded-xl text-[10px] font-bold text-primary cursor-pointer transition-all"
                     >
-                      <Download className="w-3 h-3" />
-                      {isBrowserConnected ? "Pasang Lagi" : "Pasang Ekstensi"}
+                      Cek Koneksi Sekarang
                     </button>
                   </div>
-                </div>
-                <div className="shrink-0 pt-1">
-                  {isBrowserConnected ? (
-                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase">
-                      ✅ Terhubung
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-muted bg-muted-light border border-border px-2 py-0.5 rounded-full uppercase">
-                      ⏳ Belum
-                    </span>
-                  )}
-                </div>
+                ) : (
+                  <>
+                    <div className="p-4 rounded-2xl border border-red-100 bg-red-50/10 flex items-start gap-2.5">
+                      <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-red-700 leading-relaxed">
+                        Perangkat pemantau belum terdeteksi. Silakan pilih minimal salah satu opsi di bawah ini untuk diarahkan ke halaman instalasi terlebih dahulu.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInstallOption("android")}
+                        className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-32 transition-all cursor-pointer ${
+                          selectedInstallOption === "android"
+                            ? "border-primary bg-muted-light/20 shadow-xs"
+                            : "border-border hover:bg-muted-light/10"
+                        }`}
+                      >
+                        <Smartphone className={`w-6 h-6 ${selectedInstallOption === "android" ? "text-primary" : "text-muted"}`} />
+                        <div>
+                          <h4 className="text-xs font-bold text-primary">Aplikasi Android</h4>
+                          <p className="text-[9px] text-muted font-light mt-0.5 leading-tight">Unduh APK untuk HP Android Anda.</p>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInstallOption("extension")}
+                        className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-32 transition-all cursor-pointer ${
+                          selectedInstallOption === "extension"
+                            ? "border-primary bg-muted-light/20 shadow-xs"
+                            : "border-border hover:bg-muted-light/10"
+                        }`}
+                      >
+                        <Laptop className={`w-6 h-6 ${selectedInstallOption === "extension" ? "text-primary" : "text-muted"}`} />
+                        <div>
+                          <h4 className="text-xs font-bold text-primary">Ekstensi Browser</h4>
+                          <p className="text-[9px] text-muted font-light mt-0.5 leading-tight">Pasang di Google Chrome komputer.</p>
+                        </div>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
+            )}
 
             <div className="flex justify-between gap-3 pt-2">
               <button
@@ -300,24 +461,25 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-primary text-white font-semibold hover:bg-secondary transition-all cursor-pointer text-xs"
+                disabled={waitingForInstall && !isAndroidPlatform && !isExtensionInstalled}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-primary text-white font-semibold hover:bg-secondary transition-all cursor-pointer text-xs disabled:opacity-50"
               >
-                <span>Lanjutkan / Lewati</span>
+                <span>{(!isAndroidPlatform && !isExtensionInstalled) ? "Lanjutkan ke Instalasi" : "Lanjutkan"}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: Pilih Aplikasi yang Dipantau */}
-        {step === 3 && (
+        {/* STEP: android_apps */}
+        {stepId === "android_apps" && (
           <div className="space-y-6">
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-primary">
-                Aplikasi mana yang ingin kamu pantau?
+                Pilih Aplikasi HP yang Dipantau
               </h2>
               <p className="text-xs text-muted font-light">
-                Pilih aplikasi media sosial yang biasa kamu pakai sehari-hari.
+                Pilih aplikasi media sosial yang biasa Anda gunakan di HP Android.
               </p>
             </div>
 
@@ -329,17 +491,17 @@ export default function OnboardingPage() {
                     type="button"
                     key={app.id}
                     onClick={() => handleToggleApp(app.id)}
-                    className={`flex items-center justify-between p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                    className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                       isSelected
-                        ? "border-primary bg-muted-light/30 shadow-xs"
+                        ? "border-primary bg-muted-light/20"
                         : "border-border hover:border-muted hover:bg-muted-light/10"
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
                       <div
-                        className={`w-8 h-8 rounded-xl bg-gradient-to-tr ${getAppColor(
-                          app.name,
-                        )} flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-xs`}
+                        className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${getAppColor(
+                          app.name
+                        )} flex items-center justify-center text-white text-[9px] font-bold shrink-0`}
                       >
                         {app.name.substring(0, 2)}
                       </div>
@@ -348,13 +510,13 @@ export default function OnboardingPage() {
                       </span>
                     </div>
                     <div
-                      className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-all shrink-0 ${
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 ${
                         isSelected
                           ? "bg-primary border-primary text-white"
                           : "border-border text-transparent"
                       }`}
                     >
-                      <Check className="w-3 h-3" />
+                      <Check className="w-2.5 h-2.5" />
                     </div>
                   </button>
                 );
@@ -382,105 +544,174 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 4: Atur Jam Belajar & Tidur */}
-        {step === 4 && (
+        {/* STEP: browser_urls */}
+        {stepId === "browser_urls" && (
           <div className="space-y-6">
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-primary">
-                Kapan kamu biasanya belajar/kerja dan tidur?
+                Atur Daftar Situs yang Dipantau
               </h2>
               <p className="text-xs text-muted font-light">
-                Ini membantu FomoTracker mendeteksi apakah HP mengganggu waktu
-                pentingmu.
+                Masukkan nama dan domain situs web yang ingin dipantau oleh Ekstensi FomoTracker.
+              </p>
+            </div>
+
+            {/* Input Form */}
+            <div className="p-4 rounded-2xl border border-border bg-muted-light/10 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="url-name" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    Nama Situs
+                  </label>
+                  <input
+                    id="url-name"
+                    type="text"
+                    placeholder="Instagram"
+                    value={newUrlName}
+                    onChange={(e) => setNewUrlName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="url-address" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                    Domain Website
+                  </label>
+                  <input
+                    id="url-address"
+                    type="text"
+                    placeholder="instagram.com"
+                    value={newUrlAddress}
+                    onChange={(e) => setNewUrlAddress(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddUrl}
+                className="w-full py-2.5 rounded-xl bg-primary hover:bg-secondary text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tambah Situs</span>
+              </button>
+            </div>
+
+            {/* URL List */}
+            <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+              {monitoredUrls.map((item) => (
+                <div key={item.url} className="flex items-center justify-between p-3 rounded-xl border border-border bg-card">
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-bold text-primary">{item.name}</span>
+                    <span className="text-[10px] text-muted truncate">{item.url}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveUrl(item.url)}
+                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 cursor-pointer transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handlePrev}
+                className="flex items-center gap-1.5 px-4 py-3 rounded-2xl border border-border text-muted hover:text-primary hover:bg-muted-light/35 font-semibold transition-all cursor-pointer text-xs"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Kembali</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-primary text-white font-semibold hover:bg-secondary transition-all cursor-pointer text-xs"
+              >
+                <span>Lanjutkan</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP: hours */}
+        {stepId === "hours" && (
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-primary">
+                Atur Waktu Harian Anda
+              </h2>
+              <p className="text-xs text-muted font-light">
+                FomoTracker akan menganalisis jam tidur dan jam produktif harian Anda.
               </p>
             </div>
 
             <div className="space-y-4">
-              {/* Jam Belajar / Kerja */}
+              {/* Productive Hours */}
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">
-                    Jam Belajar / Kerja
-                  </span>
-                  <span className="text-[10px] text-muted font-light ml-auto">
-                    Contoh: 08.00 – 17.00
-                  </span>
+                  <span className="text-xs font-bold text-primary">Jam Belajar / Kerja</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="prod-start"
-                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
-                    >
-                      Jam Mulai
+                    <label htmlFor="prod-start" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                      Mulai
                     </label>
                     <input
                       id="prod-start"
                       type="time"
                       value={productiveStart}
                       onChange={(e) => setProductiveStart(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="prod-end"
-                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
-                    >
-                      Jam Selesai
+                    <label htmlFor="prod-end" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                      Selesai
                     </label>
                     <input
                       id="prod-end"
                       type="time"
                       value={productiveEnd}
                       onChange={(e) => setProductiveEnd(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Jam Tidur */}
+              {/* Sleep Hours */}
               <div className="p-4 rounded-2xl border border-border bg-muted-light/15 space-y-3">
                 <div className="flex items-center gap-2">
                   <Moon className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">
-                    Jam Tidur
-                  </span>
-                  <span className="text-[10px] text-muted font-light ml-auto">
-                    Contoh: 22.00 – 06.00
-                  </span>
+                  <span className="text-xs font-bold text-primary">Jam Tidur Malam</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="sl-start"
-                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
-                    >
-                      Mulai Istirahat
+                    <label htmlFor="sleep-start" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                      Mulai
                     </label>
                     <input
-                      id="sl-start"
+                      id="sleep-start"
                       type="time"
                       value={sleepStart}
                       onChange={(e) => setSleepStart(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="sl-end"
-                      className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1"
-                    >
-                      Bangun Tidur
+                    <label htmlFor="sleep-end" className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                      Bangun
                     </label>
                     <input
-                      id="sl-end"
+                      id="sleep-end"
                       type="time"
                       value={sleepEnd}
                       onChange={(e) => setSleepEnd(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-card text-xs text-primary font-bold focus:outline-none"
                     />
                   </div>
                 </div>
@@ -508,30 +739,25 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 5: Aktifkan Pengingat */}
-        {step === 5 && (
+        {/* STEP: alerts */}
+        {stepId === "alerts" && (
           <div className="space-y-6">
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-primary">
-                Mau diingatkan kalau kebablasan?
+                Atur Batasan & Pengingat
               </h2>
               <p className="text-xs text-muted font-light">
-                FomoTracker bisa mengirim pengingat saat kamu perlu istirahat
-                dari HP.
+                Sesuaikan notifikasi pengingat untuk melatih disiplin digital Anda.
               </p>
             </div>
 
             <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-              {/* Limit HP Harian */}
+              {/* Daily HP Limit */}
               <div className="p-4 rounded-2xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-primary text-xs sm:text-sm">
-                      Batas Pemakaian HP
-                    </h3>
-                    <p className="text-[10px] text-muted font-light">
-                      Ingatkan jika pakai HP terlalu lama hari ini.
-                    </p>
+                    <h3 className="font-bold text-primary text-xs sm:text-sm">Batas Pemakaian Harian</h3>
+                    <p className="text-[10px] text-muted font-light">Batas pemakaian media sosial harian.</p>
                   </div>
                   <button
                     type="button"
@@ -549,35 +775,25 @@ export default function OnboardingPage() {
                 </div>
                 {notifExcessive && (
                   <div className="flex items-center gap-2 border-t border-border/50 pt-2.5">
-                    <span className="text-[11px] text-muted font-light">
-                      Batas berapa jam per hari?
-                    </span>
+                    <span className="text-[11px] text-muted font-light">Batasi berapa jam per hari?</span>
                     <input
                       type="number"
                       min="1"
                       max="24"
                       value={excessiveHours}
-                      onChange={(e) =>
-                        setExcessiveHours(Number(e.target.value))
-                      }
-                      className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none focus:border-primary"
+                      onChange={(e) => setExcessiveHours(Number(e.target.value))}
+                      className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none"
                     />
-                    <span className="text-[11px] text-muted font-light">
-                      Jam
-                    </span>
+                    <span className="text-[11px] text-muted font-light">Jam</span>
                   </div>
                 )}
               </div>
 
-              {/* Jam Produktif */}
+              {/* Productive Alert */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-bold text-primary text-xs sm:text-sm">
-                    Pengingat Jam Produktif
-                  </h3>
-                  <p className="text-[10px] text-muted font-light">
-                    Ingatkan saat jam belajar/kerja jika membuka medsos.
-                  </p>
+                  <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Jam Kerja</h3>
+                  <p className="text-[10px] text-muted font-light">Ingatkan jika membuka medsos di jam kerja.</p>
                 </div>
                 <button
                   type="button"
@@ -594,15 +810,11 @@ export default function OnboardingPage() {
                 </button>
               </div>
 
-              {/* Main Malam */}
+              {/* Midnight Sleep Alert */}
               <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card">
                 <div>
-                  <h3 className="font-bold text-primary text-xs sm:text-sm">
-                    Pengingat Jam Tidur
-                  </h3>
-                  <p className="text-[10px] text-muted font-light">
-                    Ingatkan saat main HP malam hari di jam tidur.
-                  </p>
+                  <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Jam Tidur</h3>
+                  <p className="text-[10px] text-muted font-light">Ingatkan jika main HP di jam tidur malam.</p>
                 </div>
                 <button
                   type="button"
@@ -619,16 +831,12 @@ export default function OnboardingPage() {
                 </button>
               </div>
 
-              {/* Nonstop Alert */}
+              {/* Continuous limit */}
               <div className="p-4 rounded-2xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-primary text-xs sm:text-sm">
-                      Pengingat Sesi Nonstop
-                    </h3>
-                    <p className="text-[10px] text-muted font-light">
-                      Ingatkan jika membuka HP nonstop tanpa jeda.
-                    </p>
+                    <h3 className="font-bold text-primary text-xs sm:text-sm">Pengingat Nonstop</h3>
+                    <p className="text-[10px] text-muted font-light">Ingatkan jika online terus tanpa jeda.</p>
                   </div>
                   <button
                     type="button"
@@ -646,22 +854,16 @@ export default function OnboardingPage() {
                 </div>
                 {notifContinuous && (
                   <div className="flex items-center gap-2 border-t border-border/50 pt-2.5">
-                    <span className="text-[11px] text-muted font-light">
-                      Batas waktu nonstop?
-                    </span>
+                    <span className="text-[11px] text-muted font-light">Batas online nonstop?</span>
                     <input
                       type="number"
                       min="5"
                       max="180"
                       value={continuousMinutes}
-                      onChange={(e) =>
-                        setContinuousMinutes(Number(e.target.value))
-                      }
-                      className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none focus:border-primary"
+                      onChange={(e) => setContinuousMinutes(Number(e.target.value))}
+                      className="w-16 px-2 py-1 rounded-lg border border-border bg-background text-xs text-primary font-bold text-center focus:outline-none"
                     />
-                    <span className="text-[11px] text-muted font-light">
-                      Menit
-                    </span>
+                    <span className="text-[11px] text-muted font-light">Menit</span>
                   </div>
                 )}
               </div>
@@ -688,106 +890,79 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 6: Selesai */}
-        {step === 6 && (
+        {/* STEP: finish */}
+        {stepId === "finish" && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <div className="mx-auto w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <CheckCircle className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-extrabold text-primary">
-                Semua siap! 🎉
-              </h2>
-              <p className="text-xs text-muted font-light">
-                Konfigurasi Anda berhasil disimpan.
-              </p>
+              <h2 className="text-2xl font-extrabold text-primary">Semua siap! 🎉</h2>
+              <p className="text-xs text-muted font-light">Konfigurasi awal FomoTracker telah berhasil disiapkan.</p>
             </div>
 
-            {/* Config Summary */}
             <div className="space-y-3.5 p-5 rounded-2xl border border-border bg-muted-light/10 text-xs">
               <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">
-                  Perangkat Terhubung
-                </span>
-                <div className="text-right space-y-0.5">
-                  <div className="font-bold text-primary">
-                    {isAndroidConnected
-                      ? "✅ HP Android"
-                      : "⏳ HP Android (Belum)"}
-                  </div>
-                  <div className="font-bold text-primary">
-                    {isBrowserConnected
-                      ? "✅ Browser Extension"
-                      : "⏳ Browser Extension (Belum)"}
-                  </div>
+                <span className="font-semibold text-muted">Metode Pemantauan</span>
+                <div className="text-right space-y-0.5 font-bold text-primary">
+                  <div>{isAndroidPlatform ? "✅ Aplikasi Android HP" : "❌ Aplikasi Android HP (Mati)"}</div>
+                  <div>{isExtensionInstalled ? "✅ Ekstensi Browser" : "❌ Ekstensi Browser (Mati)"}</div>
                 </div>
               </div>
 
-              <div className="flex justify-between items-start pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">
-                  Aplikasi Dipantau
-                </span>
-                <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
-                  {selectedApps.length > 0 ? (
-                    initialApps
-                      .filter((app) => selectedApps.includes(app.id))
-                      .map((app) => (
-                        <span
-                          key={app.id}
-                          className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase"
-                        >
-                          {app.name}
+              {isAndroidPlatform && (
+                <div className="flex justify-between items-start pb-3 border-b border-border/60">
+                  <span className="font-semibold text-muted">Aplikasi HP Dipantau</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
+                    {selectedApps.length > 0 ? (
+                      initialApps
+                        .filter((app) => selectedApps.includes(app.id))
+                        .map((app) => (
+                          <span key={app.id} className="text-[9px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                            {app.name}
+                          </span>
+                        ))
+                    ) : (
+                      <span className="text-[10px] text-red-500 font-semibold">Belum memilih</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isExtensionInstalled && (
+                <div className="flex justify-between items-start pb-3 border-b border-border/60">
+                  <span className="font-semibold text-muted">Situs Web Dipantau</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
+                    {monitoredUrls.length > 0 ? (
+                      monitoredUrls.map((item) => (
+                        <span key={item.url} className="text-[9px] font-bold px-2 py-0.5 rounded bg-secondary/10 text-secondary uppercase">
+                          {item.name}
                         </span>
                       ))
-                  ) : (
-                    <span className="text-[10px] text-red-500 font-semibold">
-                      Belum memilih
-                    </span>
-                  )}
+                    ) : (
+                      <span className="text-[10px] text-red-500 font-semibold">Belum ada situs</span>
+                    )}
+                  </div>
                 </div>
+              )}
+
+              <div className="flex justify-between items-center pb-3 border-b border-border/60">
+                <span className="font-semibold text-muted">Jadwal Jam Kerja</span>
+                <span className="font-bold text-primary">{productiveStart} – {productiveEnd}</span>
               </div>
 
               <div className="flex justify-between items-center pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">
-                  Jam Belajar / Kerja
-                </span>
-                <span className="font-bold text-primary">
-                  {productiveStart} – {productiveEnd}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center pb-3 border-b border-border/60">
-                <span className="font-semibold text-muted">Jam Tidur</span>
-                <span className="font-bold text-primary">
-                  {sleepStart} – {sleepEnd}
-                </span>
+                <span className="font-semibold text-muted">Jadwal Tidur Malam</span>
+                <span className="font-bold text-primary">{sleepStart} – {sleepEnd}</span>
               </div>
 
               <div className="flex justify-between items-start">
-                <span className="font-semibold text-muted">
-                  Pengingat Aktif
-                </span>
-                <div className="flex flex-col items-end gap-1">
-                  {notifExcessive && (
-                    <span className="text-[10px] text-emerald-600 font-bold">
-                      ✓ Batas Harian ({excessiveHours} Jam)
-                    </span>
-                  )}
-                  {notifProductive && (
-                    <span className="text-[10px] text-emerald-600 font-bold">
-                      ✓ Jam Produktif
-                    </span>
-                  )}
-                  {notifMidnight && (
-                    <span className="text-[10px] text-emerald-600 font-bold">
-                      ✓ Jam Tidur Malam
-                    </span>
-                  )}
-                  {notifContinuous && (
-                    <span className="text-[10px] text-emerald-600 font-bold">
-                      ✓ Sesi Nonstop ({continuousMinutes} mnt)
-                    </span>
-                  )}
+                <span className="font-semibold text-muted">Alerts Aktif</span>
+                <div className="flex flex-col items-end gap-1 font-bold text-emerald-600">
+                  {notifExcessive && <span>✓ Harian ({excessiveHours} Jam)</span>}
+                  {notifProductive && <span>✓ Jam Kerja</span>}
+                  {notifMidnight && <span>✓ Jam Tidur</span>}
+                  {notifContinuous && <span>✓ Nonstop ({continuousMinutes} Mnt)</span>}
                 </div>
               </div>
             </div>
@@ -805,11 +980,9 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleNext}
                 disabled={isSubmitting}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-secondary disabled:bg-primary/50 transition-all cursor-pointer text-sm shadow-md shadow-primary/10"
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-secondary disabled:bg-primary/50 transition-all cursor-pointer text-sm shadow-md"
               >
-                <span>
-                  {isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}
-                </span>
+                <span>{isSubmitting ? "Menyimpan..." : "Masuk ke Beranda"}</span>
                 <Check className="w-4 h-4" />
               </button>
             </div>

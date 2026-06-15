@@ -36,10 +36,23 @@ function VerifyEmailContent() {
         );
         if (res.data.authenticated) {
           clearInterval(interval);
-          gooeyToast.success(
-            "Email berhasil diverifikasi! Mengalihkan ke dashboard...",
-          );
-          router.push("/dashboard");
+          try {
+            const userRes = await api.get("/api/user");
+            const user = userRes.data.data;
+            if (user && !user.onboardingCompleted) {
+              gooeyToast.success(
+                "Email berhasil diverifikasi! Mengalihkan ke onboarding...",
+              );
+              router.push("/onboarding");
+            } else {
+              gooeyToast.success(
+                "Email berhasil diverifikasi! Mengalihkan ke dashboard...",
+              );
+              router.push("/dashboard");
+            }
+          } catch {
+            router.push("/dashboard");
+          }
         }
       } catch (err) {
         console.error("Gagal memeriksa sesi:", err);
@@ -55,13 +68,26 @@ function VerifyEmailContent() {
     // Listen to real-time auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         clearInterval(interval);
-        gooeyToast.success(
-          "Email berhasil diverifikasi! Mengalihkan ke dashboard...",
-        );
-        router.push("/dashboard");
+        try {
+          const userRes = await api.get("/api/user");
+          const user = userRes.data.data;
+          if (user && !user.onboardingCompleted) {
+            gooeyToast.success(
+              "Email berhasil diverifikasi! Mengalihkan ke onboarding...",
+            );
+            router.push("/onboarding");
+          } else {
+            gooeyToast.success(
+              "Email berhasil diverifikasi! Mengalihkan ke dashboard...",
+            );
+            router.push("/dashboard");
+          }
+        } catch {
+          router.push("/dashboard");
+        }
       }
     });
 

@@ -25,6 +25,10 @@ import { initialApps } from "@/lib/data/databaseInitialData";
 import { api } from "@/lib/utils/api";
 import { Capacitor } from "@capacitor/core";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  isUsageStatsPermissionGranted,
+  openUsageStatsSettings,
+} from "@/lib/capacitor/usageStats";
 
 interface Message {
   id: string;
@@ -45,6 +49,8 @@ export default function OnboardingPage() {
   const [isAndroidPlatform, setIsAndroidPlatform] = useState(false);
   const [selectedInstallOption, setSelectedInstallOption] = useState<"android" | "extension" | null>(null);
   const [waitingForInstall, setWaitingForInstall] = useState(false);
+  const [needsUsagePermission, setNeedsUsagePermission] = useState(false);
+  const [isCheckingPermission, setIsCheckingPermission] = useState(true);
 
   // Form States
   const [selectedApps, setSelectedApps] = useState<string[]>([
@@ -70,8 +76,19 @@ export default function OnboardingPage() {
   const [notifContinuous, setNotifContinuous] = useState(true);
   const [continuousMinutes, setContinuousMinutes] = useState(45);
 
-  // Detect connection settings
+  // Detect connection settings and usage permissions
   useEffect(() => {
+    const isAndroid = Capacitor.getPlatform() === "android";
+    setIsAndroidPlatform(isAndroid);
+
+    const checkAndroidPermission = async () => {
+      if (isAndroid) {
+        const granted = await isUsageStatsPermissionGranted();
+        setNeedsUsagePermission(!granted);
+      }
+      setIsCheckingPermission(false);
+    };
+
     const checkExtension = () => {
       const hasExtension =
         typeof window !== "undefined" &&
@@ -80,14 +97,19 @@ export default function OnboardingPage() {
       setIsExtensionInstalled(!!hasExtension);
     };
 
-    const isAndroid = Capacitor.getPlatform() === "android";
-    setIsAndroidPlatform(isAndroid);
-
+    checkAndroidPermission();
     checkExtension();
     const timer = setTimeout(checkExtension, 1000);
 
-    // If waiting for install, run a polling loop every 2 seconds
-    const interval = setInterval(checkExtension, 2000);
+    // If waiting for install or checking permission on Android, run a polling loop
+    const interval = setInterval(() => {
+      checkExtension();
+      if (isAndroid) {
+        isUsageStatsPermissionGranted().then((granted) => {
+          setNeedsUsagePermission(!granted);
+        });
+      }
+    }, 1500);
 
     return () => {
       clearTimeout(timer);
@@ -293,6 +315,57 @@ export default function OnboardingPage() {
         return "from-secondary to-primary";
     }
   };
+
+  if (isAndroidPlatform && isCheckingPermission) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background font-poppins">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-muted font-bold">Memeriksa izin perangkat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAndroidPlatform && needsUsagePermission) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] bg-accent/20 rounded-full blur-[100px] pointer-events-none -z-10" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[350px] h-[350px] bg-secondary/15 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+        <div className="w-full max-w-xl bg-card border border-border shadow-md rounded-3xl p-6 md:p-10 transition-all duration-300 text-center space-y-6">
+          <div className="mx-auto w-20 h-20 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary border border-secondary/20">
+            <Smartphone className="w-10 h-10 animate-bounce" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-extrabold text-primary tracking-tight">
+              Akses Pemakaian Diperlukan 📱
+            </h1>
+            <p className="text-muted font-light leading-relaxed max-w-md mx-auto text-sm">
+              Untuk memantau durasi penggunaan aplikasi media sosial Anda secara akurat pada perangkat Android, FomoTracker memerlukan izin <strong>Akses Pemakaian (Usage Access)</strong>.
+            </p>
+          </div>
+          <div className="bg-muted-light/45 rounded-2xl p-4 border border-border flex items-start gap-3 text-left">
+            <Info className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
+            <p className="text-xs text-muted font-light leading-relaxed">
+              Silakan ketuk tombol di bawah, cari <strong>FomoTracker</strong> di daftar aplikasi, lalu aktifkan izin <strong>Bolehkan akses pemakaian</strong>. Setelah itu, kembalilah ke aplikasi ini.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              await openUsageStatsSettings();
+            }}
+            className="w-full py-4 rounded-2xl bg-primary text-white font-semibold hover:bg-secondary transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer text-sm"
+          >
+            <span>Buka Pengaturan Akses Pemakaian</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">

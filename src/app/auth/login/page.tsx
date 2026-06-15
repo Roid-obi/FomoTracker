@@ -9,6 +9,7 @@ import { useUser } from "@/hooks/useUser";
 import { createClient } from "@/lib/databases/supabase";
 import { api } from "@/lib/utils/api";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { gooeyToast } from "goey-toast";
@@ -21,6 +22,7 @@ function LoginContent() {
   const [isNative, setIsNative] = useState(false);
   const searchParams = useSearchParams();
   const errorParam = searchParams?.get("error");
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform());
@@ -28,7 +30,11 @@ function LoginContent() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-      router.replace("/dashboard");
+      if (user.onboardingCompleted) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/onboarding");
+      }
     }
   }, [user, isUserLoading, router]);
 
@@ -79,7 +85,7 @@ function LoginContent() {
       const response = await api.post("/api/auth/login", body);
 
       if (response.data.success) {
-        router.push("/dashboard");
+        await queryClient.invalidateQueries({ queryKey: ["user"] });
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };

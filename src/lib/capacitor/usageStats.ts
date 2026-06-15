@@ -45,14 +45,34 @@ const CapacitorUsageStatsManager =
     "CapacitorUsageStatsManager",
   );
 
+export async function isUsageStatsPermissionGranted(): Promise<boolean> {
+  if (Capacitor.getPlatform() !== "android") return true;
+  try {
+    const { granted } =
+      await CapacitorUsageStatsManager.isUsageStatsPermissionGranted();
+    return granted;
+  } catch (error) {
+    console.error("Error checking permission granted:", error);
+    return false;
+  }
+}
+
+export async function openUsageStatsSettings(): Promise<void> {
+  if (Capacitor.getPlatform() !== "android") return;
+  try {
+    await CapacitorUsageStatsManager.openUsageStatsSettings();
+  } catch (error) {
+    console.error("Error opening usage stats settings:", error);
+  }
+}
+
 export async function checkAndRequestUsagePermission(): Promise<boolean> {
   if (Capacitor.getPlatform() !== "android") return true;
 
   try {
-    const { granted } =
-      await CapacitorUsageStatsManager.isUsageStatsPermissionGranted();
+    const granted = await isUsageStatsPermissionGranted();
     if (!granted) {
-      await CapacitorUsageStatsManager.openUsageStatsSettings();
+      await openUsageStatsSettings();
       return false;
     }
     return true;

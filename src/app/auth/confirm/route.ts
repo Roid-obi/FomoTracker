@@ -33,6 +33,7 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
 
+      let onboardingCompleted = false;
       if (user) {
         // Cek apakah user sudah terdaftar di public.users
         const existingUser = await db
@@ -57,10 +58,13 @@ export async function GET(request: Request) {
             avatarUrl,
             onboardingCompleted: false,
           });
+        } else {
+          onboardingCompleted = !!existingUser.onboardingCompleted;
         }
       }
 
-      return NextResponse.redirect(new URL(next, request.url));
+      const redirectUrl = onboardingCompleted ? next : "/onboarding";
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
     console.error("Exchange code for session error:", error);
     return NextResponse.redirect(

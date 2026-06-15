@@ -44,11 +44,35 @@ export default function NotificationsPage() {
       const res = await api.put("/api/notification", { id, isRead });
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    onMutate: async ({ id, isRead }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["notifications"] });
+
+      // Snapshot the previous state
+      const previousNotifications = queryClient.getQueryData<
+        NotificationModel.getNotificationResponse[]
+      >(["notifications"]);
+
+      // Optimistically update status
+      queryClient.setQueryData<NotificationModel.getNotificationResponse[]>(
+        ["notifications"],
+        (old) => old?.map((n) => (n.id === id ? { ...n, isRead } : n)),
+      );
+
+      return { previousNotifications };
     },
-    onError: () => {
+    onError: (_err, _variables, context) => {
+      // Rollback to previous state
+      if (context?.previousNotifications) {
+        queryClient.setQueryData(
+          ["notifications"],
+          context.previousNotifications,
+        );
+      }
       gooeyToast.error("Gagal memperbarui status baca.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 
@@ -58,12 +82,38 @@ export default function NotificationsPage() {
       const res = await api.put("/api/notification", { markAllRead: true });
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      gooeyToast.success("Semua notifikasi ditandai sudah dibaca.");
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["notifications"] });
+
+      // Snapshot previous state
+      const previousNotifications = queryClient.getQueryData<
+        NotificationModel.getNotificationResponse[]
+      >(["notifications"]);
+
+      // Optimistically mark all read
+      queryClient.setQueryData<NotificationModel.getNotificationResponse[]>(
+        ["notifications"],
+        (old) => old?.map((n) => ({ ...n, isRead: true })),
+      );
+
+      return { previousNotifications };
     },
-    onError: () => {
+    onError: (_err, _variables, context) => {
+      // Rollback
+      if (context?.previousNotifications) {
+        queryClient.setQueryData(
+          ["notifications"],
+          context.previousNotifications,
+        );
+      }
       gooeyToast.error("Gagal memperbarui semua status baca.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onSuccess: () => {
+      gooeyToast.success("Semua notifikasi ditandai sudah dibaca.");
     },
   });
 
@@ -236,8 +286,7 @@ export default function NotificationsPage() {
                 type="button"
                 key={notif.id}
                 onClick={() => toggleReadStatus(notif.id, notif.isRead)}
-                disabled={toggleReadMutation.isPending}
-                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 select-none relative group bg-transparent focus:outline-none disabled:opacity-80 ${
+                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 select-none relative group bg-transparent focus:outline-none ${
                   notif.isRead
                     ? "bg-card border-border opacity-70 hover:opacity-100"
                     : "bg-primary/[0.01] border-primary/20 shadow-xs hover:bg-primary/[0.03]"

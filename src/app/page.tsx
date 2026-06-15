@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
+import { useEffect } from "react";
 
 export default function Home() {
   const { data: user, isLoading } = useUser();
@@ -104,171 +104,9 @@ export default function Home() {
             </span>
           </div> */}
 
-          <div className="relative w-full max-w-2xl mx-auto mb-6 px-4 sm:px-8 py-2">
-            {/* SVG Decorative Corners (Focus Brackets) */}
-            <div className="absolute top-0 left-0 w-6 h-6 text-secondary/30 pointer-events-none hidden md:block">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                className="w-full h-full animate-bracket-pulse"
-                aria-hidden="true"
-              >
-                <path d="M10,2 H2 V10" />
-              </svg>
-            </div>
-            <div className="absolute top-0 right-0 w-6 h-6 text-secondary/30 pointer-events-none hidden md:block">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                className="w-full h-full animate-bracket-pulse"
-                aria-hidden="true"
-              >
-                <path d="M14,2 H22 V10" />
-              </svg>
-            </div>
-            <div className="absolute bottom-0 left-0 w-6 h-6 text-secondary/30 pointer-events-none hidden md:block">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                className="w-full h-full animate-bracket-pulse"
-                aria-hidden="true"
-              >
-                <path d="M10,22 H2 V14" />
-              </svg>
-            </div>
-            <div className="absolute bottom-0 right-0 w-6 h-6 text-secondary/30 pointer-events-none hidden md:block">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                className="w-full h-full animate-bracket-pulse"
-                aria-hidden="true"
-              >
-                <path d="M14,22 H22 V14" />
-              </svg>
-            </div>
-
-            {/* Hourglass Icon (Left Flank) */}
-            <div className="absolute -left-16 top-1/2 -translate-y-1/2 w-12 h-12 text-secondary/25 pointer-events-none hidden lg:block animate-float-slow">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-full h-full"
-                aria-hidden="true"
-              >
-                <path d="M5 2h14M5 22h14M19 2v4a7 7 0 0 1-7 7 7 7 0 0 1-7-7V2M5 22v-4a7 7 0 0 1 7-7 7 7 0 0 1 7 7v4" />
-                <line
-                  x1="12"
-                  y1="11"
-                  x2="12"
-                  y2="13"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="3 3"
-                  className="animate-sand-drip"
-                />
-              </svg>
-            </div>
-
-            {/* Upward Chart/Productivity Curve (Right Flank) */}
-            <div className="absolute -right-16 top-1/2 -translate-y-1/2 w-12 h-12 text-secondary/25 pointer-events-none hidden lg:block">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-full h-full"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 17 Q8 12, 13 14 T 21 6"
-                  strokeDasharray="40"
-                  strokeDashoffset="40"
-                  className="animate-chart-line"
-                />
-                <path
-                  d="M17 6 H21 V10"
-                  strokeDasharray="10"
-                  strokeDashoffset="10"
-                  className="animate-chart-line"
-                />
-                <circle
-                  cx="21"
-                  cy="6"
-                  r="2.5"
-                  fill="currentColor"
-                  className="animate-dot-pulse text-accent"
-                />
-              </svg>
-            </div>
-
-            {/* Blinking Sparkles */}
-            <div className="absolute -right-3 -top-3 w-6 h-6 text-accent pointer-events-none hidden sm:block animate-sparkle-primary">
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-full h-full"
-                aria-hidden="true"
-              >
-                <path d="M12 3l1.912 5.885L20 10.8l-6.088 1.915L12 18.6l-1.912-5.885L4 10.8l6.088-1.915z" />
-              </svg>
-            </div>
-            <div className="absolute -left-3 -bottom-3 w-5 h-5 text-accent pointer-events-none hidden sm:block animate-sparkle-secondary">
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-full h-full"
-                aria-hidden="true"
-              >
-                <path d="M12 3l1.912 5.885L20 10.8l-6.088 1.915L12 18.6l-1.912-5.885L4 10.8l6.088-1.915z" />
-              </svg>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.25] text-primary font-poppins relative z-10">
-              Pahami{" "}
-              <span className="text-secondary/90">Kebiasaan Digitalmu</span>{" "}
-              Sebelum Ia{" "}
-              <span className="relative inline-block text-secondary">
-                Mengontrolmu.
-                {/* Underline loop effect */}
-                <svg
-                  className="absolute -bottom-2.5 left-0 w-full h-3.5 text-accent/80 overflow-visible pointer-events-none"
-                  viewBox="0 0 100 10"
-                  fill="none"
-                  preserveAspectRatio="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M3,6 C30,9 65,8 97,4 C60,6.5 30,7.5 7,6"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeDasharray="300"
-                    strokeDashoffset="300"
-                    className="animate-draw-path"
-                  />
-                </svg>
-              </span>
-            </h1>
-          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.25] text-primary mb-6 font-poppins max-w-2xl">
+            Pahami Kebiasaan Digitalmu Sebelum Ia Mengontrolmu.
+          </h1>
 
           <p className="text-muted text-base sm:text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-light font-poppins">
             FomoTracker membantu kamu memahami pola penggunaan media sosial dan

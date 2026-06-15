@@ -1,113 +1,117 @@
-# FomoTracker — Browser Extension
+<h1 align="center">FomoTracker — Web Extension</h1>
 
-**FomoTracker** is a browser extension that helps you manage your browsing time. Set time limits for distracting websites, get notified with an overlay when your time is up, and take structured breaks.
-
----
-
-## Features
-
-- ⏱ **Time Limits** — Set custom duration limits (in minutes) for any website
-- ☕ **Break Timer** — Configure break durations; an enforced break resets the session
-- 🔔 **Overlay Alert** — A full-screen overlay appears when your time runs out
-- 🎛 **Toggle Rules** — Enable/disable rules without deleting them
-- 📊 **Active Sessions** — See live session status in the popup
-- 🌐 **SPA Support** — Works on single-page applications (React, Vue, etc.)
+<p align="center">
+  <strong>Modul Ekstensi Browser Real-time untuk FomoTracker Platform</strong>
+</p>
 
 ---
 
-## Tech Stack
+## 📖 Tentang FomoTracker Web Extension
 
-- **Next.js 16** (App Router, static export)
+Bagian dari ekosistem **FomoTracker** (Platform Digital Wellbeing Berbasis AI), ekstensi peramban (browser extension) ini dirancang khusus untuk membatasi waktu penelusuran (browsing) desktop secara langsung (_real-time_).
+
+Dengan menggunakan **Manifest V3**, ekstensi ini secara otomatis menghitung waktu penggunaan di situs-situs yang membuat candu (_doomscrolling_), dan akan menampilkan layar penutup (_break overlay_) yang memaksa pengguna mengambil jeda istirahat ketika batas waktu harian tercapai.
+
+---
+
+## ✨ Fitur Utama
+
+- ⏱ **Time Limits (Batas Waktu)** — Atur batas durasi harian (dalam menit).
+- 🔔 **Smart Overlay Alert** — Menampilkan _overlay_ menutupi seluruh layar yang tidak bisa dihindari saat waktu mencapai batas.
+- 🎛 **Toggle Rules** — Aktifkan atau nonaktifkan aturan pembatasan dengan mudah tanpa harus menghapusnya.
+- 📊 **Active Sessions** — Pantau durasi sesi yang sedang berjalan secara langsung lewat antarmuka (UI) _popup_.
+- 🌐 **SPA Support** — Berjalan lancar di aplikasi _Single-Page Applications_ modern seperti YouTube, X (Twitter), React, dll.
+
+---
+
+## 🛠️ Tech Stack & Ekosistem
+
+- **Next.js 16** (App Router, ekspor statis / _static export_)
 - **TypeScript**
 - **Tailwind CSS v4**
 - **Chrome Extension Manifest V3**
-- **Bun** (package manager & build tool)
+- **Bun** (Manajemen package & alat build)
 
 ---
 
-## Architecture
+## 📊 Arsitektur Sistem Ekstensi
 
-```
-manifest.json          ← Extension manifest (V3)
+```text
 public/
-  background.js        ← Service worker: timer management, session state
-  content.js           ← Injected on all pages: overlay rendering, tick loop
-  icons/               ← Extension icons (16, 48, 128px)
+  manifest.json        ← Konfigurasi utama ekstensi (Manifest V3)
+  background.js        ← Service worker: manajemen timer, state sesi, sync API
+  content.js           ← Disuntikkan (injected) di setiap halaman web: untuk merender overlay & loop detik
+  icons/               ← Aset ikon ekstensi (16, 48, 128px)
 app/
-  page.tsx             ← Popup UI (Next.js)
-  layout.tsx           ← Root layout with fonts
-  globals.css          ← Design system CSS
-out/                   ← Build output (load this as unpacked extension)
+  page.tsx             ← Antarmuka UI (Popup) dibuat dengan Next.js
+  layout.tsx           ← Layout dasar & jenis font
+  globals.css          ← Sistem desain CSS (Tailwind)
+out/                   ← Hasil build statis (Folder ini yang di-load ke Chrome)
 ```
 
-### How it works
+### ⚙️ Cara Kerja Ekstensi
 
-1. The **popup** lets you add rules (URL + duration + break time)
-2. Rules are saved to `chrome.storage.local` via the **background service worker**
-3. When you visit a tracked URL, the **content script** starts a 1-second tick loop
-4. The background worker tracks elapsed time and break state per rule
-5. When the limit is reached, the **content script** injects a full-screen overlay
-6. You can take a break (timer resets after break) or dismiss the overlay
+1. Antarmuka **Popup** (dibangun dengan Next.js) digunakan untuk menambahkan aturan batas situs web (URL).
+2. Aturan disimpan dengan aman di `chrome.storage.local` melalui **background service worker**.
+3. Saat pengguna mengunjungi URL yang telah dipantau, **content script** akan menjalankan iterasi (tick loop) setiap 1 detik.
+4. Worker di _background_ akan melacak durasi yang telah digunakan dan status jeda per situs web.
+5. Ketika batas durasi tercapai, **content script** menyuntikkan (inject) _overlay_ penutup penuh (_full-screen break overlay_).
+6. Pengguna dipaksa mengambil jeda istirahat, lalu sesi akan di-reset saat waktu jeda telah lewat.
 
 ---
 
-## Development
+## ⚡ Memulai Pengembangan
 
-### Prerequisites
+### 📋 Prasyarat
 
-- [Bun](https://bun.sh/) installed
-- Chrome or Edge browser
+- Terinstal **Bun** runtime ([bun.sh](https://bun.sh/))
+- Browser berbasis Chromium (Google Chrome, Microsoft Edge, Brave, dll)
 
-### Install dependencies
+### 1. Kloning & Instalasi Dependensi
+
+Masuk ke dalam direktori `web_extension` dan instal dependensi menggunakan Bun:
 
 ```bash
 bun install
 ```
 
-### Build
+### 2. Build Ekstensi (Produksi)
+
+Jalankan perintah ini untuk melakukan kompilasi proyek:
 
 ```bash
 bun run build
 ```
 
-The extension will be built to the `out/` directory.
+Perintah di atas akan menghasilkan berkas statis (_static output_) di dalam folder `out/`.
 
-### Load into Chrome
+### 3. Memuat Ekstensi ke Chrome
 
-1. Open `chrome://extensions/`
-2. Enable **Developer mode** (top right)
-3. Click **Load unpacked**
-4. Select the `out/` directory
+1. Buka Chrome lalu ketik `chrome://extensions/` di kolom pencarian.
+2. Aktifkan fitur **Developer mode** (Mode Pengembang) di pojok kanan atas layar.
+3. Klik tombol **Load unpacked** (Muat yang belum dikemas).
+4. Pilih folder `out/` yang baru saja dihasilkan dari proses build.
 
-### Dev server (for UI development only)
+### 4. Menjalankan Server Development (Khusus Pengembangan UI Popup)
+
+Untuk mendesain UI _popup_ secara terpisah di luar konteks ekstensi:
 
 ```bash
 bun run dev
 ```
 
-> Note: Chrome APIs won't work in dev mode. The popup gracefully falls back to localStorage.
+> **Catatan Penting:** API ekstensi Chrome (seperti `chrome.storage`) tidak akan bekerja pada mode _development_ biasa di browser. Namun, UI telah dirancang sedemikian rupa agar mundur otomatis secara elegan menggunakan `localStorage` (_graceful fallback_) untuk keperluan uji coba UI.
 
 ---
 
-## Usage
+## 🔒 Izin Ekstensi (Permissions)
 
-1. Click the **FomoTracker** extension icon
-2. Click **+ Add Rule**
-3. Enter a website URL (e.g. `youtube.com`)
-4. Set your time limit (e.g. 30 minutes)
-5. Set your break duration (e.g. 5 minutes)
-6. Click **Add Rule**
+Untuk dapat berfungsi penuh, FomoTracker Web Extension membutuhkan izin (_permissions_) sebagai berikut pada file `manifest.json`:
 
-When you visit a tracked site and exceed your time limit, an overlay will appear offering you to take a break. After the break timer expires, your session resets.
-
----
-
-## Permissions
-
-| Permission | Reason |
-|---|---|
-| `storage` | Save rules and session data |
-| `tabs` | Detect active tab URL changes |
-| `alarms` | Background timer support |
-| `activeTab` | Access current tab URL |
-| `host_permissions: <all_urls>` | Inject content script on all sites |
+| Izin (Permission)              | Kegunaan                                                              |
+| :----------------------------- | :-------------------------------------------------------------------- |
+| `storage`                      | Menyimpan preferensi aturan dan mencatat data durasi sesi             |
+| `tabs`                         | Mendeteksi jika URL tab aktif telah berubah                           |
+| `alarms`                       | Mengaktifkan pengingat waktu (timer) di latar belakang                |
+| `activeTab`                    | Membaca URL tab yang saat ini sedang dibuka                           |
+| `host_permissions: <all_urls>` | Menyuntikkan script overlay pelindung di berbagai situs web terdaftar |

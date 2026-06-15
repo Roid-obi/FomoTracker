@@ -15,10 +15,45 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <div className="text-xs font-bold text-muted animate-pulse">
-            Memuat rincian statistik harian...
+        <div className="space-y-6 font-poppins animate-pulse">
+          {/* Back Button */}
+          <div className="h-4 bg-muted-light rounded w-32" />
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/50 pb-4">
+            <div>
+              <div className="h-6 bg-muted-light rounded w-48" />
+              <div className="h-4 bg-muted-light rounded w-36 mt-1" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-10 bg-muted-light rounded w-28" />
+              <div className="h-10 bg-muted-light rounded w-28" />
+            </div>
+          </div>
+
+          {/* 3 cards skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 bg-card">
+              <div className="h-2.5 bg-muted-light rounded w-28" />
+              <div className="mt-4 space-y-2">
+                <div className="h-7 bg-muted-light rounded w-16" />
+                <div className="h-3 bg-muted-light rounded w-24" />
+              </div>
+            </div>
+            <div className="border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 bg-card">
+              <div className="h-2.5 bg-muted-light rounded w-28" />
+              <div className="mt-4 space-y-2">
+                <div className="h-7 bg-muted-light rounded w-16" />
+                <div className="h-3 bg-muted-light rounded w-24" />
+              </div>
+            </div>
+            <div className="border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between min-h-36 bg-card">
+              <div className="h-2.5 bg-muted-light rounded w-28" />
+              <div className="mt-4 space-y-2">
+                <div className="h-7 bg-muted-light rounded w-16" />
+                <div className="h-3 bg-muted-light rounded w-24" />
+              </div>
+            </div>
           </div>
         </div>
       }

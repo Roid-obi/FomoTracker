@@ -18,9 +18,46 @@ const yellowtail = Yellowtail({
   weight: ["400"],
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  ? process.env.NEXT_PUBLIC_APP_URL
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "FomoTracker",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "FomoTracker",
+    template: "%s | FomoTracker",
+  },
   description: "Track habits, activities, and usage insights with style",
+  openGraph: {
+    title: "FomoTracker",
+    description: "Track habits, activities, and usage insights with style",
+    url: baseUrl,
+    siteName: "FomoTracker",
+    images: [
+      {
+        url: "/preview-fomotracker.png",
+        width: 1200,
+        height: 630,
+        alt: "FomoTracker - Track habits, activities, and usage insights with style",
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FomoTracker",
+    description: "Track habits, activities, and usage insights with style",
+    images: ["/preview-fomotracker.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/logo-fomotracker.png",
+  },
 };
 
 export default function RootLayout({

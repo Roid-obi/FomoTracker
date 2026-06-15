@@ -58,14 +58,24 @@ function LoginContent() {
         : typeof window !== "undefined"
           ? window.location.origin
           : "";
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${origin}/auth/confirm${isNativePlatform ? "?platform=mobile" : ""}`,
+          skipBrowserRedirect: true,
         },
       });
       if (error) {
         gooeyToast.error(`Gagal masuk dengan Google: ${error.message}`);
+        return;
+      }
+      if (data?.url) {
+        if (isNativePlatform) {
+          const { Browser } = await import("@capacitor/browser");
+          await Browser.open({ url: data.url });
+        } else {
+          window.location.assign(data.url);
+        }
       }
     } catch (err) {
       console.error(err);

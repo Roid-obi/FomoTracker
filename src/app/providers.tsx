@@ -91,6 +91,13 @@ export function Providers({ children }: { children: ReactNode }) {
               }
 
               if (accessToken && refreshToken) {
+                try {
+                  const { Browser } = await import("@capacitor/browser");
+                  await Browser.close();
+                } catch (browserErr) {
+                  console.error("Failed to close Capacitor browser:", browserErr);
+                }
+
                 const supabase = createClient();
                 const { error } = await supabase.auth.setSession({
                   access_token: accessToken,

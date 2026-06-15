@@ -167,15 +167,24 @@ Aturan Menjawab:
     .limit(1)
     .then((res) => res[0]);
 
-  const latestScore = await db
+  const todayDate = new Date();
+  const sevenDaysAgo = new Date(todayDate);
+  sevenDaysAgo.setDate(todayDate.getDate() - 7);
+  const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0];
+
+  const last7DaysScores = await db
     .select()
     .from(table.behavioralScores)
-    .where(eq(table.behavioralScores.userId, userId))
+    .where(
+      and(
+        eq(table.behavioralScores.userId, userId),
+        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr)
+      )
+    )
     .orderBy(desc(table.behavioralScores.scoreDate))
-    .limit(1)
-    .then((res) => res[0]);
+    .limit(7);
 
-  const recentStats = await db
+  const last7DaysStats = await db
     .select({
       appName: table.apps.name,
       duration: table.dailyStats.totalDurationSeconds,
@@ -184,45 +193,62 @@ Aturan Menjawab:
     })
     .from(table.dailyStats)
     .innerJoin(table.apps, eq(table.dailyStats.appId, table.apps.id))
-    .where(eq(table.dailyStats.userId, userId))
+    .where(
+      and(
+        eq(table.dailyStats.userId, userId),
+        gte(table.dailyStats.statDate, sevenDaysAgoStr)
+      )
+    )
     .orderBy(
       desc(table.dailyStats.statDate),
       desc(table.dailyStats.totalDurationSeconds),
-    )
-    .limit(3);
+    );
+
+  const groupedStats: Record<string, typeof last7DaysStats> = {};
+  for (const stat of last7DaysStats) {
+    if (!groupedStats[stat.date]) {
+      groupedStats[stat.date] = [];
+    }
+    if (groupedStats[stat.date].length < 3) {
+      groupedStats[stat.date].push(stat);
+    }
+  }
+  const topStatsPerDay = Object.values(groupedStats).flat();
 
   let userContextText = `\n\n--- DATA AKTUAL PENGGUNA SAAT INI ---`;
   if (userRecord) {
     userContextText += `\nNama Pengguna: ${userRecord.name}`;
   }
 
-  if (latestScore) {
-    userContextText += `\nStatus Perilaku Terakhir (${latestScore.scoreDate}):
-- Skor: ${latestScore.totalScore}/100 (Makin tinggi makin buruk, <40 Baik)
-- Kategori Status: ${latestScore.dailyStatus}
-- Kendala Utama Terdeteksi: ${
-      [
-        latestScore.flagExcessiveUsage ? "Pemakaian Berlebih" : "",
-        latestScore.flagCompulsiveChecking ? "Sering Cek HP (Kompulsif)" : "",
-        latestScore.flagMidnightUsage ? "Bermain HP saat jam tidur" : "",
-        latestScore.flagContinuousUsage ? "Sesi nonstop tanpa jeda" : "",
-        latestScore.flagProductiveHourDistraction ? "Distraksi jam produktif" : "",
-      ]
-        .filter(Boolean)
-        .join(", ") || "Tidak ada kendala dominan"
-    }`;
-  } else {
-    userContextText += `\nData Skor Perilaku: Belum ada data.`;
-  }
-
-  if (recentStats.length > 0) {
-    userContextText += `\n\n3 Aplikasi Paling Sering Digunakan (Data Terakhir):`;
-    recentStats.forEach((stat, i) => {
-      const minutes = Math.floor(stat.duration / 60);
-      userContextText += `\n${i + 1}. ${stat.appName} - ${minutes} menit (${stat.opens} kali dibuka)`;
+  if (last7DaysScores.length > 0) {
+    userContextText += `\n\nData Skor Perilaku (Maks 7 Hari Terakhir):`;
+    last7DaysScores.forEach((score) => {
+      userContextText += `\nTanggal: ${score.scoreDate}
+- Skor: ${score.totalScore}/100 (Kategori: ${score.dailyStatus})
+- Kendala Utama: ${
+        [
+          score.flagExcessiveUsage ? "Pemakaian Berlebih" : "",
+          score.flagCompulsiveChecking ? "Sering Cek HP" : "",
+          score.flagMidnightUsage ? "Bermain HP saat jam tidur" : "",
+          score.flagContinuousUsage ? "Sesi nonstop tanpa jeda" : "",
+          score.flagProductiveHourDistraction ? "Distraksi jam produktif" : "",
+        ]
+          .filter(Boolean)
+          .join(", ") || "Tidak ada"
+      }`;
     });
   } else {
-    userContextText += `\nData Aplikasi: Belum ada data pemakaian aplikasi.`;
+    userContextText += `\nData Skor Perilaku: Belum ada data dalam 7 hari terakhir.`;
+  }
+
+  if (topStatsPerDay.length > 0) {
+    userContextText += `\n\nData Pemakaian Aplikasi (Maks 7 Hari Terakhir, Top 3 per hari):`;
+    topStatsPerDay.forEach((stat) => {
+      const minutes = Math.floor(stat.duration / 60);
+      userContextText += `\n- ${stat.date} | ${stat.appName}: ${minutes} menit (${stat.opens}x dibuka)`;
+    });
+  } else {
+    userContextText += `\nData Aplikasi: Belum ada data pemakaian aplikasi dalam 7 hari terakhir.`;
   }
 
   userContextText += `\n-------------------------------\nINSTRUKSI TAMBAHAN: Jadikan data aktual di atas sebagai dasar untuk memberikan jawaban spesifik, rekomendasi personal, dan sentuhan empati. Panggil pengguna dengan namanya jika sesuai.`;

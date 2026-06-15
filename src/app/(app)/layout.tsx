@@ -57,6 +57,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [todayStr, setTodayStr] = useState("");
   const queryClient = useQueryClient();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleRefresh = async () => {
     if (!user) return;
@@ -600,7 +601,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all font-poppins cursor-pointer"
           >
             <LogOut className="w-5 h-5" />
@@ -686,6 +687,43 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 flex flex-col">{children}</div>
         </div>
       </main>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 space-y-4 shadow-xl select-none">
+            <div className="text-center space-y-1.5">
+              <div className="mx-auto w-12 h-12 rounded-full bg-red-50 text-red-600 border border-red-100 flex items-center justify-center">
+                <LogOut className="w-5 h-5 animate-pulse" />
+              </div>
+              <h3 className="text-sm font-extrabold text-primary font-poppins">
+                Keluar dari Akun?
+              </h3>
+              <p className="text-[11px] text-muted font-light leading-relaxed font-poppins">
+                Apakah Anda yakin ingin keluar dari FomoTracker? Anda perlu
+                masuk kembali untuk melihat data dan insight Anda.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-border hover:bg-muted-light/30 text-xs font-bold text-muted transition-all cursor-pointer font-poppins"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer font-poppins"
+              >
+                Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Floating Bottom Navigation Bar */}
       <nav className="md:hidden fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-60 h-16 rounded-2xl border border-border bg-card/90 backdrop-blur-md shadow-lg flex items-center justify-around px-2">

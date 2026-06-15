@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
@@ -271,6 +271,18 @@ export async function completeOnboardingService(
       updatedAt: new Date(),
     })
     .where(eq(table.users.id, id));
+
+  return { success: true, data: undefined };
+}
+
+export async function deleteUserService(
+  id: string,
+): Promise<ServiceResult<void>> {
+  // 1. Hapus dari tabel public.users (cascade delete akan menghapus baris dependen di schema public)
+  await db.delete(table.users).where(eq(table.users.id, id));
+
+  // 2. Hapus dari auth.users (menghapus record autentikasi Supabase)
+  await db.execute(sql`delete from auth.users where id = ${id}`);
 
   return { success: true, data: undefined };
 }

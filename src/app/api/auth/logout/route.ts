@@ -5,10 +5,13 @@ export async function POST() {
   try {
     const result = await logoutService();
 
-    if (result.success) {
-      return NextResponse.json(null, { status: 200 });
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

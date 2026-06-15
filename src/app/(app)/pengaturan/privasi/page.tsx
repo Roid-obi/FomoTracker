@@ -19,6 +19,8 @@ export default function PrivasiSettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [confirmDeleteText, setConfirmDeleteText] = useState("");
   const [isExporting, setIsExporting] = useState<"json" | "csv" | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleExportJSON = () => {
     setIsExporting("json");
@@ -64,12 +66,32 @@ export default function PrivasiSettingsPage() {
     }, 1500);
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (confirmDeleteText.toLowerCase() === "hapus akun saya") {
-      gooeyToast.success("Akun Anda berhasil dihapus (simulasi).");
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1500);
+      setIsDeleting(true);
+      try {
+        const response = await api.delete("/api/user");
+        if (response.status === 200) {
+          queryClient.setQueryData(["user"], null);
+          queryClient.clear();
+          window.localStorage.removeItem("fomotracker_monitored_apps");
+          gooeyToast.success("Akun Anda berhasil dihapus secara permanen.");
+          setTimeout(() => {
+            router.replace("/auth/login");
+          }, 1500);
+        }
+      } catch (error) {
+        console.error(error);
+        const err = error as { response?: { data?: { error?: string } } };
+        const errMsg =
+          err.response?.data?.error ||
+          "Gagal menghapus akun. Silakan coba lagi.";
+        gooeyToast.error(errMsg);
+      } finally {
+        setIsDeleting(false);
+        setShowDeleteModal(false);
+        setConfirmDeleteText("");
+      }
     } else {
       gooeyToast.error("Teks konfirmasi tidak cocok!");
     }
@@ -91,6 +113,8 @@ export default function PrivasiSettingsPage() {
     } catch (error) {
       console.error(error);
       gooeyToast.error("Gagal keluar. Silakan coba lagi.");
+    } finally {
+      setShowLogoutModal(false);
     }
   };
 
@@ -252,7 +276,7 @@ export default function PrivasiSettingsPage() {
           </p>
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             className="px-4 py-2.5 rounded-xl border border-red-200 bg-red-50/10 hover:bg-red-50/30 text-red-600 font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -306,26 +330,66 @@ export default function PrivasiSettingsPage() {
               placeholder='Ketik "hapus akun saya"'
               value={confirmDeleteText}
               onChange={(e) => setConfirmDeleteText(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-border bg-background focus:outline-none focus:border-red-600 text-xs text-primary font-semibold text-center font-poppins"
+              disabled={isDeleting}
+              className="w-full px-3 py-2 rounded-xl border border-border bg-background focus:outline-none focus:border-red-600 text-xs text-primary font-semibold text-center font-poppins disabled:opacity-50"
             />
 
             <div className="flex gap-2 pt-2">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => {
                   setShowDeleteModal(false);
                   setConfirmDeleteText("");
                 }}
-                className="flex-1 py-2.5 rounded-xl border border-border hover:bg-muted-light/30 text-xs font-bold text-muted transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl border border-border hover:bg-muted-light/30 text-xs font-bold text-muted transition-all cursor-pointer disabled:opacity-50"
               >
                 Batalkan
               </button>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
-                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer"
+                disabled={isDeleting}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
-                Hapus Akun
+                {isDeleting ? "Menghapus..." : "Hapus Akun"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-primary/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 space-y-4 shadow-xl">
+            <div className="text-center space-y-1.5">
+              <div className="mx-auto w-12 h-12 rounded-full bg-red-50 text-red-600 border border-red-100 flex items-center justify-center">
+                <LogOut className="w-5 h-5 animate-pulse" />
+              </div>
+              <h3 className="text-sm font-extrabold text-primary font-poppins">
+                Keluar dari Akun?
+              </h3>
+              <p className="text-[11px] text-muted font-light leading-relaxed font-poppins">
+                Apakah Anda yakin ingin keluar dari FomoTracker? Anda perlu
+                masuk kembali untuk melihat data dan insight Anda.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-border hover:bg-muted-light/30 text-xs font-bold text-muted transition-all cursor-pointer font-poppins"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer font-poppins"
+              >
+                Keluar
               </button>
             </div>
           </div>

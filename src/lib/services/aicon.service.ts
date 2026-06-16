@@ -64,6 +64,80 @@ export async function getHistoryService(
   return { success: true, data: parsed.data };
 }
 
+export async function getChatContextService(): Promise<
+  ServiceResult<{
+    session: number;
+    questionsCount: number;
+    history: AiconModel.messageSchema[];
+  }>
+> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  const latest = await db.query.aiConversations.findFirst({
+    where: eq(table.aiConversations.userId, userId),
+    orderBy: [desc(table.aiConversations.session)],
+  });
+  const currentSession = latest ? latest.session : 1;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todayRows = await db.query.aiConversations.findMany({
+    where: and(
+      eq(table.aiConversations.userId, userId),
+      eq(table.aiConversations.role, "user"),
+      gte(table.aiConversations.createdAt, today),
+    ),
+    columns: { id: true },
+  });
+  const questionsCount = todayRows.length;
+
+  const historyRows = await db.query.aiConversations.findMany({
+    where: and(
+      eq(table.aiConversations.userId, userId),
+      eq(table.aiConversations.session, currentSession),
+    ),
+    orderBy: [asc(table.aiConversations.createdAt)],
+  });
+
+  const parsed = AiconModel.historySchema.safeParse(
+    historyRows.map((r) => ({
+      id: r.id,
+      role: r.role as "user" | "assistant",
+      content: r.content,
+      createdAt: r.createdAt ?? undefined,
+    })),
+  );
+
+  if (!parsed.success) {
+    return { success: false, error: validationError(parsed.error) };
+  }
+
+  return {
+    success: true,
+    data: {
+      session: currentSession,
+      questionsCount,
+      history: parsed.data,
+    },
+  };
+}
+
+export async function resetChatSessionService(): Promise<
+  ServiceResult<{ session: number }>
+> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { success: false, error: "User not authenticated" };
+
+  await db
+    .delete(table.aiConversations)
+    .where(eq(table.aiConversations.userId, userId));
+
+  return { success: true, data: { session: 1 } };
+}
+
+
 export async function sendMessageService(
   body: unknown,
 ): Promise<ServiceResult<AiconModel.chatResponseSchema>> {

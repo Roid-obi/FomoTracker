@@ -26,6 +26,11 @@ export const createClient = () => {
               ).toUTCString();
             }
 
+            // Sync with local domain so get() can read it!
+            document.cookie = `${name}=${encodeURIComponent(value)}; path=${
+              options?.path || "/"
+            }${expires ? `; expires=${expires}` : ""}`;
+
             // Sync with Supabase domain
             await CapacitorCookies.setCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,6 +50,8 @@ export const createClient = () => {
             });
           },
           remove: async (name, _options) => {
+            // Remove from local domain
+            document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
             // Remove from Supabase domain
             await CapacitorCookies.deleteCookie({
               url: process.env.NEXT_PUBLIC_SUPABASE_URL!,

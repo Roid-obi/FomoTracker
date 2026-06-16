@@ -78,6 +78,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 parsedUrl.search || parsedUrl.hash.substring(1),
               );
 
+              const code = params.get("code");
               const accessToken = params.get("access_token");
               const refreshToken = params.get("refresh_token");
               const errorParam =
@@ -90,7 +91,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 return;
               }
 
-              if (accessToken && refreshToken) {
+              if (code || (accessToken && refreshToken)) {
                 try {
                   const { Browser } = await import("@capacitor/browser");
                   await Browser.close();
@@ -98,20 +99,29 @@ export function Providers({ children }: { children: ReactNode }) {
                   console.error("Failed to close Capacitor browser:", browserErr);
                 }
 
+                const { createClient } = await import(
+                  "@/lib/databases/supabase"
+                );
                 const supabase = createClient();
-                const { error } = await supabase.auth.setSession({
-                  access_token: accessToken,
-                  refresh_token: refreshToken,
-                });
-
-                if (error) {
-                  gooeyToast.error(`Gagal memproses login: ${error.message}`);
-                  router.push(
-                    `/auth/login?error=${encodeURIComponent(error.message)}`,
-                  );
-                  return;
+                
+                if (code) {
+                  const { error } = await supabase.auth.exchangeCodeForSession(code);
+                  if (error) {
+                    console.error("Failed to exchange code:", error);
+                    gooeyToast.error("Gagal menukar token sesi.");
+                    return;
+                  }
+                } else if (accessToken && refreshToken) {
+                  const { error } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                  });
+                  if (error) {
+                    console.error("Failed to set session:", error);
+                    gooeyToast.error("Gagal menyimpan sesi login.");
+                    return;
+                  }
                 }
-
                 gooeyToast.success("Berhasil masuk!");
 
                 // Invalidate query to fetch user data immediately

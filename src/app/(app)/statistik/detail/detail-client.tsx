@@ -79,7 +79,9 @@ const getPrevNextDates = (currentDateStr: string) => {
     "0",
   )}-${String(next.getDate()).padStart(2, "0")}`;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = new Date(Date.now() + 7 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
   const hasPrev = true; // Always allow looking back
   const hasNext = nextStr <= todayStr; // Do not allow looking into the future
 

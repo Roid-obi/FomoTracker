@@ -17,7 +17,7 @@ export const createClient = () => {
             return match ? decodeURIComponent(match[2]) : null;
           },
           set: async (name, value, options) => {
-            let expires: string | undefined = undefined;
+            let expires: string | undefined;
             if (options?.expires) {
               expires = options.expires.toUTCString();
             } else if (options?.maxAge) {

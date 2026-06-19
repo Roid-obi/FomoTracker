@@ -134,6 +134,11 @@ public class UsageStatsManagerPlugin extends Plugin {
         String productiveStart = call.getString("productiveStart", "08:00:00");
         String productiveEnd = call.getString("productiveEnd", "17:00:00");
         Integer continuousLimitSeconds = call.getInt("continuousLimitSeconds", 3600);
+        Integer screenTimeLimitSeconds = call.getInt("screenTimeLimitSeconds", 14400);
+        Boolean notifScreenTimeEnabled = call.getBoolean("notifScreenTimeEnabled", true);
+        Boolean notifProductiveHourEnabled = call.getBoolean("notifProductiveHourEnabled", true);
+        Boolean notifMidnightEnabled = call.getBoolean("notifMidnightEnabled", true);
+        Boolean notifContinuousEnabled = call.getBoolean("notifContinuousEnabled", true);
 
         if (userId == null || deviceId == null || monitoredAppsArray == null) {
             call.reject("Must provide userId, deviceId and monitoredApps");
@@ -162,6 +167,11 @@ public class UsageStatsManagerPlugin extends Plugin {
         editor.putString("productiveStart", productiveStart);
         editor.putString("productiveEnd", productiveEnd);
         editor.putInt("continuousLimitSeconds", continuousLimitSeconds != null ? continuousLimitSeconds : 3600);
+        editor.putInt("screenTimeLimitSeconds", screenTimeLimitSeconds != null ? screenTimeLimitSeconds : 14400);
+        editor.putBoolean("notifScreenTimeEnabled", notifScreenTimeEnabled != null ? notifScreenTimeEnabled : true);
+        editor.putBoolean("notifProductiveHourEnabled", notifProductiveHourEnabled != null ? notifProductiveHourEnabled : true);
+        editor.putBoolean("notifMidnightEnabled", notifMidnightEnabled != null ? notifMidnightEnabled : true);
+        editor.putBoolean("notifContinuousEnabled", notifContinuousEnabled != null ? notifContinuousEnabled : true);
         editor.apply();
 
         try {
@@ -185,6 +195,41 @@ public class UsageStatsManagerPlugin extends Plugin {
             call.resolve(result);
         } catch (Exception e) {
             call.reject("Failed to schedule background sync work: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void checkNotificationPermission(PluginCall call) {
+        boolean granted = true;
+        if (Build.VERSION.SDK_INT >= 33) {
+            granted = getContext().checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
+        JSObject result = new JSObject();
+        result.put("granted", granted);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void requestNotificationPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (getContext().checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                getActivity().requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1012);
+            }
+        }
+        JSObject result = new JSObject();
+        result.put("success", true);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void triggerLocalNotification(PluginCall call) {
+        String type = call.getString("type");
+        String message = call.getString("message");
+        if (type != null && message != null) {
+            SyncWorker.triggerNativeNotification(getContext(), type, message);
+            call.resolve();
+        } else {
+            call.reject("Must provide type and message");
         }
     }
 }

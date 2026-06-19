@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -7,10 +8,9 @@ import {
   PersistQueryClientProvider,
 } from "@tanstack/react-query-persist-client";
 import dynamic from "next/dynamic";
-import { type ReactNode, useEffect, useState } from "react";
-import { Capacitor } from "@capacitor/core";
-import { createClient } from "@/lib/databases/supabase";
 import { useRouter } from "next/navigation";
+import { type ReactNode, useEffect, useState } from "react";
+import { createClient } from "@/lib/databases/supabase";
 import { api } from "@/lib/utils/api";
 
 const GooeyToaster = dynamic(
@@ -96,16 +96,20 @@ export function Providers({ children }: { children: ReactNode }) {
                   const { Browser } = await import("@capacitor/browser");
                   await Browser.close();
                 } catch (browserErr) {
-                  console.error("Failed to close Capacitor browser:", browserErr);
+                  console.error(
+                    "Failed to close Capacitor browser:",
+                    browserErr,
+                  );
                 }
 
                 const { createClient } = await import(
                   "@/lib/databases/supabase"
                 );
                 const supabase = createClient();
-                
+
                 if (code) {
-                  const { error } = await supabase.auth.exchangeCodeForSession(code);
+                  const { error } =
+                    await supabase.auth.exchangeCodeForSession(code);
                   if (error) {
                     console.error("Failed to exchange code:", error);
                     gooeyToast.error("Gagal menukar token sesi.");

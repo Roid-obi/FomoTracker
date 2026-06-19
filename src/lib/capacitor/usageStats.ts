@@ -239,6 +239,28 @@ export async function processSyncQueue() {
         );
       }
 
+      // Trigger local notifications on Android for any new behavioral alerts created
+      if (statsRes.data.data?.newNotifications) {
+        const newNotifs = statsRes.data.data.newNotifications;
+        if (Array.isArray(newNotifs) && newNotifs.length > 0) {
+          const CapacitorUsageStatsManager = registerPlugin<any>(
+            "CapacitorUsageStatsManager",
+          );
+          if (CapacitorUsageStatsManager?.triggerLocalNotification) {
+            for (const notif of newNotifs) {
+              try {
+                await CapacitorUsageStatsManager.triggerLocalNotification({
+                  type: notif.type,
+                  message: notif.message,
+                });
+              } catch (err) {
+                console.error("Failed to trigger local notification:", err);
+              }
+            }
+          }
+        }
+      }
+
       // 3. Send logs if any
       if (item.logs.length > 0) {
         const logsRes = await api.post("/api/tracking/sync/activity", {
@@ -285,11 +307,9 @@ export async function syncUsageStatsClient(
   if (!stats || stats.length === 0) return { success: true, count: 0 };
 
   try {
-    const nowLocal = new Date();
-    const year = nowLocal.getFullYear();
-    const month = String(nowLocal.getMonth() + 1).padStart(2, "0");
-    const date = String(nowLocal.getDate()).padStart(2, "0");
-    const today = `${year}-${month}-${date}`;
+    const today = new Date(Date.now() + 7 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
 
     // 1. Prepare stats payload
     const statsPayload = stats.map((stat) => ({
@@ -399,12 +419,10 @@ export async function fetchAndSyncUsageData(userId: string) {
   }
 
   try {
-    const now = new Date();
-    const startOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
+    const today = new Date(Date.now() + 7 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    const startOfDay = new Date(`${today}T00:00:00+07:00`);
 
     // Ambil setting user untuk jam produktif dan malam hari
     const settingsResponse = await getUserSettingsClient(userId);
@@ -417,15 +435,7 @@ export async function fetchAndSyncUsageData(userId: string) {
     const productiveStartStr = settings?.productiveStart || "09:00:00";
     const productiveEndStr = settings?.productiveEnd || "17:00:00";
 
-    const endOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59,
-      999,
-    );
+    const endOfDay = new Date(`${today}T23:59:59.999+07:00`);
 
     const statsRecord =
       await CapacitorUsageStatsManager.queryAndAggregateUsageStats({

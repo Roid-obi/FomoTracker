@@ -1,8 +1,11 @@
-import axios from "axios";
 import { Capacitor } from "@capacitor/core";
+import axios from "axios";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile" ? "https://fomotracker.vercel.app" : "",
+  baseURL:
+    process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile"
+      ? "https://fomotracker.vercel.app"
+      : "",
   withCredentials: true,
 });
 

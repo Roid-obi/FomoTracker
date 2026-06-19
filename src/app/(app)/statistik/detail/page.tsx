@@ -1,13 +1,14 @@
 "use client";
 
-import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import DetailClient from "./detail-client";
 
 function DetailContent() {
   const searchParams = useSearchParams();
   const tanggal =
-    searchParams.get("tanggal") || new Date().toISOString().slice(0, 10);
+    searchParams.get("tanggal") ||
+    new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
   return <DetailClient tanggal={tanggal} />;
 }
 

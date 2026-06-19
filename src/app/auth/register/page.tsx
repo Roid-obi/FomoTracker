@@ -1,12 +1,12 @@
 "use client";
 
+import { Browser } from "@capacitor/browser";
+import { Capacitor } from "@capacitor/core";
 import { Eye, EyeOff, Loader2, Lock, Mail, User, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/utils/api";
-import { Capacitor } from "@capacitor/core";
-import { Browser } from "@capacitor/browser";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,8 @@ export default function Register() {
     setErrorMsg("");
     setIsLoading(true);
     const form = e.currentTarget;
-    const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
+    const isNative =
+      typeof window !== "undefined" && (window as any).Capacitor?.isNative;
     const body = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
@@ -51,7 +52,9 @@ export default function Register() {
 
   const handleOauthRegister = async (e?: any) => {
     if (e) e.preventDefault();
-    const isMobileApp = Capacitor.isNativePlatform() || process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
+    const isMobileApp =
+      Capacitor.isNativePlatform() ||
+      process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
 
     if (isMobileApp) {
       try {

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { createSupabaseServer } from "@/lib/databases/supabase";
 import {
+  deleteUserService,
   getService,
   updateService,
-  deleteUserService,
 } from "@/lib/services/user.service";
-import { createSupabaseServer } from "@/lib/databases/supabase";
 
 export async function GET() {
   try {

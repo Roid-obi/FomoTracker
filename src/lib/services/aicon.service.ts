@@ -1,10 +1,10 @@
+import { and, asc, desc, eq, gte } from "drizzle-orm";
+import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 import { AiconModel } from "@/lib/models/aicon.model";
 import { generateChatResponseAI } from "@/lib/utils/ai";
-import { and, asc, desc, eq, gte } from "drizzle-orm";
-import { z } from "zod";
 
 type ServiceResult<T = undefined> =
   | { success: true; data: T }
@@ -137,7 +137,6 @@ export async function resetChatSessionService(): Promise<
   return { success: true, data: { session: 1 } };
 }
 
-
 export async function sendMessageService(
   body: unknown,
 ): Promise<ServiceResult<AiconModel.chatResponseSchema>> {
@@ -252,8 +251,8 @@ Aturan Menjawab:
     .where(
       and(
         eq(table.behavioralScores.userId, userId),
-        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr)
-      )
+        gte(table.behavioralScores.scoreDate, sevenDaysAgoStr),
+      ),
     )
     .orderBy(desc(table.behavioralScores.scoreDate))
     .limit(7);
@@ -270,8 +269,8 @@ Aturan Menjawab:
     .where(
       and(
         eq(table.dailyStats.userId, userId),
-        gte(table.dailyStats.statDate, sevenDaysAgoStr)
-      )
+        gte(table.dailyStats.statDate, sevenDaysAgoStr),
+      ),
     )
     .orderBy(
       desc(table.dailyStats.statDate),

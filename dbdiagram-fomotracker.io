@@ -191,8 +191,8 @@ Table behavioral_scores {
   // Skor per indikator (0-100 masing-masing)
   usage_duration_score float [not null, default: 0, note: 'bobot 30% — total durasi harian']
   open_frequency_score float [not null, default: 0, note: 'bobot 20% — frekuensi buka app']
-  midnight_usage_score float [not null, default: 0, note: 'bobot 20% — aktivitas di jam tidur']
-  continuous_usage_score float [not null, default: 0, note: 'bobot 15% — nonstop tanpa jeda']
+  midnight_usage_score float [not null, default: 0, note: 'bobot 15% — aktivitas di jam tidur']
+  continuous_usage_score float [not null, default: 0, note: 'bobot 20% — nonstop tanpa jeda']
   productive_hour_score float [not null, default: 0, note: 'bobot 15% — distraksi jam kerja/belajar']
 
   // Total skor akhir (0-100, semakin rendah semakin baik)

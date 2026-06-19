@@ -1,7 +1,10 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+import { useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
 import {
+  AlertCircle,
   ArrowRight,
   Briefcase,
   Check,
@@ -16,19 +19,16 @@ import {
   Smartphone,
   Sparkles,
   Trash2,
-  AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
-import { initialApps } from "@/lib/data/databaseInitialData";
-import { api } from "@/lib/utils/api";
-import { Capacitor } from "@capacitor/core";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   isUsageStatsPermissionGranted,
   openUsageStatsSettings,
 } from "@/lib/capacitor/usageStats";
+import { initialApps } from "@/lib/data/databaseInitialData";
+import { api } from "@/lib/utils/api";
 
 interface Message {
   id: string;

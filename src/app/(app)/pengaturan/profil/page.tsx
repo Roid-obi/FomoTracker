@@ -2,7 +2,8 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
-import { Camera, Check, Key, Loader2, Mail, User } from "lucide-react";
+import { Camera, Check, Key, Loader2, LogOut, Mail, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { api } from "@/lib/utils/api";
@@ -15,6 +16,27 @@ export default function ProfilSettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await api.post("/api/auth/logout");
+      if (response.status === 200) {
+        queryClient.setQueryData(["user"], null);
+        queryClient.clear();
+        window.localStorage.removeItem("fomotracker_monitored_apps");
+        gooeyToast.success("Berhasil keluar!");
+        router.replace("/auth/login");
+      }
+    } catch (error) {
+      console.error(error);
+      gooeyToast.error("Gagal keluar. Silakan coba lagi.");
+    } finally {
+      setShowLogoutModal(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -291,7 +313,63 @@ export default function ProfilSettingsPage() {
             </button>
           </div>
         </form>
+
+        {/* Sesi & Keluar */}
+        <section className="space-y-3 border-t border-red-100 bg-red-50/[0.05] p-5 rounded-2xl border mt-6">
+          <h3 className="text-xs font-bold text-red-800 flex items-center gap-1.5">
+            <LogOut className="w-4 h-4" />
+            <span>Sesi & Keluar — Keluar dari Akun</span>
+          </h3>
+          <p className="text-[11px] text-muted font-light leading-relaxed">
+            Keluar dari sesi aktif Anda di perangkat ini. Anda perlu masuk
+            kembali untuk mengakses data statistik Anda.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowLogoutModal(true)}
+            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all cursor-pointer"
+          >
+            Keluar Sekarang
+          </button>
+        </section>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-primary/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 space-y-4 shadow-xl">
+            <div className="text-center space-y-1.5">
+              <div className="mx-auto w-12 h-12 rounded-full bg-red-50 text-red-600 border border-red-100 flex items-center justify-center">
+                <LogOut className="w-5 h-5 animate-pulse" />
+              </div>
+              <h3 className="text-sm font-extrabold text-primary font-poppins">
+                Keluar dari Akun?
+              </h3>
+              <p className="text-[11px] text-muted font-light leading-relaxed font-poppins">
+                Apakah Anda yakin ingin keluar dari FomoTracker? Anda perlu
+                masuk kembali untuk melihat data dan insight Anda.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-border hover:bg-muted-light/30 text-xs font-bold text-muted transition-all cursor-pointer font-poppins"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer font-poppins"
+              >
+                Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

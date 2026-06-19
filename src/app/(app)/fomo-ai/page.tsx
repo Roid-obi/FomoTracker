@@ -1,10 +1,10 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Clock, Send, Sparkles, Trash2, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/utils/api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Message {
   id: string;

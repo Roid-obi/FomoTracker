@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
 import {
   AlertTriangle,
@@ -7,19 +8,16 @@ import {
   Download,
   ShieldCheck,
   Trash2,
-  LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initialDatabaseData } from "@/lib/data/databaseInitialData";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/utils/api";
 
 export default function PrivasiSettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [confirmDeleteText, setConfirmDeleteText] = useState("");
   const [isExporting, setIsExporting] = useState<"json" | "csv" | null>(null);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleExportJSON = () => {
@@ -99,24 +97,6 @@ export default function PrivasiSettingsPage() {
 
   const queryClient = useQueryClient();
   const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      const response = await api.post("/api/auth/logout");
-      if (response.status === 200) {
-        queryClient.setQueryData(["user"], null);
-        queryClient.clear();
-        window.localStorage.removeItem("fomotracker_monitored_apps");
-        gooeyToast.success("Berhasil keluar!");
-        router.replace("/auth/login");
-      }
-    } catch (error) {
-      console.error(error);
-      gooeyToast.error("Gagal keluar. Silakan coba lagi.");
-    } finally {
-      setShowLogoutModal(false);
-    }
-  };
 
   return (
     <div className="space-y-8 font-poppins relative flex-1 flex flex-col justify-between">
@@ -264,26 +244,6 @@ export default function PrivasiSettingsPage() {
           </div>
         </section>
 
-        {/* Sesi & Keluar */}
-        <section className="space-y-3 border-t border-border/40 pt-5">
-          <h3 className="text-xs font-bold text-primary flex items-center gap-1.5">
-            <LogOut className="w-4 h-4 text-red-500" />
-            <span className="text-red-600">Keluar dari Akun</span>
-          </h3>
-          <p className="text-[11px] text-muted font-light leading-relaxed">
-            Keluar dari sesi aktif pada perangkat ini. Anda perlu masuk kembali
-            untuk mengakses data statistik Anda.
-          </p>
-          <button
-            type="button"
-            onClick={() => setShowLogoutModal(true)}
-            className="px-4 py-2.5 rounded-xl border border-red-200 bg-red-50/10 hover:bg-red-50/30 text-red-600 font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Keluar Sekarang</span>
-          </button>
-        </section>
-
         {/* Danger Zone: Hapus Akun */}
         <section className="space-y-3 border-t border-red-100 bg-red-50/[0.05] p-5 rounded-2xl border">
           <h3 className="text-xs font-bold text-red-800 flex items-center gap-1.5">
@@ -353,43 +313,6 @@ export default function PrivasiSettingsPage() {
                 className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 {isDeleting ? "Menghapus..." : "Hapus Akun"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Logout Confirmation Modal */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-primary/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 space-y-4 shadow-xl">
-            <div className="text-center space-y-1.5">
-              <div className="mx-auto w-12 h-12 rounded-full bg-red-50 text-red-600 border border-red-100 flex items-center justify-center">
-                <LogOut className="w-5 h-5 animate-pulse" />
-              </div>
-              <h3 className="text-sm font-extrabold text-primary font-poppins">
-                Keluar dari Akun?
-              </h3>
-              <p className="text-[11px] text-muted font-light leading-relaxed font-poppins">
-                Apakah Anda yakin ingin keluar dari FomoTracker? Anda perlu
-                masuk kembali untuk melihat data dan insight Anda.
-              </p>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowLogoutModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-border hover:bg-muted-light/30 text-xs font-bold text-muted transition-all cursor-pointer font-poppins"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all cursor-pointer font-poppins"
-              >
-                Keluar
               </button>
             </div>
           </div>

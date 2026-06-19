@@ -91,10 +91,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const getTodayStr = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const date = String(now.getDate()).padStart(2, "0");
+    const wib = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    const year = wib.getUTCFullYear();
+    const month = String(wib.getUTCMonth() + 1).padStart(2, "0");
+    const date = String(wib.getUTCDate()).padStart(2, "0");
     return `${year}-${month}-${date}`;
   };
 
@@ -338,6 +338,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // 1. Foreground stats synchronization on mount / load
   useEffect(() => {
     if (user && Capacitor.getPlatform() === "android") {
+      // Request notification permissions on Android 13+
+      const CapacitorUsageStatsManager = registerPlugin<any>(
+        "CapacitorUsageStatsManager",
+      );
+      if (CapacitorUsageStatsManager?.requestNotificationPermission) {
+        CapacitorUsageStatsManager.requestNotificationPermission()
+          .then((res: any) =>
+            console.log("Notification permission result:", res),
+          )
+          .catch((err: any) =>
+            console.error("Failed to request notification permission:", err),
+          );
+      }
+
       import("@/lib/capacitor/usageStats").then(
         ({ fetchAndSyncUsageData, processSyncQueue }) => {
           processSyncQueue().catch((err) => {
@@ -406,6 +420,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 productiveEnd: settingData.productiveEnd || "17:00:00",
                 continuousLimitSeconds:
                   settingData.continuousLimitSeconds ?? 3600,
+                screenTimeLimitSeconds:
+                  settingData.screenTimeLimitSeconds ?? 14400,
+                notifScreenTimeEnabled:
+                  settingData.notifScreenTimeEnabled ?? true,
+                notifProductiveHourEnabled:
+                  settingData.notifProductiveHourEnabled ?? true,
+                notifMidnightEnabled: settingData.notifMidnightEnabled ?? true,
+                notifContinuousEnabled:
+                  settingData.notifContinuousEnabled ?? true,
               })
                 .then((bgResult: any) => {
                   console.log(

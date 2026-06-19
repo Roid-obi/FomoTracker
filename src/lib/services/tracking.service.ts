@@ -14,8 +14,8 @@ function validationError(error: z.ZodError) {
 
 /** Tentukan status harian dari total skor */
 function calcDailyStatus(score: number): "good" | "attention" | "heavy" {
-  if (score <= 30) return "good";
-  if (score <= 60) return "attention";
+  if (score <= 39) return "good";
+  if (score <= 69) return "attention";
   return "heavy";
 }
 

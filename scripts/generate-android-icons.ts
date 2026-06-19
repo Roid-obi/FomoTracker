@@ -1,6 +1,6 @@
-import { Jimp } from "jimp";
-import * as path from "node:path";
 import * as fs from "node:fs";
+import * as path from "node:path";
+import { Jimp } from "jimp";
 
 const sourceIconPath = path.resolve("assets/icon.png");
 const resDir = path.resolve("android/app/src/main/res");

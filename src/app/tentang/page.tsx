@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import {
   Brain,
   FileText,
@@ -10,6 +9,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Tentang Kami",

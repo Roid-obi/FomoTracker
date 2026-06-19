@@ -101,6 +101,8 @@ public class SyncWorker extends Worker {
         long productiveEnd = parseTimeStrToSeconds(productiveEndStr);
 
         try {
+            java.util.TimeZone tzWIB = java.util.TimeZone.getTimeZone("GMT+7");
+
             // 1. Get usage statistics from UsageStatsManager for the current day
             UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
             if (usageStatsManager == null) {
@@ -108,16 +110,16 @@ public class SyncWorker extends Worker {
                 return Result.success();
             }
 
-            // Get start of today (local time)
-            java.util.Calendar cal = java.util.Calendar.getInstance();
+            // Get start of today (GMT+7 timezone)
+            java.util.Calendar cal = java.util.Calendar.getInstance(tzWIB);
             cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
             cal.set(java.util.Calendar.MINUTE, 0);
             cal.set(java.util.Calendar.SECOND, 0);
             cal.set(java.util.Calendar.MILLISECOND, 0);
             long beginTime = cal.getTimeInMillis();
 
-            // Get end of today (local time)
-            java.util.Calendar calEnd = java.util.Calendar.getInstance();
+            // Get end of today (GMT+7 timezone)
+            java.util.Calendar calEnd = java.util.Calendar.getInstance(tzWIB);
             calEnd.set(java.util.Calendar.HOUR_OF_DAY, 23);
             calEnd.set(java.util.Calendar.MINUTE, 59);
             calEnd.set(java.util.Calendar.SECOND, 59);
@@ -149,6 +151,7 @@ public class SyncWorker extends Worker {
             Map<String, Long> midnightDurationMap = new HashMap<>();
             Map<String, Long> productiveDurationMap = new HashMap<>();
             Map<String, Long> maxContinuousMap = new HashMap<>();
+            Map<String, Integer> hourlyOpensMap = new HashMap<>();
             JSONArray activityLogsArray = new JSONArray();
 
             if (usageEvents != null) {
@@ -164,6 +167,13 @@ public class SyncWorker extends Worker {
                         if (eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
                             openFrequencyMap.put(pkg, openFrequencyMap.getOrDefault(pkg, 0) + 1);
                             lastResumedMap.put(pkg, timestamp);
+                            
+                            // Track hourly opens in GMT+7
+                            java.util.Calendar eventCal = java.util.Calendar.getInstance(tzWIB);
+                            eventCal.setTimeInMillis(timestamp);
+                            int hour = eventCal.get(java.util.Calendar.HOUR_OF_DAY);
+                            String hourlyKey = pkg + "_" + hour;
+                            hourlyOpensMap.put(hourlyKey, hourlyOpensMap.getOrDefault(hourlyKey, 0) + 1);
                         } else if (eventType == UsageEvents.Event.ACTIVITY_PAUSED) {
                             Long resumedTime = lastResumedMap.get(pkg);
                             if (resumedTime != null) {
@@ -171,13 +181,13 @@ public class SyncWorker extends Worker {
                                 if (durationSeconds >= 1) {
                                     maxContinuousMap.put(pkg, Math.max(maxContinuousMap.getOrDefault(pkg, 0L), durationSeconds));
                                     
-                                    java.util.Calendar resCal = java.util.Calendar.getInstance();
+                                    java.util.Calendar resCal = java.util.Calendar.getInstance(tzWIB);
                                     resCal.setTimeInMillis(resumedTime);
                                     long resumedSecs = resCal.get(java.util.Calendar.HOUR_OF_DAY) * 3600L + 
                                                        resCal.get(java.util.Calendar.MINUTE) * 60L + 
                                                        resCal.get(java.util.Calendar.SECOND);
                                                        
-                                    java.util.Calendar pauseCal = java.util.Calendar.getInstance();
+                                    java.util.Calendar pauseCal = java.util.Calendar.getInstance(tzWIB);
                                     pauseCal.setTimeInMillis(timestamp);
                                     long pausedSecs = pauseCal.get(java.util.Calendar.HOUR_OF_DAY) * 3600L + 
                                                       pauseCal.get(java.util.Calendar.MINUTE) * 60L + 
@@ -188,7 +198,7 @@ public class SyncWorker extends Worker {
                                     
                                     if (pausedSecs < resumedSecs) { // Crossed midnight
                                         midnightOverlap += calculateOverlapWithMidnightCross(resumedSecs, 86400, sleepStart, sleepEnd) +
-                                                          calculateOverlapWithMidnightCross(0, pausedSecs, sleepStart, sleepEnd);
+                                                           calculateOverlapWithMidnightCross(0, pausedSecs, sleepStart, sleepEnd);
                                         productiveOverlap += calculateOverlapWithMidnightCross(resumedSecs, 86400, productiveStart, productiveEnd) +
                                                              calculateOverlapWithMidnightCross(0, pausedSecs, productiveStart, productiveEnd);
                                     } else {
@@ -223,14 +233,21 @@ public class SyncWorker extends Worker {
             }
 
             // 2. Process limits and show local notifications
-            PackageManager pm = context.getPackageManager();
-            String todayDateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            dateFormat.setTimeZone(tzWIB);
+            String todayDateStr = dateFormat.format(new Date());
 
             JSONArray statsArray = new JSONArray();
+            long totalDurationSec = 0;
+            long totalMidnightDurationSec = 0;
+            long totalProductiveDurationSec = 0;
+            long maxContinuousSec = 0;
+            int maxHourlyOpens = 0;
 
             for (String pkg : monitoredApps) {
                 long durationMs = totalsByPackage.getOrDefault(pkg, 0L);
                 long durationSec = durationMs / 1000;
+                totalDurationSec += durationSec;
 
                 int openFreq = openFrequencyMap.getOrDefault(pkg, 0);
                 // Fallback to at least 1 open frequency if usage exists
@@ -238,32 +255,58 @@ public class SyncWorker extends Worker {
                     openFreq = 1;
                 }
 
+                long midnightSec = midnightDurationMap.getOrDefault(pkg, 0L);
+                totalMidnightDurationSec += midnightSec;
+
+                long productiveSec = productiveDurationMap.getOrDefault(pkg, 0L);
+                totalProductiveDurationSec += productiveSec;
+
+                long continuousSec = maxContinuousMap.getOrDefault(pkg, 0L);
+                if (continuousSec > maxContinuousSec) {
+                    maxContinuousSec = continuousSec;
+                }
+
+                // Check hourly opens for this pkg
+                for (int h = 0; h < 24; h++) {
+                    int opens = hourlyOpensMap.getOrDefault(pkg + "_" + h, 0);
+                    if (opens > maxHourlyOpens) {
+                        maxHourlyOpens = opens;
+                    }
+                }
+
                 // Add to stats payload
                 JSONObject statObj = new JSONObject();
                 statObj.put("packageName", pkg);
                 statObj.put("totalDurationSeconds", durationSec);
                 statObj.put("openFrequency", openFreq);
-                statObj.put("midnightDurationSeconds", midnightDurationMap.getOrDefault(pkg, 0L));
-                statObj.put("productiveHourDurationSeconds", productiveDurationMap.getOrDefault(pkg, 0L));
-                statObj.put("maxContinuousSeconds", maxContinuousMap.getOrDefault(pkg, 0L));
+                statObj.put("midnightDurationSeconds", midnightSec);
+                statObj.put("productiveHourDurationSeconds", productiveSec);
+                statObj.put("maxContinuousSeconds", continuousSec);
                 statsArray.put(statObj);
+            }
 
-                // Check 4-hour limit (4 hours = 14400 seconds)
-                if (durationSec >= 14400) {
-                    String prefKey = "notif_" + pkg + "_" + todayDateStr;
-                    boolean alreadyShown = prefs.getBoolean(prefKey, false);
+            // Read preferences for limits
+            boolean notifScreenTimeEnabled = prefs.getBoolean("notifScreenTimeEnabled", true);
+            boolean notifProductiveHourEnabled = prefs.getBoolean("notifProductiveHourEnabled", true);
+            boolean notifMidnightEnabled = prefs.getBoolean("notifMidnightEnabled", true);
+            boolean notifContinuousEnabled = prefs.getBoolean("notifContinuousEnabled", true);
+            int screenTimeLimitSeconds = prefs.getInt("screenTimeLimitSeconds", 14400);
 
-                    if (!alreadyShown) {
-                        String appLabel = pkg;
-                        try {
-                            appLabel = pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString();
-                        } catch (Exception ignored) {}
-
-                        // Trigger native notification
-                        showLimitNotification(context, pkg, appLabel);
-                        prefs.edit().putBoolean(prefKey, true).apply();
-                    }
-                }
+            // Trigger warnings locally if limits exceeded (deduplication occurs inside triggerNativeNotification)
+            if (notifScreenTimeEnabled && totalDurationSec > screenTimeLimitSeconds) {
+                triggerNativeNotification(context, "screen_time", "Anda telah menggunakan media sosial lebih dari " + (screenTimeLimitSeconds / 3600) + " jam hari ini.");
+            }
+            if (maxHourlyOpens >= 40) {
+                triggerNativeNotification(context, "open_frequency", "Anda membuka media sosial sangat sering dalam satu jam terakhir.");
+            }
+            if (notifContinuousEnabled && maxContinuousSec > continuousLimitSeconds) {
+                triggerNativeNotification(context, "continuous", "Anda telah menggunakan media sosial selama lebih dari " + (continuousLimitSeconds / 60) + " menit tanpa jeda.");
+            }
+            if (notifMidnightEnabled && totalMidnightDurationSec > 900) {
+                triggerNativeNotification(context, "midnight", "Aktivitas media sosial terdeteksi pada jam tidur yang telah Anda tetapkan.");
+            }
+            if (notifProductiveHourEnabled && totalProductiveDurationSec > 1800) {
+                triggerNativeNotification(context, "productive_hour", "Penggunaan media sosial terdeteksi selama jam produktif Anda.");
             }
 
             // Get cookies for authentication
@@ -395,7 +438,19 @@ public class SyncWorker extends Worker {
         }
     }
 
-    private void triggerNativeNotification(Context context, String type, String message) {
+    public static void triggerNativeNotification(Context context, String type, String message) {
+        SharedPreferences prefs = context.getSharedPreferences("FomoTrackerPrefs", Context.MODE_PRIVATE);
+        java.util.TimeZone tzWIB = java.util.TimeZone.getTimeZone("GMT+7");
+        java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        dateFormat.setTimeZone(tzWIB);
+        String todayWIBStr = dateFormat.format(new Date());
+
+        String prefKey = "notif_triggered_" + type + "_" + todayWIBStr;
+        if (prefs.getBoolean(prefKey, false)) {
+            Log.d(TAG, "Notification for " + type + " already triggered today. Skipping.");
+            return;
+        }
+
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -431,8 +486,9 @@ public class SyncWorker extends Worker {
             try {
                 if (Build.VERSION.SDK_INT < 33 ||
                     context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                    int uniqueId = (type + "_" + System.currentTimeMillis()).hashCode();
+                    int uniqueId = (type + "_" + todayWIBStr).hashCode();
                     manager.notify(uniqueId, builder.build());
+                    prefs.edit().putBoolean(prefKey, true).apply();
                     Log.d(TAG, "Native behavior notification triggered: " + type);
                 } else {
                     Log.w(TAG, "Cannot trigger behavior notification: POST_NOTIFICATIONS permission not granted.");

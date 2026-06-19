@@ -9,8 +9,8 @@ import {
   Moon,
   RotateCcw,
 } from "lucide-react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Rectangle } from "recharts";
 import { api } from "@/lib/utils/api";
 
@@ -79,7 +79,9 @@ const getPrevNextDates = (currentDateStr: string) => {
     "0",
   )}-${String(next.getDate()).padStart(2, "0")}`;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = new Date(Date.now() + 7 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
   const hasPrev = true; // Always allow looking back
   const hasNext = nextStr <= todayStr; // Do not allow looking into the future
 
@@ -211,11 +213,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
   let statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
 
   if (totalScore > 0) {
-    if (totalScore <= 30) {
+    if (totalScore <= 39) {
       statusEmoji = "😊";
       statusDesc = "Penggunaan HP-mu harian terkontrol.";
       statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
-    } else if (totalScore <= 60) {
+    } else if (totalScore <= 69) {
       statusEmoji = "😐";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
       statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";

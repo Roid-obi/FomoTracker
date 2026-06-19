@@ -1,13 +1,13 @@
 "use client";
 
+import { Browser } from "@capacitor/browser";
+import { Capacitor } from "@capacitor/core";
 import { Eye, EyeOff, Loader2, Lock, Mail, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { api } from "@/lib/utils/api";
+import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
-import { Capacitor } from "@capacitor/core";
-import { Browser } from "@capacitor/browser";
+import { api } from "@/lib/utils/api";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +46,9 @@ export default function Login() {
 
   const handleOauthLogin = async (e?: any) => {
     if (e) e.preventDefault();
-    const isMobileApp = Capacitor.isNativePlatform() || process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
+    const isMobileApp =
+      Capacitor.isNativePlatform() ||
+      process.env.NEXT_PUBLIC_BUILD_TARGET === "mobile";
 
     if (isMobileApp) {
       try {

@@ -12,11 +12,11 @@ import {
   RotateCcw,
   Smartphone,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { useUser } from "@/hooks/useUser";
 import { Rectangle } from "recharts";
+import { useUser } from "@/hooks/useUser";
 import { api } from "@/lib/utils/api";
 
 const DashboardHourlyChart = dynamic(
@@ -59,10 +59,10 @@ const CustomBar = (props: any) => {
 };
 
 const getTodayStr = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const date = String(now.getDate()).padStart(2, "0");
+  const wib = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  const year = wib.getUTCFullYear();
+  const month = String(wib.getUTCMonth() + 1).padStart(2, "0");
+  const date = String(wib.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${date}`;
 };
 
@@ -253,13 +253,16 @@ export default function DashboardPage() {
     ? { name: topAppItem.appName, duration: topAppItem.totalDurationSeconds }
     : { name: "Tidak ada", duration: 0 };
 
-  // Top Apps for today
-  const topAppsForDisplay = (breakdownQuery.data?.items ?? [])
-    .slice(0, 5)
-    .map((app: { appName: string; totalDurationSeconds: number }) => ({
-      name: app.appName,
-      sec: app.totalDurationSeconds,
-    }));
+  // Top Apps for today, aggregated by app name to prevent duplicate keys
+  const aggregatedAppsMap = new Map<string, number>();
+  for (const app of breakdownQuery.data?.items ?? []) {
+    const current = aggregatedAppsMap.get(app.appName) || 0;
+    aggregatedAppsMap.set(app.appName, current + app.totalDurationSeconds);
+  }
+  const topAppsForDisplay = Array.from(aggregatedAppsMap.entries())
+    .map(([name, sec]) => ({ name, sec }))
+    .sort((a, b) => b.sec - a.sec)
+    .slice(0, 5);
   const maxSec = topAppsForDisplay[0]?.sec || 1;
 
   // 2. Behavioral score status configuration
@@ -272,13 +275,13 @@ export default function DashboardPage() {
 
   if (scoreData) {
     const totalScore = scoreData.totalScore;
-    if (totalScore <= 30) {
+    if (totalScore <= 39) {
       statusEmoji = "😊";
       statusTitle = "Hari yang Baik";
       statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
       statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
       _statusTextColor = "text-emerald-700";
-    } else if (totalScore <= 60) {
+    } else if (totalScore <= 69) {
       statusEmoji = "😐";
       statusTitle = "Perlu Diperhatikan";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";

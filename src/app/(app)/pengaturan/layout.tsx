@@ -39,7 +39,7 @@ export default function PengaturanLayout({
       <div className="w-full bg-card border border-border rounded-3xl shadow-xs min-h-[500px] flex flex-col md:flex-row overflow-hidden flex-1">
         {/* Left Side: Vertical Menu Sidebar */}
         <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-border p-4 sm:p-5 select-none shrink-0 bg-background/5">
-          <nav className="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible pb-3 md:pb-0 scrollbar-none">
+          <nav className="flex flex-col gap-1.5 w-full">
             {subNavigationItems.map((item) => {
               const active = pathname === item.href;
               const Icon = item.icon;
@@ -47,7 +47,7 @@ export default function PengaturanLayout({
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap md:w-full ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap w-full ${
                     active
                       ? "bg-primary text-white shadow-xs"
                       : "text-muted hover:text-primary hover:bg-muted-light/30"

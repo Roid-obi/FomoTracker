@@ -1,5 +1,5 @@
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { type EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServer } from "@/lib/databases/supabase";
 
 export async function GET(request: Request) {

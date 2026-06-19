@@ -318,13 +318,16 @@ export default function StatistikPage() {
       }));
     });
 
-  // Top Apps
-  const topAppsForDisplay = (breakdownData?.items ?? [])
-    .slice(0, 5)
-    .map((app: any) => ({
-      name: app.appName,
-      sec: app.totalDurationSeconds,
-    }));
+  // Top Apps, aggregated by app name to prevent duplicate keys
+  const aggregatedAppsMap = new Map<string, number>();
+  for (const app of breakdownData?.items ?? []) {
+    const current = aggregatedAppsMap.get(app.appName) || 0;
+    aggregatedAppsMap.set(app.appName, current + app.totalDurationSeconds);
+  }
+  const topAppsForDisplay = Array.from(aggregatedAppsMap.entries())
+    .map(([name, sec]) => ({ name, sec }))
+    .sort((a, b) => b.sec - a.sec)
+    .slice(0, 5);
   const maxSec = topAppsForDisplay[0]?.sec || 1;
 
   // Behavioral Flags
@@ -505,7 +508,7 @@ export default function StatistikPage() {
                     {formatSecToHoursMins(screenTimeData?.totalSeconds ?? 0)}
                   </h3>
                   <p className="text-[10px] text-muted font-light mt-0.5">
-                    Terakumulasi dalam rentang periode
+                    Akumulasi dalam rentang periode
                   </p>
                 </div>
               </div>

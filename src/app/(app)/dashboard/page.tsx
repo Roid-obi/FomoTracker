@@ -275,13 +275,13 @@ export default function DashboardPage() {
 
   if (scoreData) {
     const totalScore = scoreData.totalScore;
-    if (totalScore <= 30) {
+    if (totalScore <= 39) {
       statusEmoji = "😊";
       statusTitle = "Hari yang Baik";
       statusDesc = "Penggunaan HP-mu hari ini terkontrol.";
       statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
       _statusTextColor = "text-emerald-700";
-    } else if (totalScore <= 60) {
+    } else if (totalScore <= 69) {
       statusEmoji = "😐";
       statusTitle = "Perlu Diperhatikan";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";

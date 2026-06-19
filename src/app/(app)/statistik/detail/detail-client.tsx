@@ -9,8 +9,8 @@ import {
   Moon,
   RotateCcw,
 } from "lucide-react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Rectangle } from "recharts";
 import { api } from "@/lib/utils/api";
 
@@ -211,11 +211,11 @@ export default function DetailClient({ tanggal }: { tanggal: string }) {
   let statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
 
   if (totalScore > 0) {
-    if (totalScore <= 30) {
+    if (totalScore <= 39) {
       statusEmoji = "😊";
       statusDesc = "Penggunaan HP-mu harian terkontrol.";
       statusCardBg = "bg-emerald-50 border-emerald-200 text-emerald-800";
-    } else if (totalScore <= 60) {
+    } else if (totalScore <= 69) {
       statusEmoji = "😐";
       statusDesc = "Ada beberapa kebiasaan yang terdeteksi hari ini.";
       statusCardBg = "bg-amber-50 border-amber-200 text-amber-800";

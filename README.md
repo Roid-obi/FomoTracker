@@ -104,7 +104,7 @@ Menganalisis indikator perilaku digital dengan detail metrik:
 
 Sistem pembobotan tertimbang (_weighted scoring_) untuk mengukur tingkat risiko ketergantungan media sosial pengguna:
 
-- **Usage Duration** (30%), **Open Frequency** (20%), **Midnight Usage** (20%), **Continuous Usage** (15%), **Productivity Hour Usage** (15%).
+- **Usage Duration** (30%), **Open Frequency** (20%), **Midnight Usage** (15%), **Continuous Usage** (20%), **Productivity Hour Usage** (15%).
 - **Kategori Risiko**:
   - `0 - 39` : 🟢 Low Risk (Risiko Rendah)
   - `40 - 69` : 🟡 Moderate Risk (Risiko Sedang)

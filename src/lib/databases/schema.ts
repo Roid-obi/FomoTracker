@@ -273,11 +273,11 @@ export const behavioralScores = pgTable(
     openFrequencyScore: doublePrecision("open_frequency_score")
       .notNull()
       .default(0),
-    // bobot 20% — aktivitas di jam tidur
+    // bobot 15% — aktivitas di jam tidur
     midnightUsageScore: doublePrecision("midnight_usage_score")
       .notNull()
       .default(0),
-    // bobot 15% — nonstop tanpa jeda
+    // bobot 20% — nonstop tanpa jeda
     continuousUsageScore: doublePrecision("continuous_usage_score")
       .notNull()
       .default(0),

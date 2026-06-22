@@ -61,7 +61,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (user && !user.onboardingCompleted) {
-      router.replace("/onboarding");
+      if (
+        typeof window !== "undefined" &&
+        !(window as any).onboardingDismissed
+      ) {
+        router.replace("/onboarding");
+      }
     }
   }, [user, router]);
 
@@ -752,6 +757,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Onboarding Floating Action Button (FAB) */}
+      {user && !user.onboardingCompleted && (
+        <Link
+          href="/onboarding"
+          className="fixed z-50 right-6 bottom-[calc(env(safe-area-inset-bottom)+6.5rem)] md:bottom-6 w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-secondary hover:from-secondary hover:to-primary text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all cursor-pointer animate-vibrate border border-accent/20"
+          title="Lanjutkan Onboarding"
+        >
+          <Sparkles className="w-6 h-6 text-accent animate-pulse" />
+        </Link>
       )}
 
       {/* Mobile Floating Bottom Navigation Bar */}

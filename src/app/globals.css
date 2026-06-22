@@ -40,6 +40,7 @@
   --animate-float-slow: float-slow 8s ease-in-out infinite;
   --animate-float-medium: float-medium 6s ease-in-out infinite;
   --animate-float-fast: float-fast 5s ease-in-out infinite;
+  --animate-vibrate: vibrate 0.5s linear infinite;
 }
 
 body {
@@ -80,4 +81,23 @@ body {
   animation: none;
   filter: none;
   will-change: auto;
+}
+
+@keyframes vibrate {
+  0%,
+  100% {
+    transform: translate(0) rotate(0deg);
+  }
+  20% {
+    transform: translate(-1.5px, 1.5px) rotate(-1.5deg);
+  }
+  40% {
+    transform: translate(-1.5px, -1.5px) rotate(1.5deg);
+  }
+  60% {
+    transform: translate(1.5px, 1.5px) rotate(-1.5deg);
+  }
+  80% {
+    transform: translate(1.5px, -1.5px) rotate(1.5deg);
+  }
 }

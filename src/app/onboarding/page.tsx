@@ -11,7 +11,6 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  Download,
   Info,
   Laptop,
   Moon,
@@ -19,6 +18,7 @@ import {
   Smartphone,
   Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -29,13 +29,6 @@ import {
 } from "@/lib/capacitor/usageStats";
 import { initialApps } from "@/lib/data/databaseInitialData";
 import { api } from "@/lib/utils/api";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -346,7 +339,21 @@ export default function OnboardingPage() {
         <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] bg-accent/20 rounded-full blur-[100px] pointer-events-none -z-10" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[350px] h-[350px] bg-secondary/15 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-        <div className="w-full max-w-xl bg-card border border-border shadow-md rounded-3xl p-6 md:p-10 transition-all duration-300 text-center space-y-6">
+        <div className="w-full max-w-xl bg-card border border-border shadow-md rounded-3xl p-6 pt-14 md:p-10 md:pt-16 transition-all duration-300 text-center space-y-6 relative">
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                (window as any).onboardingDismissed = true;
+              }
+              router.push("/dashboard");
+            }}
+            className="absolute top-5 right-5 p-2 text-muted hover:text-primary hover:bg-muted-light/60 rounded-full transition-all cursor-pointer z-55"
+            aria-label="Tutup"
+          >
+            <X className="w-5 h-5" />
+          </button>
           <div className="mx-auto w-20 h-20 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary border border-secondary/20">
             <Smartphone className="w-10 h-10 animate-bounce" />
           </div>
@@ -390,7 +397,21 @@ export default function OnboardingPage() {
       <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] bg-accent/20 rounded-full blur-[100px] pointer-events-none -z-10" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[350px] h-[350px] bg-secondary/15 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-      <div className="w-full max-w-xl bg-card border border-border shadow-md rounded-3xl p-6 md:p-10 transition-all duration-300">
+      <div className="w-full max-w-xl bg-card border border-border shadow-md rounded-3xl p-6 pt-14 md:p-10 md:pt-16 transition-all duration-300 relative">
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              (window as any).onboardingDismissed = true;
+            }
+            router.push("/dashboard");
+          }}
+          className="absolute top-5 right-5 p-2 text-muted hover:text-primary hover:bg-muted-light/60 rounded-full transition-all cursor-pointer z-55"
+          aria-label="Tutup"
+        >
+          <X className="w-5 h-5" />
+        </button>
         {renderProgress()}
 
         {/* STEP: welcome */}

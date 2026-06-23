@@ -375,7 +375,90 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  // 2. Background sync setup when tracked apps or settings are loaded or updated
+  // 2. Immediate device connection registration on layout load/mount
+  useEffect(() => {
+    if (!user) return;
+
+    const registerDeviceOnMount = async () => {
+      const platform = Capacitor.getPlatform();
+
+      if (platform === "android") {
+        let deviceName = "Android Phone";
+        try {
+          const CapacitorUsageStatsManager = registerPlugin<any>(
+            "CapacitorUsageStatsManager",
+          );
+          if (CapacitorUsageStatsManager?.getDeviceInfo) {
+            const info = await CapacitorUsageStatsManager.getDeviceInfo();
+            if (info?.deviceName) {
+              deviceName = info.deviceName;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to get native device info on mount:", e);
+        }
+
+        try {
+          await api.put("/api/setting/device", {
+            platform: "android_app",
+            deviceName,
+            isConnected: true,
+          });
+        } catch (err) {
+          console.error("Failed to auto-register Android device:", err);
+        }
+      } else {
+        // Browser/Extension auto-detect and register
+        const checkAndRegisterExtension = () => {
+          const isExtensionInstalled =
+            typeof window !== "undefined" &&
+            ((window as any).__FOMOTRACKER_EXTENSION_INSTALLED__ ||
+              document.getElementById("fomotracker-extension-root"));
+
+          if (isExtensionInstalled) {
+            api
+              .put<{ success: boolean; data: { id: string } }>(
+                "/api/setting/device",
+                {
+                  platform: "browser_extension",
+                  browserName: "Google Chrome",
+                  isConnected: true,
+                },
+              )
+              .then((res) => {
+                if (res.data.success) {
+                  // Notify extension about current user and device ID
+                  window.postMessage(
+                    {
+                      type: "FOMOTRACKER_SET_USER_INFO",
+                      userId: user.id,
+                      deviceId: res.data.data.id,
+                    },
+                    "*",
+                  );
+                }
+              })
+              .catch((err) => {
+                console.error(
+                  "Failed to auto-register browser extension:",
+                  err,
+                );
+              });
+          }
+        };
+
+        // Check immediately
+        checkAndRegisterExtension();
+        // Check again after 1.5s in case extension loaded later
+        const timer = setTimeout(checkAndRegisterExtension, 1500);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    registerDeviceOnMount();
+  }, [user]);
+
+  // 3. Background sync setup when tracked apps or settings are loaded or updated
   useEffect(() => {
     if (
       user &&
@@ -394,44 +477,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         JSON.stringify(activeMonitoredApps),
       );
 
-      // Helper to fetch authentic Android device info and register device
-      const registerAndroidDevice = async () => {
-        let deviceName = "Android Phone";
-        try {
-          const CapacitorUsageStatsManager = registerPlugin<any>(
-            "CapacitorUsageStatsManager",
-          );
-          if (CapacitorUsageStatsManager?.getDeviceInfo) {
-            const info = await CapacitorUsageStatsManager.getDeviceInfo();
-            if (info?.deviceName) {
-              deviceName = info.deviceName;
-            }
-          }
-        } catch (e) {
-          console.error("Failed to get native device info on mount:", e);
-        }
-
-        try {
-          const res = await api.put<{ success: boolean; data: { id: string } }>(
-            "/api/setting/device",
-            {
-              platform: "android_app",
-              deviceName,
-              isConnected: true,
-            },
-          );
-
+      // Fetch or verify device ID first then setup native WorkManager periodic task
+      api
+        .put<{ success: boolean; data: { id: string } }>(
+          "/api/setting/device",
+          {
+            platform: "android_app",
+            isConnected: true,
+          },
+        )
+        .then((res) => {
           if (res.data.success) {
             const deviceId = res.data.data.id;
-            // Set up native background WorkManager task
             const CapacitorUsageStatsManager = registerPlugin<any>(
               "CapacitorUsageStatsManager",
             );
-            if (
-              CapacitorUsageStatsManager &&
-              CapacitorUsageStatsManager.setupBackgroundSync
-            ) {
-              await CapacitorUsageStatsManager.setupBackgroundSync({
+            if (CapacitorUsageStatsManager?.setupBackgroundSync) {
+              CapacitorUsageStatsManager.setupBackgroundSync({
                 userId: user.id,
                 deviceId: deviceId,
                 monitoredApps: activeMonitoredApps,
@@ -450,19 +512,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 notifMidnightEnabled: settingData.notifMidnightEnabled ?? true,
                 notifContinuousEnabled:
                   settingData.notifContinuousEnabled ?? true,
-              });
-              console.log("Background WorkManager sync scheduled successfully");
+              })
+                .then(() => {
+                  console.log(
+                    "Background WorkManager sync scheduled successfully",
+                  );
+                })
+                .catch((err: any) => {
+                  console.error("Failed to schedule background sync:", err);
+                });
             }
           }
-        } catch (err) {
-          console.error(
-            "Failed to register/sync device for background tracking:",
-            err,
-          );
-        }
-      };
-
-      registerAndroidDevice();
+        })
+        .catch((err) => {
+          console.error("Failed to sync device ID for background sync:", err);
+        });
     }
   }, [user, trackedAppsData, settingData]);
 

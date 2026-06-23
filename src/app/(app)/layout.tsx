@@ -394,17 +394,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         JSON.stringify(activeMonitoredApps),
       );
 
-      // Register device first to get deviceId
-      api
-        .put<{ success: boolean; data: { id: string } }>(
-          "/api/setting/device",
-          {
-            platform: "android_app",
-            deviceName: "Android Phone",
-            isConnected: true,
-          },
-        )
-        .then((res) => {
+      // Helper to fetch authentic Android device info and register device
+      const registerAndroidDevice = async () => {
+        let deviceName = "Android Phone";
+        try {
+          const CapacitorUsageStatsManager = registerPlugin<any>(
+            "CapacitorUsageStatsManager",
+          );
+          if (CapacitorUsageStatsManager?.getDeviceInfo) {
+            const info = await CapacitorUsageStatsManager.getDeviceInfo();
+            if (info?.deviceName) {
+              deviceName = info.deviceName;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to get native device info on mount:", e);
+        }
+
+        try {
+          const res = await api.put<{ success: boolean; data: { id: string } }>(
+            "/api/setting/device",
+            {
+              platform: "android_app",
+              deviceName,
+              isConnected: true,
+            },
+          );
+
           if (res.data.success) {
             const deviceId = res.data.data.id;
             // Set up native background WorkManager task
@@ -415,7 +431,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               CapacitorUsageStatsManager &&
               CapacitorUsageStatsManager.setupBackgroundSync
             ) {
-              CapacitorUsageStatsManager.setupBackgroundSync({
+              await CapacitorUsageStatsManager.setupBackgroundSync({
                 userId: user.id,
                 deviceId: deviceId,
                 monitoredApps: activeMonitoredApps,
@@ -434,25 +450,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 notifMidnightEnabled: settingData.notifMidnightEnabled ?? true,
                 notifContinuousEnabled:
                   settingData.notifContinuousEnabled ?? true,
-              })
-                .then((bgResult: any) => {
-                  console.log(
-                    "Background WorkManager sync scheduled:",
-                    bgResult,
-                  );
-                })
-                .catch((err: any) => {
-                  console.error("Failed to schedule background sync:", err);
-                });
+              });
+              console.log("Background WorkManager sync scheduled successfully");
             }
           }
-        })
-        .catch((err) => {
+        } catch (err) {
           console.error(
             "Failed to register/sync device for background tracking:",
             err,
           );
-        });
+        }
+      };
+
+      registerAndroidDevice();
     }
   }, [user, trackedAppsData, settingData]);
 
@@ -546,6 +556,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
+      const platform =
+        Capacitor.getPlatform() === "android"
+          ? "android_app"
+          : "browser_extension";
+      try {
+        await api.put("/api/setting/device", {
+          platform,
+          isConnected: false,
+        });
+      } catch (err) {
+        console.error("Failed to disconnect device on logout:", err);
+      }
+
       const response = await api.post("/api/auth/logout");
 
       if (response.status === 200) {

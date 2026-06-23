@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
 import { Camera, Check, Key, Loader2, LogOut, Mail, User } from "lucide-react";
@@ -22,6 +23,19 @@ export default function ProfilSettingsPage() {
 
   const handleLogout = async () => {
     try {
+      const platform =
+        Capacitor.getPlatform() === "android"
+          ? "android_app"
+          : "browser_extension";
+      try {
+        await api.put("/api/setting/device", {
+          platform,
+          isConnected: false,
+        });
+      } catch (err) {
+        console.error("Failed to disconnect device on logout:", err);
+      }
+
       const response = await api.post("/api/auth/logout");
       if (response.status === 200) {
         queryClient.setQueryData(["user"], null);

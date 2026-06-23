@@ -1,6 +1,6 @@
 "use client";
 
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { gooeyToast } from "goey-toast";
 import {
@@ -42,6 +42,7 @@ export default function PerangkatSettingsPage() {
   const [isAndroidDevice, setIsAndroidDevice] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
+  const [realDeviceName, setRealDeviceName] = useState("Perangkat Android");
 
   // Time settings local state
   const [prodStart, setProdStart] = useState("08:00");
@@ -146,6 +147,20 @@ export default function PerangkatSettingsPage() {
     setIsAndroidDevice(isAndroid);
 
     if (isAndroid) {
+      const CapacitorUsageStatsManager = registerPlugin<any>(
+        "CapacitorUsageStatsManager",
+      );
+      if (CapacitorUsageStatsManager?.getDeviceInfo) {
+        CapacitorUsageStatsManager.getDeviceInfo()
+          .then((info: any) => {
+            if (info?.deviceName) {
+              setRealDeviceName(info.deviceName);
+            }
+          })
+          .catch((e: any) => {
+            console.error("Failed to get native device info:", e);
+          });
+      }
       checkAndRequestUsagePermission().then((granted) => {
         setHasPermission(granted);
         if (granted) {
@@ -592,7 +607,7 @@ export default function PerangkatSettingsPage() {
                     deviceMutation.mutate({
                       platform: "android_app",
                       isConnected: !androidConnected,
-                      deviceName: "Perangkat Android",
+                      deviceName: realDeviceName,
                     })
                   }
                   className={`text-[10px] font-bold px-3 py-1 rounded-xl transition-colors cursor-pointer ${

@@ -222,6 +222,15 @@ public class UsageStatsManagerPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void getDeviceInfo(PluginCall call) {
+        JSObject result = new JSObject();
+        result.put("manufacturer", Build.MANUFACTURER);
+        result.put("model", Build.MODEL);
+        result.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL);
+        call.resolve(result);
+    }
+
+    @PluginMethod
     public void triggerLocalNotification(PluginCall call) {
         String type = call.getString("type");
         String message = call.getString("message");

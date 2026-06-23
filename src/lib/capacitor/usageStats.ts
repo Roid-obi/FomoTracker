@@ -37,7 +37,28 @@ interface CapacitorUsageStatsManagerPluginType {
     userId: string;
     deviceId: string;
     monitoredApps: string[];
+    sleepStart?: string;
+    sleepEnd?: string;
+    productiveStart?: string;
+    productiveEnd?: string;
+    continuousLimitSeconds?: number;
+    screenTimeLimitSeconds?: number;
+    notifScreenTimeEnabled?: boolean;
+    notifProductiveHourEnabled?: boolean;
+    notifMidnightEnabled?: boolean;
+    notifContinuousEnabled?: boolean;
   }): Promise<{ success: boolean }>;
+  checkNotificationPermission(): Promise<{ granted: boolean }>;
+  requestNotificationPermission(): Promise<{ success: boolean }>;
+  getDeviceInfo(): Promise<{
+    manufacturer: string;
+    model: string;
+    deviceName: string;
+  }>;
+  triggerLocalNotification(options: {
+    type: string;
+    message: string;
+  }): Promise<void>;
 }
 
 const CapacitorUsageStatsManager =
@@ -211,12 +232,24 @@ export async function processSyncQueue() {
 
     try {
       // 1. Get or register the user device in backend database
+      let deviceName = "Android Device";
+      try {
+        if (CapacitorUsageStatsManager?.getDeviceInfo) {
+          const info = await CapacitorUsageStatsManager.getDeviceInfo();
+          if (info?.deviceName) {
+            deviceName = info.deviceName;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to get native device info during queue sync:", e);
+      }
+
       const deviceRes = await api.put<{
         success: boolean;
         data: { id: string };
       }>("/api/setting/device", {
         platform: "android_app",
-        deviceName: "Android Device",
+        deviceName,
         isConnected: true,
       });
 
@@ -243,9 +276,6 @@ export async function processSyncQueue() {
       if (statsRes.data.data?.newNotifications) {
         const newNotifs = statsRes.data.data.newNotifications;
         if (Array.isArray(newNotifs) && newNotifs.length > 0) {
-          const CapacitorUsageStatsManager = registerPlugin<any>(
-            "CapacitorUsageStatsManager",
-          );
           if (CapacitorUsageStatsManager?.triggerLocalNotification) {
             for (const notif of newNotifs) {
               try {

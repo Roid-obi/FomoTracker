@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
@@ -129,11 +129,53 @@ export async function getDeviceService(): Promise<
   }
 
   const devices = await db
-    .select(deviceSelect)
+    .select({
+      ...deviceSelect,
+      createdAt: table.userDevices.createdAt,
+    })
     .from(table.userDevices)
     .where(eq(table.userDevices.userId, userId));
 
-  const parsed = DeviceModel.getResponse.array().safeParse(devices);
+  // Self-healing duplicate cleaner
+  const byPlatform: Record<string, typeof devices> = {};
+  for (const dev of devices) {
+    if (!byPlatform[dev.platform]) {
+      byPlatform[dev.platform] = [];
+    }
+    byPlatform[dev.platform].push(dev);
+  }
+
+  const idsToDelete: string[] = [];
+  const keepDevices: typeof devices = [];
+
+  for (const plat of Object.keys(byPlatform)) {
+    const list = byPlatform[plat];
+    if (list.length > 1) {
+      // Sort newest first based on createdAt
+      list.sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      keepDevices.push(list[0]);
+      for (let i = 1; i < list.length; i++) {
+        idsToDelete.push(list[i].id);
+      }
+    } else if (list.length === 1) {
+      keepDevices.push(list[0]);
+    }
+  }
+
+  if (idsToDelete.length > 0) {
+    await db
+      .delete(table.userDevices)
+      .where(inArray(table.userDevices.id, idsToDelete));
+  }
+
+  // Remove `createdAt` field to match validation model
+  const finalDevices = keepDevices.map(({ createdAt, ...rest }) => rest);
+
+  const parsed = DeviceModel.getResponse.array().safeParse(finalDevices);
 
   if (!parsed.success) {
     return { success: false, error: validationError(parsed.error) };

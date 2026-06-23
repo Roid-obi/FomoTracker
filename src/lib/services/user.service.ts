@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/databases";
 import { table } from "@/lib/databases/schema";
@@ -221,29 +221,57 @@ export async function completeOnboardingService(
 
   // 2. Add devices
   if (data.isAndroidConnected) {
-    await db
-      .insert(table.userDevices)
-      .values({
+    const [existing] = await db
+      .select({ id: table.userDevices.id })
+      .from(table.userDevices)
+      .where(
+        and(
+          eq(table.userDevices.userId, id),
+          eq(table.userDevices.platform, "android_app"),
+        ),
+      );
+
+    if (existing) {
+      await db
+        .update(table.userDevices)
+        .set({ isConnected: true, connectedAt: new Date() })
+        .where(eq(table.userDevices.id, existing.id));
+    } else {
+      await db.insert(table.userDevices).values({
         userId: id,
         platform: "android_app",
         deviceName: "Android Phone",
         isConnected: true,
         connectedAt: new Date(),
-      })
-      .onConflictDoNothing();
+      });
+    }
   }
 
   if (data.isBrowserConnected) {
-    await db
-      .insert(table.userDevices)
-      .values({
+    const [existing] = await db
+      .select({ id: table.userDevices.id })
+      .from(table.userDevices)
+      .where(
+        and(
+          eq(table.userDevices.userId, id),
+          eq(table.userDevices.platform, "browser_extension"),
+        ),
+      );
+
+    if (existing) {
+      await db
+        .update(table.userDevices)
+        .set({ isConnected: true, connectedAt: new Date() })
+        .where(eq(table.userDevices.id, existing.id));
+    } else {
+      await db.insert(table.userDevices).values({
         userId: id,
         platform: "browser_extension",
         browserName: "Web Browser",
         isConnected: true,
         connectedAt: new Date(),
-      })
-      .onConflictDoNothing();
+      });
+    }
   }
 
   // 3. Add tracked apps
